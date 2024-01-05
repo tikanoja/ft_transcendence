@@ -25,7 +25,7 @@ services:
     image: frontend-img:dev
     container_name: frontend-cont
     ports:
-      - "9000:9000"
+      - "3000:3000"
     env_file: .env
     networks:
       - frontend-network
@@ -43,13 +43,31 @@ services:
   #   image: backend-img:dev
   #   container_name: backend-cont
   #   ports:
-  #     - "3306:3306"
+  #     - "8000:8000"
+  #   env_file: .env
+  #   restart: always
+  #   depends_on:
+  #     -database
+  #   networks:
+  #     - frontend-network
+  #     - backend-network
+  #   volumes:
+  #     - insert backend volume here!
+
+  # database:
+  #   build:
+  #     context: ./services/database
+  #     dockerfile: Dockerfile
+  #   image: database-img:dev
+  #   container_name: database-cont
+  #   ports:
+  #     - "5432:5432"
   #   env_file: .env
   #   restart: always
   #   networks:
   #     - backend-network
   #   volumes:
-  #     - insert backend volume here!
+  #     - insert database volume here!
 
 # volumes:
 #   database-data:
