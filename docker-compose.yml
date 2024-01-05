@@ -1,0 +1,67 @@
+version: '1'
+
+services:
+  nginx:
+    build:
+      context: ./services/nginx
+      dockerfile: Dockerfile
+    image: nginx-img:dev
+    container_name: nginx-cont
+    ports:
+      - "443:443"
+    depends_on:
+      - frontend
+    env_file: .env
+    networks:
+      - frontend-network
+    restart: always
+    # volumes:
+    #   - do we need a volume to frontend and access it ?
+
+  frontend:
+    build:
+      context: ./services/frontend
+      dockerfile: Dockerfile
+    image: frontend-img:dev
+    container_name: frontend-cont
+    ports:
+      - "9000:9000"
+    env_file: .env
+    networks:
+      - frontend-network
+      # - backend-network
+    restart: always
+    # depends_on:
+    #   - backend
+    # volumes:
+    #   - do we need a volume to frontend ?
+
+  # backend:
+  #   build:
+  #     context: ./services/backend
+  #     dockerfile: Dockerfile
+  #   image: backend-img:dev
+  #   container_name: backend-cont
+  #   ports:
+  #     - "3306:3306"
+  #   env_file: .env
+  #   restart: always
+  #   networks:
+  #     - backend-network
+  #   volumes:
+  #     - insert backend volume here!
+
+# volumes:
+#   database-data:
+#     name: database-data
+#     driver: local
+#     driver_opts:
+#       type: none
+#       device: /home/ttikanoj/data/database-data
+#       o: bind
+
+networks:
+  frontend-network:
+    name: frontend-network
+  # backend-network:
+  #   name: backend-network
