@@ -1,0 +1,10 @@
+@font-face {
+    font-family: 'PressStart2P';
+    src: url('../fonts/Press_Start_2P/PressStart2P-Regular.ttf') format('truetype');
+    /* You may include other font formats (woff, woff2, etc.) for better cross-browser support */
+}
+
+body {
+    font-family: 'PressStart2P', sans-serif;
+    /* Use the 'CustomFont' as the font family */
+}
