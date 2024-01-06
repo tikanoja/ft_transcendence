@@ -2,9 +2,9 @@
 *** This stylesheet will display the active Bootstrap breakpoint on top right.
  */
 
-body {
-  margin-top: 40px; /* This margin just makes the text easier to read. You can remove it if you want since it can mess with your other styles. */
-}
+/* body {
+  margin-top: 40px;
+} */
 
 body::before {
   content: "XS";

@@ -1,4 +1,4 @@
-# Use VM Alpine version as base image
+# base img
 FROM alpine:3.18
 
 # Install NGINX and SSL
@@ -17,7 +17,7 @@ RUN mkdir -p /run/nginx /etc/nginx/ssl
 RUN openssl req -newkey rsa:2048 -x509 -sha256 -days 365 -nodes \
     -out /etc/nginx/ssl/certificate.crt \
     -keyout /etc/nginx/ssl/certificate.key \
-    -subj "/C=FI/ST=Helsinki/L=Helsinki/O=42/OU=Hive/CN=ttikanoj.42.fr"
+    -subj "/C=FI/ST=Helsinki/L=Helsinki/O=42/OU=Hive/CN=pongchamps"
 
 # Add a new user within the container
 RUN adduser -D -H -s /sbin/nologin -g www-data -G www-data www-data

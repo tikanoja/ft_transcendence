@@ -12,24 +12,39 @@
 	<link rel="stylesheet" href="./css/bootstrap-breakpoint.css">
 	<link rel="stylesheet" href="./css/styles.css">
   </head>
-  <body>
-	  <div class="container">
-		  <div class="row">
-			  <div class="col">
-				  <div class="box"></div>
+<body>
+	<!-- Fluid container to fill entire viewport without padding -->
+	<div class="container-fluid">
+		<div class="row">
+			<!-- Sidebar to house our navigation menu -->
+			<nav class="col-3 bg-dark sidebar">
+				<!-- The content of the sidebar -->
+				<div class="sidebar-content">
+					<!-- Init bootstrap nav component to stack vertically -->
+					<ul class="nav flex-column">
+						<!-- The items of the nav component -->
+						<li class="nav-item">
+							<a href="/"         class="nav_link" data-link>Dashboard</a>
+						</li>
+						<li class="nav-item"></li>
+							<a href="/play"     class="nav_link" data-link>Play</a>
+						</li>
+						<li class="nav-item"></li>
+							<a href="/friends"  class="nav_link" data-link>Friends</a>
+						</li>
+						<li class="nav-item"></li>
+							<a href="/settings" class="nav_link" data-link>Settings</a>
+						</li>
+					</ul>
 				</div>
-				<div class="col">
-					<div class="box"></div>
-				</div>
-				<div class="col">
-					<div class="box"></div>
-				</div>
-				<div class="col">
-					<div class="box"></div>
-				</div>
+			</nav>
+			<!-- The main content of the app -->
+			<div class="col-9 bg-light main-content">
+				<h1>Greetings, stranger!</h1>
+				<p>I'm not surprised to see your kind here...</p>
+				<script type="module" src="./js/index.js"></script>
 			</div>
 		</div>
-		<h1>Greetings, stranger!</h1>
-		<p>I'm not surprised to see your kind here...</p>
-  </body>
+	</div>
+</body>
 </html>

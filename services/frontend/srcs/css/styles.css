@@ -6,5 +6,18 @@
 
 body {
     font-family: 'PressStart2P', sans-serif;
-    /* Use the 'CustomFont' as the font family */
+}
+
+.sidebar {
+    /* Fill entire viewport height */
+    height: 100vh;
+    /* Dont move on scroll */
+    position: fixed;
+    top: 0;
+    background-color: #343a40; /* Change sidebar background color */
+    color: white; /* Change text color */
+}
+
+.main-content {
+    padding-left: 25%;
 }
