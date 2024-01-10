@@ -6,11 +6,18 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ft_transcendence</title>
+    <title></title>
+	<meta name="description" content="">
+	<!-- Link to Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+	<!-- Link to Bootstrap JS -->
 	<script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+	<!-- The breakpoint visualizer -->
 	<link rel="stylesheet" href="./css/bootstrap-breakpoint.css">
+	<!-- The css for our SPA -->
 	<link rel="stylesheet" href="./css/styles.css">
+	<!-- The router logic -->
+	<script type="module" src="./js/router.js"></script>
   </head>
 <body>
 	<!-- Fluid container to fill entire viewport without padding -->
@@ -23,26 +30,17 @@
 					<!-- Init bootstrap nav component to stack vertically -->
 					<ul class="nav flex-column">
 						<!-- The items of the nav component -->
-						<li class="nav-item">
-							<a href="/"         class="nav_link" data-link>Dashboard</a>
-						</li>
-						<li class="nav-item"></li>
-							<a href="/play"     class="nav_link" data-link>Play</a>
-						</li>
-						<li class="nav-item"></li>
-							<a href="/friends"  class="nav_link" data-link>Friends</a>
-						</li>
-						<li class="nav-item"></li>
-							<a href="/settings" class="nav_link" data-link>Settings</a>
-						</li>
+						<li class="nav-item"> <a href="/"         class="nav_link">Home</a>      </li>
+						<li class="nav-item"> <a href="/play"     class="nav_link">Play</a>      </li>
+						<li class="nav-item"> <a href="/friends"  class="nav_link">Friends</a>   </li>
+						<li class="nav-item"> <a href="/settings" class="nav_link">Settings</a>  </li>
 					</ul>
 				</div>
 			</nav>
 			<!-- The main content of the app -->
 			<div class="col-9 bg-light main-content">
-				<h1>Greetings, stranger!</h1>
-				<p>I'm not surprised to see your kind here...</p>
-				<script type="module" src="./js/index.js"></script>
+				<!-- The content of this div is displayed dynamically using URL-based routing -->
+				<div id="content"></div>
 			</div>
 		</div>
 	</div>
