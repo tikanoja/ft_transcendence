@@ -52,6 +52,8 @@ const route = (event) => {
 	event = event || window.event;
 	event.preventDefault();
 	// Update browser history without triggering page reload
+	if (event.target.href == window.location.href)
+		return ;
 	window.history.pushState("", "", event.target.href);
 	locationHandler();
 }

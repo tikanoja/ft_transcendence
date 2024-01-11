@@ -18,30 +18,25 @@
 	<link rel="stylesheet" href="./css/styles.css">
 	<!-- The router logic -->
 	<script type="module" src="./js/router.js"></script>
+	<!-- The JS for index.html -->
+	<script src="./js/index.js"></script>
   </head>
 <body>
-	<!-- Fluid container to fill entire viewport without padding -->
-	<div class="container-fluid">
-		<div class="row">
-			<!-- Sidebar to house our navigation menu -->
-			<nav class="col-3 bg-dark sidebar">
-				<!-- The content of the sidebar -->
-				<div class="sidebar-content">
-					<!-- Init bootstrap nav component to stack vertically -->
-					<ul class="nav flex-column">
-						<!-- The items of the nav component -->
-						<li class="nav-item"> <a href="/"         class="nav_link">Home</a>      </li>
-						<li class="nav-item"> <a href="/play"     class="nav_link">Play</a>      </li>
-						<li class="nav-item"> <a href="/friends"  class="nav_link">Friends</a>   </li>
-						<li class="nav-item"> <a href="/settings" class="nav_link">Settings</a>  </li>
-					</ul>
-				</div>
-			</nav>
-			<!-- The main content of the app -->
-			<div class="col-9 bg-light main-content">
-				<!-- The content of this div is displayed dynamically using URL-based routing -->
-				<div id="content"></div>
-			</div>
+	<div class="container-fluid" style="margin: 0; padding: 0">
+		<nav class="sidebar">
+			<!-- Init bootstrap nav component to stack vertically -->
+			<ul class="nav flex-column">
+				<!-- The items of the nav component -->
+				<li class="nav-item"> <a href="/"         class="nav-link" onclick="setActive(this)">Home</a>      </li>
+				<li class="nav-item"> <a href="/play"     class="nav-link" onclick="setActive(this)">Play</a>      </li>
+				<li class="nav-item"> <a href="/friends"  class="nav-link" onclick="setActive(this)">Friends</a>   </li>
+				<li class="nav-item"> <a href="/settings" class="nav-link" onclick="setActive(this)">Settings</a>  </li>
+			</ul>
+		</nav>
+		<!-- The main content of the app -->
+		<div class="bg-light main-content">
+			<!-- The content of this div is displayed dynamically using URL-based routing -->
+			<div id="content"></div>
 		</div>
 	</div>
 </body>
