@@ -76,6 +76,10 @@ const locationHandler = async () => {
 	document.getElementById("content").innerHTML = html;
 	document.title = route.title;
 	document.querySelector('meta[name="description"]').setAttribute("content", route.description);
+
+	/*
+		Update event listeners here!
+	*/
 }
 
 // Add an event listener to the window that looks for URL changes
