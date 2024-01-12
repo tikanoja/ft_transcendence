@@ -36,23 +36,23 @@ services:
     volumes:
       - frontend-data:/app/frontend
 
-  # backend:
-  #   build:
-  #     context: ./services/backend
-  #     dockerfile: Dockerfile
-  #   image: backend-img:dev
-  #   container_name: backend-cont
-  #   ports:
-  #     - "8000:8000"
-  #   env_file: .env
-  #   restart: always
-  #   depends_on:
-  #     -database
-  #   networks:
-  #     - frontend-network
-  #     - backend-network
-  #   volumes:
-  #     - insert backend volume here!
+  backend:
+    build:
+      context: ./services/backend
+      dockerfile: Dockerfile
+    image: backend-img:dev
+    container_name: backend-cont
+    ports:
+      - "8000:8000"
+    env_file: .env
+    restart: always
+    # depends_on:
+    #   -database
+    networks:
+      - frontend-network
+      - backend-network
+    # volumes:
+    #   - insert backend volume here!
 
   # database:
   #   build:
@@ -82,5 +82,5 @@ volumes:
 networks:
   frontend-network:
     name: frontend-network
-  # backend-network:
-  #   name: backend-network
+  backend-network:
+    name: backend-network
