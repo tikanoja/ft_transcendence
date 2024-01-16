@@ -18,3 +18,20 @@ function setActive(link) {
 	});
 	link.classList.add('active');
 }
+
+// Define the functions for the events listed below
+const fetchData = () => {
+    // Log "Button pressed!" to the console
+	var greetings = "hello from index.js";
+	greetings = //fetch something from django
+    console.log(greetings);
+}
+
+// List all the necessary event listeners 
+const updateEventListeners = () => {
+    const fetchButton = document.getElementById("fetchButton");
+    if (fetchButton) {
+        fetchButton.removeEventListener("click", fetchData);
+        fetchButton.addEventListener("click", fetchData);
+    }
+}
