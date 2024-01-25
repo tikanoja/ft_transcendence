@@ -19,19 +19,68 @@ function setActive(link) {
 	link.classList.add('active');
 }
 
+function sendRequest(endpoint, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'http://localhost:8000/' + endpoint, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
 
-// List all the necessary event listeners 
-const updateEventListeners = () => {
-	const fetchButton = document.getElementById("fetchButton");
-    if (fetchButton) {
-		fetchButton.removeEventListener("click", fetchData);
-        fetchButton.addEventListener("click", fetchData);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            console.log(response);
+            if (callback) {
+                callback(response);
+            }
+        }
+    };
+
+    xhr.send();
+}
+
+function updateEventListeners() {
+    // Check if the buttons exist on the current view
+    var increaseButton = document.getElementById('increaseButton');
+    var decreaseButton = document.getElementById('decreaseButton');
+    var retrieveButton = document.getElementById('retrieveButton');
+
+    // Remove existing event listeners if any
+    if (increaseButton) {
+        increaseButton.removeEventListener('click', increaseButtonClickHandler);
+    }
+    if (decreaseButton) {
+        decreaseButton.removeEventListener('click', decreaseButtonClickHandler);
+    }
+    if (retrieveButton) {
+        retrieveButton.removeEventListener('click', retrieveButtonClickHandler);
+    }
+
+    // Attach event listeners only if the buttons exist
+    if (increaseButton) {
+        increaseButton.addEventListener('click', increaseButtonClickHandler);
+    }
+    if (decreaseButton) {
+        decreaseButton.addEventListener('click', decreaseButtonClickHandler);
+    }
+    if (retrieveButton) {
+        retrieveButton.addEventListener('click', retrieveButtonClickHandler);
     }
 }
 
-// Define the functions for the events listed above!
-const fetchData = () => {
-	var greetings = "hello from index.js";
-	greetings = //fetch something from django
-	console.log(greetings);
+// Define separate click handlers for each button
+function increaseButtonClickHandler() {
+    sendRequest('pong/increase_number/', function (response) {
+        console.log('Increased number:', response.number);
+    });
+}
+
+function decreaseButtonClickHandler() {
+    sendRequest('pong/decrease_number/', function (response) {
+        console.log('Decreased number:', response.number);
+    });
+}
+
+function retrieveButtonClickHandler() {
+    sendRequest('pong/get_number/', function (response) {
+        console.log('Current number:', response.number);
+    });
 }

@@ -29,10 +29,8 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
+# Add psycopg2 once implemented PostgreSQL
 INSTALLED_APPS = [
-    'channels',
-    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+#add!
+ASGI_APPLICATION = 'backend.routing.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -69,6 +70,7 @@ TEMPLATES = [
     },
 ]
 
+# Wwwwhat???
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 
@@ -123,3 +125,27 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Add logging config
+# Usage:
+# import logging
+# logger = logging.getLogger(__name__)
+# logger.debug('This is a debug message')
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+}
+
+# Set up possible project-wide defines here
+# Example:
+# PROJECT_NAME = 'PongChamps'
+# Remember!! from django.conf import settings
