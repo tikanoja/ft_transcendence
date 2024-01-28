@@ -9,8 +9,8 @@ services:
     container_name: nginx-cont
     ports:
       - "443:443"
-    depends_on:
-      - frontend
+    # depends_on:
+    #   - frontend
     env_file: .env
     networks:
       - frontend-network
@@ -29,7 +29,6 @@ services:
     env_file: .env
     networks:
       - frontend-network
-      # - backend-network
     restart: always
     # depends_on:
     #   - backend
@@ -46,38 +45,45 @@ services:
       - "8000:8000"
     env_file: .env
     restart: always
-    # depends_on:
-    #   -database
+    depends_on:
+      database:
+        condition: service_healthy
     networks:
       - frontend-network
       - backend-network
     # volumes:
     #   - insert backend volume here!
 
-  # database:
-  #   build:
-  #     context: ./services/database
-  #     dockerfile: Dockerfile
-  #   image: database-img:dev
-  #   container_name: database-cont
-  #   ports:
-  #     - "5432:5432"
-  #   env_file: .env
-  #   restart: always
-  #   networks:
-  #     - backend-network
-  #   volumes:
-  #     - insert database volume here!
+  database:
+    build:
+      context: ./services/database
+      dockerfile: Dockerfile
+    image: database-img:dev
+    container_name: database-cont
+    ports:
+      - "5432:5432"
+    env_file: .env
+    restart: always
+    networks:
+      - backend-network
+    volumes:
+      - database-data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
+      interval: 3s
+      timeout: 15s
+      retries: 10
 
 volumes:
   frontend-data:
-#   database-data:
-#     name: database-data
-#     driver: local
-#     driver_opts:
-#       type: none
-#       device: /home/ttikanoj/data/database-data
-#       o: bind
+    name: frontend-data
+  database-data:
+    name: database-data
+    # driver: local
+    # driver_opts:
+    #   type: none
+    #   device: /home/ttikanoj/data/database-data
+    #   o: bind
 
 networks:
   frontend-network:

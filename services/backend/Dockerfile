@@ -2,18 +2,16 @@
 # Using latest stable slim python debian. Remove slim if need more tools. Build from plain bookworm/slim if required...
 FROM python:3.12.1-slim-bookworm
 
+RUN apt-get update && apt-get install -y \
+	postgresql-client \
+	libpq-dev
+
 WORKDIR /backend
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip -r requirements.txt
 
-# RUN django-admin startproject backend .
-
-# Try running without this and check "docker logs backend-cont"
-# RUN python manage.py migrate
-
-# The dir structure and source files should be set 
 COPY . .
 
 EXPOSE 8000
