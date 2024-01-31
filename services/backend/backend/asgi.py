@@ -8,23 +8,28 @@ https://docs.djangoproject.com/en/5.0/howto/deployment/asgi/
 """
 
 import os
-
 from django.core.asgi import get_asgi_application
-#add!
-from channel.routing import ProtocolTypeRouter, URLRouter
-#add!
-from your_app.routing import websocket_urlpatterns
+from channels.routing import ProtocolTypeRouter, URLRouter
+from backend.routing import websocket_urlpatterns
+from pong.consumers import PongConsumer
+# add this if need AuthMiddlewareStack
+# from channels.auth import AuthMiddlewareStack
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 
 # Default:
 # application = get_asgi_application()
 
-#add!
+# Maybe create routing.py for these if list starts to grow...
+websocket_urlpatterns = [
+    path('ws/pong/', PongConsumer.as_asgi()),
+    # Add paths for other WS consumers if needed
+]
+
 application = ProtocolTypeRouter({
-	"http": get_asgi_application(),
+	#Wrap URLRouter inside AuthMiddlewareStack() if needed!
+	# "http": get_asgi_application(),
 	"websocket": URLRouter(
-		#websocket routing here!!!
 		websocket_urlpatterns
 	),
 })

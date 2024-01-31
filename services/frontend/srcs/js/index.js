@@ -19,22 +19,30 @@ function setActive(link) {
 	link.classList.add('active');
 }
 
-function sendRequest(endpoint, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost:8000/' + endpoint, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
+// STYLING UP THERE
+// 'Play' JS DOWN HERE
 
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            var response = JSON.parse(xhr.responseText);
-            console.log(response);
-            if (callback) {
-                callback(response);
-            }
+var socket = new WebSocket('wss://backend:8000/ws/pong/');
+
+socket.addEventListener('open', function (event) {
+    console.log('WebSocket connection opened:', event);
+});
+socket.addEventListener('close', function (event) {
+    console.log('WebSocket connection closed:', event);
+});
+
+function sendRequest(endpoint, callback) {
+    // send json to backend to the specified endpoint
+    socket.send(JSON.stringify({ endpoint: endpoint }));
+
+    // handle response from backend
+    socket.onmessage = function (event) {
+        var response = JSON.parse(event.data);
+        console.log(response);
+        if (callback) {
+            callback(response);
         }
     };
-
-    xhr.send();
 }
 
 function updateEventListeners() {
@@ -68,19 +76,19 @@ function updateEventListeners() {
 
 // Define separate click handlers for each button
 function increaseButtonClickHandler() {
-    sendRequest('pong/increase_number/', function (response) {
+    sendRequest('increase_number/', function (response) {
         console.log('Increased number:', response.number);
     });
 }
 
 function decreaseButtonClickHandler() {
-    sendRequest('pong/decrease_number/', function (response) {
+    sendRequest('decrease_number/', function (response) {
         console.log('Decreased number:', response.number);
     });
 }
 
 function retrieveButtonClickHandler() {
-    sendRequest('pong/get_number/', function (response) {
+    sendRequest('get_number/', function (response) {
         console.log('Current number:', response.number);
     });
 }
