@@ -11,25 +11,18 @@ import os
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from backend.routing import websocket_urlpatterns
+# from channels.auth import AuthMiddlewareStack Add this is authentication needed
 from pong.consumers import PongConsumer
-# add this if need AuthMiddlewareStack
-# from channels.auth import AuthMiddlewareStack
+from django.urls import path
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 
-# Default:
-# application = get_asgi_application()
-
-# Maybe create routing.py for these if list starts to grow...
-websocket_urlpatterns = [
-    path('ws/pong/', PongConsumer.as_asgi()),
-    # Add paths for other WS consumers if needed
-]
-
+# wrap URLrouter in authmiddlewarestack if auth needed
 application = ProtocolTypeRouter({
-	#Wrap URLRouter inside AuthMiddlewareStack() if needed!
-	# "http": get_asgi_application(),
-	"websocket": URLRouter(
-		websocket_urlpatterns
-	),
+    "http": get_asgi_application(),
+    "websocket": URLRouter(
+        [
+            path("ws/pong/", PongConsumer.as_asgi()),
+        ]
+    ),
 })

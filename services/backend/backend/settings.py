@@ -26,14 +26,12 @@ SECRET_KEY = 'django-insecure-*9#ubcwnam1fwt8y$$*l3)+u-cpsh+ms)w%pglfthdiwgza*8u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# add the usual suspects
+ALLOWED_HOSTS = ['backend-cont', 'frontend-cont', 'localhost', '127.0.0.1']
 
-
-# Application definition
-# Add psycopg2 once implemented PostgreSQL
-# psycopg2-binary==2.9.9 add this to requirements.txt
 INSTALLED_APPS = [
     'channels',
+    'pong',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -44,7 +42,7 @@ INSTALLED_APPS = [
 ]
 
 #add!
-ASGI_APPLICATION = 'backend.routing.application'
+ASGI_APPLICATION = 'backend.asgi.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

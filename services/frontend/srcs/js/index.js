@@ -22,7 +22,11 @@ function setActive(link) {
 // STYLING UP THERE
 // 'Play' JS DOWN HERE
 
-var socket = new WebSocket('wss://backend:8000/ws/pong/');
+const socket = new WebSocket('ws://localhost:8000/ws/pong/');
+// const socket = new WebSocket('wss://backend:8000/ws/pong/');
+socket.onerror = function(error) {
+    console.log('WebSocket Error: ', error);
+};
 
 socket.addEventListener('open', function (event) {
     console.log('WebSocket connection opened:', event);
