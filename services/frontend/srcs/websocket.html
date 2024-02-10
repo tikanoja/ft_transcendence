@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+</head>
+<body>
+    <h1>Testing WebSocket</h1>
+    <script>
+        // Create a WebSocket connection
+        const socket = new WebSocket('wss://localhost:8433/wss/pong/');
+
+        // Event handler for when the connection is opened
+        socket.addEventListener('open', (event) => {
+            console.log('WebSocket connection opened:', event);
+        });
+
+        // Event handler for when a message is received
+        socket.addEventListener('message', (event) => {
+            console.log('WebSocket message received:', event.data);
+        });
+
+        // Event handler for when an error occurs
+        socket.addEventListener('error', (event) => {
+            console.error('WebSocket error:', event);
+        });
+
+        // Event handler for when the connection is closed
+        socket.addEventListener('close', (event) => {
+            console.log('WebSocket connection closed:', event);
+        });
+
+        // Function to send a test message to the server
+        function sendTestMessage() {
+            const message = 'Hello, WebSocket!';
+            console.log('Sending message:', message);
+            socket.send(message);
+        }
+
+        // Close the WebSocket connection when the page is unloaded
+        window.addEventListener('beforeunload', () => {
+            socket.close();
+        });
+
+        function sendRequest(endpoint, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://localhost:8433/' + endpoint, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    console.log('Response from /pong/getnumber:', response);
+                    if (callback) {
+                        callback(response);
+                    }
+                }
+            };
+
+            xhr.send();
+        }
+
+        // Send a request to /pong/getnumber when the page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            sendRequest('pong/getnumber', function (response) {
+                // Handle the response if needed
+            });
+        });
+    </script>
+</body>
+</html>

@@ -34,6 +34,8 @@ ALLOWED_HOSTS = []
 # psycopg2-binary==2.9.9 add this to requirements.txt
 INSTALLED_APPS = [
     'channels',
+    'pong',
+    'daphne',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -44,7 +46,7 @@ INSTALLED_APPS = [
 ]
 
 #add!
-ASGI_APPLICATION = 'backend.routing.application'
+ASGI_APPLICATION = 'backend.asgi.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

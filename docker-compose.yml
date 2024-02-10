@@ -1,37 +1,20 @@
 # version: '1'
 
 services:
-  nginx:
-    build:
-      context: ./services/nginx
-      dockerfile: Dockerfile
-    image: nginx-img:dev
-    container_name: nginx-cont
-    ports:
-      - "443:443"
-    # depends_on:
-    #   - frontend
-    env_file: .env
-    networks:
-      - frontend-network
-    restart: always
-    volumes:
-      - frontend-data:/app/frontend
-
   frontend:
     build:
       context: ./services/frontend
       dockerfile: Dockerfile
     image: frontend-img:dev
-    container_name: frontend-cont
+    container_name: frontend
     ports:
-      - "3000:3000"
+      - "443:443"
+    # depends_on:
+    #   - backend
     env_file: .env
     networks:
       - frontend-network
     restart: always
-    # depends_on:
-    #   - backend
     volumes:
       - frontend-data:/app/frontend
 
@@ -40,7 +23,7 @@ services:
       context: ./services/backend
       dockerfile: Dockerfile
     image: backend-img:dev
-    container_name: backend-cont
+    container_name: backend
     ports:
       - "8000:8000"
     env_file: .env
@@ -51,15 +34,13 @@ services:
     networks:
       - frontend-network
       - backend-network
-    # volumes:
-    #   - insert backend volume here!
 
   database:
     build:
       context: ./services/database
       dockerfile: Dockerfile
     image: database-img:dev
-    container_name: database-cont
+    container_name: database
     ports:
       - "5432:5432"
     env_file: .env
@@ -79,11 +60,6 @@ volumes:
     name: frontend-data
   database-data:
     name: database-data
-    # driver: local
-    # driver_opts:
-    #   type: none
-    #   device: /home/ttikanoj/data/database-data
-    #   o: bind
 
 networks:
   frontend-network:
