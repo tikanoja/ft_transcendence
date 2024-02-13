@@ -19,34 +19,22 @@ function setActive(link) {
 	link.classList.add('active');
 }
 
-// STYLING UP THERE
-// 'Play' JS DOWN HERE
-
-const socket = new WebSocket('ws://localhost:8000/ws/pong/');
-// const socket = new WebSocket('wss://backend:8000/ws/pong/');
-socket.onerror = function(error) {
-    console.log('WebSocket Error: ', error);
-};
-
-socket.addEventListener('open', function (event) {
-    console.log('WebSocket connection opened:', event);
-});
-socket.addEventListener('close', function (event) {
-    console.log('WebSocket connection closed:', event);
-});
-
 function sendRequest(endpoint, callback) {
-    // send json to backend to the specified endpoint
-    socket.send(JSON.stringify({ endpoint: endpoint }));
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'http://localhost:8000/' + endpoint, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
 
-    // handle response from backend
-    socket.onmessage = function (event) {
-        var response = JSON.parse(event.data);
-        console.log(response);
-        if (callback) {
-            callback(response);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            console.log(response);
+            if (callback) {
+                callback(response);
+            }
         }
     };
+
+    xhr.send();
 }
 
 function updateEventListeners() {
@@ -88,19 +76,19 @@ function updateEventListeners() {
 
 // Define separate click handlers for each button
 function increaseButtonClickHandler() {
-    sendRequest('increase_number/', function (response) {
+    sendRequest('pong/increase_number/', function (response) {
         console.log('Increased number:', response.number);
     });
 }
 
 function decreaseButtonClickHandler() {
-    sendRequest('decrease_number/', function (response) {
+    sendRequest('pong/decrease_number/', function (response) {
         console.log('Decreased number:', response.number);
     });
 }
 
 function retrieveButtonClickHandler() {
-    sendRequest('get_number/', function (response) {
+    sendRequest('pong/get_number/', function (response) {
         console.log('Current number:', response.number);
     });
 }
