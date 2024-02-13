@@ -26,12 +26,15 @@ SECRET_KEY = 'django-insecure-*9#ubcwnam1fwt8y$$*l3)+u-cpsh+ms)w%pglfthdiwgza*8u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# add the usual suspects
-ALLOWED_HOSTS = ['backend-cont', 'frontend-cont', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
+# Application definition
+# Add psycopg2 once implemented PostgreSQL
+# psycopg2-binary==2.9.9 add this to requirements.txt
 INSTALLED_APPS = [
     'channels',
     'pong',
+    'daphne',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -40,9 +43,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
-
-#add!
-ASGI_APPLICATION = 'backend.asgi.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -72,9 +72,16 @@ TEMPLATES = [
     },
 ]
 
+#add!
+ASGI_APPLICATION = 'backend.asgi.application'
 # Wwwwhat???
 WSGI_APPLICATION = 'backend.wsgi.application'
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases

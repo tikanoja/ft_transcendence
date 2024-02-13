@@ -54,6 +54,8 @@ function updateEventListeners() {
     var increaseButton = document.getElementById('increaseButton');
     var decreaseButton = document.getElementById('decreaseButton');
     var retrieveButton = document.getElementById('retrieveButton');
+    var connectButton = document.getElementById('connectButton');
+
 
     // Remove existing event listeners if any
     if (increaseButton) {
@@ -65,6 +67,9 @@ function updateEventListeners() {
     if (retrieveButton) {
         retrieveButton.removeEventListener('click', retrieveButtonClickHandler);
     }
+    if (connectButton) {
+        connectButton.removeEventListener('click', connectButtonClickHandler);
+    }
 
     // Attach event listeners only if the buttons exist
     if (increaseButton) {
@@ -75,6 +80,9 @@ function updateEventListeners() {
     }
     if (retrieveButton) {
         retrieveButton.addEventListener('click', retrieveButtonClickHandler);
+    }
+    if (connectButton) {
+        connectButton.addEventListener('click', connectButtonClickHandler);
     }
 }
 
@@ -94,5 +102,23 @@ function decreaseButtonClickHandler() {
 function retrieveButtonClickHandler() {
     sendRequest('get_number/', function (response) {
         console.log('Current number:', response.number);
+    });
+}
+
+function connectButtonClickHandler() {
+    const socket = new WebSocket('wss://localhost/ws/pong/');
+    // const socket = new WebSocket('wss://backend:8000/ws/pong/');
+    socket.onerror = function(error) {
+        console.log('WebSocket Error: ', error);
+    };
+    socket.addEventListener('open', function (event) {
+        console.log('WebSocket connection opened:', event);
+        socket.send(JSON.stringify({ message: 'hello world' }));
+    });
+    socket.addEventListener('message', function (event) {
+		console.log('WebSocket message received:', event.data);
+	});
+    socket.addEventListener('close', function (event) {
+        console.log('WebSocket connection closed:', event);
     });
 }
