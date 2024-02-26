@@ -33,7 +33,7 @@ ALLOWED_HOSTS = ['*']
 # psycopg2-binary==2.9.9 add this to requirements.txt
 INSTALLED_APPS = [
     'channels',
-    'pong',
+    'user',
     'daphne',
 
     'django.contrib.admin',
@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'pong_service.urls'
+ROOT_URLCONF = 'user_service.urls'
 
 TEMPLATES = [
     {
@@ -73,9 +73,9 @@ TEMPLATES = [
 ]
 
 #add!
-ASGI_APPLICATION = 'pong_service.asgi.application'
+ASGI_APPLICATION = 'user_service.asgi.application'
 # Wwwwhat???
-WSGI_APPLICATION = 'pong_service.wsgi.application'
+WSGI_APPLICATION = 'user_service.wsgi.application'
 
 CHANNEL_LAYERS = {
     "default": {

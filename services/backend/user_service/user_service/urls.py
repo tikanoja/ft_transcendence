@@ -16,10 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from pong.views import increase_number, decrease_number, get_number
+from user.views import increase_number, decrease_number, get_number
 
 urlpatterns = [
-    path('pong/increase_number/', increase_number, name='increase_number'),
-    path('pong/decrease_number/', decrease_number, name='decrease_number'),
-    path('pong/get_number/', get_number, name='get_number'),
+    path('user/increase_number/', increase_number, name='increase_number'),
+    path('user/decrease_number/', decrease_number, name='decrease_number'),
+    path('user/get_number/', get_number, name='get_number'),
 ]

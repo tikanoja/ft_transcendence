@@ -35,22 +35,22 @@ services:
       - frontend-network
       - backend-network
 
-  # user_service:
-  #   build:
-  #     context: ./services/backend/user_service
-  #     dockerfile: Dockerfile
-  #   image: user_service-img:dev
-  #   container_name: user_service_c
-  #   ports:
-  #     - "8000:8000"
-  #   env_file: .env
-  #   restart: always
-  #   depends_on:
-  #     database:
-  #       condition: service_healthy
-  #   networks:
-  #     - frontend-network
-  #     - backend-network
+  user_service:
+    build:
+      context: ./services/backend/user_service
+      dockerfile: Dockerfile
+    image: user_service-img:dev
+    container_name: user_service_c
+    ports:
+      - "8001:8000"
+    env_file: .env
+    restart: always
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - frontend-network
+      - backend-network
 
   database:
     build:

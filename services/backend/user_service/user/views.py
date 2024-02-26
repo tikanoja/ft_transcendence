@@ -5,7 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-current_number = 50  # Initial number
+current_number = 42  # Initial number
 
 def add_cors_headers(response):
 	response["Access-Control-Allow-Origin"] = "https://localhost"

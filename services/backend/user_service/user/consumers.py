@@ -5,7 +5,7 @@ import json
 
 logger = logging.getLogger(__name__)
 
-class PongConsumer(AsyncWebsocketConsumer):
+class UserConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		logger.info('New connect received')
 		await self.accept()
@@ -20,5 +20,5 @@ class PongConsumer(AsyncWebsocketConsumer):
 		text_data_json = json.loads(text_data)
 		await self.send(text_data=json.dumps({
 			'type': 'connection established',
-			'message': 'you are connected! :)'
+			'message': 'USER CONNECTED! :)'
 		}))
