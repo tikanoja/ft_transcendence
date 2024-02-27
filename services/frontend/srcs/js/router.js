@@ -43,6 +43,11 @@ const routes = {
 		view: "../views/settings.html",
 		title: "Settings | " + pageTitle,
 		description: "Manage your settings"
+	},
+	"/login" : {
+		view: "../views/login.html",
+		title: "Login | " + pageTitle,
+		description: "Login"
 	}
 }
 

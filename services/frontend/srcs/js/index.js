@@ -19,7 +19,8 @@ function setActive(link) {
 	link.classList.add('active');
 }
 
-function sendRequest(endpoint, callback) {
+//callback?
+function sendRequest(endpoint, data, callback) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', endpoint, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -33,8 +34,7 @@ function sendRequest(endpoint, callback) {
             }
         }
     };
-
-    xhr.send();
+    xhr.send(JSON.stringify(data));
 }
 
 function updateEventListeners() {
@@ -45,6 +45,7 @@ function updateEventListeners() {
     var connectButton = document.getElementById('connectButton');
     var userConnectButton = document.getElementById('user-connectButton');
     var userRetrieveButton = document.getElementById('user-retrieveButton');
+    var registerButton = document.getElementById('registerButton');
 
     // Remove existing event listeners if any
     if (increaseButton) {
@@ -64,6 +65,9 @@ function updateEventListeners() {
     }
     if (userRetrieveButton) {
         userRetrieveButton.removeEventListener('click', userRetrieveButtonClickHandler);
+    }
+    if (registerButton) {
+        registerButton.removeEventListener('click', registerButtonClickHandler);
     }
 
     // Attach event listeners only if the buttons exist
@@ -85,29 +89,32 @@ function updateEventListeners() {
     if (userConnectButton) {
         userConnectButton.addEventListener('click', userConnectButtonClickHandler);
     }
+    if (registerButton) {
+        registerButton.addEventListener('click', registerButtonClickHandler);
+    }
 }
 
 // Define separate click handlers for each button
 function increaseButtonClickHandler() {
-    sendRequest('http://localhost:8000/pong/increase_number/', function (response) {
+    sendRequest('http://localhost:8000/pong/increase_number/', (response) => {
         console.log('Increased number:', response.number);
     });
 }
 
 function decreaseButtonClickHandler() {
-    sendRequest('http://localhost:8000/pong/decrease_number/', function (response) {
+    sendRequest('http://localhost:8000/pong/decrease_number/', (response) => {
         console.log('Decreased number:', response.number);
     });
 }
 
 function retrieveButtonClickHandler() {
-    sendRequest('http://localhost:8000/pong/get_number/', function (response) {
+    sendRequest('http://localhost:8000/pong/get_number/', (response) => {
         console.log('Current number:', response.number);
     });
 }
 
 function userRetrieveButtonClickHandler() {
-    sendRequest('http://localhost:8001/user/get_number/', function (response) {
+    sendRequest('http://localhost:8001/user/get_number/', (response) => {
         console.log('Current number:', response.number);
     });
 }
@@ -144,5 +151,23 @@ function userConnectButtonClickHandler() {
 	});
     socket.addEventListener('close', function (event) {
         console.log('WebSocket connection closed:', event);
+    });
+}
+
+function registerButtonClickHandler(event) {
+    event.preventDefault();
+    console.log("we in!");
+
+    var registrationData = {};
+    registrationData["username"] = document.getElementById('username').value;
+    registrationData["email"] = document.getElementById('email').value;
+    registrationData["firstname"] = document.getElementById('firstname').value;
+    registrationData["lastname"] = document.getElementById('lastname').value;
+    registrationData["password"] = document.getElementById('password').value;
+    registrationData["confirm_password"] = document.getElementById('confirm_password').value;
+
+    var endpoint = 'http://localhost:8001/user/register_user/';
+    sendRequest(endpoint, registrationData, (response) => {
+        console.log('Received response:', response);
     });
 }

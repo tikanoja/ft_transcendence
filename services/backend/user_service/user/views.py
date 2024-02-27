@@ -2,6 +2,10 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import logging
+from django.http import HttpResponse
+from django.http import HttpRequest
+import json
+from user.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -48,4 +52,21 @@ def get_number(request):
 	global current_number
 	response = JsonResponse({'result': 'success', 'number': current_number})
 	add_cors_headers(response)
+	return response
+
+@csrf_exempt
+def register_user(request):
+	if request.method == 'POST':
+		logger.debug('In register user')
+		data = json.loads(request.body)
+		logger.debug(data)
+		new_user = User(username=data["username"], firstname=data["firstname"], lastname=data["lastname"], email=data["email"], password=data["password"])
+		logger.debug(new_user.username)
+		logger.debug(new_user.firstname)
+		logger.debug(new_user.lastname)
+		logger.debug(new_user.email)
+		logger.debug(new_user.password)
+
+	response = HttpResponse("Congrats you registered!")
+	add_cors_headers(response) #dose this work with http res?
 	return response
