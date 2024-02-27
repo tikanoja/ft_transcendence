@@ -75,6 +75,11 @@ services:
 volumes:
   frontend-data:
     name: frontend-data
+    driver: local
+    driver_opts:
+      type: none
+      device: ./services/frontend/srcs
+      o: bind
   database-data:
     name: database-data
 

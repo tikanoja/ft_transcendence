@@ -13,8 +13,6 @@ EXPOSE 443
 # Ensure that we have the dir to store PID and SSL certs
 RUN mkdir -p /run/nginx /etc/nginx/ssl /app/frontend
 
-COPY ./srcs /app/frontend
-
 # Generate SSL cert & key
 RUN openssl req -newkey rsa:2048 -x509 -sha256 -days 365 -nodes \
     -out /etc/nginx/ssl/certificate.crt \
