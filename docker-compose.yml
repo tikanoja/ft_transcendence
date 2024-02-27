@@ -24,7 +24,7 @@ services:
       dockerfile: Dockerfile
     image: pong_service-img:dev
     container_name: pong_service_c
-    ports:
+    expose:
       - "8000:8000"
     env_file: .env
     restart: always
@@ -58,7 +58,7 @@ services:
       dockerfile: Dockerfile
     image: database-img:dev
     container_name: database_c
-    ports:
+    expose:
       - "5432:5432"
     env_file: .env
     restart: always
@@ -75,6 +75,11 @@ services:
 volumes:
   frontend-data:
     name: frontend-data
+    driver: local
+    driver_opts:
+      type: none
+      device: ./services/frontend/srcs
+      o: bind
   database-data:
     name: database-data
 
