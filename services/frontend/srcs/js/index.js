@@ -43,6 +43,7 @@ function updateEventListeners() {
     var decreaseButton = document.getElementById('decreaseButton');
     var retrieveButton = document.getElementById('retrieveButton');
     var connectButton = document.getElementById('connectButton');
+	var testButton = document.getElementById('testButton');
 
 
     // Remove existing event listeners if any
@@ -58,6 +59,9 @@ function updateEventListeners() {
     if (connectButton) {
         connectButton.removeEventListener('click', connectButtonClickHandler);
     }
+	if (testButton) {
+        testButton.removeEventListener('click', testButtonClickHandler);
+    }
 
     // Attach event listeners only if the buttons exist
     if (increaseButton) {
@@ -72,9 +76,19 @@ function updateEventListeners() {
     if (connectButton) {
         connectButton.addEventListener('click', connectButtonClickHandler);
     }
+	if (testButton) {
+        testButton.removeEventListener('click', testButtonClickHandler);
+    }
 }
 
 // Define separate click handlers for each button
+function testButtonClickHandler() {
+	sendRequest('pong/get_number/', function (response) {
+        console.log('Hello there!');
+    });
+}
+
+
 function increaseButtonClickHandler() {
     sendRequest('pong/increase_number/', function (response) {
         console.log('Increased number:', response.number);
