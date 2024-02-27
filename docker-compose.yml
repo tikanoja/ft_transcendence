@@ -24,7 +24,7 @@ services:
       dockerfile: Dockerfile
     image: pong_service-img:dev
     container_name: pong_service_c
-    expose:
+    ports:
       - "8000:8000"
     env_file: .env
     restart: always
@@ -58,7 +58,7 @@ services:
       dockerfile: Dockerfile
     image: database-img:dev
     container_name: database_c
-    expose:
+    ports:
       - "5432:5432"
     env_file: .env
     restart: always
