@@ -6,11 +6,11 @@ services:
       context: ./services/frontend
       dockerfile: Dockerfile
     image: frontend-img:dev
-    container_name: frontend
+    container_name: frontend_c
     ports:
       - "443:443"
     depends_on:
-      - backend
+      - pong_service
     env_file: .env
     networks:
       - frontend-network
@@ -18,12 +18,12 @@ services:
     volumes:
       - frontend-data:/app/frontend
 
-  backend:
+  pong_service:
     build:
-      context: ./services/backend
+      context: ./services/backend/pong_service
       dockerfile: Dockerfile
-    image: backend-img:dev
-    container_name: backend
+    image: pong_service-img:dev
+    container_name: pong_service_c
     ports:
       - "8000:8000"
     env_file: .env
@@ -35,12 +35,29 @@ services:
       - frontend-network
       - backend-network
 
+  user_service:
+    build:
+      context: ./services/backend/user_service
+      dockerfile: Dockerfile
+    image: user_service-img:dev
+    container_name: user_service_c
+    ports:
+      - "8001:8000"
+    env_file: .env
+    restart: always
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - frontend-network
+      - backend-network
+
   database:
     build:
-      context: ./services/database
+      context: ./services/backend/database
       dockerfile: Dockerfile
     image: database-img:dev
-    container_name: database
+    container_name: database_c
     ports:
       - "5432:5432"
     env_file: .env

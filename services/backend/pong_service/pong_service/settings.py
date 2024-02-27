@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'backend.urls'
+ROOT_URLCONF = 'pong_service.urls'
 
 TEMPLATES = [
     {
@@ -73,9 +73,9 @@ TEMPLATES = [
 ]
 
 #add!
-ASGI_APPLICATION = 'backend.asgi.application'
+ASGI_APPLICATION = 'pong_service.asgi.application'
 # Wwwwhat???
-WSGI_APPLICATION = 'backend.wsgi.application'
+WSGI_APPLICATION = 'pong_service.wsgi.application'
 
 CHANNEL_LAYERS = {
     "default": {

@@ -21,7 +21,7 @@ function setActive(link) {
 
 function sendRequest(endpoint, callback) {
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost:8000/' + endpoint, true);
+    xhr.open('POST', endpoint, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
 
     xhr.onreadystatechange = function () {
@@ -43,7 +43,8 @@ function updateEventListeners() {
     var decreaseButton = document.getElementById('decreaseButton');
     var retrieveButton = document.getElementById('retrieveButton');
     var connectButton = document.getElementById('connectButton');
-
+    var userConnectButton = document.getElementById('user-connectButton');
+    var userRetrieveButton = document.getElementById('user-retrieveButton');
 
     // Remove existing event listeners if any
     if (increaseButton) {
@@ -57,6 +58,12 @@ function updateEventListeners() {
     }
     if (connectButton) {
         connectButton.removeEventListener('click', connectButtonClickHandler);
+    }
+    if (userConnectButton) {
+        userConnectButton.removeEventListener('click', userConnectButtonClickHandler);
+    }
+    if (userRetrieveButton) {
+        userRetrieveButton.removeEventListener('click', userRetrieveButtonClickHandler);
     }
 
     // Attach event listeners only if the buttons exist
@@ -72,23 +79,35 @@ function updateEventListeners() {
     if (connectButton) {
         connectButton.addEventListener('click', connectButtonClickHandler);
     }
+    if (userRetrieveButton) {
+        userRetrieveButton.addEventListener('click', userRetrieveButtonClickHandler);
+    }
+    if (userConnectButton) {
+        userConnectButton.addEventListener('click', userConnectButtonClickHandler);
+    }
 }
 
 // Define separate click handlers for each button
 function increaseButtonClickHandler() {
-    sendRequest('pong/increase_number/', function (response) {
+    sendRequest('http://localhost:8000/pong/increase_number/', function (response) {
         console.log('Increased number:', response.number);
     });
 }
 
 function decreaseButtonClickHandler() {
-    sendRequest('pong/decrease_number/', function (response) {
+    sendRequest('http://localhost:8000/pong/decrease_number/', function (response) {
         console.log('Decreased number:', response.number);
     });
 }
 
 function retrieveButtonClickHandler() {
-    sendRequest('pong/get_number/', function (response) {
+    sendRequest('http://localhost:8000/pong/get_number/', function (response) {
+        console.log('Current number:', response.number);
+    });
+}
+
+function userRetrieveButtonClickHandler() {
+    sendRequest('http://localhost:8001/user/get_number/', function (response) {
         console.log('Current number:', response.number);
     });
 }
@@ -96,6 +115,23 @@ function retrieveButtonClickHandler() {
 function connectButtonClickHandler() {
     const socket = new WebSocket('wss://localhost/ws/pong/');
     // const socket = new WebSocket('wss://backend:8000/ws/pong/');
+    socket.onerror = function(error) {
+        console.log('WebSocket Error: ', error);
+    };
+    socket.addEventListener('open', function (event) {
+        console.log('WebSocket connection opened:', event);
+        socket.send(JSON.stringify({ message: 'hello world' }));
+    });
+    socket.addEventListener('message', function (event) {
+		console.log('WebSocket message received:', event.data);
+	});
+    socket.addEventListener('close', function (event) {
+        console.log('WebSocket connection closed:', event);
+    });
+}
+
+function userConnectButtonClickHandler() {
+    const socket = new WebSocket('wss://localhost/ws/user/');
     socket.onerror = function(error) {
         console.log('WebSocket Error: ', error);
     };
