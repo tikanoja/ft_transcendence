@@ -77,17 +77,47 @@ function updateEventListeners() {
         connectButton.addEventListener('click', connectButtonClickHandler);
     }
 	if (testButton) {
-        testButton.removeEventListener('click', testButtonClickHandler);
+        testButton.addEventListener('click', testButtonClickHandler);
     }
 }
+document.addEventListener('keydown', function (event) {
+    //playing with key bindings, currently registers the keys.
+    switch (event.key) {
+        case 'c':
+            connectButtonClickHandler();
+            break;
+        case 't':
+            testButtonClickHandler();
+            break;
+        case 'ArrowUp':
+        case 'w':
+            console.log("Arrow Up or 'w' key pressed");
+            break;
+        case 'ArrowDown':
+        case 's':
+            console.log("Arrow Down or 's' key pressed");
+            break;
+        case 'ArrowLeft':
+        case 'a':
+            console.log("Arrow Left or 'a' key pressed");
+            break;
+        case 'ArrowRight':
+        case 'd':
+            console.log("Arrow Right or 'd' key pressed");
+            break;
+        default:
+            console.log('Key code for ' + event.key + ': ' + event.keyCode);
+            break;
+    }
+});
 
-// Define separate click handlers for each button
-function testButtonClickHandler() {
-	sendRequest('pong/get_number/', function (response) {
-        console.log('Hello there!');
+
+
+function testButtonClickHandler(){
+    sendRequest('pong/increase_number/', function (response) {
+        console.log("The thing works");
     });
 }
-
 
 function increaseButtonClickHandler() {
     sendRequest('pong/increase_number/', function (response) {

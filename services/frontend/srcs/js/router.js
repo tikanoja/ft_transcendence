@@ -4,6 +4,24 @@
 
 const pageTitle = "Pong";
 
+
+// CHANGING HERE //////////////////
+
+// / Define a shared state object - added to attempt a shared game input
+const sharedState = {
+    currentPage: '/'
+};
+
+// Update the shared state when navigating to different pages
+function navigateTo(page) {
+    sharedState.currentPage = page;
+    // Trigger a custom event or call a function to notify other parts of the code
+}
+
+///////////// CHANGING HERE //////////////////
+
+
+
 // Listens to clicks on the entire document
 document.addEventListener("click", (e) => {
 	// Save the clicked element as target
