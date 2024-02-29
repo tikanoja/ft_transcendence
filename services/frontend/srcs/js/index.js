@@ -89,27 +89,37 @@ document.addEventListener('keydown', function (event) {
         case 't':
             testButtonClickHandler();
             break;
-        case 'ArrowUp':
-        case 'w':
-            console.log("Arrow Up or 'w' key pressed");
-            break;
-        case 'ArrowDown':
-        case 's':
-            console.log("Arrow Down or 's' key pressed");
-            break;
-        case 'ArrowLeft':
-        case 'a':
-            console.log("Arrow Left or 'a' key pressed");
-            break;
-        case 'ArrowRight':
-        case 'd':
-            console.log("Arrow Right or 'd' key pressed");
-            break;
-        default:
-            console.log('Key code for ' + event.key + ': ' + event.keyCode);
-            break;
+		case "ArrowUp": 
+		case "ArrowDown": 
+		case "ArrowLeft": 
+		case "ArrowRight": 
+			event.preventDefault();
+			 break;
+		default:
+			break;
+				
+		};
+	   // case 'ArrowUp':
+        // case 'w':
+        //     console.log("Arrow Up or 'w' key pressed");
+        //     break;
+        // case 'ArrowDown':
+        // case 's':
+        //     console.log("Arrow Down or 's' key pressed");
+        //     break;
+        // case 'ArrowLeft':
+        // case 'a':
+        //     console.log("Arrow Left or 'a' key pressed");
+        //     break;
+        // case 'ArrowRight':
+        // case 'd':
+        //     console.log("Arrow Right or 'd' key pressed");
+        //     break;
+        // default:
+        //     console.log('Key code for ' + event.key + ': ' + event.key);
+        //     break;
     }
-});
+);
 
 
 

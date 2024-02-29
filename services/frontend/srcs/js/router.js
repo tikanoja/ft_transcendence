@@ -4,22 +4,7 @@
 
 const pageTitle = "Pong";
 
-
-// CHANGING HERE //////////////////
-
-// / Define a shared state object - added to attempt a shared game input
-const sharedState = {
-    currentPage: '/'
-};
-
-// Update the shared state when navigating to different pages
-function navigateTo(page) {
-    sharedState.currentPage = page;
-    // Trigger a custom event or call a function to notify other parts of the code
-}
-
-///////////// CHANGING HERE //////////////////
-
+import {test} from "./main.js"
 
 
 // Listens to clicks on the entire document
@@ -64,7 +49,7 @@ const routes = {
 	},
 	"/test" : {
 		view: "../views/3dgen.html",
-		title: "3D!" +  pageTitle,
+		title: "testing | " +  pageTitle,
 		description: "Amazing 3D"
 	}
 }
@@ -73,7 +58,6 @@ const routes = {
 const route = (event) => {
 	// The event is either the one passed to it, or grab the window event if not (prev / forward buttons)
 	event = event || window.event;
-	event.preventDefault();
 	// Update browser history without triggering page reload
 	if (event.target.href == window.location.href)
 		return ;
@@ -85,21 +69,31 @@ const route = (event) => {
 const locationHandler = async () => {
 	// Get the path part of URL (eg. https://example.com/friends/profile returns /friends/profile)
 	const location = window.location.pathname;
+	
+
+	/////force the reload here 
+	
+	
+	
 	// Redirect https://example.com to https://example.com/ in order to land on home page
 	if (location.length == 0)
-		location = "/";
+	location = "/";
 	// Check the routes (the views above) for a match, if no match: 404
 	const route = routes[location] || routes[404];
 	// Make a network request to the URL specified route.view
-		// .then() is used to handle the Promise returned by fetch. It waits for the fetch to to complete and processes the response
-		// (response) => response.text() takes the response object returned by fetch and converts its body to text
-		// await waits for the entire .then() chain to resolve
+	// .then() is used to handle the Promise returned by fetch. It waits for the fetch to to complete and processes the response
+	// (response) => response.text() takes the response object returned by fetch and converts its body to text
+	// await waits for the entire .then() chain to resolve
 	const html = await fetch(route.view).then((response) => response.text());
 	// Update the main content element with the content of the retrieved html
 	document.getElementById("content").innerHTML = html;
 	document.title = route.title;
 	document.querySelector('meta[name="description"]').setAttribute("content", route.description);
-
+	// if (routes == "/test") {
+		console.log("called");
+		test();
+		//window.location.reload();
+	// }
 	updateEventListeners();
 }
 
