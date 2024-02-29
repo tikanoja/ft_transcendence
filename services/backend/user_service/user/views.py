@@ -5,7 +5,7 @@ import logging
 from django.http import HttpResponse
 from django.http import HttpRequest
 import json
-from user.models import User
+from django.contrib.auth import get_user_model
 
 logger = logging.getLogger(__name__)
 
@@ -58,14 +58,17 @@ def get_number(request):
 def register_user(request):
 	if request.method == 'POST':
 		logger.debug('In register user')
-		data = json.loads(request.body)
+		data = json.loads(request.body)	
 		logger.debug(data)
-		new_user = User(username=data["username"], firstname=data["firstname"], lastname=data["lastname"], email=data["email"], password=data["password"])
+		new_user = get_user_model()
+		new_user.objects.create_user(username=data['username'], email=data['email'], password=data['password'])
+		
 		logger.debug(new_user.username)
-		logger.debug(new_user.firstname)
-		logger.debug(new_user.lastname)
+		logger.debug(new_user.first_name)
+		logger.debug(new_user.last_name)
 		logger.debug(new_user.email)
 		logger.debug(new_user.password)
+		new_user.save()
 
 	response = HttpResponse("Congrats you registered!")
 	add_cors_headers(response) #dose this work with http res?
