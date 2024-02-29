@@ -71,9 +71,6 @@ const locationHandler = async () => {
 	const location = window.location.pathname;
 	
 
-	/////force the reload here 
-	
-	
 	
 	// Redirect https://example.com to https://example.com/ in order to land on home page
 	if (location.length == 0)
