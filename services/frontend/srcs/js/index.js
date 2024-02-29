@@ -157,6 +157,7 @@ function userConnectButtonClickHandler() {
 function registerButtonClickHandler(event) {
     event.preventDefault();
     console.log("we in!");
+    // event.returnValue = false;
 
     var registrationData = {};
     registrationData["username"] = document.getElementById('username').value;
@@ -165,9 +166,19 @@ function registerButtonClickHandler(event) {
     registrationData["lastname"] = document.getElementById('lastname').value;
     registrationData["password"] = document.getElementById('password').value;
     registrationData["confirm_password"] = document.getElementById('confirm_password').value;
-
-    var endpoint = 'http://localhost:8001/user/register_user/';
-    sendRequest(endpoint, registrationData, (response) => {
-        console.log('Received response:', response);
-    });
+    for (var prop in registrationData) {
+        if (registrationData[prop] === "") {
+            console.log("something was empty!")
+            event.returnValue = false;
+        }
+    }
+    // if (check_same_input_registration_passwords() === false) {
+    //     event.returnValue = false;
+    // }
+    // if (event.returnValue != false) {
+        var endpoint = 'http://localhost:8001/user/register_user/';
+        sendRequest(endpoint, registrationData, (response) => {
+            console.log('Received response:', response);
+        });
+    // }
 }

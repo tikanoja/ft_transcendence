@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.http import HttpRequest
 import json
 from user.models import User
+from user.input_validation import validate_registration_input
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +61,11 @@ def register_user(request):
 		logger.debug('In register user')
 		data = json.loads(request.body)
 		logger.debug(data)
+		# call for validation
+		validate_registration_input()
+		# return failure if poorly formatted - maybe reload reg page and add message on top that user creation failed due to xyz: username taken, weak pw, etc
+		# pass validated user for database entry
+
 		new_user = User(username=data["username"], firstname=data["firstname"], lastname=data["lastname"], email=data["email"], password=data["password"])
 		logger.debug(new_user.username)
 		logger.debug(new_user.firstname)
@@ -68,5 +74,5 @@ def register_user(request):
 		logger.debug(new_user.password)
 
 	response = HttpResponse("Congrats you registered!")
-	add_cors_headers(response) #dose this work with http res?
+	add_cors_headers(response) #does this work with http res?
 	return response
