@@ -7,6 +7,9 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.m
 //TODO: A better looking start screen the also shows user name, and opponent name
 //TODO: center line for court look
 //TODO: visable scoreboard with API calls
+//TODO: Make lighting better
+//TODO: boundrys working, potentially a canva boarder
+
 
 
 let is3DGraphics = false; // Default to 3D graphics
@@ -16,11 +19,15 @@ export const startScreen = () => {
     const playButton = document.getElementById('playButton');
     const canvasContainer = document.getElementById('canvasContainer');
     const styleCheckbox = document.getElementById('styleCheckbox');
+    const scoreboard = document.getElementById('styleCheckbox');
     
     playButton.addEventListener('click', () => {
+        
         startScreen.style.display = 'none'; // Hide the start screen
         canvasContainer.style.display = 'block'; // Show the game canvas
-        test(is3DGraphics); // Start the game with selected graphics option
+        scoreboard.style.display = 'block';
+     
+        renderPongGame(is3DGraphics); // Start the game with selected graphics option
     });
 
     styleCheckbox.addEventListener('change', (event) => {
@@ -29,7 +36,7 @@ export const startScreen = () => {
     });
 };
 
-export const test = (is3DGraphics) => {
+export const renderPongGame = (is3DGraphics) => {
     
     function addLighting(scene) {
         let color = 0xFFFFFF;
@@ -43,6 +50,15 @@ export const test = (is3DGraphics) => {
         scene.add(amb_light);
     }
 
+    var p1_score = 0;
+    var p2_score = 0;
+
+    // <div id=”scoreboard”>Player 1:  &emsp; Player 2: 0</div>
+    // sendRequest('pong/get_number/', function (response) {
+    //     console.log('Current number:', response.number);
+    // })
+    document.getElementById("scoreboard").innerHTML = "Player 1: " + p1_score + " &emsp; SCORE: " + p2_score; 
+    
     let keyDown = false;
 
     const scene = new THREE.Scene();
@@ -81,8 +97,6 @@ export const test = (is3DGraphics) => {
     scene.add(p1_paddle);
     scene.add(p2_paddle);
     scene.add(ball);
-
-
     // Set the positions of the paddles
     p1_paddle.position.set(-100,  0, 0);
     p2_paddle.position.set(100, 0, 0);
@@ -91,6 +105,7 @@ export const test = (is3DGraphics) => {
     var clock = new THREE.Clock();
     var time = 0;
     var delta = 0;
+
 
     camera.position.z = 200;
 
