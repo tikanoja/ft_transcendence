@@ -4,7 +4,7 @@
 
 const pageTitle = "Pong";
 
-import {test} from "./main.js"
+import {startScreen, test} from "./main.js"
 
 
 // Listens to clicks on the entire document
@@ -91,7 +91,8 @@ const locationHandler = async () => {
 	document.querySelector('meta[name="description"]').setAttribute("content", route.description);
 	// if (routes == "/test") {
 		console.log("called");
-		test();
+		startScreen();
+		// test();
 		//window.location.reload();
 	// }
 	updateEventListeners();
