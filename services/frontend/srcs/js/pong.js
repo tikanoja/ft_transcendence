@@ -1,7 +1,7 @@
 // Import required modules
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.module.js';
 
-
+// import { increaseButtonClickHandler, decreaseButtonClickHandler } from './buttonHandlers.js';
 //TODO: seperate into 2 scene creation functions that allow for the 2d scene to render with different lights and cameras.
 //TODO:the size of paddles, ball and their positioning MUST BE DYNAMIC!
 //TODO: A better looking start screen the also shows user name, and opponent name
@@ -19,14 +19,13 @@ export const startScreen = () => {
     const playButton = document.getElementById('playButton');
     const canvasContainer = document.getElementById('canvasContainer');
     const styleCheckbox = document.getElementById('styleCheckbox');
-    const scoreboard = document.getElementById('styleCheckbox');
+
+
     
     playButton.addEventListener('click', () => {
         
         startScreen.style.display = 'none'; // Hide the start screen
         canvasContainer.style.display = 'block'; // Show the game canvas
-        scoreboard.style.display = 'block';
-     
         renderPongGame(is3DGraphics); // Start the game with selected graphics option
     });
 
@@ -57,7 +56,6 @@ export const renderPongGame = (is3DGraphics) => {
     // sendRequest('pong/get_number/', function (response) {
     //     console.log('Current number:', response.number);
     // })
-    document.getElementById("scoreboard").innerHTML = "Player 1: " + p1_score + " &emsp; SCORE: " + p2_score; 
     
     let keyDown = false;
 
@@ -66,8 +64,9 @@ export const renderPongGame = (is3DGraphics) => {
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
-    const directionalLight = addLighting(scene);
-
+    const directionalLight = addLighting(scene); //
+   
+    
     function create2DPaddle(color) {
         const geometry = new THREE.BoxGeometry(5, 20, 1);
         const material = new THREE.MeshStandardMaterial({ color });
@@ -112,6 +111,7 @@ export const renderPongGame = (is3DGraphics) => {
 ;
 
     function animate() {
+
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
     }
@@ -124,9 +124,11 @@ export const renderPongGame = (is3DGraphics) => {
             const moveP1 = () => {
                 switch (event.key) {
                     case 'ArrowUp':
+                        increaseButtonClickHandler();
                         p1_paddle.position.y += speed; // Move up
                         break;
                     case 'ArrowDown':
+                        decreaseButtonClickHandler();
                         p1_paddle.position.y -= speed; // Move down
                         break;
                 }
@@ -134,9 +136,11 @@ export const renderPongGame = (is3DGraphics) => {
             const moveP2 = () => {
                 switch (event.key) {
                     case 'w':
+                        increaseButtonClickHandler();
                         p2_paddle.position.y += speed; // Move up
                         break;
-                    case 's':
+                        case 's':
+                        decreaseButtonClickHandler();
                         p2_paddle.position.y -= speed; // Move down
                         break;
                 }
