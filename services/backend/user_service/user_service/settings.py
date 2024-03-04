@@ -16,7 +16,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -29,8 +28,6 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 # Application definition
-# Add psycopg2 once implemented PostgreSQL
-# psycopg2-binary==2.9.9 add this to requirements.txt
 INSTALLED_APPS = [
     'channels',
     'user',
@@ -74,25 +71,15 @@ TEMPLATES = [
 
 #add!
 ASGI_APPLICATION = 'user_service.asgi.application'
-# Wwwwhat???
 WSGI_APPLICATION = 'user_service.wsgi.application'
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
     }
 }
-
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-# OG bd config
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 
 DATABASES = {
     'default': {
@@ -106,7 +93,7 @@ DATABASES = {
 }
 
 # Add custom model for auth user
-AUTH_USER_MODEL = 'user.NewUser'
+AUTH_USER_MODEL = 'user.CustomUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

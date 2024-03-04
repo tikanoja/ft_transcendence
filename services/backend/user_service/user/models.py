@@ -8,7 +8,7 @@ class CustomUserManager(BaseUserManager):
 		if not email:
 			raise ValueError('The email field must be set.')
 		email = self.normalize_email(email)
-		user = self.model(email=email, **extra_fields)
+		user = self.model(email=email, username=username, **extra_fields)
 		if password:
 			user.set_password(password)
 		else:
@@ -17,7 +17,7 @@ class CustomUserManager(BaseUserManager):
 		return user
 
 # Create your models here.
-class NewUser(AbstractBaseUser):
+class CustomUser(AbstractBaseUser):
 	username = models.CharField(max_length = 254, unique=True)
 	first_name = models.CharField(max_length = 254, null=True)
 	last_name = models.CharField(max_length = 254, null=True)

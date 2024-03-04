@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.http import HttpRequest
 import json
 from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, login
 
 logger = logging.getLogger(__name__)
 
@@ -62,14 +63,29 @@ def register_user(request):
 		logger.debug(data)
 		new_user = get_user_model()
 		new_user.objects.create_user(username=data['username'], email=data['email'], password=data['password'])
-		
-		logger.debug(new_user.username)
-		logger.debug(new_user.first_name)
-		logger.debug(new_user.last_name)
-		logger.debug(new_user.email)
-		logger.debug(new_user.password)
-		new_user.save()
 
 	response = HttpResponse("Congrats you registered!")
+	add_cors_headers(response) #dose this work with http res?
+	return response
+
+@csrf_exempt
+def login_user(request):
+	if request.method == 'POST':
+		logger.debug('In login user')
+		data = json.loads(request.body)
+		logger.debug(data)
+		username = data['username']
+		password = data['password']
+		user = authenticate(request, username=username, password=password)
+		if user is not None:
+			login(request, user)
+			# store users id in session
+			request.session['user_id'] = user.id
+			response = HttpResponse("oh my god it actually worked!!!")
+		else:
+			response = HttpResponse("bad credentials. register or try again")
+	else:
+		# render login form here !!! :)
+		response = HttpResponse("this is a login form believe it or not")
 	add_cors_headers(response) #dose this work with http res?
 	return response
