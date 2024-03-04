@@ -16,6 +16,27 @@ body {
     box-sizing: border-box;
 }
 
+
+#startScreen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100; /* Ensure the start screen appears above the graphics */
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Add a shadow for depth */
+}
+
+#canvasContainer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: none; 
+}
+
+
 .sidebar {
     width: 200px;
     /* Fill entire viewport height */

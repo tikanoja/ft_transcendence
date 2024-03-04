@@ -42,7 +42,8 @@ def decrease_number(request):
 		add_cors_headers(response)
 		return response
 
-@csrf_exempt
+# this is the placeholder now for scores
+@csrf_exempt 
 def get_number(request):
 	logger.debug('In get num')
 	global current_number

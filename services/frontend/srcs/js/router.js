@@ -4,7 +4,7 @@
 
 const pageTitle = "Pong";
 
-import {test} from "./main.js"
+import {startScreen} from "./pong.js"
 
 
 // Listens to clicks on the entire document
@@ -86,9 +86,11 @@ const locationHandler = async () => {
 	document.getElementById("content").innerHTML = html;
 	document.title = route.title;
 	document.querySelector('meta[name="description"]').setAttribute("content", route.description);
-	// if (routes == "/test") {
-		console.log("called");
-		test();
+	
+	
+	// TODO: create a loader function
+		startScreen();
+		// test();
 		//window.location.reload();
 	// }
 	updateEventListeners();
