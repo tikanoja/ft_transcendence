@@ -120,11 +120,27 @@ function decreaseButtonClickHandler() {
     });
 }
 
-function retrieveButtonClickHandler() {
-    sendRequest('pong/get_number/', function (response) {
-        console.log('Current number:', response.number);
+//now a placeholder "get score"
+const retrieveButtonClickHandler = () => {
+    return new Promise((resolve, reject) => {
+        sendRequest('pong/get_number/', function(response) {
+            console.log('Raw response:', response); // Log the raw response
+            try {
+                
+                const p1Score = response.p1Score;
+                const p2Score = response.p2Score;
+                console.log('Player 1 score:', p1Score);
+                console.log('Player 2 score:', p2Score);
+                resolve({ p1Score, p2Score });
+            } catch (error) {
+                console.error('Error parsing JSON:', error);
+                reject(error);
+            }
+        });
     });
-}
+};
+
+
 
 function connectButtonClickHandler() {
     const socket = new WebSocket('wss://localhost/ws/pong/');

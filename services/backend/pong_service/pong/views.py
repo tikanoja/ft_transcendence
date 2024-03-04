@@ -5,7 +5,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-current_number = 50  # Initial number
+p1Score = 50  # Initial number
+p2Score = 50
 
 def add_cors_headers(response):
 	response["Access-Control-Allow-Origin"] = "https://localhost"
@@ -15,11 +16,11 @@ def add_cors_headers(response):
 @csrf_exempt
 def increase_number(request):
 	logger.debug('In increase num')
-	global current_number
+	global p1Score
 	if request.method == 'POST':
-		if (current_number < 100):
-			current_number += 1
-		response = JsonResponse({'result': 'success', 'number': current_number})
+		if (p1Score < 100):
+			p1Score += 1
+		response = JsonResponse({'result': 'success', 'number': p1Score})
 		add_cors_headers(response)
 		return response
 	else:
@@ -30,11 +31,11 @@ def increase_number(request):
 @csrf_exempt
 def decrease_number(request):
 	logger.debug('In decrease num')
-	global current_number
+	global p1Score
 	if request.method == 'POST':
-		if (current_number > 0):
-			current_number -= 1
-		response = JsonResponse({'result': 'success', 'number': current_number})
+		if (p1Score > 0):
+			p1Score -= 1
+		response = JsonResponse({'result': 'success', 'number': p1Score})
 		add_cors_headers(response)
 		return response
 	else:
@@ -46,7 +47,8 @@ def decrease_number(request):
 @csrf_exempt 
 def get_number(request):
 	logger.debug('In get num')
-	global current_number
-	response = JsonResponse({'result': 'success', 'number': current_number})
+	global p1Score
+	global p2Score
+	response = JsonResponse({'result': 'success', 'p1Score': p1Score, 'p2Score': p2Score})
 	add_cors_headers(response)
 	return response
