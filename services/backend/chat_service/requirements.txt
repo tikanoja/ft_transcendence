@@ -1,0 +1,4 @@
+Django==4.2.9
+channels==4.0.0
+daphne==4.0.0
+Twisted[tls,http2]
