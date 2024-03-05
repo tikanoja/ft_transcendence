@@ -24,6 +24,7 @@ function sendRequest(endpoint, data, callback) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', endpoint, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.withCredentials = true;
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
@@ -34,7 +35,10 @@ function sendRequest(endpoint, data, callback) {
             }
         }
     };
-    xhr.send(JSON.stringify(data));
+    if (data)
+        xhr.send(JSON.stringify(data));
+    else
+        xhr.send();
 }
 
 function updateEventListeners() {
@@ -47,6 +51,8 @@ function updateEventListeners() {
     var userRetrieveButton = document.getElementById('user-retrieveButton');
     var registerButton = document.getElementById('registerButton');
     var loginButton = document.getElementById('loginButton');
+    var usernameButton = document.getElementById('getUsernameButton');
+    var logoutButton = document.getElementById('logoutButton');
 
     // Remove existing event listeners if any
     if (increaseButton) {
@@ -72,6 +78,12 @@ function updateEventListeners() {
     }
     if (loginButton) {
         loginButton.removeEventListener('click', loginButtonClickHandler);
+    }
+    if (usernameButton) {
+        usernameButton.removeEventListener('click', usernameButtonClickHandler);
+    }
+    if (logoutButton) {
+        logoutButton.removeEventListener('click', logoutButtonClickHandler);
     }
 
     // Attach event listeners only if the buttons exist
@@ -99,6 +111,13 @@ function updateEventListeners() {
     if (loginButton) {
         loginButton.addEventListener('click', loginButtonClickHandler);
     }
+    if (usernameButton) {
+        usernameButton.addEventListener('click', usernameButtonClickHandler);
+    }
+    if (logoutButton) {
+        logoutButton.addEventListener('click', logoutButtonClickHandler);
+    }
+
 }
 
 // Define separate click handlers for each button
@@ -189,6 +208,26 @@ function loginButtonClickHandler(event) {
 
     var endpoint = 'http://localhost:8001/user/login_user/';
     sendRequest(endpoint, loginData, (response) => {
+        console.log('Received response:', response);
+    });
+}
+
+function usernameButtonClickHandler(event) {
+    event.preventDefault();
+    console.log("requesting username!");
+
+    var endpoint = 'http://localhost:8001/user/get_current_username/'
+    sendRequest(endpoint, null, (response) => {
+        console.log('Received response:', response);
+    });
+}
+
+function logoutButtonClickHandler(event) {
+    event.preventDefault();
+    console.log("requesting logout!");
+
+    var endpoint = 'http://localhost:8001/user/logout_user';
+    sendRequest(endpoint, null, (response) => {
         console.log('Received response:', response);
     });
 }

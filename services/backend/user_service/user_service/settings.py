@@ -74,6 +74,8 @@ ASGI_APPLICATION = 'user_service.asgi.application'
 WSGI_APPLICATION = 'user_service.wsgi.application'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_SAMESITE = 'None' #Remove this for CORS
+SESSION_COOKIE_SECURE = True
 
 CHANNEL_LAYERS = {
     "default": {
