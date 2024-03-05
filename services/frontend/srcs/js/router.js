@@ -5,6 +5,36 @@
 const pageTitle = "Pong";
 
 import {startScreen} from "./pong.js"
+import {friendsManager} from "./friends.js"
+import {settingsCreation} from "./settings.js"
+
+
+const loaders = [
+	{ path: "/test", function: startScreen},
+	{ path: "/friends", function: friendsManager},
+	{ path: "/settings", function: settingsCreation},
+]
+
+const load = (path) => {
+	const match = loaders.find(l => {
+		if (l.path.includes("*")) {
+			const basePath = l.path.replace("*", "");
+			const pathSplit = path.split("/");
+			const basePathSplit = basePath.split("/");
+			if (path.startsWith(basePath) && pathSplit.length === basePathSplit.length)
+				return true;
+			else
+				return false;
+		} else {
+			return l.path === path;
+		}
+	});
+	if (match)
+		match.function();
+	else
+		console.error("No matching loader found for path:", path);
+}
+
 
 
 // Listens to clicks on the entire document
@@ -89,7 +119,8 @@ const locationHandler = async () => {
 	
 	
 	// TODO: create a loader function
-		startScreen();
+	load(window.location.pathname)
+	//startScreen();
 		// test();
 		//window.location.reload();
 	// }
