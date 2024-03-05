@@ -19,14 +19,12 @@ export const startScreen = () => {
     const playButton = document.getElementById('playButton');
     const canvasContainer = document.getElementById('canvasContainer');
     const styleCheckbox = document.getElementById('styleCheckbox');
-
-
     
     playButton.addEventListener('click', () => {
         
         startScreen.style.display = 'none'; // Hide the start screen
-        canvasContainer.style.display = 'block'; // Show the game canvas
-        renderPongGame(is3DGraphics); // Start the game with selected graphics option
+        canvasContainer.style.display = 'block';
+        renderPongGame(is3DGraphics); 
     });
 
     styleCheckbox.addEventListener('change', (event) => {
@@ -34,6 +32,53 @@ export const startScreen = () => {
         is3DGraphics = event.target.checked; 
     });
 };
+
+// Modify the updateScoreboard function to call retrieveButtonClickHandler
+export const updateScoreboard = () => {
+    retrieveButtonClickHandler().then(data => {
+        const p1ScoreElement = document.getElementById('score-left');
+        const p2ScoreElement = document.getElementById('score-right');
+        p1ScoreElement.textContent = `Player 1: ${data.p1Score}`;
+        p2ScoreElement.textContent = `Player 2: ${data.p2Score}`;
+    }).catch(error => {
+        console.error('Error updating scoreboard:', error);
+    });
+};
+
+// // Function to handle fetching scoreboard data from the API
+// function retrieveButtonClickHandler() {
+//     fetch('pong/get_number/') // Assuming this is the correct API endpoint
+//     .then(data => {
+//         // Update the scoreboard numbers on the webpage with the parsed data
+//         const p1ScoreElement = document.getElementById('score-left'); // Assuming you have elements with IDs for displaying scores
+//         const p2ScoreElement = document.getElementById('score-right');
+//         p1ScoreElement.textContent = `Player 1: ${data.p1Score}`; // Assuming the API response contains data for player 1's score
+//         p2ScoreElement.textContent = `Player 2: ${data.p2Score}`; // Assuming the API response contains data for player 2's score
+//     })
+//     .catch(error => {
+//         console.error('Error fetching scoreboard data:', error);
+//     });
+// }
+
+
+
+
+window.addEventListener('resize', function() {
+    var canvasContainer = document.getElementById('canvasContainer');
+    var scoreboard = document.getElementById('scoreboard');
+    
+    var canvasWidth = canvasContainer.offsetWidth;
+    var scoreboardWidth = scoreboard.offsetWidth;
+    
+    if (canvasWidth < scoreboardWidth) {
+        scoreboard.style.flexDirection = 'column'; // Stack elements vertically
+        scoreboard.style.alignItems = 'center'; // Center elements vertically
+    } else {
+        scoreboard.style.flexDirection = 'row'; // Reset to default row layout
+        scoreboard.style.alignItems = 'initial'; // Reset alignment
+    }
+});
+
 
 export const renderPongGame = (is3DGraphics) => {
     
@@ -49,20 +94,12 @@ export const renderPongGame = (is3DGraphics) => {
         scene.add(amb_light);
     }
 
-    var p1_score = 0;
-    var p2_score = 0;
-
-    // <div id=”scoreboard”>Player 1:  &emsp; Player 2: 0</div>
-    // sendRequest('pong/get_number/', function (response) {
-    //     console.log('Current number:', response.number);
-    // })
-    
-    let keyDown = false;
+   let keyDown = false;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight);
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
     const directionalLight = addLighting(scene); //
    
@@ -113,6 +150,7 @@ export const renderPongGame = (is3DGraphics) => {
     function animate() {
 
         requestAnimationFrame(animate);
+        // updateScoreboard();
         renderer.render(scene, camera);
     }
 
