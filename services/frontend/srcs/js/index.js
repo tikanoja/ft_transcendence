@@ -46,6 +46,7 @@ function updateEventListeners() {
     var userConnectButton = document.getElementById('user-connectButton');
     var userRetrieveButton = document.getElementById('user-retrieveButton');
     var registerButton = document.getElementById('registerButton');
+    var loginButton = document.getElementById('loginButton');
 
     // Remove existing event listeners if any
     if (increaseButton) {
@@ -69,6 +70,9 @@ function updateEventListeners() {
     if (registerButton) {
         registerButton.removeEventListener('click', registerButtonClickHandler);
     }
+    if (loginButton) {
+        loginButton.removeEventListener('click', loginButtonClickHandler);
+    }
 
     // Attach event listeners only if the buttons exist
     if (increaseButton) {
@@ -91,6 +95,9 @@ function updateEventListeners() {
     }
     if (registerButton) {
         registerButton.addEventListener('click', registerButtonClickHandler);
+    }
+    if (loginButton) {
+        loginButton.addEventListener('click', loginButtonClickHandler);
     }
 }
 
@@ -156,8 +163,7 @@ function userConnectButtonClickHandler() {
 
 function registerButtonClickHandler(event) {
     event.preventDefault();
-    console.log("we in!");
-    // event.returnValue = false;
+    console.log("sending registration!");
 
     var registrationData = {};
     registrationData["username"] = document.getElementById('username').value;
@@ -166,19 +172,23 @@ function registerButtonClickHandler(event) {
     registrationData["lastname"] = document.getElementById('lastname').value;
     registrationData["password"] = document.getElementById('password').value;
     registrationData["confirm_password"] = document.getElementById('confirm_password').value;
-    for (var prop in registrationData) {
-        if (registrationData[prop] === "") {
-            console.log("something was empty!")
-            event.returnValue = false;
-        }
-    }
-    // if (check_same_input_registration_passwords() === false) {
-    //     event.returnValue = false;
-    // }
-    // if (event.returnValue != false) {
-        var endpoint = 'http://localhost:8001/user/register_user/';
-        sendRequest(endpoint, registrationData, (response) => {
-            console.log('Received response:', response);
-        });
-    // }
+    
+    var endpoint = 'http://localhost:8001/user/register_user/';
+    sendRequest(endpoint, registrationData, (response) => {
+        console.log('Received response:', response);
+    });
+}
+
+function loginButtonClickHandler(event) {
+    event.preventDefault();
+    console.log("sending loqin request!");
+
+    var loginData = {};
+    loginData["username"] = document.getElementById('usernameLogin').value;
+    loginData["password"] = document.getElementById('passwordLogin').value;
+
+    var endpoint = 'http://localhost:8001/user/login_user/';
+    sendRequest(endpoint, loginData, (response) => {
+        console.log('Received response:', response);
+    });
 }

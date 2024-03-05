@@ -27,7 +27,7 @@ EXPOSE 8000
 RUN chmod +x entrypoint.sh
 
 # Having this enabled causes an error... Uncomment and check 'docker logs database_c'
-# ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
 
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 

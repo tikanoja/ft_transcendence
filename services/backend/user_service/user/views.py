@@ -7,6 +7,9 @@ from django.http import HttpRequest
 import json
 from user.models import User
 from user.input_validation import validate_registration_input
+from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, login
+
 
 logger = logging.getLogger(__name__)
 
@@ -59,9 +62,10 @@ def get_number(request):
 def register_user(request):
 	if request.method == 'POST':
 		logger.debug('In register user')
-		data = json.loads(request.body)
+		data = json.loads(request.body)	
 		logger.debug(data)
 		# call for validation
+
 		validate_registration_input()
 		# return failure if poorly formatted - maybe reload reg page and add message on top that user creation failed due to xyz: username taken, weak pw, etc
 		# pass validated user for database entry
@@ -72,7 +76,55 @@ def register_user(request):
 		logger.debug(new_user.lastname)
 		logger.debug(new_user.email)
 		logger.debug(new_user.password)
+		
+		new_user = get_user_model()
+		new_user.objects.create_user(username=data['username'], email=data['email'], password=data['password'])
 
 	response = HttpResponse("Congrats you registered!")
 	add_cors_headers(response) #does this work with http res?
+	return response
+
+@csrf_exempt
+def login_user(request):
+	if request.method == 'POST':
+		
+		logger.debug('In login user')
+		data = json.loads(request.body)
+		logger.debug(data)
+		username = data['username']
+		password = data['password']
+		user = authenticate(request, username=username, password=password)
+		if user is not None:
+			login(request, user)
+			# store users id in session
+			request.session['user_id'] = user.id
+			response = HttpResponse("oh my god it actually worked!!!")
+		else:
+			response = HttpResponse("bad credentials. register or try again")
+	else:
+		# render login form here !!! :)
+		response = HttpResponse("this is a login form believe it or not")
+	add_cors_headers(response) #dose this work with http res?
+	return response
+
+@csrf_exempt
+def login_user(request):
+	if request.method == 'POST':
+		logger.debug('In login user')
+		data = json.loads(request.body)
+		logger.debug(data)
+		username = data['username']
+		password = data['password']
+		user = authenticate(request, username=username, password=password)
+		if user is not None:
+			login(request, user)
+			# store users id in session
+			request.session['user_id'] = user.id
+			response = HttpResponse("oh my god it actually worked!!!")
+		else:
+			response = HttpResponse("bad credentials. register or try again")
+	else:
+		# render login form here !!! :)
+		response = HttpResponse("this is a login form believe it or not")
+	add_cors_headers(response) #dose this work with http res?
 	return response
