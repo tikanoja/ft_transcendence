@@ -120,7 +120,7 @@ function decreaseButtonClickHandler() {
     });
 }
 
-//now a placeholder "get score"
+//now a placeholder "get score" THIS MIGHT BE THE ISSUE
 const retrieveButtonClickHandler = () => {
     return new Promise((resolve, reject) => {
         sendRequest('pong/get_number/', function(response) {
@@ -129,9 +129,7 @@ const retrieveButtonClickHandler = () => {
                 
                 const p1Score = response.p1Score;
                 const p2Score = response.p2Score;
-                console.log('Player 1 score:', p1Score);
-                console.log('Player 2 score:', p2Score);
-                resolve({ p1Score, p2Score });
+                resolve({p1Score, p2Score});
             } catch (error) {
                 console.error('Error parsing JSON:', error);
                 reject(error);

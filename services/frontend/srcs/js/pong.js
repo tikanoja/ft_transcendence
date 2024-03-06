@@ -28,38 +28,23 @@ export const startScreen = () => {
     });
 
     styleCheckbox.addEventListener('change', (event) => {
-        console.log("changed    ", is3DGraphics);
         is3DGraphics = event.target.checked; 
     });
 };
 
-// Modify the updateScoreboard function to call retrieveButtonClickHandler
 export const updateScoreboard = () => {
-    retrieveButtonClickHandler().then(data => {
-        const p1ScoreElement = document.getElementById('score-left');
-        const p2ScoreElement = document.getElementById('score-right');
-        p1ScoreElement.textContent = `Player 1: ${data.p1Score}`;
-        p2ScoreElement.textContent = `Player 2: ${data.p2Score}`;
-    }).catch(error => {
-        console.error('Error updating scoreboard:', error);
+    // Call updateScoreboard on the next frame
+    requestAnimationFrame(() => {
+        retrieveButtonClickHandler().then(data => {
+            console.log("FROM PONG>JS:  ", data); // Log the data returned by retrieveButtonClickHandler
+        }).catch(error => {
+            console.error('Error updating scoreboard:', error);
+        }).finally(() => {
+            // Call updateScoreboard again on the next frame
+            requestAnimationFrame(updateScoreboard);
+        });
     });
 };
-
-// // Function to handle fetching scoreboard data from the API
-// function retrieveButtonClickHandler() {
-//     fetch('pong/get_number/') // Assuming this is the correct API endpoint
-//     .then(data => {
-//         // Update the scoreboard numbers on the webpage with the parsed data
-//         const p1ScoreElement = document.getElementById('score-left'); // Assuming you have elements with IDs for displaying scores
-//         const p2ScoreElement = document.getElementById('score-right');
-//         p1ScoreElement.textContent = `Player 1: ${data.p1Score}`; // Assuming the API response contains data for player 1's score
-//         p2ScoreElement.textContent = `Player 2: ${data.p2Score}`; // Assuming the API response contains data for player 2's score
-//     })
-//     .catch(error => {
-//         console.error('Error fetching scoreboard data:', error);
-//     });
-// }
-
 
 
 
@@ -150,7 +135,7 @@ export const renderPongGame = (is3DGraphics) => {
     function animate() {
 
         requestAnimationFrame(animate);
-        // updateScoreboard();
+        updateScoreboard();
         renderer.render(scene, camera);
     }
 
