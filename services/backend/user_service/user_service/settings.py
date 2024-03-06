@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-*9#ubcwnam1fwt8y$$*l3)+u-cpsh+ms)w%pglfthdiwgza*8u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'http://localhost', 'https://localhost']
 
 # Application definition
 INSTALLED_APPS = [
@@ -46,6 +46,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'user_service.cors_middleware.CorsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -76,6 +77,8 @@ WSGI_APPLICATION = 'user_service.wsgi.application'
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_SAMESITE = 'None' #Remove this for CORS
 SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None' # Might have to be removed once we have templates
+CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_AGE = 2520 # 42 min * 60 sec
 
 CHANNEL_LAYERS = {

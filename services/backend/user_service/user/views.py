@@ -12,10 +12,11 @@ logger = logging.getLogger(__name__)
 
 current_number = 42  # Initial number
 
+# Added cors_middleware.py to do this automatically for all requests. Referencced in setting.py MIDDLEWARE
 def add_cors_headers(response):
 	response["Access-Control-Allow-Origin"] = "https://localhost"
 	response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS, DELETE, PUT"
-	response["Access-Control-Allow-Headers"] = "Content-Type"
+	response["Access-Control-Allow-Headers"] = "Content-Type, Accept, X-CSRFToken"
 	response["Access-Control-Allow-Credentials"] = "true"
 
 @csrf_exempt
@@ -26,11 +27,9 @@ def increase_number(request):
 		if (current_number < 100):
 			current_number += 1
 		response = JsonResponse({'result': 'success', 'number': current_number})
-		add_cors_headers(response)
 		return response
 	else:
 		response = JsonResponse({'result': 'error', 'message': 'Invalid request method'})
-		add_cors_headers(response)
 		return response
 
 @csrf_exempt
@@ -41,11 +40,9 @@ def decrease_number(request):
 		if (current_number > 0):
 			current_number -= 1
 		response = JsonResponse({'result': 'success', 'number': current_number})
-		add_cors_headers(response)
 		return response
 	else:
 		response = JsonResponse({'result': 'error', 'message': 'Invalid request method'})
-		add_cors_headers(response)
 		return response
 
 @csrf_exempt
@@ -53,7 +50,6 @@ def get_number(request):
 	logger.debug('In get num')
 	global current_number
 	response = JsonResponse({'result': 'success', 'number': current_number})
-	add_cors_headers(response)
 	return response
 
 @csrf_exempt
@@ -69,7 +65,6 @@ def register_user(request):
 			response = JsonResponse({'message': 'congrats you registered!'})	
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST"})
-	add_cors_headers(response) #dose this work with http res?
 	return response
 
 @csrf_exempt
@@ -81,7 +76,6 @@ def login_user(request):
 		password = data['password']
 		if request.user.is_authenticated:
 			response = JsonResponse({'error': "already logged in!"})
-			add_cors_headers(response)
 			return response
 		user = authenticate(request, username=username, password=password) #verifiy credentials, if match with db, returns user object
 		if user is not None:
@@ -92,12 +86,10 @@ def login_user(request):
 			response = JsonResponse({'error': "user not found"}, status=401)
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST"})
-	add_cors_headers(response)
 	return response
 
 @csrf_exempt
 def logout_user(request):
-	logger.debug('HERE!!!!!')
 	if request.method == 'POST':
 		logger.debug('In logout user')
 		if request.user.is_authenticated:
@@ -107,12 +99,13 @@ def logout_user(request):
 			response = JsonResponse({'error': "User is not logged in."}, status=401)
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST"})
-	add_cors_headers(response) #dose this work with http res?
 	return response
 
 @csrf_exempt
 def get_current_username(request):
 	logger.debug('In get_current_username()')
+	origin = request.headers.get("Origin")
+	logger.debug('The origin for the request was: ' + origin)
 	if request.method == 'POST':
 		if request.user.is_authenticated: #The responnse comes with the session ID var stored in the browser and django automatically figures out which user this ID belongs to
 			username = request.user.username
@@ -121,5 +114,4 @@ def get_current_username(request):
 	else:
 		username = 'only POST allowed'
 	response = JsonResponse({'message': username})
-	add_cors_headers(response)
 	return response

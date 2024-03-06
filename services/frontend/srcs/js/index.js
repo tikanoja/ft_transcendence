@@ -19,11 +19,29 @@ function setActive(link) {
 	link.classList.add('active');
 }
 
-//callback?
+// Once we are using templates, we should include a csrftoken in django. Then django will be very happy and there is no need for decorator.
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// callback?
 function sendRequest(endpoint, data, callback) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', endpoint, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
     xhr.withCredentials = true;
 
     xhr.onreadystatechange = function () {
