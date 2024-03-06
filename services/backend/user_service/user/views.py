@@ -61,11 +61,14 @@ def register_user(request):
 	if request.method == 'POST':
 		logger.debug('In register user')
 		data = json.loads(request.body)	
-		logger.debug(data)
 		new_user = get_user_model()
-		new_user.objects.create_user(username=data['username'], email=data['email'], password=data['password'])
-
-	response = JsonResponse({'message': 'congrats you registered!'})	
+		if new_user.objects.filter(username=data['username']).exists():
+			response = JsonResponse({'error': 'Username already exists.'}, status=400)
+		else:
+			new_user.objects.create_user(username=data['username'], email=data['email'], password=data['password'])
+			response = JsonResponse({'message': 'congrats you registered!'})	
+	else:
+		response = JsonResponse({'error': "method not allowed. please use POST"})
 	add_cors_headers(response) #dose this work with http res?
 	return response
 
@@ -74,29 +77,36 @@ def login_user(request):
 	if request.method == 'POST':
 		logger.debug('In login user')
 		data = json.loads(request.body)
-		logger.debug(data)
 		username = data['username']
 		password = data['password']
-		user = authenticate(request, username=username, password=password)
+		if request.user.is_authenticated:
+			response = JsonResponse({'error': "already logged in!"})
+			add_cors_headers(response)
+			return response
+		user = authenticate(request, username=username, password=password) #verifiy credentials, if match with db, returns user object
 		if user is not None:
-			login(request, user)
-			# store users id in session
-			request.session['user_id'] = user.id
-			response = JsonResponse({'message': "oh my god it actually worked!!!"})
+			login(request, user) #log user in, create new session, add sessionID cookie for the response
+			request.session['user_id'] = user.id #store user ID explicity to the request.session dictionary
+			response = JsonResponse({'success': "you just logged in"})
 		else:
-			response = JsonResponse({'error': "bad credentials. register or try again"}, status=401)
+			response = JsonResponse({'error': "user not found"}, status=401)
 	else:
-		# render login form here !!! :)
-		response = JsonResponse({'message': "this is a login form believe it or not"})
-	add_cors_headers(response) #dose this work with http res?
+		response = JsonResponse({'error': "method not allowed. please use POST"})
+	add_cors_headers(response)
 	return response
 
 @csrf_exempt
 def logout_user(request):
+	logger.debug('HERE!!!!!')
 	if request.method == 'POST':
-		logger.debug('In logout_user()')
-		logout(request, user)
-	response = JsonResponse({'message': "logged out!"})
+		logger.debug('In logout user')
+		if request.user.is_authenticated:
+			logout(request)
+			response = JsonResponse({'success': "Logged out!"})
+		else:
+			response = JsonResponse({'error': "User is not logged in."}, status=401)
+	else:
+		response = JsonResponse({'error': "method not allowed. please use POST"})
 	add_cors_headers(response) #dose this work with http res?
 	return response
 
@@ -107,9 +117,9 @@ def get_current_username(request):
 		if request.user.is_authenticated: #The responnse comes with the session ID var stored in the browser and django automatically figures out which user this ID belongs to
 			username = request.user.username
 		else:
-			username = 'you are not logged in'
+			username = 'unknown user'
 	else:
 		username = 'only POST allowed'
-	response = JsonResponse({'hello': username})
+	response = JsonResponse({'message': username})
 	add_cors_headers(response)
 	return response

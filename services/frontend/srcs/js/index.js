@@ -226,7 +226,7 @@ function logoutButtonClickHandler(event) {
     event.preventDefault();
     console.log("requesting logout!");
 
-    var endpoint = 'http://localhost:8001/user/logout_user';
+    var endpoint = 'http://localhost:8001/user/logout_user/';
     sendRequest(endpoint, null, (response) => {
         console.log('Received response:', response);
     });

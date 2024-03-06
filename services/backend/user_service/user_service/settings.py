@@ -76,6 +76,7 @@ WSGI_APPLICATION = 'user_service.wsgi.application'
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_SAMESITE = 'None' #Remove this for CORS
 SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_AGE = 2520 # 42 min * 60 sec
 
 CHANNEL_LAYERS = {
     "default": {
