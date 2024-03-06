@@ -72,9 +72,14 @@ def register_user(request):
 		data = request.POST
 		logger.debug(data)
 		# call for validation
-
-		# validate_registration_input()
-		# return failure if poorly formatted - maybe reload reg page and add message on top that user creation failed due to xyz: username taken, weak pw, etc
+		try:
+			validate_registration_input(data)
+		except ValueError as ve:
+			logger.debug(f"Error in registration form: {ve}")
+			form = RegistrationForm()
+			title = "Register as a new user"
+			# resend reg form with error msg included
+			return render(request, 'registration', {"form": form, "title": title, "error_msg": ve})
 		# pass validated user for database entry
 
 		new_user = CustomUser(username=data["username"], firstname=data["firstname"], lastname=data["lastname"], email=data["email"], password=data["password"])

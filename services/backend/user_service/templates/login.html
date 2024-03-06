@@ -1,0 +1,11 @@
+{% extends "form_base.html" with form_title=title %}
+{% block form %}
+<form action="/user/login_user" action="POST">
+	{% csrf_token %}
+	{% for field in form %}
+	<div class="form-group">
+	{{field}}
+	</div>
+	{% endfor%}
+</form>
+{% endblock %}

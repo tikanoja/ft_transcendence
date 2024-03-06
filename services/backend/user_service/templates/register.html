@@ -1,4 +1,7 @@
 {% extends "form_base.html" with form_title=title %}
+{% if error_msg %}
+<p style="color: red">{{error_msg}}</p>
+{% endif %}
 {% block form %}
 <form action="/user/register_user" action="POST">
 	{% csrf_token %}

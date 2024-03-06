@@ -7,3 +7,8 @@ class RegistrationForm(forms.Form):
 	email = forms.EmailField(label='Email', widget=forms.TextInput(attrs={'placeholder': 'Enter email'}), max_length=320, required=False)
 	password = forms.CharField(label="Password", widget=forms.PasswordInput)
 	confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
+
+
+class LoginForm(forms.Form):
+	username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
+	password = forms.CharField(label="Password", widget=forms.PasswordInput)
