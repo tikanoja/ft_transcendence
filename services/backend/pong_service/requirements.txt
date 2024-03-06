@@ -3,6 +3,6 @@ channels==4.0.0
 daphne==4.0.0
 Twisted[tls,http2]
 psycopg2-binary==2.9.9
-djangorestframework==3.12.5
-django-cors-headers==3.8.0
-
+djangorestframework
+environs
+django-cors-headers

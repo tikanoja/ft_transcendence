@@ -28,13 +28,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",
-    "https://localhost:8000",
-]
-
 # Application definition
 # Add psycopg2 once implemented PostgreSQL
 # psycopg2-binary==2.9.9 add this to requirements.txt
@@ -42,21 +35,15 @@ INSTALLED_APPS = [
     'channels',
     'pong',
     'daphne',
-    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'corsheaders',
 ]
-
-REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-    ],
-}
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -65,9 +52,15 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "https://localhost",  # Add other origins as needed
+]
+
 
 ROOT_URLCONF = 'pong_service.urls'
 

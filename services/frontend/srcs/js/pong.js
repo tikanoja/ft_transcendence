@@ -33,19 +33,15 @@ export const startScreen = () => {
 };
 
 export const updateScoreboard = () => {
-    // Call updateScoreboard on the next frame
-    requestAnimationFrame(() => {
-        retrieveButtonClickHandler().then(data => {
-            console.log("FROM PONG>JS:  ", data); // Log the data returned by retrieveButtonClickHandler
-        }).catch(error => {
-            console.error('Error updating scoreboard:', error);
-        }).finally(() => {
-            // Call updateScoreboard again on the next frame
-            requestAnimationFrame(updateScoreboard);
-        });
+    retrieveButtonClickHandler().then(response => {
+        const p1Score = response.p1Score;
+        const p2Score = response.p2Score;
+        document.querySelector('.score-left').textContent = `P1 SCORE: ${p1Score}`;
+        document.querySelector('.score-right').textContent = `P2 SCORE: ${p2Score}`;
+    }).catch(error => {
+        console.error('Error retrieving scoreboard:', error);
     });
 };
-
 
 
 window.addEventListener('resize', function() {

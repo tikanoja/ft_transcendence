@@ -21,21 +21,23 @@ function setActive(link) {
 
 function sendRequest(endpoint, callback) {
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost:8000/' + endpoint, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.open('GET', 'http://localhost:8000/' + endpoint, true);
 
     xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            var response = JSON.parse(xhr.responseText);
-            console.log(response);
-            if (callback) {
-                callback(response);
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                var response = xhr.responseText;
+                if (callback) {
+                    callback(response);
+                }
+            } else {
+                console.error('Error:', xhr.statusText);
             }
         }
     };
-
     xhr.send();
 }
+
 
 function updateEventListeners() {
     // Check if the buttons exist on the current view
@@ -100,8 +102,6 @@ document.addEventListener('keydown', function (event) {
     }
 );
 
-
-
 function testButtonClickHandler(){
     sendRequest('pong/increase_number/', function (response) {
         console.log("The thing works");
@@ -110,26 +110,29 @@ function testButtonClickHandler(){
 
 function increaseButtonClickHandler() {
     sendRequest('pong/increase_number/', function (response) {
-        console.log('Increased number:', response.number);
+        console.log(response);
     });
 }
 
 function decreaseButtonClickHandler() {
     sendRequest('pong/decrease_number/', function (response) {
-        console.log('Decreased number:', response.number);
+        console.log(response);
     });
-}
+};
 
 //now a placeholder "get score" THIS MIGHT BE THE ISSUE
 const retrieveButtonClickHandler = () => {
     return new Promise((resolve, reject) => {
         sendRequest('pong/get_number/', function(response) {
-            console.log('Raw response:', response); // Log the raw response
             try {
-                
-                const p1Score = response.p1Score;
-                const p2Score = response.p2Score;
-                resolve({p1Score, p2Score});
+                const responseData = JSON.parse(response);
+                if ('p1Score' in responseData && 'p2Score' in responseData) {
+                    const p1Score = responseData.p1Score;
+                    const p2Score = responseData.p2Score;
+                    resolve({ p1Score, p2Score });
+                } else {
+                    throw new Error('p1Score or p2Score not found in response');
+                }
             } catch (error) {
                 console.error('Error parsing JSON:', error);
                 reject(error);
@@ -137,6 +140,7 @@ const retrieveButtonClickHandler = () => {
         });
     });
 };
+
 
 
 
