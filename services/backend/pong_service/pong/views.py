@@ -9,10 +9,12 @@ logger = logging.getLogger(__name__)
 p1Score = 50  # Initial number
 p2Score = 50
 
-def add_cors_headers(response):
-    response["Access-Control-Allow-Origin"] = "https://localhost"
-    response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS, DELETE, PUT"
-    response["Access-Control-Allow-Headers"] = "Content-Type"
+p1_x_pos = 50
+
+# def add_cors_headers(response):
+#     response["Access-Control-Allow-Origin"] = "https://localhost"
+#     response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS, DELETE, PUT"
+#     response["Access-Control-Allow-Headers"] = "Content-Type"
 
 
 @api_view(['GET']) 
@@ -26,6 +28,24 @@ def increase_number(request):
 
     # Prepare the response
     response = {'successful increase'}                                                                
+    return Response(response)
+
+@api_view(['GET']) 
+def decrease_number(request):
+    global p1Score
+    global p2Score
+    p1Score -= 1
+    p2Score -= 1
+    response = {'successful decrease'}                                                                
+    return Response(response)
+
+
+@api_view(['GET']) 
+def getPaddlePosition(request):
+    # Increment the position (for now)
+    p1_x_pos += 1
+    # Prepare the response
+    response = {'p1_pos': p1_x_pos}                                                                
     return Response(response)
 
 @api_view(['GET']) 
