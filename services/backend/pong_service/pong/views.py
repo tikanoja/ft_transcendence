@@ -6,59 +6,64 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-p1Score = 50  # Initial number
-p2Score = 50
-
-p1_x_pos = 50
-
-# def add_cors_headers(response):
-#     response["Access-Control-Allow-Origin"] = "https://localhost"
-#     response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS, DELETE, PUT"
-#     response["Access-Control-Allow-Headers"] = "Content-Type"
+p1_score = 50
+p2_score = 50
+p1_x_pos = 70
+p2_x_pos = -100
+p1_y_pos = 0
+p2_y_pos = 0
+game_progress = "In Progress"
 
 
 @api_view(['GET']) 
 def increase_number(request):
-    global p1Score
-    global p2Score
+    global p1_score
+    global p2_score
+    global p1_y_pos
+    global p2_y_pos
 
-    # Increment the scores
-    p1Score += 1
-    p2Score += 1
+    p1_y_pos += 0.2
+    p1_y_pos += 0.2
+    p1_score += 1
+    p2_score += 1
 
-    # Prepare the response
     response = {'successful increase'}                                                                
     return Response(response)
 
 @api_view(['GET']) 
 def decrease_number(request):
-    global p1Score
-    global p2Score
-    p1Score -= 1
-    p2Score -= 1
+    global p1_score
+    global p2_score
+    p1_score -= 1
+    p2_score -= 1
     response = {'successful decrease'}                                                                
     return Response(response)
 
 
-@api_view(['GET']) 
-def getPaddlePosition(request):
-    # Increment the position (for now)
-    p1_x_pos += 1
-    # Prepare the response
-    response = {'p1_pos': p1_x_pos}                                                                
+@api_view(['GET'])
+def get_game_state(request):
+    global p1_x_pos
+    global p2_x_pos
+    global p1_score
+    global p2_score
+    global p1_y_pos
+    global p2_y_pos
+    global game_progress
+    response = {'game_progress': game_progress , 'p1_pos_y': p1_y_pos, 'p2_pos_y': p2_y_pos, 'p1_pos': p1_x_pos, 'p2_pos': p2_x_pos, 'p1_score': p1_score, 'p2_score': p2_score}
     return Response(response)
+
 
 @api_view(['GET']) 
 def decrease_number(request):
-    global p1Score
-    global p2Score
-    p1Score -= 1
-    p2Score -= 1
+    global p1_score
+    global p2_score
+    p1_score -= 1
+    p2_score -= 1
     response = {'successful decrease'}                                                                
     return Response(response)
 
 
 @api_view(['GET']) 
 def get_number(request):
-    response = {'p1Score': p1Score, 'p2Score': p2Score}                                                                
+    response = {'p1_score': p1_score, 'p2_score': p2_score}                                                                
     return Response(response)

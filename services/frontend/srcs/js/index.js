@@ -120,19 +120,27 @@ function decreaseButtonClickHandler() {
     });
 };
 
-//now a placeholder "get score" THIS MIGHT BE THE ISSUE
-const retrieveButtonClickHandler = () => {
+
+function decreaseButtonClickHandler() {
+    sendRequest('pong/decrease_number/', function (response) {
+        console.log(response);
+    });
+};
+
+const get_game_state = () => {
     return new Promise((resolve, reject) => {
-        sendRequest('pong/get_number/', function(response) {
+        sendRequest('pong/get_game_state/', function(response) {
             try {
                 const responseData = JSON.parse(response);
-                if ('p1Score' in responseData && 'p2Score' in responseData) {
-                    const p1Score = responseData.p1Score;
-                    const p2Score = responseData.p2Score;
-                    resolve({ p1Score, p2Score });
-                } else {
-                    throw new Error('p1Score or p2Score not found in response');
-                }
+                console.log("from index, game_state: ", responseData)
+                const p1_pos = responseData.p1_pos;
+                const p2_pos = responseData.p2_pos;
+                const p1_pos_y = responseData.p1_pos_y;
+                const p2_pos_y = responseData.p2_pos_y;
+                const p1_score = responseData.p1_score;
+                const p2_score = responseData.p2_score;
+                const game_progress = responseData.game_;
+                resolve({ game_progress, p1_pos, p2_pos, p1_score, p2_score, p1_pos_y, p2_pos_y});
             } catch (error) {
                 console.error('Error parsing JSON:', error);
                 reject(error);
@@ -140,8 +148,6 @@ const retrieveButtonClickHandler = () => {
         });
     });
 };
-
-
 
 
 function connectButtonClickHandler() {

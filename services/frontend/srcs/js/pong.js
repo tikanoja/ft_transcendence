@@ -1,14 +1,12 @@
 // Import required modules
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.module.js';
 
-// import { increaseButtonClickHandler, decreaseButtonClickHandler } from './buttonHandlers.js';
-//TODO: seperate into 2 scene creation functions that allow for the 2d scene to render with different lights and cameras.
 //TODO:the size of paddles, ball and their positioning MUST BE DYNAMIC!
 //TODO: A better looking start screen the also shows user name, and opponent name
 //TODO: center line for court look
 //TODO: visable scoreboard with API calls
 //TODO: Make lighting better
-//TODO: boundrys working, potentially a canva boarder
+//TODO: boundrys working, potentially a canvas boarder
 
 
 
@@ -24,7 +22,7 @@ export const startScreen = () => {
     
     playButton.addEventListener('click', () => {
         
-        startScreen.style.display = 'none'; // Hide the start screen
+        startScreen.style.display = 'none';
         canvasContainer.style.display = 'block';
         renderPongGame(is3DGraphics); 
     });
@@ -35,9 +33,9 @@ export const startScreen = () => {
 };
 
 export const updateScoreboard = () => {
-    retrieveButtonClickHandler().then(response => {
-        const p1Score = response.p1Score;
-        const p2Score = response.p2Score;
+        get_game_state().then(response => {
+        const p1Score = response.p1_score;
+        const p2Score = response.p2_score;
         document.querySelector('.score-left').textContent = `P1 SCORE: ${p1Score}`;
         document.querySelector('.score-right').textContent = `P2 SCORE: ${p2Score}`;
     }).catch(error => {
@@ -73,40 +71,31 @@ function addLighting(scene) {
     scene.add(amb_light);
 }
 function setup2DScene(scene) {
-    const camera = new THREE.OrthographicCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
     directionalLight.position.set(0, 0, 1);
     scene.add(directionalLight);
-
-    let p1_paddle, p2_paddle, ball; // Declare variables
-
-
-    fetchPaddlePositionFromAPI().then(response => {
-        const p1_x_pos = response.p1_pos;
-        console.log("api returned X position: ", p1_x_pos)
-        p1_paddle = create2DPaddle(0x808080); // Old-school TV Pong grey
-        scene.add(p1_paddle);
-        p1_paddle.position.set(p1_x_pos, 0, 0); // Set paddle position using API response
-    }).catch(error => {
-        p1_paddle = create2DPaddle(0x808080); // Old-school TV Pong grey
-        scene.add(p1_paddle);
-        p1_paddle.position.set(-100, 0, 0);
-        console.error('Error fetching paddle position from API:', error);
-    });
-
-    p2_paddle = create2DPaddle(0x808080); // Declare and assign p2_paddle variable
+    let p1_paddle, p2_paddle, ball;
+    p1_paddle = create2DPaddle(0x808080); // Old-school TV Pong grey
+    p2_paddle = create2DPaddle(0x808080);
     ball = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), new THREE.MeshStandardMaterial({color: 0x808080}));
     scene.add(p2_paddle);
     scene.add(ball);
-    p2_paddle.position.set(100, 0, 0); // Default position for P2 paddle
-
-    return camera; // Return the camera object
+    scene.add(p1_paddle);
+    get_game_state().then(response => {
+        console.log("setting up scene:  ", response)
+        p1_paddle.position.set(response.p1_pos, response.p1_pos_y, 0);
+        p2_paddle.position.set(response.p2_pos, response.p2_pos_y, 0);
+    }).catch(error => {
+        console.error('Error fetching paddle position from API:', error);
+    });
+    return camera;
 }
 
 function setup3DScene(scene) {
-    let p1_paddle, p2_paddle, ball; // Declare variables
+    let p1_paddle, p2_paddle, ball;
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     addLighting(scene);
     p1_paddle = create3DPaddle(0xEF85A8);
@@ -115,7 +104,7 @@ function setup3DScene(scene) {
     scene.add(p1_paddle);
     scene.add(p2_paddle);
     scene.add(ball);
-    p1_paddle.position.set(-100,  0, 0); // this will be set from API call
+    p1_paddle.position.set(-100,  0, 0); // this will be set from API call as well
     p2_paddle.position.set(100, 0, 0);
 
     return camera; // Return the camera object
@@ -131,19 +120,6 @@ function create3DPaddle(color) {
     const geometry = new THREE.BoxGeometry(5, 20, 5);
     const material = new THREE.MeshPhongMaterial({ color });
     return new THREE.Mesh(geometry, material);
-}
-
-
-async function fetchPaddlePositionFromAPI() {
-    try {
-        const response = await fetch('/pong/getPaddlePosition');
-        if (!response.ok) {
-            throw new Error('Failed to fetch paddle position from API');
-        }
-        return await response.json();
-    } catch (error) {
-        throw new Error(error.message);
-    }
 }
 
 export const renderPongGame = (is3DGraphics) => {
@@ -173,8 +149,16 @@ export const renderPongGame = (is3DGraphics) => {
     function animate() {
         requestAnimationFrame(animate);
         updateScoreboard();
+        get_game_state().then(response => {
+            console.log("Animate:  ", response)
+            // p1_paddle.position.set(response.p1_pos, response.p1_pos_y, 0);
+            // p2_paddle.position.set(response.p2_pos, response.p2_pos_y, 0);
+            renderer.render(scene, camera);
+        }).catch(error => {
+            console.error('Error fetching game state:', error);
+        });
+        }
         renderer.render(scene, camera);
-    }
 
     document.addEventListener('keydown', (event) => {
         if (!keyDown) {
