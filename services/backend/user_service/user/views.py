@@ -92,7 +92,11 @@ def register_user(request):
 			response = JsonResponse({'error': 'Username already exists.'}, status=400)
 		else:
 			new_user.objects.create_user(username=data['username'], email=data['email'], password=data['password'])
-			response = JsonResponse({'message': 'congrats you registered!'})	
+			response = JsonResponse({'message': 'congrats you registered!'})
+	elif request.method == 'GET':
+			form = RegistrationForm()
+			title = "Register as a new user"
+			return render(request, 'register', {"form": form, "title": title})	
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST"})
 	return response
