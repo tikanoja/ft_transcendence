@@ -70,6 +70,7 @@ function addLighting(scene) {
     scene.add(light.target);
     scene.add(amb_light);
 }
+
 function setup2DScene(scene) {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -77,21 +78,15 @@ function setup2DScene(scene) {
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
     directionalLight.position.set(0, 0, 1);
     scene.add(directionalLight);
-    let p1_paddle, p2_paddle, ball;
-    p1_paddle = create2DPaddle(0x808080); // Old-school TV Pong grey
-    p2_paddle = create2DPaddle(0x808080);
-    ball = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), new THREE.MeshStandardMaterial({color: 0x808080}));
+
+    const p1_paddle = create2DPaddle(0x808080); // Old-school TV Pong grey
+    const p2_paddle = create2DPaddle(0x808080);
+    const ball = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), new THREE.MeshStandardMaterial({color: 0x808080}));
+    scene.add(p1_paddle);
     scene.add(p2_paddle);
     scene.add(ball);
-    scene.add(p1_paddle);
-    get_game_state().then(response => {
-        console.log("setting up scene:  ", response)
-        p1_paddle.position.set(response.p1_pos, response.p1_pos_y, 0);
-        p2_paddle.position.set(response.p2_pos, response.p2_pos_y, 0);
-    }).catch(error => {
-        console.error('Error fetching paddle position from API:', error);
-    });
-    return camera;
+
+    return { camera, p1_paddle, p2_paddle, ball };
 }
 
 function setup3DScene(scene) {
@@ -107,10 +102,10 @@ function setup3DScene(scene) {
     p1_paddle.position.set(-100,  0, 0); // this will be set from API call as well
     p2_paddle.position.set(100, 0, 0);
 
-    return camera; // Return the camera object
+    return camera;
 }
 function create2DPaddle(color) {
-    const geometry = new THREE.BoxGeometry(5, 20, 0);
+    const geometry = new THREE.BoxGeometry(5, 20, 0); ///will be plane geomatry?
     const material = new THREE.MeshStandardMaterial({ color });
     return new THREE.Mesh(geometry, material);
 }
@@ -124,7 +119,8 @@ function create3DPaddle(color) {
 
 export const renderPongGame = (is3DGraphics) => {
     const scene = new THREE.Scene();
-    let camera; // Declare camera variable
+    let camera;
+    let keyDown = false; //
 
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight);
@@ -134,7 +130,16 @@ export const renderPongGame = (is3DGraphics) => {
     if (is3DGraphics) {
         camera = setup3DScene(scene);
     } else {
-        camera = setup2DScene(scene);
+        ({ camera, p1_paddle, p2_paddle, ball } = setup2DScene(scene));
+        get_game_state().then(response => {
+            console.log("setting up scene:  ", response)
+            p1_paddle.position.set(response.p1_pos, response.p1_pos_y, 0);
+            p2_paddle.position.set(response.p2_pos, response.p2_pos_y, 0);
+            p2_paddle.position.set(response.p2_pos, response.p2_pos_y, 0);
+            ball.position.set(0, 0, 0); //needs to be added into the api call
+        }).catch(error => {
+            console.error('Error fetching paddle position from API:', error);
+        });
     }
     ///set up is completed by this point, game is now rendering/////
 
@@ -144,21 +149,35 @@ export const renderPongGame = (is3DGraphics) => {
 
     camera.position.z = 200;
 
-
-
-    function animate() {
-        requestAnimationFrame(animate);
-        updateScoreboard();
+    function updateGameState() {
         get_game_state().then(response => {
             console.log("Animate:  ", response)
-            // p1_paddle.position.set(response.p1_pos, response.p1_pos_y, 0);
-            // p2_paddle.position.set(response.p2_pos, response.p2_pos_y, 0);
-            renderer.render(scene, camera);
+            p1_paddle.position.set(response.p1_pos, response.p1_pos_y, 0);
+            p2_paddle.position.set(response.p2_pos, response.p2_pos_y, 0);
         }).catch(error => {
             console.error('Error fetching game state:', error);
         });
-        }
-        renderer.render(scene, camera);
+    }
+
+    // Update the game state 50 times per second
+    const gameStateInterval = setInterval(updateGameState, 1000 / 50);
+     
+    // Update the game state 1 times per second for debugging
+    // const gameStateInterval = setInterval(updateGameState, 3000);
+
+    // Stop updating the game state when the page changes
+    document.addEventListener('pagechange', () => {
+        clearInterval(gameStateInterval);
+    });
+
+    function animate() {
+        requestAnimationFrame(animate);
+        updateGameState();
+        updateScoreboard();
+    
+        renderer.render(scene, camera); // Move this line here
+    }
+    
 
     document.addEventListener('keydown', (event) => {
         if (!keyDown) {
@@ -169,11 +188,9 @@ export const renderPongGame = (is3DGraphics) => {
                 switch (event.key) {
                     case 'ArrowUp':
                         increaseButtonClickHandler();
-                        p1_paddle.position.y += speed; // Move up
                         break;
                     case 'ArrowDown':
                         decreaseButtonClickHandler();
-                        p1_paddle.position.y -= speed; // Move down
                         break;
                 }
             };
@@ -181,11 +198,9 @@ export const renderPongGame = (is3DGraphics) => {
                 switch (event.key) {
                     case 'w':
                         increaseButtonClickHandler();
-                        p2_paddle.position.y += speed; // Move up
                         break;
                         case 's':
                         decreaseButtonClickHandler();
-                        p2_paddle.position.y -= speed; // Move down
                         break;
                 }
             };

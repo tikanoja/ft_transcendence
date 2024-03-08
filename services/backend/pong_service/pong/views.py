@@ -23,7 +23,7 @@ def increase_number(request):
     global p2_y_pos
 
     p1_y_pos += 0.2
-    p1_y_pos += 0.2
+    p2_y_pos += 0.2
     p1_score += 1
     p2_score += 1
 
