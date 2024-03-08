@@ -22,43 +22,44 @@ def add_cors_headers(response):
 	response["Access-Control-Allow-Headers"] = "Content-Type, Accept, X-CSRFToken"
 	response["Access-Control-Allow-Credentials"] = "true"
 
-# @csrf_exempt
-# def increase_number(request):
-# 	logger.debug('In increase num')
-# 	global current_number
-# 	if request.method == 'POST':
-# 		if (current_number < 100):
-# 			current_number += 1
-# 		response = JsonResponse({'result': 'success', 'number': current_number})
-# 		return response
-# 	else:
-# 		response = JsonResponse({'result': 'error', 'message': 'Invalid request method'})
-# 		return response
+@csrf_exempt
+def increase_number(request):
+	logger.debug('In increase num')
+	global current_number
+	if request.method == 'POST':
+		if (current_number < 100):
+			current_number += 1
+		response = JsonResponse({'result': 'success', 'number': current_number})
+		return response
+	else:
+		response = JsonResponse({'result': 'error', 'message': 'Invalid request method'})
+		return response
 
-# @csrf_exempt
-# def decrease_number(request):
-# 	logger.debug('In decrease num')
-# 	global current_number
-# 	if request.method == 'POST':
-# 		if (current_number > 0):
-# 			current_number -= 1
-# 		response = JsonResponse({'result': 'success', 'number': current_number})
-# 		return response
-# 	else:
-# 		response = JsonResponse({'result': 'error', 'message': 'Invalid request method'})
-# 		return response
+@csrf_exempt
+def decrease_number(request):
+	logger.debug('In decrease num')
+	global current_number
+	if request.method == 'POST':
+		if (current_number > 0):
+			current_number -= 1
+		response = JsonResponse({'result': 'success', 'number': current_number})
+		return response
+	else:
+		response = JsonResponse({'result': 'error', 'message': 'Invalid request method'})
+		return response
 
-# @csrf_exempt
-# def get_number(request):
-# 	logger.debug('In get num')
-# 	global current_number
-# 	response = JsonResponse({'result': 'success', 'number': current_number})
-# 	return response
+@csrf_exempt
+def get_number(request):
+	logger.debug('In get num')
+	global current_number
+	response = JsonResponse({'result': 'success', 'number': current_number})
+	return response
 
+# GET for register user
 def	register(request):
 	form = RegistrationForm()
 	title = "Register as a new user"
-	return render(request, 'registration_form', {"form": form, "title": title})
+	return render(request, 'register', {"form": form, "title": title})
 
 
 # @csrf_exempt
