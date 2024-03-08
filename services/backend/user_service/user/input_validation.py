@@ -17,7 +17,7 @@ def check_password_strength(password: str, confirm_password: str):
 	elif len(password) < 8:
 		raise ValueError("password is too short")
 	cap_num_pattern = re.compile(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)')
-	special_pattern = re.compile('[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]')
+	special_pattern = re.compile(r'[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]')
 	match_one = cap_num_pattern.search(password)
 	match_two = special_pattern.search(password)
 	if not bool(match_one):
@@ -47,13 +47,13 @@ def validate_registration_input(input) -> bool:
 		screen_res = screen_input(value)
 		if not screen_res:
 			return False
-		if key is "username":
+		if key == "username":
 			check_username_availability(value)
-		elif key is "email":
+		elif key == "email":
 			validate_email(input)
-		elif key is "password":
+		elif key == "password":
 			password = value
-		elif key is "confirm_password":
+		elif key == "confirm_password":
 			confirm_password = value
 	check_password_strength(password, confirm_password)
 	return True

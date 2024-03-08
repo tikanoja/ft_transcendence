@@ -35,7 +35,7 @@ services:
       - frontend-network
       - backend-network
 
-  user_service:
+  user-service:
     build:
       context: ./services/backend/user_service
       dockerfile: Dockerfile

@@ -1,3 +1,4 @@
+
 /*
 *** URL-based router for displaying the main content based on the navbar
  */
@@ -46,6 +47,11 @@ const routes = {
 	},
 	"/login" : {
 		view: "../views/login.html",
+		title: "Login | " + pageTitle,
+		description: "Login"
+	},
+	"/user/register" : {
+		view: "http://localhost:8001/user/register",
 		title: "Login | " + pageTitle,
 		description: "Login"
 	}

@@ -55,13 +55,6 @@ def get_number(request):
 	response = JsonResponse({'result': 'success', 'number': current_number})
 	return response
 
-# GET for register user
-def	register(request):
-	form = RegistrationForm()
-	title = "Register as a new user"
-	return render(request, 'register', {"form": form, "title": title})
-
-
 # @csrf_exempt
 def register_user(request):
 	if request.method == 'POST':
@@ -94,9 +87,11 @@ def register_user(request):
 			new_user.objects.create_user(username=data['username'], email=data['email'], password=data['password'])
 			response = JsonResponse({'message': 'congrats you registered!'})
 	elif request.method == 'GET':
+			logger.debug('hello!')
 			form = RegistrationForm()
+			logger.debug(form)
 			title = "Register as a new user"
-			return render(request, 'register', {"form": form, "title": title})	
+			return render(request, 'register.html', {"form": form, "title": title})
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST"})
 	return response

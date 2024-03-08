@@ -1,4 +1,4 @@
-{% extends "form_base.html" with form_title=title %}
+{% extends "form_base.html" %}
 {% block form %}
 <form action="/user/login_user" action="POST">
 	{% csrf_token %}
