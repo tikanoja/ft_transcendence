@@ -37,7 +37,7 @@ function getCookie(name) {
 }
 
 // callback?
-function sendRequest(endpoint, data, callback) {
+function sendRequest (endpoint, data, callback) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', endpoint, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -67,7 +67,8 @@ function updateEventListeners() {
     var connectButton = document.getElementById('connectButton');
     var userConnectButton = document.getElementById('user-connectButton');
     var userRetrieveButton = document.getElementById('user-retrieveButton');
-    var registerButton = document.getElementById('registerButton');
+    // var registerButton = document.getElementById('registerButton');
+    var registerForm = document.getElementById('registerForm');
     var loginButton = document.getElementById('loginButton');
     var usernameButton = document.getElementById('getUsernameButton');
     var logoutButton = document.getElementById('logoutButton');
@@ -91,8 +92,11 @@ function updateEventListeners() {
     if (userRetrieveButton) {
         userRetrieveButton.removeEventListener('click', userRetrieveButtonClickHandler);
     }
-    if (registerButton) {
-        registerButton.removeEventListener('click', registerButtonClickHandler);
+    // if (registerButton) {
+    //     registerButton.removeEventListener('click', registerButtonClickHandler);
+    // }
+    if (registerForm) {
+        registerForm.removeEventListener('submit', submitRegistrationHandler);
     }
     if (loginButton) {
         loginButton.removeEventListener('click', loginButtonClickHandler);
@@ -123,8 +127,11 @@ function updateEventListeners() {
     if (userConnectButton) {
         userConnectButton.addEventListener('click', userConnectButtonClickHandler);
     }
-    if (registerButton) {
-        registerButton.addEventListener('click', registerButtonClickHandler);
+    // if (registerButton) {
+    //     registerButton.addEventListener('click', registerButtonClickHandler);
+    // }
+    if (registerForm) {
+        registerForm.addEventListener('submit', submitRegistrationHandler);
     }
     if (loginButton) {
         loginButton.addEventListener('click', loginButtonClickHandler);
@@ -198,23 +205,23 @@ function userConnectButtonClickHandler() {
     });
 }
 
-function registerButtonClickHandler(event) {
-    event.preventDefault();
-    console.log("sending registration!");
+// function registerButtonClickHandler(event) {
+//     event.preventDefault();
+//     console.log("sending registration!");
 
-    var registrationData = {};
-    registrationData["username"] = document.getElementById('username').value;
-    registrationData["email"] = document.getElementById('email').value;
-    registrationData["firstname"] = document.getElementById('firstname').value;
-    registrationData["lastname"] = document.getElementById('lastname').value;
-    registrationData["password"] = document.getElementById('password').value;
-    registrationData["confirm_password"] = document.getElementById('confirm_password').value;
+//     var registrationData = {};
+//     registrationData["username"] = document.getElementById('username').value;
+//     registrationData["email"] = document.getElementById('email').value;
+//     registrationData["firstname"] = document.getElementById('firstname').value;
+//     registrationData["lastname"] = document.getElementById('lastname').value;
+//     registrationData["password"] = document.getElementById('password').value;
+//     registrationData["confirm_password"] = document.getElementById('confirm_password').value;
     
-    var endpoint = 'http://localhost:8001/user/register_user/';
-    sendRequest(endpoint, registrationData, (response) => {
-        console.log('Received response:', response);
-    });
-}
+//     var endpoint = 'http://localhost:8001/user/register_user/';
+//     sendRequest(endpoint, registrationData, (response) => {
+//         console.log('Received response:', response);
+//     });
+// }
 
 function loginButtonClickHandler(event) {
     event.preventDefault();
@@ -248,4 +255,19 @@ function logoutButtonClickHandler(event) {
     sendRequest(endpoint, null, (response) => {
         console.log('Received response:', response);
     });
+}
+
+const submitRegistrationHandler = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+
+    const html = await fetch('/user/register/', {
+        method: 'POST',
+        body: formData
+    }).then((response) => response.text());
+
+    document.getElementById("content").innerHTML = html;
+	document.title = "Registration | Pong";
+	document.querySelector('meta[name="description"]').setAttribute("content", "Registration");
+    updateEventListeners();
 }

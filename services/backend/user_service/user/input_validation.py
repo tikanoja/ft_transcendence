@@ -1,5 +1,6 @@
 from .models import CustomUser
 import re
+from .forms import RegistrationForm
 
 def check_username_availability(username: str):
 	exists = CustomUser.objects.filter(username=username)
@@ -14,7 +15,7 @@ Characters: one of each upercase, lowecase, digit, special
 def check_password_strength(password: str, confirm_password: str):
 	if not password == confirm_password:
 		raise ValueError("passwords don't match")
-	elif len(password) < 8:
+	if len(password) < 8:
 		raise ValueError("password is too short")
 	cap_num_pattern = re.compile(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)')
 	special_pattern = re.compile(r'[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]')
@@ -25,41 +26,35 @@ def check_password_strength(password: str, confirm_password: str):
 	if not bool(match_two):
 		raise ValueError("Password must contain at least one special character")
 
-def validate_email(email: str):
-	# should we actually see if its a real email?
-	pass
+def check_email(email: str):
+	# if email != "":
+	exists = CustomUser.objects.filter(email=email)
+	if exists:
+		raise ValueError("Email is registered with another account")
 
+def validate_registration_input(input):
 
-def screen_input(input: str):
-	# check for dangerous inputs
-	# not empty,  not sketchy
-	# this is done by Django so maybe not needed for now leave empty
-	return True
-
-
-def validate_registration_input(input) -> bool:
-	if not input.is_valid():
+	form = RegistrationForm(input)
+	if not form.is_valid():
 		raise ValueError("form incorrectly filled")
+	
 	password = ""
 	confirm_password = ""
 
-	for key, value in input:
-		screen_res = screen_input(value)
-		if not screen_res:
-			return False
+	for key, value in input.items():
 		if key == "username":
 			check_username_availability(value)
 		elif key == "email":
-			validate_email(input)
+			check_email(value)
 		elif key == "password":
 			password = value
 		elif key == "confirm_password":
 			confirm_password = value
 	check_password_strength(password, confirm_password)
-	return True
 
 
 if __name__ == "__main__":
 	# attach debuger
 	input = {}
 	validate_registration_input(input)
+

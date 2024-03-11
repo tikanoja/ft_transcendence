@@ -8,7 +8,7 @@ from .models import CustomUser
 from user.input_validation import validate_registration_input
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login, logout
-from .forms import RegistrationForm
+from .forms import RegistrationForm, LoginForm
 
 
 logger = logging.getLogger(__name__)
@@ -55,34 +55,37 @@ def get_number(request):
 	response = JsonResponse({'result': 'success', 'number': current_number})
 	return response
 
-# @csrf_exempt
+
 def register_user(request):
 	if request.method == 'POST':
 		logger.debug('In register user')
-		# data = json.loads(request.body)
 		data = request.POST
 		logger.debug(data)
 		# call for validation
+		sent_form = RegistrationForm(data)
 		try:
 			validate_registration_input(data)
+			# if not form.is_valid():
+				# raise ValueError("something was wrong with the form...")
 		except ValueError as ve:
 			logger.debug(f"Error in registration form: {ve}")
-			form = RegistrationForm()
 			title = "Register as a new user"
 			# resend reg form with error msg included
-			return render(request, 'registration', {"form": form, "title": title, "error_msg": ve})
+			return render(request, 'register.html', {"form": sent_form, "title": title, "error_msg": ve})
 		# pass validated user for database entry
 
-		new_user = CustomUser(username=data["username"], firstname=data["firstname"], lastname=data["lastname"], email=data["email"], password=data["password"])
-		logger.debug(new_user.username)
-		logger.debug(new_user.firstname)
-		logger.debug(new_user.lastname)
-		logger.debug(new_user.email)
-		logger.debug(new_user.password)
+		new_user = CustomUser(username=data["username"], first_name=data["first_name"], last_name=data["last_name"], email=data["email"], password=data["password"])
+		# logger.debug(new_user.username)
+		# logger.debug(new_user.firstname)
+		# logger.debug(new_user.lastname)
+		# logger.debug(new_user.email)
+		# logger.debug(new_user.password)
 		
 		new_user = get_user_model()
 		if new_user.objects.filter(username=data['username']).exists():
-			response = JsonResponse({'error': 'Username already exists.'}, status=400)
+			title = "Register as a new user"
+			return render(request, 'register.html', {"form": form, "title": title, "error_msg": 'Username already exists.'})
+			# response = JsonResponse({'error': 'Username already exists.'}, status=400)
 		else:
 			new_user.objects.create_user(username=data['username'], email=data['email'], password=data['password'])
 			response = JsonResponse({'message': 'congrats you registered!'})
@@ -113,8 +116,17 @@ def login_user(request):
 			login(request, user) #log user in, create new session, add sessionID cookie for the response
 			request.session['user_id'] = user.id #store user ID explicity to the request.session dictionary
 			response = JsonResponse({'success': "you just logged in"})
+			# could send a redirect to the home page or user profile
 		else:
-			response = JsonResponse({'error': "user not found"}, status=401)
+			# send form again with the error at the top
+			return render(request, 'login.html', {"form": form, "title": title, "error": "user not found"})
+			# response = JsonResponse({'error': "user not found"}, status=401)
+	elif request.method == 'GET':
+		logger.debug('hello, will send login form!')
+		form = LoginForm()
+		logger.debug(form)
+		title = "Sign in"
+		return render(request, 'login.html', {"form": form, "title": title})
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST"})
 	return response

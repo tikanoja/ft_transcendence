@@ -46,16 +46,17 @@ const routes = {
 		description: "Manage your settings"
 	},
 	"/login" : {
-		view: "../views/login.html",
+		view: "/user/login",
 		title: "Login | " + pageTitle,
 		description: "Login"
-	},
-	"/user/register" : {
-		view: "http://localhost:8001/user/register",
+	}, 
+	"/register" : {
+		view: "/user/register",
 		title: "Login | " + pageTitle,
 		description: "Login"
 	}
 }
+// route above should not be the same as the calls to the backend...seems fragile
 
 // Checks the URL
 const route = (event) => {
@@ -82,6 +83,7 @@ const locationHandler = async () => {
 		// .then() is used to handle the Promise returned by fetch. It waits for the fetch to to complete and processes the response
 		// (response) => response.text() takes the response object returned by fetch and converts its body to text
 		// await waits for the entire .then() chain to resolve
+	console.log("about to fetch ", route)
 	const html = await fetch(route.view).then((response) => response.text());
 	// Update the main content element with the content of the retrieved html
 	document.getElementById("content").innerHTML = html;
