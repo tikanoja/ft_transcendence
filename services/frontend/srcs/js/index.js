@@ -67,7 +67,7 @@ function updateEventListeners() {
     var connectButton = document.getElementById('connectButton');
     var userConnectButton = document.getElementById('user-connectButton');
     var userRetrieveButton = document.getElementById('user-retrieveButton');
-    // var registerButton = document.getElementById('registerButton');
+    var loginForm = document.getElementById('loginForm');
     var registerForm = document.getElementById('registerForm');
     var loginButton = document.getElementById('loginButton');
     var usernameButton = document.getElementById('getUsernameButton');
@@ -92,9 +92,9 @@ function updateEventListeners() {
     if (userRetrieveButton) {
         userRetrieveButton.removeEventListener('click', userRetrieveButtonClickHandler);
     }
-    // if (registerButton) {
-    //     registerButton.removeEventListener('click', registerButtonClickHandler);
-    // }
+    if (loginForm) {
+        loginForm.removeEventListener('submit', loginFormHandler);
+    }
     if (registerForm) {
         registerForm.removeEventListener('submit', submitRegistrationHandler);
     }
@@ -127,9 +127,9 @@ function updateEventListeners() {
     if (userConnectButton) {
         userConnectButton.addEventListener('click', userConnectButtonClickHandler);
     }
-    // if (registerButton) {
-    //     registerButton.addEventListener('click', registerButtonClickHandler);
-    // }
+    if (loginForm) {
+        loginForm.addEventListener('submit', loginFormHandler);
+    }
     if (registerForm) {
         registerForm.addEventListener('submit', submitRegistrationHandler);
     }
@@ -205,24 +205,6 @@ function userConnectButtonClickHandler() {
     });
 }
 
-// function registerButtonClickHandler(event) {
-//     event.preventDefault();
-//     console.log("sending registration!");
-
-//     var registrationData = {};
-//     registrationData["username"] = document.getElementById('username').value;
-//     registrationData["email"] = document.getElementById('email').value;
-//     registrationData["firstname"] = document.getElementById('firstname').value;
-//     registrationData["lastname"] = document.getElementById('lastname').value;
-//     registrationData["password"] = document.getElementById('password').value;
-//     registrationData["confirm_password"] = document.getElementById('confirm_password').value;
-    
-//     var endpoint = 'http://localhost:8001/user/register_user/';
-//     sendRequest(endpoint, registrationData, (response) => {
-//         console.log('Received response:', response);
-//     });
-// }
-
 function loginButtonClickHandler(event) {
     event.preventDefault();
     console.log("sending loqin request!");
@@ -269,5 +251,21 @@ const submitRegistrationHandler = async (event) => {
     document.getElementById("content").innerHTML = html;
 	document.title = "Registration | Pong";
 	document.querySelector('meta[name="description"]').setAttribute("content", "Registration");
+    updateEventListeners();
+}
+
+const loginFormHandler = async (event) => {
+    event.preventDefault();
+    console.log("in loginFormHandler")
+    const formData = new FormData(event.target);
+
+    const html = await fetch('/user/login/', {
+        method: 'POST',
+        body: formData
+    }).then((response) => response.text());
+
+    document.getElementById("content").innerHTML = html;
+	document.title = "Login | Pong";
+	document.querySelector('meta[name="description"]').setAttribute("content", "Login");
     updateEventListeners();
 }

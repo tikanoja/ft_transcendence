@@ -99,15 +99,18 @@ def register_user(request):
 		response = JsonResponse({'error': "method not allowed. please use POST"})
 	return response
 
-@csrf_exempt
+# @csrf_exempt
 def login_user(request):
+	title = "Sign in"
 	if request.method == 'POST':
 
 		logger.debug('In login user')
 		# data = json.loads(request.body)
-		data = request.POST
-		username = data['username']
-		password = data['password']
+		sent_form = LoginForm(request.POST)
+		logger.debug(sent_form)
+		sent_form.is_valid()
+		username = sent_form.cleaned_data['username']
+		password = sent_form.cleaned_data['password']
 		if request.user.is_authenticated:
 			response = JsonResponse({'error': "already logged in!"})
 			return response
@@ -119,13 +122,12 @@ def login_user(request):
 			# could send a redirect to the home page or user profile
 		else:
 			# send form again with the error at the top
-			return render(request, 'login.html', {"form": form, "title": title, "error": "user not found"})
+			return render(request, 'login.html', {"form": sent_form, "title": title, "error": "user not found"})
 			# response = JsonResponse({'error': "user not found"}, status=401)
 	elif request.method == 'GET':
 		logger.debug('hello, will send login form!')
 		form = LoginForm()
 		logger.debug(form)
-		title = "Sign in"
 		return render(request, 'login.html', {"form": form, "title": title})
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST"})
@@ -159,24 +161,3 @@ def get_current_username(request):
 	response = JsonResponse({'message': username})
 	return response
 
-# @csrf_exempt
-# def login_user(request):
-# 	if request.method == 'POST':
-# 		logger.debug('In login user')
-# 		data = json.loads(request.body)
-# 		logger.debug(data)
-# 		username = data['username']
-# 		password = data['password']
-# 		user = authenticate(request, username=username, password=password)
-# 		if user is not None:
-# 			login(request, user)
-# 			# store users id in session
-# 			request.session['user_id'] = user.id
-# 			response = HttpResponse("oh my god it actually worked!!!")
-# 		else:
-# 			response = HttpResponse("bad credentials. register or try again")
-# 	else:
-# 		# render login form here !!! :)
-# 		response = HttpResponse("this is a login form believe it or not")
-# 	add_cors_headers(response) #dose this work with http res?
-# 	return response
