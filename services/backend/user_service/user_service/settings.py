@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-*9#ubcwnam1fwt8y$$*l3)+u-cpsh+ms)w%pglfthdiwgza*8u
 DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'http://localhost', 'https://localhost', 'user-service']
-
+CSRF_TRUSTED_ORIGINS = ['https://localhost']
 # Application definition
 INSTALLED_APPS = [
     'channels',
@@ -77,9 +77,13 @@ WSGI_APPLICATION = 'user_service.wsgi.application'
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_SAMESITE = 'None' #Remove this for CORS
 SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = 'None' # Might have to be removed once we have templates
+CSRF_COOKIE_SAMESITE = 'Lax' # Might have to be removed once we have templates
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_AGE = 2520 # 42 min * 60 sec
+# added trying to get form submission to work from templates
+# CSRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"  # The header name used by Nginx
+# SESSION_COOKIE_DOMAIN = None
+# CSRF_COOKIE_DOMAIN = None
 
 CHANNEL_LAYERS = {
     "default": {
@@ -90,7 +94,7 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'user_data',
+        'NAME':  os.environ.get('USER_SERVICE_DB'),
         'USER': os.environ.get('POSTGRES_USER'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
         'HOST': 'database',
