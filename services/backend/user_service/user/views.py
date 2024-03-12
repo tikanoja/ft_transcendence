@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import logging
@@ -61,25 +61,23 @@ def get_number(request):
 def register_user(request):
 	title = "Register as a new user"
 	if request.method == 'POST':
-		logger.debug('In register user')
+		logger.debug('In register user')#
 		sent_form = RegistrationForm(request.POST)
-		logger.debug(sent_form)
+		logger.debug(sent_form)#
 
 		try:
 			if not sent_form.is_valid():
 				raise ValidationError("Form filled incorrectly")
 		except ValidationError as ve:
-			logger.debug(f"Error in registration form: {ve}")
+			logger.debug(f"Error in registration form: {ve}")#
 			return render(request, 'register.html', {"form": sent_form, "title": title, "error_msg": ve})
 		# pass validated user for database entry
-
 		new_user = CustomUser(username=sent_form.cleaned_data["username"], first_name=sent_form.cleaned_data["first_name"], last_name=sent_form.cleaned_data["last_name"], email=sent_form.cleaned_data["email"], password=sent_form.cleaned_data["password"])
-		
 		new_user = get_user_model()
 		new_user.objects.create_user(username=sent_form.cleaned_data['username'], email=sent_form.cleaned_data['email'], password=sent_form.cleaned_data['password'])
 		response = JsonResponse({'message': 'congrats you registered!'})
 	elif request.method == 'GET':
-			logger.debug('hello getting reg form!')
+			logger.debug('hello getting reg form!')#
 			form = RegistrationForm()
 			return render(request, 'register.html', {"form": form, "title": title})
 	else:
@@ -90,12 +88,10 @@ def register_user(request):
 # @csrf_exempt
 def login_user(request):
 	title = "Sign in"
-	if request.method == 'POST':
-
+	if request.method == 'POST':#
 		logger.debug('In login user')
-		# data = json.loads(request.body)
 		sent_form = LoginForm(request.POST)
-		logger.debug(sent_form)
+		logger.debug(sent_form)#
 		sent_form.is_valid()
 		username = sent_form.cleaned_data['username']
 		password = sent_form.cleaned_data['password']
@@ -109,10 +105,12 @@ def login_user(request):
 			response = JsonResponse({'success': "you just logged in"})
 			# could send a redirect to the home page or user profile
 		else:
-			# send form again with the error at the top
 			return render(request, 'login.html', {"form": sent_form, "title": title, "error": "user not found"})
-			# response = JsonResponse({'error': "user not found"}, status=401)
 	elif request.method == 'GET':
+		# send a redirect to logout pg?
+		if request.user.is_authenticated:
+			return render(request, "logout.html", {})
+			# return redirect("/user/logout")
 		logger.debug('hello, will send login form!')
 		form = LoginForm()
 		logger.debug(form)
