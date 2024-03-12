@@ -3,9 +3,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import logging
 from django.http import HttpResponse
-# import json
+from django.core.exceptions import ValidationError
 from .models import CustomUser
-from user.input_validation import validate_registration_input
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login, logout
 from .forms import RegistrationForm, LoginForm
@@ -22,6 +21,7 @@ def add_cors_headers(response):
 	response["Access-Control-Allow-Headers"] = "Content-Type, Accept, X-CSRFToken"
 	response["Access-Control-Allow-Credentials"] = "true"
 
+
 @csrf_exempt
 def increase_number(request):
 	logger.debug('In increase num')
@@ -34,6 +34,7 @@ def increase_number(request):
 	else:
 		response = JsonResponse({'result': 'error', 'message': 'Invalid request method'})
 		return response
+
 
 @csrf_exempt
 def decrease_number(request):
@@ -48,6 +49,7 @@ def decrease_number(request):
 		response = JsonResponse({'result': 'error', 'message': 'Invalid request method'})
 		return response
 
+
 @csrf_exempt
 def get_number(request):
 	logger.debug('In get num')
@@ -57,47 +59,33 @@ def get_number(request):
 
 
 def register_user(request):
+	title = "Register as a new user"
 	if request.method == 'POST':
 		logger.debug('In register user')
-		data = request.POST
-		logger.debug(data)
-		# call for validation
-		sent_form = RegistrationForm(data)
+		sent_form = RegistrationForm(request.POST)
+		logger.debug(sent_form)
+
 		try:
-			validate_registration_input(data)
-			# if not form.is_valid():
-				# raise ValueError("something was wrong with the form...")
-		except ValueError as ve:
+			if not sent_form.is_valid():
+				raise ValidationError("Form filled incorrectly")
+		except ValidationError as ve:
 			logger.debug(f"Error in registration form: {ve}")
-			title = "Register as a new user"
-			# resend reg form with error msg included
 			return render(request, 'register.html', {"form": sent_form, "title": title, "error_msg": ve})
 		# pass validated user for database entry
 
-		new_user = CustomUser(username=data["username"], first_name=data["first_name"], last_name=data["last_name"], email=data["email"], password=data["password"])
-		# logger.debug(new_user.username)
-		# logger.debug(new_user.firstname)
-		# logger.debug(new_user.lastname)
-		# logger.debug(new_user.email)
-		# logger.debug(new_user.password)
+		new_user = CustomUser(username=sent_form.cleaned_data["username"], first_name=sent_form.cleaned_data["first_name"], last_name=sent_form.cleaned_data["last_name"], email=sent_form.cleaned_data["email"], password=sent_form.cleaned_data["password"])
 		
 		new_user = get_user_model()
-		if new_user.objects.filter(username=data['username']).exists():
-			title = "Register as a new user"
-			return render(request, 'register.html', {"form": form, "title": title, "error_msg": 'Username already exists.'})
-			# response = JsonResponse({'error': 'Username already exists.'}, status=400)
-		else:
-			new_user.objects.create_user(username=data['username'], email=data['email'], password=data['password'])
-			response = JsonResponse({'message': 'congrats you registered!'})
+		new_user.objects.create_user(username=sent_form.cleaned_data['username'], email=sent_form.cleaned_data['email'], password=sent_form.cleaned_data['password'])
+		response = JsonResponse({'message': 'congrats you registered!'})
 	elif request.method == 'GET':
-			logger.debug('hello!')
+			logger.debug('hello getting reg form!')
 			form = RegistrationForm()
-			logger.debug(form)
-			title = "Register as a new user"
 			return render(request, 'register.html', {"form": form, "title": title})
 	else:
-		response = JsonResponse({'error': "method not allowed. please use POST"})
+		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 	return response
+
 
 # @csrf_exempt
 def login_user(request):
