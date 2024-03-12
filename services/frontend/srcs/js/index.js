@@ -213,7 +213,7 @@ function loginButtonClickHandler(event) {
     loginData["username"] = document.getElementById('usernameLogin').value;
     loginData["password"] = document.getElementById('passwordLogin').value;
 
-    var endpoint = 'http://localhost:8001/user/login_user/';
+    var endpoint = '/user/login_user/';
     sendRequest(endpoint, loginData, (response) => {
         console.log('Received response:', response);
     });
@@ -233,11 +233,31 @@ function logoutButtonClickHandler(event) {
     event.preventDefault();
     console.log("requesting logout!");
 
-    var endpoint = 'http://localhost:8001/user/logout_user/';
+    var endpoint = '/user/logout/';
     sendRequest(endpoint, null, (response) => {
         console.log('Received response:', response);
     });
 }
+
+
+// const logoutButtonClickHandler = async (event) => {
+//     event.preventDefault();
+//     console.log("requesting logout!");
+
+//     // var endpoint = 'https://localhost/user/logout/';
+//     // sendRequest(endpoint, null, (response) => {
+//     //     console.log('Received response:', response);
+//     // });
+//     const html = await fetch('/user/logout/', {
+//         method: 'POST',
+//     }).then((response) => response.text());
+
+//     document.getElementById("content").innerHTML = html;
+// 	document.title = "Logout | Pong";
+// 	document.querySelector('meta[name="description"]').setAttribute("content", "Logout");
+//     updateEventListeners();
+// }
+
 
 const submitRegistrationHandler = async (event) => {
     event.preventDefault();
