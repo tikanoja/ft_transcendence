@@ -7,22 +7,20 @@ FROM python:3.12.1-slim-bookworm
 RUN apt-get update && apt-get install -y \
     openssl
 
-RUN mkdir -p /chat_service/ssl
-RUN openssl req -newkey rsa:2048 -x509 -sha256 -days 365 -nodes \
-    -out /chat_service/ssl/certificate.crt \
-    -keyout /chat_service/ssl/certificate.key \
-    -subj "/C=FI/ST=Helsinki/L=Helsinki/O=42/OU=Hive/CN=chatchamps"
-
 WORKDIR /chat_service
 
-COPY ./ ./
+RUN mkdir -p ssl
+RUN openssl req -newkey rsa:2048 -x509 -sha256 -days 365 -nodes \
+    -out ssl/certificate.crt \
+    -keyout ssl/certificate.key \
+    -subj "/C=FI/ST=Helsinki/L=Helsinki/O=42/OU=Hive/CN=chatchamps"
 
 RUN pip install --no-cache-dir --upgrade pip -r requirements.txt
 
 ## RUN chmod +x entrypoint.sh
 ## ENTRYPOINT ["./entrypoint.sh"]
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8002"]
 
 # CMD ["daphne", \
 # 	"-e", \
