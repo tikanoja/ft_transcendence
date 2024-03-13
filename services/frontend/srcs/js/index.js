@@ -36,6 +36,29 @@ function getCookie(name) {
     return cookieValue;
 }
 
+function check_login() {
+    fetch('user/check_login/')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === 'authenticated') {
+            console.log('User is authenticated');
+            return true;
+        } else {
+            console.log('User is not logged in');
+            return false;
+        }
+    })
+    .catch(error => {
+        console.error('Problem with fetch call:', error);
+        return false;
+    });
+}
+
 // callback?
 function sendRequest (endpoint, data, callback) {
     var xhr = new XMLHttpRequest();
@@ -61,9 +84,6 @@ function sendRequest (endpoint, data, callback) {
 
 function updateEventListeners() {
     // Check if the buttons exist on the current view
-    var increaseButton = document.getElementById('increaseButton');
-    var decreaseButton = document.getElementById('decreaseButton');
-    var retrieveButton = document.getElementById('retrieveButton');
     var connectButton = document.getElementById('connectButton');
     var userConnectButton = document.getElementById('user-connectButton');
     var userRetrieveButton = document.getElementById('user-retrieveButton');
@@ -74,15 +94,6 @@ function updateEventListeners() {
     var logoutButton = document.getElementById('logoutButton');
 
     // Remove existing event listeners if any
-    if (increaseButton) {
-        increaseButton.removeEventListener('click', increaseButtonClickHandler);
-    }
-    if (decreaseButton) {
-        decreaseButton.removeEventListener('click', decreaseButtonClickHandler);
-    }
-    if (retrieveButton) {
-        retrieveButton.removeEventListener('click', retrieveButtonClickHandler);
-    }
     if (connectButton) {
         connectButton.removeEventListener('click', connectButtonClickHandler);
     }
@@ -108,16 +119,7 @@ function updateEventListeners() {
         logoutButton.removeEventListener('click', logoutButtonClickHandler);
     }
 
-    // Attach event listeners only if the buttons exist
-    if (increaseButton) {
-        increaseButton.addEventListener('click', increaseButtonClickHandler);
-    }
-    if (decreaseButton) {
-        decreaseButton.addEventListener('click', decreaseButtonClickHandler);
-    }
-    if (retrieveButton) {
-        retrieveButton.addEventListener('click', retrieveButtonClickHandler);
-    }
+    // Attach event listeners only if the buttons exists
     if (connectButton) {
         connectButton.addEventListener('click', connectButtonClickHandler);
     }
@@ -146,23 +148,6 @@ function updateEventListeners() {
 }
 
 // Define separate click handlers for each button
-function increaseButtonClickHandler() {
-    sendRequest('http://localhost:8000/pong/increase_number/', (response) => {
-        console.log('Increased number:', response.number);
-    });
-}
-
-function decreaseButtonClickHandler() {
-    sendRequest('http://localhost:8000/pong/decrease_number/', (response) => {
-        console.log('Decreased number:', response.number);
-    });
-}
-
-function retrieveButtonClickHandler() {
-    sendRequest('http://localhost:8000/pong/get_number/', (response) => {
-        console.log('Current number:', response.number);
-    });
-}
 
 function userRetrieveButtonClickHandler() {
     sendRequest('http://localhost:8001/user/get_number/', (response) => {

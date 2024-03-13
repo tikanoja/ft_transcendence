@@ -7,56 +7,11 @@ from django.core.exceptions import ValidationError
 from .models import CustomUser
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from .forms import RegistrationForm, LoginForm
 
 
 logger = logging.getLogger(__name__)
-
-current_number = 42  # Initial number
-
-# Added cors_middleware.py to do this automatically for all requests. Referencced in setting.py MIDDLEWARE
-def add_cors_headers(response):
-	response["Access-Control-Allow-Origin"] = "https://localhost"
-	response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS, DELETE, PUT"
-	response["Access-Control-Allow-Headers"] = "Content-Type, Accept, X-CSRFToken"
-	response["Access-Control-Allow-Credentials"] = "true"
-
-
-@csrf_exempt
-def increase_number(request):
-	logger.debug('In increase num')
-	global current_number
-	if request.method == 'POST':
-		if (current_number < 100):
-			current_number += 1
-		response = JsonResponse({'result': 'success', 'number': current_number})
-		return response
-	else:
-		response = JsonResponse({'result': 'error', 'message': 'Invalid request method'})
-		return response
-
-
-@csrf_exempt
-def decrease_number(request):
-	logger.debug('In decrease num')
-	global current_number
-	if request.method == 'POST':
-		if (current_number > 0):
-			current_number -= 1
-		response = JsonResponse({'result': 'success', 'number': current_number})
-		return response
-	else:
-		response = JsonResponse({'result': 'error', 'message': 'Invalid request method'})
-		return response
-
-
-@csrf_exempt
-def get_number(request):
-	logger.debug('In get num')
-	global current_number
-	response = JsonResponse({'result': 'success', 'number': current_number})
-	return response
-
 
 def register_user(request):
 	title = "Register as a new user"
@@ -146,4 +101,8 @@ def get_current_username(request):
 		username = 'only POST allowed'
 	response = JsonResponse({'message': username})
 	return response
+
+@login_required
+def check_login(request):
+	return (JsonResponse({'status': 'authenticated'}))
 
