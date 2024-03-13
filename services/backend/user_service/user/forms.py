@@ -40,8 +40,6 @@ class RegistrationForm(forms.Form):
 		return True
 		
 
-
-
 class LoginForm(forms.Form):
 	username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
 	password = forms.CharField(label="Password", widget=forms.PasswordInput)

@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from .models import CustomUser
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login, logout
-from .forms import RegistrationForm, LoginForm
+from .forms import RegistrationForm, LoginForm, DeleteAccountForm
 
 
 logger = logging.getLogger(__name__)
@@ -147,3 +147,38 @@ def get_current_username(request):
 	response = JsonResponse({'message': username})
 	return response
 
+
+def manage_account(request):
+	if request.method =='GET':
+		# send the interfacet hat will send POST reqs here
+		pass
+	elif request.method == 'POST':
+		# edit the user entry in db based off of info sent.
+		# only if authenticated.
+		pass
+
+def delete_account(request, username):
+	if request.method == 'GET':
+		return JsonResponse({'message': 'This will have the form to fill and send for account deletion'})
+	elif request.method == 'POST':
+		if request.user.is_authenticated:
+			delete_form = DeleteAccountForm(request.POST)
+			if not delete_form.is_valid():
+				return render(request, 'delete_account.html', {"form": delete_form, "error": "Values given are not valid"})
+			username = request.user
+			password = delete_form.cleaned_data["password"]
+			user = authenticate(request, username=username, password=password)
+			if user is not None:
+				# check if this should cascade delete the profile etc. remove from friend lists...
+				CustomUser.objects.filter(username=username).delete()
+				# delete account, return a success page with a 'link' to go to homepage
+				return JsonResponse({'message': 'Your account has been deleted'})
+			else:
+				return JsonResponse({'message': 'Unable to delete account. Check which account you are logged in as'})
+		else:
+			return JsonResponse({'message': 'User needs to be logged into delete account'})
+	
+""" 
+on account delete, how to handle other recodrs tied to that username? if the username isn't purged from all,
+if another user uses it they will then be linked to the other records...
+"""

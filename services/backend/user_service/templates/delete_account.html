@@ -3,7 +3,7 @@
 {% if error %}
 <p style="color: red">Error: {{error}}</p>
 {% endif %}
-<form id="loginForm" >
+<form id="deleteAccountForm" >
 	{% csrf_token %}
 	{% for field in form %}
 	<div class="form-group">
