@@ -63,7 +63,7 @@ def login_user(request):
 	elif request.method == 'GET':
 		# send a redirect to logout pg?
 		if request.user.is_authenticated:
-			return render(request, "logout.html", {})
+			return render(request, "logout.html", {}) #redirect to show game view
 			# return redirect("/user/logout")
 		logger.debug('hello, will send login form!')
 		form = LoginForm()

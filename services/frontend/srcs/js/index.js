@@ -75,6 +75,13 @@ function sendRequest (endpoint, data, callback) {
         xhr.send();
 }
 
+function updateEventListeners(buttonId, event, nameOfF)
+{
+    var button = document.getElementById(buttonId);
+    var func = ; // hey javascript get me this function with the name of nameofF
+    button.removeEventListener(event, func);
+}
+
 function updateEventListeners() {
     // Check if the buttons exist on the current view
     var connectButton = document.getElementById('connectButton');

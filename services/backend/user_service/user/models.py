@@ -21,9 +21,42 @@ class CustomUser(AbstractBaseUser):
 	username = models.CharField(max_length = 254, unique=True)
 	first_name = models.CharField(max_length = 254, null=True)
 	last_name = models.CharField(max_length = 254, null=True)
-	email = models.EmailField(max_length = 254, blank=True, null=True)
+	email = models.EmailField(max_length = 320, blank=True, null=True)
 
 	USERNAME_FIELD = 'username'
 	REQUIRED_FIELDS = []
 
 	objects = CustomUserManager()
+
+
+# user profile model
+#  language -> maybe add to CustomUser model?
+#  picture
+#  custom setting for paddle?
+
+
+# stats model -  individual game stats that linked to the user
+#  define what about a game to save
+#  expect game service to send game info to us 
+"""
+profile/submit_game
+
+request for specific username
+{
+	GameInstance {
+		date: ofGame,
+		game: whichGame,
+		player1: {
+			username: username,
+			result: win/loss
+			hitRate: percent
+		},
+		player2: {
+			username: username,
+			result: win/loss
+			hitRate: percent
+		}
+	},
+	GameInstance ...
+}
+"""
