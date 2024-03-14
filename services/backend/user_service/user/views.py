@@ -24,7 +24,7 @@ def register_user(request):
 				raise ValidationError("Form filled incorrectly")
 		except ValidationError as ve:
 			logger.debug(f"Error in registration form: {ve}")#
-			return render(request, 'register.html', {"form": sent_form, "title": title, "error_msg": ve})
+			return render(request, 'register.html', {"form": sent_form, "title": title, "error": ve})
 		# pass validated user for database entry
 		new_user = CustomUser(username=sent_form.cleaned_data["username"], first_name=sent_form.cleaned_data["first_name"], last_name=sent_form.cleaned_data["last_name"], email=sent_form.cleaned_data["email"], password=sent_form.cleaned_data["password"])
 		new_user = get_user_model()
@@ -43,9 +43,8 @@ def register_user(request):
 def login_user(request):
 	title = "Sign in"
 	if request.method == 'POST':#
-		logger.debug('In login user')
+		logger.debug('In login user POST')
 		sent_form = LoginForm(request.POST)
-		logger.debug(sent_form)#
 		sent_form.is_valid()
 		username = sent_form.cleaned_data['username']
 		password = sent_form.cleaned_data['password']
@@ -56,9 +55,14 @@ def login_user(request):
 		if user is not None:
 			login(request, user) #log user in, create new session, add sessionID cookie for the response
 			request.session['user_id'] = user.id #store user ID explicity to the request.session dictionary
-			response = JsonResponse({'success': "you just logged in"})
+			# response = JsonResponse({'success': "you just logged in"})
+			res = JsonResponse({'success': "you just logged in"}, status=301)
+			res['Location'] = "/play"
+			logger.debug("sending back a response w code %s", res.status_code)
+			return res
 			# could send a redirect to the home page or user profile
 		else:
+			logger.debug("user not authenticated")
 			return render(request, 'login.html', {"form": sent_form, "title": title, "error": "user not found"})
 	elif request.method == 'GET':
 		# send a redirect to logout pg?

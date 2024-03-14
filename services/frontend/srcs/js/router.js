@@ -5,6 +5,8 @@
 
 const pageTitle = "Pong";
 
+import { updateEventListeners } from './index.js'
+
 // Listens to clicks on the entire document
 document.addEventListener("click", (e) => {
 	// Save the clicked element as target
@@ -76,6 +78,16 @@ const route = (event) => {
 	locationHandler();
 }
 
+const routeRedirect = (target) => {
+	console.log("trying to: ", target);
+	// The event is either the one passed to it, or grab the window event if not (prev / forward buttons)
+	// Update browser history without triggering page reload
+	if (target == window.location.href)
+		return ;
+	window.history.pushState("", "", target);
+	locationHandler();
+}
+
 // By using 'async' we can use 'await'. This way we can use asynchronous operations without blocking the execution of other code
 const locationHandler = async () => {
 	// Get the path part of URL (eg. https://example.com/friends/profile returns /friends/profile)
@@ -109,3 +121,5 @@ locationHandler();
 
 // if (window.location.pathname != "/login" && window.location.pathname != "/register")
 	// checkLogin();
+
+export { routeRedirect, locationHandler }

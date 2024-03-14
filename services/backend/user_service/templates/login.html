@@ -1,7 +1,7 @@
 {% extends "form_base.html" %}
 {% block form %}
-{% if error_msg %}
-<p style="color: red">Error: {{error_msg}}</p>
+{% if error %}
+<p style="color: red">Error: {{error}}</p>
 {% endif %}
 <form id="loginForm" >
 	{% csrf_token %}
@@ -14,6 +14,9 @@
 	<input type="submit" value="Login">
 </form>
 <div>
-<p>Don't have an account? Make one <a href="https://localhost/register">here</a> </p>
+<p>Don't have an account? Make one <nav><a href="/register">here</a></nav> </p>
 </div>
 {% endblock %}
+
+
+{% comment %} {% include {{real_html}} %} {% endcomment %}
