@@ -14,6 +14,7 @@ document.addEventListener("click", (e) => {
 		return ;
 	}
 	// Prevent the navigation to a new page
+	// checkLogin();
 	e.preventDefault();
 	route();
 })
@@ -81,7 +82,7 @@ const locationHandler = async () => {
 	const location = window.location.pathname;
 	// Redirect https://example.com to https://example.com/ in order to land on home page
 	if (location.length == 0)
-		location = "/";
+		location = "/"; 
 	// Check the routes (the views above) for a match, if no match: 404
 	const route = routes[location] || routes[404];
 	// Make a network request to the URL specified route.view
@@ -105,3 +106,6 @@ window.route = route;
 
 // Run route as soon as the page loads
 locationHandler();
+
+// if (window.location.pathname != "/login" && window.location.pathname != "/register")
+	// checkLogin();

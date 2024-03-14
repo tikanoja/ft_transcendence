@@ -7,7 +7,6 @@ from django.core.exceptions import ValidationError
 from .models import CustomUser
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from .forms import RegistrationForm, LoginForm
 
 
@@ -102,7 +101,9 @@ def get_current_username(request):
 	response = JsonResponse({'message': username})
 	return response
 
-@login_required
 def check_login(request):
-	return (JsonResponse({'status': 'authenticated'}))
+	if request.user.is_authenticated:
+		return JsonResponse({'status': 'authenticated'})
+	else:
+		return JsonResponse({'status': 'not authenticated'}, status=401)
 

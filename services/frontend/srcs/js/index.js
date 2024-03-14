@@ -36,26 +36,19 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function check_login() {
-    fetch('user/check_login/')
+function checkLogin() {
+    fetch('user/check_login/', {
+        method: 'POST',
+        credentials: 'include',
+    })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.status === 'authenticated') {
-            console.log('User is authenticated');
-            return true;
-        } else {
-            console.log('User is not logged in');
-            return false;
+            window.location.href = '/login';
         }
     })
     .catch(error => {
         console.error('Problem with fetch call:', error);
-        return false;
+        window.location.href = '/login';
     });
 }
 
