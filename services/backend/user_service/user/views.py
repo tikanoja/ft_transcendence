@@ -7,18 +7,11 @@ from django.core.exceptions import ValidationError
 from .models import CustomUser
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from .forms import RegistrationForm, LoginForm
 
 
 logger = logging.getLogger(__name__)
-
-# Added cors_middleware.py to do this automatically for all requests. Referencced in setting.py MIDDLEWARE
-# def add_cors_headers(response):
-# 	response["Access-Control-Allow-Origin"] = "https://localhost"
-# 	response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS, DELETE, PUT"
-# 	response["Access-Control-Allow-Headers"] = "Content-Type, Accept, X-CSRFToken"
-# 	response["Access-Control-Allow-Credentials"] = "true"
-
 
 def register_user(request):
 	title = "Register as a new user"
@@ -108,4 +101,8 @@ def get_current_username(request):
 		username = 'only POST allowed'
 	response = JsonResponse({'message': username})
 	return response
+
+@login_required
+def check_login(request):
+	return (JsonResponse({'status': 'authenticated'}))
 
