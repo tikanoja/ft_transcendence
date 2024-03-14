@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from .models import CustomUser
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login, logout
-from .forms import RegistrationForm, LoginForm, DeleteAccountForm
+from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm
 
 
 logger = logging.getLogger(__name__)
@@ -151,6 +151,12 @@ def get_current_username(request):
 def manage_account(request):
 	if request.method =='GET':
 		# send the interfacet hat will send POST reqs here
+		user = CustomUser.objects.filter(username=request.user)
+		# username = 
+		# 
+		password_form = UpdatePasswordForm()
+		email_form = UpdateEmailForm()
+		return render(request, "manage_account.html", {}) #"username"=user.get_field('username')
 		pass
 	elif request.method == 'POST':
 		if request.user.is_authenticated:
@@ -166,8 +172,11 @@ def delete_account(request, username):
 	elif request.method == 'POST':
 		if request.user.is_authenticated:
 			delete_form = DeleteAccountForm(request.POST)
-			if not delete_form.is_valid():
-				return render(request, 'delete_account.html', {"form": delete_form, "error": "Values given are not valid"})
+			try:
+				if not delete_form.is_valid():
+					raise ValidationError("Values given are not valid") 
+			except ValidationError as ve:
+				return render(request, 'delete_account.html', {"form": delete_form, "error": ve})
 			username = request.user
 			password = delete_form.cleaned_data["password"]
 			user = authenticate(request, username=username, password=password)

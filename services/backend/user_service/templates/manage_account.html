@@ -17,22 +17,24 @@
 <p>E-mail: {{email}}</p>
 <button style="btn-primary" id="change-email">Change E-mail</button>
 <form id="email-change-form" style="display: none;">
-<div class="form-group">
+	{{email_form}}
+{% comment %} <div class="form-group">
 	<label for="email">New Email address</label>
 	<input type="email" class="form-control" id="email" name="email" placeholder="enter new email">
-</div>
+</div> {% endcomment %}
 <button type="submit" id="emailChange" class="btn btn-primary">Submit</button>
 </form>
 <button style="btn-primary" id="change-password">Change Password</button>
 <form id="password-change-form" style="display: none;">
-	<div class="form-group">
+	{{pasword_form}}
+	{% comment %} <div class="form-group">
 		<label for="password">New Password</label>
 		<input type="password" class="form-control" id="password" name="password" placeholder="enter new password" required>
 	</div>
 	<div class="form-group">
 		<label for="confirm_password">Confirm Password</label>
 		<input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="confirm password" required>
-	</div>
+	</div> {% endcomment %}
 	<button type="submit" id="passwordChange" class="btn btn-primary">Submit</button>
 </form>
 </div>
