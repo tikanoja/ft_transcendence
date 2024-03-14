@@ -153,9 +153,12 @@ def manage_account(request):
 		# send the interfacet hat will send POST reqs here
 		pass
 	elif request.method == 'POST':
+		if request.user.is_authenticated:
+			pass
 		# edit the user entry in db based off of info sent.
 		# only if authenticated.
-		pass
+		else:
+			return JsonResponse({'message': 'User needs to be logged into make changes to account'})
 
 def delete_account(request, username):
 	if request.method == 'GET':

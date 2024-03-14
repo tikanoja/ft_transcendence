@@ -1,0 +1,38 @@
+<div>
+<h2>Manage Account</h2>
+<p>Username: {{username}}</h3>
+<p>Name: {{first_name}} {{last_name}}</p>
+<button style="btn-primary" id="change-name">Change Name</button>
+<form id="name-change-form" style="display: none;">
+	<div class="form-group">
+        <label for="first-name">First name</label>
+        <input type="text" class="form-control" id="firstname" name="firstname" placeholder="enter new given name">
+	</div>
+	<div class="form-group">
+		<label for="lastname">Last name</label>
+		<input type="text" class="form-control" id="lastname" name="lastname" placeholder="enter new family name" required>
+    </div>
+	<button type="submit" id="nameChange" class="btn btn-primary">Submit</button>
+</form>
+<p>E-mail: {{email}}</p>
+<button style="btn-primary" id="change-email">Change E-mail</button>
+<form id="email-change-form" style="display: none;">
+<div class="form-group">
+	<label for="email">New Email address</label>
+	<input type="email" class="form-control" id="email" name="email" placeholder="enter new email">
+</div>
+<button type="submit" id="emailChange" class="btn btn-primary">Submit</button>
+</form>
+<button style="btn-primary" id="change-password">Change Password</button>
+<form id="password-change-form" style="display: none;">
+	<div class="form-group">
+		<label for="password">New Password</label>
+		<input type="password" class="form-control" id="password" name="password" placeholder="enter new password" required>
+	</div>
+	<div class="form-group">
+		<label for="confirm_password">Confirm Password</label>
+		<input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="confirm password" required>
+	</div>
+	<button type="submit" id="passwordChange" class="btn btn-primary">Submit</button>
+</form>
+</div>
