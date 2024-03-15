@@ -5,6 +5,8 @@
 
 const pageTitle = "Pong";
 
+import { updateEventListeners } from './index.js'
+
 // Listens to clicks on the entire document
 document.addEventListener("click", (e) => {
 	// Save the clicked element as target
@@ -14,6 +16,7 @@ document.addEventListener("click", (e) => {
 		return ;
 	}
 	// Prevent the navigation to a new page
+	// checkLogin();
 	e.preventDefault();
 	route();
 })
@@ -75,13 +78,23 @@ const route = (event) => {
 	locationHandler();
 }
 
+const routeRedirect = (target) => {
+	console.log("trying to: ", target);
+	// The event is either the one passed to it, or grab the window event if not (prev / forward buttons)
+	// Update browser history without triggering page reload
+	if (target == window.location.href)
+		return ;
+	window.history.pushState("", "", target);
+	locationHandler();
+}
+
 // By using 'async' we can use 'await'. This way we can use asynchronous operations without blocking the execution of other code
 const locationHandler = async () => {
 	// Get the path part of URL (eg. https://example.com/friends/profile returns /friends/profile)
 	const location = window.location.pathname;
 	// Redirect https://example.com to https://example.com/ in order to land on home page
 	if (location.length == 0)
-		location = "/";
+		location = "/"; 
 	// Check the routes (the views above) for a match, if no match: 404
 	const route = routes[location] || routes[404];
 	// Make a network request to the URL specified route.view
@@ -105,3 +118,8 @@ window.route = route;
 
 // Run route as soon as the page loads
 locationHandler();
+
+// if (window.location.pathname != "/login" && window.location.pathname != "/register")
+	// checkLogin();
+
+export { routeRedirect, locationHandler }

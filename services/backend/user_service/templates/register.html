@@ -1,7 +1,7 @@
 {% extends "form_base.html" %}
 {% block form %}
-{% if error_msg %}
-<p style="color: red">Error: {{error_msg}}</p>
+{% if error %}
+<p style="color: red">Error: {{error}}</p>
 {% endif %}
 <form id="registerForm" enctype="multipart/form-data">
 	{% csrf_token %}

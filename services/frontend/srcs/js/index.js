@@ -1,3 +1,5 @@
+import { routeRedirect } from './router.js'
+
 document.addEventListener("DOMContentLoaded", function () {
 	// Get the current URL path
 	var currentPath = window.location.pathname;
@@ -36,8 +38,24 @@ function getCookie(name) {
     return cookieValue;
 }
 
+function checkLogin() {
+    fetch('user/check_login/', {
+        method: 'POST',
+        credentials: 'include',
+    })
+    .then(response => {
+        if (!response.ok) {
+            window.location.href = '/login';
+        }
+    })
+    .catch(error => {
+        console.error('Problem with fetch call:', error);
+        window.location.href = '/login';
+    });
+}
+
 // callback?
-function sendRequest (endpoint, data, callback) {
+function sendRequest(endpoint, data, callback) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', endpoint, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -59,14 +77,35 @@ function sendRequest (endpoint, data, callback) {
         xhr.send();
 }
 
+const sendPostRequest = async (endpoint, data) => {
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        body: data
+    })
+    console.log("Response status in sendrequest: ", response.status)
+    return response
+}
+
+const sendGetRequest = async (endpoint, data, callback) => {
+    const response = await fetch(endpoint, {
+        method: 'GET'
+    })
+    return response
+}
+
+
+// function updateEventListeners(buttonId, event, nameOfF)
+// {
+//     var button = document.getElementById(buttonId);
+//     var func = ; // hey javascript get me this function with the name of nameofF
+//     button.removeEventListener(event, func);
+// }
+
 function updateEventListeners() {
     // Check if the buttons exist on the current view
-    var increaseButton = document.getElementById('increaseButton');
-    var decreaseButton = document.getElementById('decreaseButton');
-    var retrieveButton = document.getElementById('retrieveButton');
-    var connectButton = document.getElementById('connectButton');
-    var userConnectButton = document.getElementById('user-connectButton');
-    var userRetrieveButton = document.getElementById('user-retrieveButton');
+    // var connectButton = document.getElementById('connectButton');
+    // var userConnectButton = document.getElementById('user-connectButton');
+    // var userRetrieveButton = document.getElementById('user-retrieveButton');
     var loginForm = document.getElementById('loginForm');
     var registerForm = document.getElementById('registerForm');
     var loginButton = document.getElementById('loginButton');
@@ -74,24 +113,15 @@ function updateEventListeners() {
     var logoutButton = document.getElementById('logoutButton');
 
     // Remove existing event listeners if any
-    if (increaseButton) {
-        increaseButton.removeEventListener('click', increaseButtonClickHandler);
-    }
-    if (decreaseButton) {
-        decreaseButton.removeEventListener('click', decreaseButtonClickHandler);
-    }
-    if (retrieveButton) {
-        retrieveButton.removeEventListener('click', retrieveButtonClickHandler);
-    }
-    if (connectButton) {
-        connectButton.removeEventListener('click', connectButtonClickHandler);
-    }
-    if (userConnectButton) {
-        userConnectButton.removeEventListener('click', userConnectButtonClickHandler);
-    }
-    if (userRetrieveButton) {
-        userRetrieveButton.removeEventListener('click', userRetrieveButtonClickHandler);
-    }
+    // if (connectButton) {
+    //     connectButton.removeEventListener('click', connectButtonClickHandler);
+    // }
+    // if (userConnectButton) {
+    //     userConnectButton.removeEventListener('click', userConnectButtonClickHandler);
+    // }
+    // if (userRetrieveButton) {
+    //     userRetrieveButton.removeEventListener('click', userRetrieveButtonClickHandler);
+    // }
     if (loginForm) {
         loginForm.removeEventListener('submit', loginFormHandler);
     }
@@ -108,25 +138,16 @@ function updateEventListeners() {
         logoutButton.removeEventListener('click', logoutButtonClickHandler);
     }
 
-    // Attach event listeners only if the buttons exist
-    if (increaseButton) {
-        increaseButton.addEventListener('click', increaseButtonClickHandler);
-    }
-    if (decreaseButton) {
-        decreaseButton.addEventListener('click', decreaseButtonClickHandler);
-    }
-    if (retrieveButton) {
-        retrieveButton.addEventListener('click', retrieveButtonClickHandler);
-    }
-    if (connectButton) {
-        connectButton.addEventListener('click', connectButtonClickHandler);
-    }
-    if (userRetrieveButton) {
-        userRetrieveButton.addEventListener('click', userRetrieveButtonClickHandler);
-    }
-    if (userConnectButton) {
-        userConnectButton.addEventListener('click', userConnectButtonClickHandler);
-    }
+    // Attach event listeners only if the buttons exists
+    // if (connectButton) {
+    //     connectButton.addEventListener('click', connectButtonClickHandler);
+    // }
+    // if (userRetrieveButton) {
+    //     userRetrieveButton.addEventListener('click', userRetrieveButtonClickHandler);
+    // }
+    // if (userConnectButton) {
+    //     userConnectButton.addEventListener('click', userConnectButtonClickHandler);
+    // }
     if (loginForm) {
         loginForm.addEventListener('submit', loginFormHandler);
     }
@@ -145,65 +166,46 @@ function updateEventListeners() {
 
 }
 
+
 // Define separate click handlers for each button
-function increaseButtonClickHandler() {
-    sendRequest('http://localhost:8000/pong/increase_number/', (response) => {
-        console.log('Increased number:', response.number);
-    });
-}
 
-function decreaseButtonClickHandler() {
-    sendRequest('http://localhost:8000/pong/decrease_number/', (response) => {
-        console.log('Decreased number:', response.number);
-    });
-}
+// function connectButtonClickHandler() {
+//     const socket = new WebSocket('wss://localhost/ws/pong/');
+//     // const socket = new WebSocket('wss://backend:8000/ws/pong/');
+//     socket.onerror = function(error) {
+//         console.log('WebSocket Error: ', error);
+//     };
+//     socket.addEventListener('open', function (event) {
+//         console.log('WebSocket connection opened:', event);
+//         socket.send(JSON.stringify({ message: 'hello world' }));
+//     });
+//     socket.addEventListener('message', function (event) {
+// 		console.log('WebSocket message received:', event.data);
+// 	});
+//     socket.addEventListener('close', function (event) {
+//         console.log('WebSocket connection closed:', event);
+//     });
+// }
 
-function retrieveButtonClickHandler() {
-    sendRequest('http://localhost:8000/pong/get_number/', (response) => {
-        console.log('Current number:', response.number);
-    });
-}
+// function userConnectButtonClickHandler() {
+//     const socket = new WebSocket('wss://localhost/ws/user/');
+//     socket.onerror = function(error) {
+//         console.log('WebSocket Error: ', error);
+//     };
+//     socket.addEventListener('open', function (event) {
+//         console.log('WebSocket connection opened:', event);
+//         socket.send(JSON.stringify({ message: 'hello world' }));
+//     });
+//     socket.addEventListener('message', function (event) {
+// 		console.log('WebSocket message received:', event.data);
+// 	});
+//     socket.addEventListener('close', function (event) {
+//         console.log('WebSocket connection closed:', event);
+//     });
+// }
 
-function userRetrieveButtonClickHandler() {
-    sendRequest('http://localhost:8001/user/get_number/', (response) => {
-        console.log('Current number:', response.number);
-    });
-}
+// ***** USER SERVICE HANDLERS ***** //
 
-function connectButtonClickHandler() {
-    const socket = new WebSocket('wss://localhost/ws/pong/');
-    // const socket = new WebSocket('wss://backend:8000/ws/pong/');
-    socket.onerror = function(error) {
-        console.log('WebSocket Error: ', error);
-    };
-    socket.addEventListener('open', function (event) {
-        console.log('WebSocket connection opened:', event);
-        socket.send(JSON.stringify({ message: 'hello world' }));
-    });
-    socket.addEventListener('message', function (event) {
-		console.log('WebSocket message received:', event.data);
-	});
-    socket.addEventListener('close', function (event) {
-        console.log('WebSocket connection closed:', event);
-    });
-}
-
-function userConnectButtonClickHandler() {
-    const socket = new WebSocket('wss://localhost/ws/user/');
-    socket.onerror = function(error) {
-        console.log('WebSocket Error: ', error);
-    };
-    socket.addEventListener('open', function (event) {
-        console.log('WebSocket connection opened:', event);
-        socket.send(JSON.stringify({ message: 'hello world' }));
-    });
-    socket.addEventListener('message', function (event) {
-		console.log('WebSocket message received:', event.data);
-	});
-    socket.addEventListener('close', function (event) {
-        console.log('WebSocket connection closed:', event);
-    });
-}
 
 function loginButtonClickHandler(event) {
     event.preventDefault();
@@ -239,26 +241,6 @@ function logoutButtonClickHandler(event) {
     });
 }
 
-
-// const logoutButtonClickHandler = async (event) => {
-//     event.preventDefault();
-//     console.log("requesting logout!");
-
-//     // var endpoint = 'https://localhost/user/logout/';
-//     // sendRequest(endpoint, null, (response) => {
-//     //     console.log('Received response:', response);
-//     // });
-//     const html = await fetch('/user/logout/', {
-//         method: 'POST',
-//     }).then((response) => response.text());
-
-//     document.getElementById("content").innerHTML = html;
-// 	document.title = "Logout | Pong";
-// 	document.querySelector('meta[name="description"]').setAttribute("content", "Logout");
-//     updateEventListeners();
-// }
-
-
 const submitRegistrationHandler = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -274,18 +256,38 @@ const submitRegistrationHandler = async (event) => {
     updateEventListeners();
 }
 
+
 const loginFormHandler = async (event) => {
     event.preventDefault();
     console.log("in loginFormHandler")
     const formData = new FormData(event.target);
 
-    const html = await fetch('/user/login/', {
-        method: 'POST',
-        body: formData
-    }).then((response) => response.text());
-
-    document.getElementById("content").innerHTML = html;
-	document.title = "Login | Pong";
-	document.querySelector('meta[name="description"]').setAttribute("content", "Login");
-    updateEventListeners();
+	let response = await sendPostRequest('/user/login/', formData);
+	// html = response.body();
+    // console.log(html);
+    console.log("Response status: ", response.status, "Redirect: ", response.redirected)
+    if (response.redirected) {
+        console.log('redirect status found');
+        // do we display content and handle routing from here?
+        // or change routing to trigger the next request
+        // redirect_location = response.headers.get('location')
+        // routeRedirect(redirect_location)
+        routeRedirect('/play');
+    }
+	else if (response.ok) {
+        console.log('response,ok triggered');
+		// stay on this page, display the content again
+        response.text().then(function (text) {
+            document.getElementById("content").innerHTML = text;
+            document.title = "Login | Pong";
+            document.querySelector('meta[name="description"]').setAttribute("content", "Login");
+            updateEventListeners();
+        })
+	}
+	else {
+		console.log("Response status: ", response.status)
+		// some 400 or 500 code probably, show the error that was sent?
+	}
 }
+
+export { updateEventListeners, setActive }
