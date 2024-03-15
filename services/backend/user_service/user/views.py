@@ -9,40 +9,33 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login, logout
 from .forms import RegistrationForm, LoginForm
 
-
 logger = logging.getLogger(__name__)
 
 def register_user(request):
 	title = "Register as a new user"
 	if request.method == 'POST':
-		logger.debug('In register user')#
+		logger.debug('In register user')
 		sent_form = RegistrationForm(request.POST)
-		logger.debug(sent_form)#
-
 		try:
 			if not sent_form.is_valid():
 				raise ValidationError("Form filled incorrectly")
 		except ValidationError as ve:
-			logger.debug(f"Error in registration form: {ve}")#
+			logger.debug(f"Error in registration form: {ve}")
 			return render(request, 'register.html', {"form": sent_form, "title": title, "error": ve})
-		# pass validated user for database entry
 		new_user = CustomUser(username=sent_form.cleaned_data["username"], first_name=sent_form.cleaned_data["first_name"], last_name=sent_form.cleaned_data["last_name"], email=sent_form.cleaned_data["email"], password=sent_form.cleaned_data["password"])
 		new_user = get_user_model()
 		new_user.objects.create_user(username=sent_form.cleaned_data['username'], email=sent_form.cleaned_data['email'], password=sent_form.cleaned_data['password'])
 		response = JsonResponse({'message': 'congrats you registered!'})
 	elif request.method == 'GET':
-			logger.debug('hello getting reg form!')#
 			form = RegistrationForm()
 			return render(request, 'register.html', {"form": form, "title": title})
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 	return response
 
-
-# @csrf_exempt
 def login_user(request):
 	title = "Sign in"
-	if request.method == 'POST':#
+	if request.method == 'POST':
 		logger.debug('In login user POST')
 		sent_form = LoginForm(request.POST)
 		sent_form.is_valid()
@@ -77,7 +70,6 @@ def login_user(request):
 		response = JsonResponse({'error': "method not allowed. please use POST"})
 	return response
 
-@csrf_exempt
 def logout_user(request):
 	if request.method == 'POST':
 		logger.debug('In logout user')
@@ -90,13 +82,10 @@ def logout_user(request):
 		response = JsonResponse({'error': "method not allowed. please use POST"})
 	return response
 
-@csrf_exempt
 def get_current_username(request):
 	logger.debug('In get_current_username()')
-	origin = request.headers.get("Origin")
-	logger.debug('The origin for the request was: ' + origin)
 	if request.method == 'POST':
-		if request.user.is_authenticated: #The responnse comes with the session ID var stored in the browser and django automatically figures out which user this ID belongs to
+		if request.user.is_authenticated:
 			username = request.user.username
 		else:
 			username = 'unknown user'
@@ -106,6 +95,7 @@ def get_current_username(request):
 	return response
 
 def check_login(request):
+	logger.debug('In check_login()')
 	if request.user.is_authenticated:
 		return JsonResponse({'status': 'authenticated'})
 	else:
