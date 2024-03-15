@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from .models import CustomUser
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login, logout
-from .forms import RegistrationForm, LoginForm
+from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm
 
 logger = logging.getLogger(__name__)
 
@@ -101,3 +101,49 @@ def check_login(request):
 	else:
 		return JsonResponse({'status': 'not authenticated'}, status=401)
 
+def manage_account(request):
+	if request.method =='GET':
+		# send the interfacet hat will send POST reqs here
+		user = CustomUser.objects.filter(username=request.user)
+		# username = 
+		# 
+		password_form = UpdatePasswordForm()
+		email_form = UpdateEmailForm()
+		return render(request, "manage_account.html", {}) #"username"=user.get_field('username')
+		pass
+	elif request.method == 'POST':
+		if request.user.is_authenticated:
+			pass
+		# edit the user entry in db based off of info sent.
+		# only if authenticated.
+		else:
+			return JsonResponse({'message': 'User needs to be logged into make changes to account'})
+
+def delete_account(request, username):
+	if request.method == 'GET':
+		return JsonResponse({'message': 'This will have the form to fill and send for account deletion'})
+	elif request.method == 'POST':
+		if request.user.is_authenticated:
+			delete_form = DeleteAccountForm(request.POST)
+			try:
+				if not delete_form.is_valid():
+					raise ValidationError("Values given are not valid") 
+			except ValidationError as ve:
+				return render(request, 'delete_account.html', {"form": delete_form, "error": ve})
+			username = request.user
+			password = delete_form.cleaned_data["password"]
+			user = authenticate(request, username=username, password=password)
+			if user is not None:
+				# check if this should cascade delete the profile etc. remove from friend lists...
+				CustomUser.objects.filter(username=username).delete()
+				# delete account, return a success page with a 'link' to go to homepage
+				return JsonResponse({'message': 'Your account has been deleted'})
+			else:
+				return JsonResponse({'message': 'Unable to delete account. Check which account you are logged in as'})
+		else:
+			return JsonResponse({'message': 'User needs to be logged into delete account'})
+	
+""" 
+on account delete, how to handle other recodrs tied to that username? if the username isn't purged from all,
+if another user uses it they will then be linked to the other records...
+"""
