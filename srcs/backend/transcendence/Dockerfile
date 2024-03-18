@@ -7,14 +7,14 @@ RUN apt-get update && apt-get install -y \
 	libpq-dev \
 	openssl
 
-RUN mkdir -p /user_service/ssl
+RUN mkdir -p /transcendence/ssl
 
 RUN openssl req -newkey rsa:2048 -x509 -sha256 -days 365 -nodes \
-    -out /user_service/ssl/certificate.crt \
-    -keyout /user_service/ssl/certificate.key \
+    -out /transcendence/ssl/certificate.crt \
+    -keyout /transcendence/ssl/certificate.key \
     -subj "/C=FI/ST=Helsinki/L=Helsinki/O=42/OU=Hive/CN=pongchamps"
 
-WORKDIR /user_service
+WORKDIR /transcendence
 
 COPY requirements.txt .
 
@@ -33,11 +33,11 @@ CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 # CMD ["daphne", \
 # 	"-e", \
-# 	"ssl:8000:privateKey=/user_service/ssl/certificate.key:certKey=/user_service/ssl/certificate.crt", \
-# 	"user_service.asgi:application"]
+# 	"ssl:8000:privateKey=/transcendence/ssl/certificate.key:certKey=/transcendence/ssl/certificate.crt", \
+# 	"transcendence.asgi:application"]
 
 # CMD ["daphne", \
-#     "-e", "ssl:8000:privateKey=/user_service/ssl/certificate.crt:certKey=/user_service/ssl/certificate.key", \
+#     "-e", "ssl:8000:privateKey=/transcendence/ssl/certificate.crt:certKey=/transcendence/ssl/certificate.key", \
 # 	"--websocket_timeout=300", "--websocket_connect_timeout=100", \
-#     "user_service.asgi:application", \
+#     "transcendence.asgi:application", \
 #     "-v", "3"]

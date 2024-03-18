@@ -49,12 +49,12 @@ const routes = {
 		description: "Manage your settings"
 	},
 	"/login" : {
-		view: "/user/login",
+		view: "/app/login",
 		title: "Login | " + pageTitle,
 		description: "Login"
 	}, 
 	"/register" : {
-		view: "/user/register",
+		view: "/app/register",
 		title: "Login | " + pageTitle,
 		description: "Login"
 	},

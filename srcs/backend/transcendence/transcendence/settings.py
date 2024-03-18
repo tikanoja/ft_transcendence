@@ -25,12 +25,12 @@ SECRET_KEY = 'django-insecure-*9#ubcwnam1fwt8y$$*l3)+u-cpsh+ms)w%pglfthdiwgza*8u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'http://localhost', 'https://localhost', 'user-service']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'http://localhost', 'https://localhost', 'transcendence']
 CSRF_TRUSTED_ORIGINS = ['https://localhost']
 # Application definition
 INSTALLED_APPS = [
     'channels',
-    'user',
+    'app',
     'daphne',
 
     'django.contrib.admin',
@@ -46,13 +46,13 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'user_service.cors_middleware.CorsMiddleware',
+    'transcendence.cors_middleware.CorsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'user_service.urls'
+ROOT_URLCONF = 'transcendence.urls'
 
 TEMPLATES = [
     {
@@ -71,8 +71,8 @@ TEMPLATES = [
 ]
 
 #add!
-ASGI_APPLICATION = 'user_service.asgi.application'
-WSGI_APPLICATION = 'user_service.wsgi.application'
+ASGI_APPLICATION = 'transcendence.asgi.application'
+WSGI_APPLICATION = 'transcendence.wsgi.application'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_SAMESITE = 'None' #Remove this for CORS
@@ -94,7 +94,7 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME':  os.environ.get('USER_SERVICE_DB'),
+        'NAME':  os.environ.get('transcendence_DB'),
         'USER': os.environ.get('POSTGRES_USER'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
         'HOST': 'database',
@@ -102,8 +102,8 @@ DATABASES = {
     }
 }
 
-# Add custom model for auth user
-AUTH_USER_MODEL = 'user.CustomUser'
+# Add custom model for auth app
+AUTH_USER_MODEL = 'app.CustomUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

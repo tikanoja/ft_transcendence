@@ -13,10 +13,10 @@ from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from channels.security.websocket import AllowedHostsOriginValidator
-from user_service.routing import websocket_urlpatterns
-from user.consumers import UserConsumer
+from transcendence.routing import websocket_urlpatterns
+from app.consumers import UserConsumer
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'user_service.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'transcendence.settings')
 
 application = ProtocolTypeRouter({
 	'http': get_asgi_application(),

@@ -39,7 +39,7 @@ function getCookie(name) {
 }
 
 function checkLogin() {
-    fetch('user/check_login/', {
+    fetch('app/check_login/', {
         method: 'POST',
         credentials: 'include',
     })
@@ -215,7 +215,7 @@ function loginButtonClickHandler(event) {
     loginData["username"] = document.getElementById('usernameLogin').value;
     loginData["password"] = document.getElementById('passwordLogin').value;
 
-    var endpoint = '/user/login_user/';
+    var endpoint = '/app/login_user/';
     sendRequest(endpoint, loginData, (response) => {
         console.log('Received response:', response);
     });
@@ -225,7 +225,7 @@ function usernameButtonClickHandler(event) {
     event.preventDefault();
     console.log("requesting username!");
 
-    var endpoint = 'http://localhost:8001/user/get_current_username/'
+    var endpoint = 'http://localhost:8001/app/get_current_username/'
     sendRequest(endpoint, null, (response) => {
         console.log('Received response:', response);
     });
@@ -235,7 +235,7 @@ function logoutButtonClickHandler(event) {
     event.preventDefault();
     console.log("requesting logout!");
 
-    var endpoint = '/user/logout/';
+    var endpoint = '/app/logout/';
     sendRequest(endpoint, null, (response) => {
         console.log('Received response:', response);
     });
@@ -245,7 +245,7 @@ const submitRegistrationHandler = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
 
-    const html = await fetch('/user/register/', {
+    const html = await fetch('/app/register/', {
         method: 'POST',
         body: formData
     }).then((response) => response.text());
@@ -262,7 +262,7 @@ const loginFormHandler = async (event) => {
     console.log("in loginFormHandler")
     const formData = new FormData(event.target);
 
-	let response = await sendPostRequest('/user/login/', formData);
+	let response = await sendPostRequest('/app/login/', formData);
 	// html = response.body();
     // console.log(html);
     console.log("Response status: ", response.status, "Redirect: ", response.redirected)
