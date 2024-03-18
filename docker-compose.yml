@@ -3,14 +3,14 @@
 services:
   frontend:
     build:
-      context: ./services/frontend
+      context: ./srcs/frontend
       dockerfile: Dockerfile
     image: frontend-img:dev
     container_name: frontend_c
+    depends_on:
+      - transcendence
     ports:
       - "443:443"
-    depends_on:
-      - pong_service
     env_file: .env
     networks:
       - frontend-network
@@ -18,14 +18,12 @@ services:
     volumes:
       - frontend-data:/app/frontend
 
-  pong_service:
+  transcendence:
     build:
-      context: ./services/backend/pong_service
+      context: ./srcs/backend/transcendence
       dockerfile: Dockerfile
-    image: pong_service-img:dev
-    container_name: pong_service_c
-    ports:
-      - "8000:8000"
+    image: transcendence-img:dev
+    container_name: transcendence_c
     env_file: .env
     restart: always
     depends_on:
@@ -35,26 +33,9 @@ services:
       - frontend-network
       - backend-network
 
-  # user_service:
-  #   build:
-  #     context: ./services/backend/user_service
-  #     dockerfile: Dockerfile
-  #   image: user_service-img:dev
-  #   container_name: user_service_c
-  #   ports:
-  #     - "8000:8000"
-  #   env_file: .env
-  #   restart: always
-  #   depends_on:
-  #     database:
-  #       condition: service_healthy
-  #   networks:
-  #     - frontend-network
-  #     - backend-network
-
   database:
     build:
-      context: ./services/backend/database
+      context: ./srcs/backend/database
       dockerfile: Dockerfile
     image: database-img:dev
     container_name: database_c
@@ -78,7 +59,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ./services/frontend/srcs
+      device: ./srcs/frontend/srcs
       o: bind
   database-data:
     name: database-data

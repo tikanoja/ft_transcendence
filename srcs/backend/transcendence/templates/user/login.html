@@ -1,0 +1,22 @@
+{% extends "user/form_base.html" %}
+{% block form %}
+{% if error %}
+<p style="color: red">Error: {{error}}</p>
+{% endif %}
+<form id="loginForm" >
+	{% csrf_token %}
+	{% for field in form %}
+	<div class="form-group">
+	<p style="color: red">{{ field.errors }}<p>
+	{{ field.label_tag }} {{ field }}
+	</div>
+	{% endfor %}
+	<input type="submit" value="Login">
+</form>
+<div>
+<p>Don't have an account? Make one <nav><a href="/register">here</a></nav> </p>
+</div>
+{% endblock %}
+
+
+{% comment %} {% include {{real_html}} %} {% endcomment %}

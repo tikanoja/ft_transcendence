@@ -21,7 +21,7 @@ logs:
 	docker logs --tail 10 frontend_c
 	@echo "\n* * * * * * * * * * DATABASE LOGS * * * * * * * * * *"
 	docker logs --tail 10 database_c
-	@echo "\n* * * * * * * * * * PONG LOGS * * * * * * * * * *"
-	docker logs --tail 10 pong_service_c
+	@echo "\n* * * * * * * * * * USER LOGS * * * * * * * * * *"
+	docker logs --tail 10 transcendence_c
 
 .PHONY: all clean fclean re up down
