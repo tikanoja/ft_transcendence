@@ -1,4 +1,5 @@
 import json
+import string
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 
@@ -8,7 +9,9 @@ i = 0
 class ClientConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
+        global i
         self.groups = [tmp_user[i], "Global"]
+        i += 1
         for group in self.groups:
             await self.channel_layer.group_add(group, self.channel_name)
         await self.accept()
@@ -19,13 +22,26 @@ class ClientConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_discard(group, self.channel_name)
 
     async def receive(self, text_data : str):
-        print(text_data)
         packet = json.loads(text_data)
+
+        message : str = packet["message"].strip(string.whitespace)
+        if not message or len(message) > 255 or not message.isprintable():
+            return
+
+        target : str = "Global"
+        if message.startswith("/w "):
+            split = message.split(None, 2)
+            if len(split) < 3:
+                return 
+            _, target, message = split
+            if not target or not message:
+                return
+            
         await self.channel_layer.group_send(
-            "Global",
+            target,
             {
                 "type": "chat.message",
-                "message": "[" + self.groups[0] + "] " + packet["message"]
+                "message": "".join(["[", self.groups[0], "] ", message])
             }
         )
 
