@@ -1,16 +1,16 @@
-{% extends "form_base.html" %}
+{% extends "user/form_base.html" %}
 {% block form %}
 {% if error %}
 <p style="color: red">Error: {{error}}</p>
 {% endif %}
-<form id="registerForm" enctype="multipart/form-data">
+<form id="deleteAccountForm" >
 	{% csrf_token %}
 	{% for field in form %}
 	<div class="form-group">
-	{{ field.errors }}
+	<p style="color: red">{{ field.errors }}<p>
 	{{ field.label_tag }} {{ field }}
 	</div>
 	{% endfor %}
-	<input type="submit" value="Register">
+	<input type="submit" value="Login">
 </form>
 {% endblock %}
