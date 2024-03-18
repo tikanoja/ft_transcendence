@@ -31,7 +31,6 @@ def registerGET(request):
 	return render(request, 'user/register.html', {"form": form, "title": title})
 
 
-
 def loginPOST(request):
 	title = "Sign in"
 	sent_form = LoginForm(request.POST)
