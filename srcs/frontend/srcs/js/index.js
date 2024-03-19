@@ -111,6 +111,7 @@ function updateEventListeners() {
     var loginButton = document.getElementById('loginButton');
     var usernameButton = document.getElementById('getUsernameButton');
     var logoutButton = document.getElementById('logoutButton');
+    var deleteForm = document.getElementById('deleteAccountForm');
 
     // Remove existing event listeners if any
     // if (connectButton) {
@@ -122,6 +123,9 @@ function updateEventListeners() {
     // if (userRetrieveButton) {
     //     userRetrieveButton.removeEventListener('click', userRetrieveButtonClickHandler);
     // }
+    if (deleteForm) {
+        deleteForm.removeEventListener('submit', deleteFormHandler);
+    }
     if (loginForm) {
         loginForm.removeEventListener('submit', loginFormHandler);
     }
@@ -162,6 +166,9 @@ function updateEventListeners() {
     }
     if (logoutButton) {
         logoutButton.addEventListener('click', logoutButtonClickHandler);
+    }
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', deleteFormHandler);
     }
 
 }
@@ -281,6 +288,42 @@ const loginFormHandler = async (event) => {
             document.getElementById("content").innerHTML = text;
             document.title = "Login | Pong";
             document.querySelector('meta[name="description"]').setAttribute("content", "Login");
+            updateEventListeners();
+        })
+	}
+	else {
+		console.log("Response status: ", response.status)
+		// some 400 or 500 code probably, show the error that was sent?
+	}
+}
+
+const deleteFormHandler= async (event) => {
+    event.preventDefault();
+    console.log("in loginFormHandler")
+    const formData = new FormData(event.target);
+
+	let response = await sendPostRequest('/app/delete_account/', formData);
+	// html = response.body();
+    // console.log(html);
+    console.log("Response status: ", response.status, "Redirect: ", response.redirected)
+    if (response.redirected) {
+        console.log('redirect status found');
+        // for now show the resulting message, redirect later
+        // response.text().then(function (text) {
+        //     document.getElementById("content").innerHTML = text;
+        //     document.title = "Delete Account | Pong";
+        //     document.querySelector('meta[name="description"]').setAttribute("content", "Delete Account");
+        //     updateEventListeners();
+        // })
+        routeRedirect('/login');
+    }
+	else if (response.ok) {
+        console.log('response,ok triggered');
+		// stay on this page, display the content again
+        response.text().then(function (text) {
+            document.getElementById("content").innerHTML = text;
+            document.title = "Delete Account | Pong";
+            document.querySelector('meta[name="description"]').setAttribute("content", "Delete Account");
             updateEventListeners();
         })
 	}

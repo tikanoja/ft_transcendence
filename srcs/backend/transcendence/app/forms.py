@@ -51,7 +51,7 @@ class DeleteAccountForm(forms.Form):
 	confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
 
 	def is_valid(self):
-		valid = super.is_valid()
+		valid = super().is_valid()
 		
 		if not valid:
 			return False

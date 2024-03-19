@@ -62,6 +62,11 @@ const routes = {
 		view: "../views/login.html",
 		title: "Login | " + pageTitle,
 		description: "Login"
+	},
+	"/delete-account" : {
+		view: "/app/delete_account",
+		title: "Login | " + pageTitle,
+		description: "Login"
 	}
 }
 // route above should not be the same as the calls to the backend...seems fragile

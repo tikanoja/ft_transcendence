@@ -104,8 +104,8 @@ def manage_accountGET(request):
 
 
 def delete_accountGET(request):
-	return JsonResponse({'message': 'This will have the form to fill and send for account deletion'})
-
+	form  = DeleteAccountForm()
+	return render(request, 'user/delete_account.html', {"form": form, "username": request.user})
 
 def delete_accountPOST(request):
 	if request.user.is_authenticated:
@@ -122,7 +122,9 @@ def delete_accountPOST(request):
 			# check if this should cascade delete the profile etc. remove from friend lists...
 			CustomUser.objects.filter(username=username).delete()
 			# delete account, return a success page with a 'link' to go to homepage
-			return JsonResponse({'message': 'Your account has been deleted'})
+			res =  JsonResponse({'message': 'Your account has been deleted'}, status=301) #can I have the message show up in the next location?
+			res['Location'] = "/login"
+			return res
 		else:
 			return JsonResponse({'message': 'Unable to delete account. Check which account you are logged in as'})
 	else:

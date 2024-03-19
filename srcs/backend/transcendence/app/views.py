@@ -72,8 +72,8 @@ def manage_account(request):
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 	return response
 
-
-def delete_account(request, username):
+# only allow interaction if user has session
+def delete_account(request):
 	logger.debug('In delete_account()')
 	if request.method == 'GET':
 		response = user.delete_accountGET(request)

@@ -1,5 +1,6 @@
 {% extends "user/form_base.html" %}
 {% block form %}
+<p>Submitting this form will cause the irreversiable action of deleting the account for user: {{username}}</p>
 {% if error %}
 <p style="color: red">Error: {{error}}</p>
 {% endif %}
@@ -11,6 +12,6 @@
 	{{ field.label_tag }} {{ field }}
 	</div>
 	{% endfor %}
-	<input type="submit" value="Login">
+	<input type="submit" value="Delete Account">
 </form>
 {% endblock %}
