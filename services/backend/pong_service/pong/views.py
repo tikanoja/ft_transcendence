@@ -30,16 +30,6 @@ def increase_number(request):
     response = {'successful increase'}                                                                
     return Response(response)
 
-@api_view(['GET']) 
-def decrease_number(request):
-    global p1_score
-    global p2_score
-    p1_score -= 1
-    p2_score -= 1
-    response = {'successful decrease'}                                                                
-    return Response(response)
-
-
 @api_view(['GET'])
 def get_game_state(request):
     global p1_x_pos
@@ -57,9 +47,15 @@ def get_game_state(request):
 def decrease_number(request):
     global p1_score
     global p2_score
+    global p1_y_pos
+    global p2_y_pos
+
+    p1_y_pos -= 0.2
+    p2_y_pos -= 0.2
     p1_score -= 1
     p2_score -= 1
-    response = {'successful decrease'}                                                                
+
+    response = {'successful increase'}                                                                
     return Response(response)
 
 

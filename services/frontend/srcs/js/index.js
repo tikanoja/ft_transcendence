@@ -37,6 +37,7 @@ function sendRequest(endpoint, callback) {
     };
     xhr.send();
 }
+// index.js:38     GET http://localhost:8000/pong/get_game_state/ net::ERR_INSUFFICIENT_RESOURCES
 
 
 function updateEventListeners() {
@@ -113,12 +114,6 @@ function increaseButtonClickHandler() {
         console.log(response);
     });
 }
-
-function decreaseButtonClickHandler() {
-    sendRequest('pong/decrease_number/', function (response) {
-        console.log(response);
-    });
-};
 
 
 function decreaseButtonClickHandler() {

@@ -143,9 +143,9 @@ export const renderPongGame = (is3DGraphics) => {
     }
     ///set up is completed by this point, game is now rendering/////
 
-    var clock = new THREE.Clock();
-    var time = 0;
-    var delta = 0;
+    // var clock = new THREE.Clock();
+    // var time = 0;
+    // var delta = 0;
 
     camera.position.z = 200;
 
@@ -157,13 +157,14 @@ export const renderPongGame = (is3DGraphics) => {
         }).catch(error => {
             console.error('Error fetching game state:', error);
         });
+		updateScoreboard();
     }
 
     // Update the game state 50 times per second
-    const gameStateInterval = setInterval(updateGameState, 1000 / 50);
+    // const gameStateInterval = setInterval(updateGameState, 1000 / 50);
      
     // Update the game state 1 times per second for debugging
-    // const gameStateInterval = setInterval(updateGameState, 3000);
+    const gameStateInterval = setInterval(updateGameState, 3000);
 
     // Stop updating the game state when the page changes
     document.addEventListener('pagechange', () => {
@@ -172,9 +173,6 @@ export const renderPongGame = (is3DGraphics) => {
 
     function animate() {
         requestAnimationFrame(animate);
-        updateGameState();
-        updateScoreboard();
-    
         renderer.render(scene, camera); // Move this line here
     }
     
@@ -238,5 +236,6 @@ export const renderPongGame = (is3DGraphics) => {
             stopAnimation();
         }
     });
+
     startAnimation();
 };
