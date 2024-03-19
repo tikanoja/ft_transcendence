@@ -78,7 +78,7 @@ def	logoutPOST(request):
 
 def	get_current_usernamePOST(request):
 	if request.user.is_authenticated:
-			username = request.user.username
+		username = request.user.username
 	else:
 		username = 'unknown user'
 	return username
@@ -127,3 +127,7 @@ def delete_accountPOST(request):
 			return JsonResponse({'message': 'Unable to delete account. Check which account you are logged in as'})
 	else:
 		return JsonResponse({'message': 'User needs to be logged into delete account'})
+
+
+def settingsGET(request):
+	return render(request, "user/settings.html", {})

@@ -5,7 +5,7 @@
 
 const pageTitle = "Pong";
 
-import { updateEventListeners } from './index.js'
+import { updateEventListeners, checkLogin } from './index.js'
 
 // Listens to clicks on the entire document
 document.addEventListener("click", (e) => {
@@ -44,7 +44,7 @@ const routes = {
 		description: "Chat and manage friends"
 	},
 	"/settings" : {
-		view: "../views/settings.html",
+		view: "/app/settings",
 		title: "Settings | " + pageTitle,
 		description: "Manage your settings"
 	},
@@ -79,9 +79,6 @@ const route = (event) => {
 }
 
 const routeRedirect = (target) => {
-	console.log("trying to: ", target);
-	// The event is either the one passed to it, or grab the window event if not (prev / forward buttons)
-	// Update browser history without triggering page reload
 	if (target == window.location.href)
 		return ;
 	window.history.pushState("", "", target);
@@ -97,18 +94,24 @@ const locationHandler = async () => {
 		location = "/"; 
 	// Check the routes (the views above) for a match, if no match: 404
 	const route = routes[location] || routes[404];
-	// Make a network request to the URL specified route.view
-		// .then() is used to handle the Promise returned by fetch. It waits for the fetch to to complete and processes the response
-		// (response) => response.text() takes the response object returned by fetch and converts its body to text
-		// await waits for the entire .then() chain to resolve
-	console.log("about to fetch ", route)
-	const html = await fetch(route.view).then((response) => response.text());
-	// Update the main content element with the content of the retrieved html
-	document.getElementById("content").innerHTML = html;
-	document.title = route.title;
-	document.querySelector('meta[name="description"]').setAttribute("content", route.description);
+	const response = await fetch(route.view);
+	console.log('hello, the status was ' + response.status)
+	if (response.status === 302 || response.status === 303) {
+		const newUrl = response.headers.get('Location');
+		console.log('django redirected us to: ' + newUrl);
+		if (newUrl) {
+			window.history.pushState("", "", newUrl);
+			locationHandler();
+		}
+	} else {
+		const html = await response.text();
+		// Update the main content element with the content of the retrieved html
+		document.getElementById("content").innerHTML = html;
+		document.title = route.title;
+		document.querySelector('meta[name="description"]').setAttribute("content", route.description);
 
-	updateEventListeners();
+		updateEventListeners();
+	}
 }
 
 // Add an event listener to the window that looks for URL changes
