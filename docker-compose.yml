@@ -35,6 +35,19 @@ services:
       - frontend-network
       - backend-network
 
+  pong:
+    build:
+      context: ./services/backend/pong
+      dockerfile: Dockerfile
+    image: pong_img:dev
+    container_name: pong_c
+    ports:
+      - "8080:8080"
+    env_file: .env
+    restart: always
+    networks:
+      - backend-network  
+
   # user_service:
   #   build:
   #     context: ./services/backend/user_service
