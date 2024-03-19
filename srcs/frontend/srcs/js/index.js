@@ -21,6 +21,8 @@ function setActive(link) {
 	link.classList.add('active');
 }
 
+window.setActive = setActive;
+
 // Once we are using templates, we should include a csrftoken in django. Then django will be very happy and there is no need for decorator.
 function getCookie(name) {
     let cookieValue = null;
@@ -42,15 +44,26 @@ function checkLogin() {
     fetch('app/check_login/', {
         method: 'POST',
         credentials: 'include',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
     })
     .then(response => {
         if (!response.ok) {
-            window.location.href = '/login';
+            return false;
+        }
+        return response.json()
+    })
+    .then(data => {
+        if (data.status === 'authenticated') {
+            return true;
+        } else {
+            return false;
         }
     })
     .catch(error => {
         console.error('Problem with fetch call:', error);
-        window.location.href = '/login';
+        return false;
     });
 }
 
@@ -290,4 +303,4 @@ const loginFormHandler = async (event) => {
 	}
 }
 
-export { updateEventListeners, setActive }
+export { updateEventListeners, setActive, checkLogin }

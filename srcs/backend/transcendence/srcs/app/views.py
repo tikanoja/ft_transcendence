@@ -9,6 +9,7 @@ from .models import CustomUser
 from django.contrib.auth import authenticate #, login, logout
 # from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm
 from . import user
+from django.contrib.auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ def check_login(request):
 	if request.user.is_authenticated:
 		return JsonResponse({'status': 'authenticated'})
 	else:
-		return JsonResponse({'status': 'not authenticated'}, status=401)
+		return JsonResponse({'status': 'not authenticated'})
 
 
 def manage_account(request):
@@ -79,6 +80,17 @@ def delete_account(request, username):
 		response = user.delete_accountGET(request)
 	elif request.method == 'POST':
 		response = user.delete_accountPOST(request)
+	else:
+		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+	return response
+
+@login_required(login_url='/login/')
+def settings(request):
+	logger.debug('In settings()')
+	if request.method == 'GET':
+		response = user.settingsGET(request)
+	elif request.method == 'POST':
+		response = user.settingsPOST(request)
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 	return response
