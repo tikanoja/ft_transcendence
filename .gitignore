@@ -1,2 +1,11 @@
-.DS_Store
+# MacOS
+.DS_Store/
+
+# VSCode
 .vscode/
+
+# Python
+__pycache__/
+
+# Django
+migrations/
