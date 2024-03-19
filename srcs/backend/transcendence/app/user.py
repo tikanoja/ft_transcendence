@@ -129,3 +129,22 @@ def delete_accountPOST(request):
 			return JsonResponse({'message': 'Unable to delete account. Check which account you are logged in as'})
 	else:
 		return JsonResponse({'message': 'User needs to be logged into delete account'})
+
+
+# basic details username, name, image link, other public viewable stuff
+# email, other spcific things? for self view
+def get_profile_details(username:str, self:bool) -> dict:
+	pass
+
+
+# hadcode a dict of friends for now
+def get_friends_dict(username):
+	pass
+
+
+def get_game_history(usesrname:str, self:bool) -> dict:
+	pass
+
+
+def get_dashboard_stats(username:str, self:bool) -> dict:
+	pass
