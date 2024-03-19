@@ -1,5 +1,3 @@
-# version: '1'
-
 services:
   frontend:
     build:
@@ -7,8 +5,6 @@ services:
       dockerfile: Dockerfile
     image: frontend-img:dev
     container_name: frontend_c
-    depends_on:
-      - transcendence
     ports:
       - "443:443"
     env_file: .env
@@ -16,7 +12,9 @@ services:
       - frontend-network
     restart: always
     volumes:
-      - frontend-data:/app/frontend
+      - ./srcs/frontend/srcs/:/var/html/www:ro
+    depends_on:
+      - transcendence
 
   transcendence:
     build:
@@ -24,14 +22,18 @@ services:
       dockerfile: Dockerfile
     image: transcendence-img:dev
     container_name: transcendence_c
+    expose:
+      - "8000:8000"
     env_file: .env
     restart: always
-    depends_on:
-      database:
-        condition: service_healthy
     networks:
       - frontend-network
       - backend-network
+    volumes:
+      - ./srcs/backend/transcendence/srcs:/transcendence:ro
+    depends_on:
+      database:
+        condition: service_healthy
 
   database:
     build:
@@ -39,7 +41,7 @@ services:
       dockerfile: Dockerfile
     image: database-img:dev
     container_name: database_c
-    ports:
+    expose:
       - "5432:5432"
     env_file: .env
     restart: always
@@ -54,13 +56,6 @@ services:
       retries: 10
 
 volumes:
-  frontend-data:
-    name: frontend-data
-    driver: local
-    driver_opts:
-      type: none
-      device: ./srcs/frontend/srcs
-      o: bind
   database-data:
     name: database-data
 

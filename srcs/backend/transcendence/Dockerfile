@@ -8,28 +8,20 @@ RUN apt-get update && apt-get install -y \
 	openssl
 
 RUN mkdir -p /transcendence/ssl
-
 RUN openssl req -newkey rsa:2048 -x509 -sha256 -days 365 -nodes \
     -out /transcendence/ssl/certificate.crt \
     -keyout /transcendence/ssl/certificate.key \
     -subj "/C=FI/ST=Helsinki/L=Helsinki/O=42/OU=Hive/CN=pongchamps"
 
+COPY ./conf/requirements.txt /tmp/
+RUN pip install --no-cache-dir --upgrade pip -r /tmp/requirements.txt
+
 WORKDIR /transcendence
 
-COPY requirements.txt .
-
-RUN pip install --no-cache-dir --upgrade pip -r requirements.txt
-
-COPY . .
-
-EXPOSE 8000
-
-RUN chmod +x entrypoint.sh
-
 # Having this enabled causes an error... Uncomment and check 'docker logs database_c'
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["./start.sh"]
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# CMD ["python", "volume/manage.py", "runserver", "0.0.0.0:8000"]
 
 # CMD ["daphne", \
 # 	"-e", \
