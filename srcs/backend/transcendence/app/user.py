@@ -134,11 +134,19 @@ def delete_accountPOST(request):
 # basic details username, name, image link, other public viewable stuff
 # email, other spcific things? for self view
 def get_profile_details(username:str, self:bool) -> dict:
-	pass
+	details = {}
+	user = CustomUser.objects.filter(username=username)
+	details["username"] = username
+	details["first_name"] = user.first_name
+	details["last_name"] = user.last_name
+	if self:
+		details["email"] = user.email
+	# details["img"] = user.img #how to get link for profile image?
+	return details
 
 
 # hadcode a dict of friends for now
-def get_friends_dict(username):
+def get_friends_dict(username:str, self:bool) -> dict:
 	pass
 
 
