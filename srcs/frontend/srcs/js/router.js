@@ -110,6 +110,7 @@ const locationHandler = async () => {
 		console.log("FETCH RESPONSE WAS NOT OK!");
 	if (response.redirected){
 		console.log('* * * response.redirected * * *')
+		console.log('location header in locHandler: ' + response.headers.get('Location'));
 		console.log(response);
 		const newUrl = response.url;
 		console.log('django redirected us to: ' + newUrl);

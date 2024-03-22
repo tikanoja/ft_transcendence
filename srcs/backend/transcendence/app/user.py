@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 import logging
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
 
 logger = logging.getLogger(__name__)
 
@@ -73,11 +74,8 @@ def loginGET(request):
 def	logoutPOST(request):
 	if request.user.is_authenticated:
 		logout(request)
-		response = JsonResponse({'success': "Logged out!"}, status=301)
 		next = request.GET.get('next', '/login')
-		if next:
-			response['Location'] = next
-		return response	
+		return HttpResponseRedirect(next)	
 	else:
 		response = JsonResponse({'error': "Already logged out."})
 	return response
