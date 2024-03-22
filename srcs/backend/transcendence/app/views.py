@@ -95,6 +95,12 @@ def settings(request):
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 	return response
 
+def notfound(request):
+	logger.debug('in notfound()')
+	if request.method == 'GET':
+		return render(request, 'user/404.html', {})
+	else:
+		return JsonResponse({'error': "method not allowed. please use GET"})
 
 """ 
 on account delete, how to handle other recodrs tied to that username? if the username isn't purged from all,

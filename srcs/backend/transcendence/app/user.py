@@ -46,11 +46,9 @@ def loginPOST(request):
 		request.session['user_id'] = user.id #store user ID explicity to the request.session dictionary
 		# response = JsonResponse({'success': "you just logged in"})
 		res = JsonResponse({'success': "you just logged in"}, status=301)
-		next = request.GET['next']
+		next = request.GET.get('next', '/play')
 		if next:
 			res['Location'] = next
-		else:
-			res['Location'] = "/play"
 		logger.debug("sending back a response w code %s", res.status_code)
 		return res
 		# could send a redirect to the home page or user profile
@@ -75,9 +73,13 @@ def loginGET(request):
 def	logoutPOST(request):
 	if request.user.is_authenticated:
 		logout(request)
-		response = JsonResponse({'success': "Logged out!"})
+		response = JsonResponse({'success': "Logged out!"}, status=301)
+		next = request.GET.get('next', '/login')
+		if next:
+			response['Location'] = next
+		return response	
 	else:
-		response = JsonResponse({'error': "User is not logged in."}, status=401)
+		response = JsonResponse({'error': "Already logged out."})
 	return response
 
 def	get_current_usernamePOST(request):

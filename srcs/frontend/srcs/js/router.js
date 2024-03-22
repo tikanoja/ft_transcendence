@@ -22,9 +22,10 @@ document.addEventListener("click", (e) => {
 })
 
 // An array of the possible routes (eg. views, pages... etc)
+// * * * * REMEMBER TRAILING / FOR BACKEND CALLS TO AVOID HOURS OF PAIN!!!!! * * * *
 const routes = {
 	404 : {
-		view: "../views/404.html",
+		view: "/app/notfound/",
 		title: "404 | " + pageTitle,
 		description: "Page not found"
 	},
@@ -44,17 +45,17 @@ const routes = {
 		description: "Chat and manage friends"
 	},
 	"/settings" : {
-		view: "/app/settings",
+		view: "/app/settings/",
 		title: "Settings | " + pageTitle,
 		description: "Manage your settings"
 	},
 	"/login" : {
-		view: "/app/login",
+		view: "/app/login/",
 		title: "Login | " + pageTitle,
 		description: "Login"
 	}, 
 	"/register" : {
-		view: "/app/register",
+		view: "/app/register/",
 		title: "Login | " + pageTitle,
 		description: "Login"
 	},
@@ -81,6 +82,7 @@ const route = (event) => {
 const routeRedirect = (target) => {
 	if (target == window.location.href)
 		return ;
+	console.log('in routeRedir! target: ' + target)
 	window.history.pushState("", "", target);
 	locationHandler();
 }
@@ -103,12 +105,16 @@ const locationHandler = async () => {
 	const route = routes[location] || routes[404];
 	const querystring = window.location.search;
 	console.log('fetching this thing: ' + route.view + querystring);
-	const response = await fetch(route.view + querystring, {redirection: 'manual'});
+	const response = await fetch(route.view + querystring)//, {redirect: 'manual'});
+	if (!response.ok)
+		console.log("FETCH RESPONSE WAS NOT OK!");
 	if (response.redirected){
+		console.log('* * * response.redirected * * *')
 		console.log(response);
 		const newUrl = response.url;
 		console.log('django redirected us to: ' + newUrl);
 		if (newUrl) {
+			console.log('* * * newUrl * * *')
 			window.history.pushState("", "", newUrl);
 			// locationHandler();
 			const html = await response.text();
@@ -118,6 +124,7 @@ const locationHandler = async () => {
 			updateEventListeners();
 		}
 	} else {
+		console.log('* * * else * * *');
 		const html = await response.text();
 		document.getElementById("content").innerHTML = html;
 		document.title = route.title;
