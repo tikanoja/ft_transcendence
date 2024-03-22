@@ -46,7 +46,11 @@ def loginPOST(request):
 		request.session['user_id'] = user.id #store user ID explicity to the request.session dictionary
 		# response = JsonResponse({'success': "you just logged in"})
 		res = JsonResponse({'success': "you just logged in"}, status=301)
-		res['Location'] = "/play"
+		next = request.GET['next']
+		if next:
+			res['Location'] = next
+		else:
+			res['Location'] = "/play"
 		logger.debug("sending back a response w code %s", res.status_code)
 		return res
 		# could send a redirect to the home page or user profile
@@ -128,6 +132,3 @@ def delete_accountPOST(request):
 	else:
 		return JsonResponse({'message': 'User needs to be logged into delete account'})
 
-
-def settingsGET(request):
-	return render(request, "user/settings.html", {})

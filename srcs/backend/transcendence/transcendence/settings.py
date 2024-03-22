@@ -74,6 +74,8 @@ TEMPLATES = [
 ASGI_APPLICATION = 'transcendence.asgi.application'
 WSGI_APPLICATION = 'transcendence.wsgi.application'
 
+LOGIN_URL = '/app/login'
+
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_SAMESITE = 'None' #Remove this for CORS
 SESSION_COOKIE_SECURE = True
