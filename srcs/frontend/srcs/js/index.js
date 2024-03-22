@@ -93,6 +93,7 @@ function sendRequest(endpoint, data, callback) {
 const sendPostRequest = async (endpoint, data) => {
     const response = await fetch(endpoint, {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'X-CSRFToken': getCookie('csrftoken')
         },
@@ -182,46 +183,7 @@ function updateEventListeners() {
 
 }
 
-
-// Define separate click handlers for each button
-
-// function connectButtonClickHandler() {
-//     const socket = new WebSocket('wss://localhost/ws/pong/');
-//     // const socket = new WebSocket('wss://backend:8000/ws/pong/');
-//     socket.onerror = function(error) {
-//         console.log('WebSocket Error: ', error);
-//     };
-//     socket.addEventListener('open', function (event) {
-//         console.log('WebSocket connection opened:', event);
-//         socket.send(JSON.stringify({ message: 'hello world' }));
-//     });
-//     socket.addEventListener('message', function (event) {
-// 		console.log('WebSocket message received:', event.data);
-// 	});
-//     socket.addEventListener('close', function (event) {
-//         console.log('WebSocket connection closed:', event);
-//     });
-// }
-
-// function userConnectButtonClickHandler() {
-//     const socket = new WebSocket('wss://localhost/ws/user/');
-//     socket.onerror = function(error) {
-//         console.log('WebSocket Error: ', error);
-//     };
-//     socket.addEventListener('open', function (event) {
-//         console.log('WebSocket connection opened:', event);
-//         socket.send(JSON.stringify({ message: 'hello world' }));
-//     });
-//     socket.addEventListener('message', function (event) {
-// 		console.log('WebSocket message received:', event.data);
-// 	});
-//     socket.addEventListener('close', function (event) {
-//         console.log('WebSocket connection closed:', event);
-//     });
-// }
-
 // ***** USER SERVICE HANDLERS ***** //
-
 
 function loginButtonClickHandler(event) {
     event.preventDefault();
@@ -256,6 +218,7 @@ async function logoutButtonClickHandler(event) {
     let response = await sendPostRequest(endpoint, null);
     if (response.redirected) {
         console.log('redirect status found');
+        console.log('location working?: ' + response.headers.get('Location'));
         console.log(response)
         // do we display content and handle routing from here?
         // or change routing to trigger the next request
