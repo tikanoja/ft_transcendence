@@ -93,6 +93,9 @@ function sendRequest(endpoint, data, callback) {
 const sendPostRequest = async (endpoint, data) => {
     const response = await fetch(endpoint, {
         method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
         body: data
     })
     console.log("Response status in sendrequest: ", response.status)
@@ -244,14 +247,23 @@ function usernameButtonClickHandler(event) {
     });
 }
 
-function logoutButtonClickHandler(event) {
+async function logoutButtonClickHandler(event) {
     event.preventDefault();
     console.log("requesting logout!");
 
-    var endpoint = '/app/logout/';
-    sendRequest(endpoint, null, (response) => {
-        console.log('Received response:', response);
-    });
+    const querystring = window.location.search;
+    var endpoint = '/app/logout/' + querystring;
+    let response = await sendPostRequest(endpoint, null);
+    if (response.redirected) {
+        console.log('redirect status found');
+        console.log(response)
+        // do we display content and handle routing from here?
+        // or change routing to trigger the next request
+        let redirect_location = response.url;
+        console.log('in logoutButtonClickHandler. redir location: ' + redirect_location)
+        routeRedirect(redirect_location)
+        // routeRedirect('/play');
+    }
 }
 
 const submitRegistrationHandler = async (event) => {
@@ -281,9 +293,11 @@ const loginFormHandler = async (event) => {
     console.log("Response status: ", response.status, "Redirect: ", response.redirected)
     if (response.redirected) {
         console.log('redirect status found');
+        console.log(response)
         // do we display content and handle routing from here?
         // or change routing to trigger the next request
-        let redirect_location = response.headers.get('Location')
+        let redirect_location = response.url;
+        console.log('in loginFormHandler. redir location: ' + redirect_location)
         routeRedirect(redirect_location)
         // routeRedirect('/play');
     }
