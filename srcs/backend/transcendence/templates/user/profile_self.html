@@ -1,12 +1,12 @@
 <div id="self-profile">
 	<div id="profile-details">
-		{% include 'manage_account.html' %}
+		{% include 'manage_account.html' with details=details email_form=email_form password_form=password_form%}
 	</div>
 	<div id="dashboard">
 		{% include 'stats.html' %}
 		{% include 'game_history.html' %}
 	</div>
 	<div id="friends">
-		{% include 'friends.html' %}
+		{% include 'friends.html' with friends=friends %}
 	</div>
 </div>

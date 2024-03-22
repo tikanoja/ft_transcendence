@@ -7,7 +7,7 @@ import logging
 from .models import CustomUser
 # from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate #, login, logout
-# from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm
+from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm
 from . import user
 
 logger = logging.getLogger(__name__)
@@ -87,3 +87,25 @@ def delete_account(request):
 on account delete, how to handle other recodrs tied to that username? if the username isn't purged from all,
 if another user uses it they will then be linked to the other records...
 """
+
+def profile(request, username):
+	self = False
+	if request.user == username:
+		self = True
+	if request.method == "GET":
+		friends = user.get_friends_dict(username)
+		details = user.get_profile_details(username, self)
+		context = {}
+		context["friends"] = friends
+		context["details"] = details
+		context["email_form"] = UpdateEmailForm()
+		context["password_form"] = UpdatePasswordForm()
+		# need to add in the game stats and history here too
+		if self:
+			return render(request, 'user/profile_self.html', context)
+		else:
+			return render(request, 'user/profile_other.html', {})
+	else:
+		return JsonResponse({"message": "method not allowed, try GET"})
+
+	

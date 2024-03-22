@@ -1,7 +1,7 @@
 from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
-from .models import CustomUser
+from .models import CustomUser, GameInstance
 from django.core.exceptions import ValidationError
 import logging
 from django.http import JsonResponse
@@ -146,13 +146,51 @@ def get_profile_details(username:str, self:bool) -> dict:
 
 
 # hadcode a dict of friends for now
-def get_friends_dict(username:str, self:bool) -> dict:
-	pass
+# does self matter for this one?
+def get_friends_dict(username:str) -> dict:
+	user = CustomUser.object.filter(username=username)
+	# will get friends list from the user
+	friends = {
+		"friend1": {
+			"username": "username1",
+			"picture_link": "picture_link"
+		},
+		"friend2": {
+			"username": "username2",
+			"picture_link": "picture_link"
+		}
+	}
+	return friends
+
+def get_game_result(self_score: int, opponent_score: int) -> str:
+	if self_score < opponent_score:
+		return "Won"
+	elif self_score == opponent_score:
+		return "Tie"
+	else:
+		return "Lost"
 
 
-def get_game_history(usesrname:str, self:bool) -> dict:
-	pass
+def get_game_history(username:str) -> dict:
+	user = CustomUser.objects.get(username=username)
+	games = GameInstance.objects.filter(p1_user=user, p2_user=user)
+	history = {}
+	for iter, game in enumerate(games):
+		entry = {}
+		entry["game"] = game.game
+		entry["date"] = game.date
+		if game.p1_user == user:
+			entry["opponent"] = game.p2_user
+			entry["result"] = get_game_result(game.p1_score, game.p2_score)
+		else:
+			entry["opponent"] = game.p1_user
+			entry["result"] = get_game_result(game.p2_score, game.p1_score)
+		history[iter] = entry
+	return history
 
 
-def get_dashboard_stats(username:str, self:bool) -> dict:
+
+def get_dashboard_stats(username:str) -> dict:
+	user = CustomUser.objects.get(username=username)
+	games = GameInstance.objects.filter(user1=user, user2=user)
 	pass
