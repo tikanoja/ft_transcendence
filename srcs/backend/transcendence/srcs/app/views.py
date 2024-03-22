@@ -84,17 +84,18 @@ def delete_account(request, username):
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 	return response
 
-@login_required(login_url='/login/')
+@login_required
 def settings(request):
 	logger.debug('In settings()')
 	if request.method == 'GET':
-		response = user.settingsGET(request)
+		return render(request, 'user/settings.html', {})
 	elif request.method == 'POST':
 		response = user.settingsPOST(request)
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 	return response
-	
+
+
 """ 
 on account delete, how to handle other recodrs tied to that username? if the username isn't purged from all,
 if another user uses it they will then be linked to the other records...

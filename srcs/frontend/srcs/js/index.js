@@ -274,8 +274,8 @@ const loginFormHandler = async (event) => {
     event.preventDefault();
     console.log("in loginFormHandler")
     const formData = new FormData(event.target);
-
-	let response = await sendPostRequest('/app/login/', formData);
+    const querystring = window.location.search;
+	let response = await sendPostRequest('/app/login/' + querystring, formData);
 	// html = response.body();
     // console.log(html);
     console.log("Response status: ", response.status, "Redirect: ", response.redirected)
@@ -283,9 +283,9 @@ const loginFormHandler = async (event) => {
         console.log('redirect status found');
         // do we display content and handle routing from here?
         // or change routing to trigger the next request
-        // redirect_location = response.headers.get('location')
-        // routeRedirect(redirect_location)
-        routeRedirect('/play');
+        let redirect_location = response.headers.get('Location')
+        routeRedirect(redirect_location)
+        // routeRedirect('/play');
     }
 	else if (response.ok) {
         console.log('response,ok triggered');

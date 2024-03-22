@@ -88,28 +88,40 @@ const routeRedirect = (target) => {
 // By using 'async' we can use 'await'. This way we can use asynchronous operations without blocking the execution of other code
 const locationHandler = async () => {
 	// Get the path part of URL (eg. https://example.com/friends/profile returns /friends/profile)
-	const location = window.location.pathname;
+	let location = window.location.pathname;
+	console.log('og loc: ' + location);
 	// Redirect https://example.com to https://example.com/ in order to land on home page
+	if (location.endsWith('/'))
+		location = location.slice(0, -1);
 	if (location.length == 0)
-		location = "/"; 
+		location = "/";
+	if (location.startsWith('/app/'))
+		location = location.substring(4);
+
+	console.log('trying to match this to routes: ' + location)
 	// Check the routes (the views above) for a match, if no match: 404
 	const route = routes[location] || routes[404];
-	const response = await fetch(route.view);
-	console.log('hello, the status was ' + response.status)
-	if (response.status === 302 || response.status === 303) {
-		const newUrl = response.headers.get('Location');
+	const querystring = window.location.search;
+	console.log('fetching this thing: ' + route.view + querystring);
+	const response = await fetch(route.view + querystring, {redirection: 'manual'});
+	if (response.redirected){
+		console.log(response);
+		const newUrl = response.url;
 		console.log('django redirected us to: ' + newUrl);
 		if (newUrl) {
 			window.history.pushState("", "", newUrl);
-			locationHandler();
+			// locationHandler();
+			const html = await response.text();
+			document.getElementById("content").innerHTML = html;
+			document.title = 'oh my god it worked!!!!';
+			document.querySelector('meta[name="description"]').setAttribute("content", route.description);
+			updateEventListeners();
 		}
 	} else {
 		const html = await response.text();
-		// Update the main content element with the content of the retrieved html
 		document.getElementById("content").innerHTML = html;
 		document.title = route.title;
 		document.querySelector('meta[name="description"]').setAttribute("content", route.description);
-
 		updateEventListeners();
 	}
 }
