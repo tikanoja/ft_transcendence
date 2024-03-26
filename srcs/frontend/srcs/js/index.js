@@ -88,18 +88,11 @@ const sendGetRequest = async (endpoint, data, callback) => {
     return response
 }
 
-// function updateEventListeners(buttonId, event, nameOfF)
-// {
-//     var button = document.getElementById(buttonId);
-//     var func = ; // hey javascript get me this function with the name of nameofF
-//     button.removeEventListener(event, func);
-// }
-
 function updateEventListeners() {
     var loginForm = document.getElementById('loginForm');
     var registerForm = document.getElementById('registerForm');
     var logoutButton = document.getElementById('logoutButton');
-
+    
     if (loginForm) {
         loginForm.removeEventListener('submit', loginFormHandler);
     }
@@ -119,7 +112,14 @@ function updateEventListeners() {
     if (logoutButton) {
         logoutButton.addEventListener('click', logoutButtonClickHandler);
     }
+    
+}
 
+function updateContent(html, title, description) {
+    document.getElementById("content").innerHTML = html;
+	document.title = title;
+	document.querySelector('meta[name="description"]').setAttribute("content", description);
+    updateEventListeners();
 }
 
 // ***** USER SERVICE HANDLERS ***** //
@@ -130,17 +130,12 @@ async function logoutButtonClickHandler(event) {
 
     const querystring = window.location.search;
     var endpoint = '/app/logout/' + querystring;
-    let response = await sendPostRequest(endpoint, null);
+    const response = await sendPostRequest(endpoint, null);
     if (response.redirected) {
-        console.log('redirect status found');
-        console.log('location working?: ' + response.headers.get('Location'));
-        console.log(response)
-        // do we display content and handle routing from here?
-        // or change routing to trigger the next request
         let redirect_location = response.url;
-        console.log('in logoutButtonClickHandler. redir location: ' + redirect_location)
-        routeRedirect(redirect_location)
-        // routeRedirect('/play');
+        routeRedirect(redirect_location);
+    } else {
+        console.log("this shouldn't be? logout should always lead to redirection?");
     }
 }
 
@@ -149,15 +144,21 @@ const submitRegistrationHandler = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
 
-    const html = await fetch('/app/register/', {
-        method: 'POST',
-        body: formData
-    }).then((response) => response.text());
-
-    document.getElementById("content").innerHTML = html;
-	document.title = "Registration | Pong";
-	document.querySelector('meta[name="description"]').setAttribute("content", "Registration");
-    updateEventListeners();
+    const querystring = window.location.search;
+    var endpoint = '/app/register/' + querystring;
+    const response = await sendPostRequest(endpoint, formData);
+    if (response.redirected) {
+        let redirect_location = response.url;
+        console.log("redir to: ", redirect_location);
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        // handling normal content update
+        const html = await response.text();
+        updateContent(html, "Registration | Pong", "Description");
+    } else {
+        // something is not quite right...
+        console.log('submitRegistrationHandler(): response status: ' + response.status);
+    }
 }
 
 const loginFormHandler = async (event) => {
@@ -165,34 +166,18 @@ const loginFormHandler = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const querystring = window.location.search;
-	let response = await sendPostRequest('/app/login/' + querystring, formData);
-	// html = response.body();
-    // console.log(html);
-    console.log("Response status: ", response.status, "Redirect: ", response.redirected)
+    var endpoint = '/app/login/' + querystring;
+	const response = await sendPostRequest(endpoint, formData);
     if (response.redirected) {
-        console.log('redirect status found');
-        console.log(response)
-        // do we display content and handle routing from here?
-        // or change routing to trigger the next request
         let redirect_location = response.url;
-        console.log('in loginFormHandler. redir location: ' + redirect_location)
-        routeRedirect(redirect_location)
-        // routeRedirect('/play');
-    }
-	else if (response.ok) {
-        console.log('response,ok triggered');
-		// stay on this page, display the content again
-        response.text().then(function (text) {
-            document.getElementById("content").innerHTML = text;
-            document.title = "Login | Pong";
-            document.querySelector('meta[name="description"]').setAttribute("content", "Login");
-            updateEventListeners();
-        })
-	}
-	else {
-		console.log("Response status: ", response.status)
-		// some 400 or 500 code probably, show the error that was sent?
+        console.log("redir to: ", redirect_location);
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        const html = await response.text();
+        updateContent(html, "Login | Pong", "Login form");
+	} else {
+		console.log("Response status in loginFormHandler(): ", response.status)
 	}
 }
 
-export { updateEventListeners, setActive, checkLogin }
+export { updateEventListeners, setActive, checkLogin, updateContent }
