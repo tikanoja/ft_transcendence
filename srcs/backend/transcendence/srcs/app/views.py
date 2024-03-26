@@ -84,6 +84,7 @@ def delete_account(request, username):
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 	return response
 
+
 @login_required
 def settings(request):
 	logger.debug('In settings()')
@@ -94,6 +95,43 @@ def settings(request):
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 	return response
+
+
+@login_required
+def play(request):
+	logger.debug('In play()')
+	if request.method == 'GET':
+		return render(request, 'user/play.html', {})
+	elif request.method == 'POST':
+		response = user.playPOST(request)
+	else:
+		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+	return response
+
+
+@login_required
+def friends(request):
+	logger.debug('In friends()')
+	if request.method == 'GET':
+		return render(request, 'user/friends.html', {})
+	elif request.method == 'POST':
+		response = user.playPOST(request)
+	else:
+		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+	return response
+
+
+@login_required
+def home(request):
+	logger.debug('In home()')
+	if request.method == 'GET':
+		return render(request, 'user/home.html', {})
+	elif request.method == 'POST':
+		response = user.playPOST(request)
+	else:
+		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+	return response
+
 
 def notfound(request):
 	logger.debug('in notfound()')
