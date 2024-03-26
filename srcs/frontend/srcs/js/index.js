@@ -69,6 +69,7 @@ function checkLogin() {
 
 // callback?
 function sendRequest(endpoint, data, callback) {
+    console.log('In sendRequest() this should not be used?');
     var xhr = new XMLHttpRequest();
     xhr.open('POST', endpoint, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -91,6 +92,7 @@ function sendRequest(endpoint, data, callback) {
 }
 
 const sendPostRequest = async (endpoint, data) => {
+    console.log('In sendPostRequest()');
     const response = await fetch(endpoint, {
         method: 'POST',
         credentials: 'include',
@@ -110,7 +112,6 @@ const sendGetRequest = async (endpoint, data, callback) => {
     return response
 }
 
-
 // function updateEventListeners(buttonId, event, nameOfF)
 // {
 //     var button = document.getElementById(buttonId);
@@ -119,26 +120,12 @@ const sendGetRequest = async (endpoint, data, callback) => {
 // }
 
 function updateEventListeners() {
-    // Check if the buttons exist on the current view
-    // var connectButton = document.getElementById('connectButton');
-    // var userConnectButton = document.getElementById('user-connectButton');
-    // var userRetrieveButton = document.getElementById('user-retrieveButton');
     var loginForm = document.getElementById('loginForm');
     var registerForm = document.getElementById('registerForm');
     var loginButton = document.getElementById('loginButton');
     var usernameButton = document.getElementById('getUsernameButton');
     var logoutButton = document.getElementById('logoutButton');
 
-    // Remove existing event listeners if any
-    // if (connectButton) {
-    //     connectButton.removeEventListener('click', connectButtonClickHandler);
-    // }
-    // if (userConnectButton) {
-    //     userConnectButton.removeEventListener('click', userConnectButtonClickHandler);
-    // }
-    // if (userRetrieveButton) {
-    //     userRetrieveButton.removeEventListener('click', userRetrieveButtonClickHandler);
-    // }
     if (loginForm) {
         loginForm.removeEventListener('submit', loginFormHandler);
     }
@@ -154,17 +141,7 @@ function updateEventListeners() {
     if (logoutButton) {
         logoutButton.removeEventListener('click', logoutButtonClickHandler);
     }
-
-    // Attach event listeners only if the buttons exists
-    // if (connectButton) {
-    //     connectButton.addEventListener('click', connectButtonClickHandler);
-    // }
-    // if (userRetrieveButton) {
-    //     userRetrieveButton.addEventListener('click', userRetrieveButtonClickHandler);
-    // }
-    // if (userConnectButton) {
-    //     userConnectButton.addEventListener('click', userConnectButtonClickHandler);
-    // }
+    
     if (loginForm) {
         loginForm.addEventListener('submit', loginFormHandler);
     }
@@ -186,6 +163,7 @@ function updateEventListeners() {
 // ***** USER SERVICE HANDLERS ***** //
 
 function loginButtonClickHandler(event) {
+    console.log('In loginButtonClickHandler()');
     event.preventDefault();
     console.log("sending loqin request!");
 
@@ -199,19 +177,19 @@ function loginButtonClickHandler(event) {
     });
 }
 
-function usernameButtonClickHandler(event) {
-    event.preventDefault();
-    console.log("requesting username!");
+// function usernameButtonClickHandler(event) {
+//     event.preventDefault();
+//     console.log("requesting username!");
 
-    var endpoint = 'http://localhost:8001/app/get_current_username/'
-    sendRequest(endpoint, null, (response) => {
-        console.log('Received response:', response);
-    });
-}
+//     var endpoint = 'http://localhost:8001/app/get_current_username/'
+//     sendRequest(endpoint, null, (response) => {
+//         console.log('Received response:', response);
+//     });
+// }
 
 async function logoutButtonClickHandler(event) {
+    console.log('In logoutButtonClickHandler()');	
     event.preventDefault();
-    console.log("requesting logout!");
 
     const querystring = window.location.search;
     var endpoint = '/app/logout/' + querystring;
@@ -230,6 +208,7 @@ async function logoutButtonClickHandler(event) {
 }
 
 const submitRegistrationHandler = async (event) => {
+    console.log('In submitRegistrationHandler');
     event.preventDefault();
     const formData = new FormData(event.target);
 
@@ -246,8 +225,8 @@ const submitRegistrationHandler = async (event) => {
 
 
 const loginFormHandler = async (event) => {
+    console.log('In routeRedirect()');
     event.preventDefault();
-    console.log("in loginFormHandler")
     const formData = new FormData(event.target);
     const querystring = window.location.search;
 	let response = await sendPostRequest('/app/login/' + querystring, formData);

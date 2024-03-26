@@ -22,6 +22,7 @@ def	registerPOST(request):
 	new_user = get_user_model()
 	new_user.objects.create_user(username=sent_form.cleaned_data['username'], email=sent_form.cleaned_data['email'], password=sent_form.cleaned_data['password'])
 	response = JsonResponse({'message': 'congrats you registered!'})
+	# return render(request, 'user/login.html', {"form": sent_form, "title": title, "error": "user not found"})
 	return response
 
 
