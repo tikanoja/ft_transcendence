@@ -67,30 +67,6 @@ function checkLogin() {
     });
 }
 
-// callback?
-function sendRequest(endpoint, data, callback) {
-    console.log('In sendRequest() this should not be used?');
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', endpoint, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-    xhr.withCredentials = true;
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            var response = JSON.parse(xhr.responseText);
-            console.log(response);
-            if (callback) {
-                callback(response);
-            }
-        }
-    };
-    if (data)
-        xhr.send(JSON.stringify(data));
-    else
-        xhr.send();
-}
-
 const sendPostRequest = async (endpoint, data) => {
     console.log('In sendPostRequest()');
     const response = await fetch(endpoint, {
@@ -122,8 +98,6 @@ const sendGetRequest = async (endpoint, data, callback) => {
 function updateEventListeners() {
     var loginForm = document.getElementById('loginForm');
     var registerForm = document.getElementById('registerForm');
-    var loginButton = document.getElementById('loginButton');
-    var usernameButton = document.getElementById('getUsernameButton');
     var logoutButton = document.getElementById('logoutButton');
 
     if (loginForm) {
@@ -131,12 +105,6 @@ function updateEventListeners() {
     }
     if (registerForm) {
         registerForm.removeEventListener('submit', submitRegistrationHandler);
-    }
-    if (loginButton) {
-        loginButton.removeEventListener('click', loginButtonClickHandler);
-    }
-    if (usernameButton) {
-        usernameButton.removeEventListener('click', usernameButtonClickHandler);
     }
     if (logoutButton) {
         logoutButton.removeEventListener('click', logoutButtonClickHandler);
@@ -148,12 +116,6 @@ function updateEventListeners() {
     if (registerForm) {
         registerForm.addEventListener('submit', submitRegistrationHandler);
     }
-    if (loginButton) {
-        loginButton.addEventListener('click', loginButtonClickHandler);
-    }
-    if (usernameButton) {
-        usernameButton.addEventListener('click', usernameButtonClickHandler);
-    }
     if (logoutButton) {
         logoutButton.addEventListener('click', logoutButtonClickHandler);
     }
@@ -161,31 +123,6 @@ function updateEventListeners() {
 }
 
 // ***** USER SERVICE HANDLERS ***** //
-
-function loginButtonClickHandler(event) {
-    console.log('In loginButtonClickHandler()');
-    event.preventDefault();
-    console.log("sending loqin request!");
-
-    var loginData = {};
-    loginData["username"] = document.getElementById('usernameLogin').value;
-    loginData["password"] = document.getElementById('passwordLogin').value;
-
-    var endpoint = '/app/login_user/';
-    sendRequest(endpoint, loginData, (response) => {
-        console.log('Received response:', response);
-    });
-}
-
-// function usernameButtonClickHandler(event) {
-//     event.preventDefault();
-//     console.log("requesting username!");
-
-//     var endpoint = 'http://localhost:8001/app/get_current_username/'
-//     sendRequest(endpoint, null, (response) => {
-//         console.log('Received response:', response);
-//     });
-// }
 
 async function logoutButtonClickHandler(event) {
     console.log('In logoutButtonClickHandler()');	
@@ -223,9 +160,8 @@ const submitRegistrationHandler = async (event) => {
     updateEventListeners();
 }
 
-
 const loginFormHandler = async (event) => {
-    console.log('In routeRedirect()');
+    console.log('In loginFormHandler()');
     event.preventDefault();
     const formData = new FormData(event.target);
     const querystring = window.location.search;

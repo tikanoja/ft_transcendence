@@ -30,17 +30,17 @@ const routes = {
 		description: "Page not found"
 	},
 	"/" : {
-		view: "../views/home.html",
+		view: "/app/home/",
 		title: "Home | " + pageTitle,
 		description: "Home page"
 	},
 	"/play" : {
-		view: "../views/play.html",
+		view: "/app/play/",
 		title: "Play | " + pageTitle,
 		description: "Play games"
 	},
 	"/friends" : {
-		view: "../views/friends.html",
+		view: "/app/friends/",
 		title: "Friends | " + pageTitle,
 		description: "Chat and manage friends"
 	},
