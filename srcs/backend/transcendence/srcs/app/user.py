@@ -21,9 +21,14 @@ def	registerPOST(request):
 	new_user = CustomUser(username=sent_form.cleaned_data["username"], first_name=sent_form.cleaned_data["first_name"], last_name=sent_form.cleaned_data["last_name"], email=sent_form.cleaned_data["email"], password=sent_form.cleaned_data["password"])
 	new_user = get_user_model()
 	new_user.objects.create_user(username=sent_form.cleaned_data['username'], email=sent_form.cleaned_data['email'], password=sent_form.cleaned_data['password'])
-	response = JsonResponse({'message': 'congrats you registered!'})
-	# return render(request, 'user/login.html', {"form": sent_form, "title": title, "error": "user not found"})
-	return response
+	# response = JsonResponse({'message': 'congrats you registered!'})
+	# return render(request, 'user/login.html', {"form": LoginForm(request.POST), "title": "Login", "success": "Account created!"})
+	# return response
+	res = JsonResponse({'success': "account created"}, status=301)
+	next = request.GET.get('next', '/login')
+	if next:
+		res['Location'] = next
+	return res
 
 
 def registerGET(request):

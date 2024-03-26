@@ -5,7 +5,7 @@
 
 const pageTitle = "Pong";
 
-import { updateEventListeners, checkLogin } from './index.js'
+import { updateEventListeners, updateContent } from './index.js'
 
 // Listens to clicks on the entire document
 document.addEventListener("click", (e) => {
@@ -69,7 +69,7 @@ const routes = {
 
 // Checks the URL
 const route = (event) => {
-	console.log('In route()');	
+	console.log('In route()');
 	// The event is either the one passed to it, or grab the window event if not (prev / forward buttons)
 	event = event || window.event;
 	event.preventDefault();
@@ -82,9 +82,10 @@ const route = (event) => {
 }
 
 const routeRedirect = (target) => {
-	console.log('In routeRedirect()');	
-	if (target == window.location.href)
-		return ;	
+	console.log('In routeRedirect()');
+	if (target == window.location.href) {
+		// return ;
+	}
 	console.log('routeRedirect(): pushing this to history: ' + target);
 	window.history.pushState("", "", target);
 	locationHandler();
@@ -109,29 +110,22 @@ const locationHandler = async () => {
 	const querystring = window.location.search;
 	console.log('locationHandler(): fetching this: ' + route.view + querystring);
 	const response = await fetch(route.view + querystring)//, {redirect: 'manual'});
-	if (!response.ok)
+	if (!response.ok) {
 		console.log("locationHandler(): Fetch status != OK");
-	if (response.redirected){
+	} else if (response.redirected) {
 		console.log('locationHandler(): Response redirected');
 		console.log(response);
 		const newUrl = response.url;
 		if (newUrl) {
 			console.log('locationHandler(): replacing history: ' + newUrl);	
 			window.history.replaceState("", "", newUrl);
-			// locationHandler();
 			const html = await response.text();
-			document.getElementById("content").innerHTML = html;
-			document.title = 'oh my god it worked!!!!';
-			document.querySelector('meta[name="description"]').setAttribute("content", route.description);
-			updateEventListeners();
+			updateContent(html, "redir | Pong", "description");
 		}
 	} else {
 		console.log('locationHandler(): Fetch OK, no redirs, updating site content');
 		const html = await response.text();
-		document.getElementById("content").innerHTML = html;
-		document.title = route.title;
-		document.querySelector('meta[name="description"]').setAttribute("content", route.description);
-		updateEventListeners();
+		updateContent(html, route.title, route.description);
 	}
 }
 
