@@ -3,6 +3,9 @@
 {% if error %}
 <p style="color: red">Error: {{error}}</p>
 {% endif %}
+{% if success %}
+<p style="color: green">Success: {{success}}</p>
+{% endif %}
 <form id="loginForm" >
 	{% csrf_token %}
 	{% for field in form %}
