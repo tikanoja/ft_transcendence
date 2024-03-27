@@ -2,13 +2,9 @@
 FROM alpine:3.18
 
 # Install NGINX and SSL
-RUN apk update && \
-	apk add --no-cache \
+RUN apk update && apk add --no-cache \
     nginx \
     openssl
-
-# Expose port for HTTPS
-EXPOSE 443
 
 # Ensure that we have the dir to store PID and SSL certs
 RUN mkdir -p /run/nginx /etc/nginx/ssl /app/frontend

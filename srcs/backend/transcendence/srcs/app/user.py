@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 import logging
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect
 
 logger = logging.getLogger(__name__)
 
@@ -22,14 +21,8 @@ def	registerPOST(request):
 	new_user = CustomUser(username=sent_form.cleaned_data["username"], first_name=sent_form.cleaned_data["first_name"], last_name=sent_form.cleaned_data["last_name"], email=sent_form.cleaned_data["email"], password=sent_form.cleaned_data["password"])
 	new_user = get_user_model()
 	new_user.objects.create_user(username=sent_form.cleaned_data['username'], email=sent_form.cleaned_data['email'], password=sent_form.cleaned_data['password'])
-	# response = JsonResponse({'message': 'congrats you registered!'})
-	# return render(request, 'user/login.html', {"form": LoginForm(request.POST), "title": "Login", "success": "Account created!"})
-	# return response
-	res = JsonResponse({'success': "account created"}, status=301)
-	next = request.GET.get('next', '/login')
-	if next:
-		res['Location'] = next
-	return res
+	response = JsonResponse({'message': 'congrats you registered!'})
+	return response
 
 
 def registerGET(request):
@@ -53,9 +46,7 @@ def loginPOST(request):
 		request.session['user_id'] = user.id #store user ID explicity to the request.session dictionary
 		# response = JsonResponse({'success': "you just logged in"})
 		res = JsonResponse({'success': "you just logged in"}, status=301)
-		next = request.GET.get('next', '/play')
-		if next:
-			res['Location'] = next
+		res['Location'] = "/play"
 		logger.debug("sending back a response w code %s", res.status_code)
 		return res
 		# could send a redirect to the home page or user profile
@@ -80,15 +71,14 @@ def loginGET(request):
 def	logoutPOST(request):
 	if request.user.is_authenticated:
 		logout(request)
-		next = request.GET.get('next', '/login')
-		return HttpResponseRedirect(next)	
+		response = JsonResponse({'success': "Logged out!"})
 	else:
-		response = JsonResponse({'error': "Already logged out."})
+		response = JsonResponse({'error': "User is not logged in."}, status=401)
 	return response
 
 def	get_current_usernamePOST(request):
 	if request.user.is_authenticated:
-		username = request.user.username
+			username = request.user.username
 	else:
 		username = 'unknown user'
 	return username
@@ -137,4 +127,3 @@ def delete_accountPOST(request):
 			return JsonResponse({'message': 'Unable to delete account. Check which account you are logged in as'})
 	else:
 		return JsonResponse({'message': 'User needs to be logged into delete account'})
-
