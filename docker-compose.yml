@@ -35,6 +35,19 @@ services:
     depends_on:
       database:
         condition: service_healthy
+        
+  pong:
+    build:
+      context: ./srcs/backend/pong
+      dockerfile: Dockerfile
+    image: pong_img:dev
+    container_name: pong_c
+    ports:
+      - "8080:8080"
+    env_file: .env
+    restart: always
+    networks:
+      - backend-network  
 
   database:
     build:

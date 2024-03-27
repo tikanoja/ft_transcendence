@@ -59,10 +59,10 @@ const routes = {
 		title: "Login | " + pageTitle,
 		description: "Login"
 	},
-	"/check-login" : {
-		view: "../views/login.html",
-		title: "Login | " + pageTitle,
-		description: "Login"
+	"/test" : { //TODO: fix this
+		view: "/pong/get_canvas/",
+		title: "testing | " +  pageTitle,
+		description: "Amazing 3D"
 	}
 }
 // route above should not be the same as the calls to the backend...seems fragile
