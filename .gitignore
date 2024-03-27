@@ -1,8 +1,10 @@
 # MacOS
-.DS_Store/
+.DS_Store
 
 # VSCode
-.vscode/
+.vscode
 
 # Python
-__pycache__/
+__pycache__
+
+migrations/
