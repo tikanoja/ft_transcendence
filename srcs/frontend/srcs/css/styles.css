@@ -4,6 +4,21 @@
     /* You may include other font formats (woff, woff2, etc.) for better cross-browser support */
 }
 
+#scoreboard {
+    display: flex;
+    justify-content: space-between;
+}
+
+.score-left {
+    order: 1;
+    margin-right: auto;
+}
+
+.score-right {
+    order: 2; 
+    margin-left: auto;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -12,6 +27,25 @@ body {
 
 * {
     box-sizing: border-box;
+}
+
+#startScreen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100; /* Ensure the start screen appears above the graphics */
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Add a shadow for depth */
+}
+
+#canvasContainer {
+    position: relative;
+    width: 10%;
+    height: 10%;
+    display: block;
 }
 
 .sidebar {
