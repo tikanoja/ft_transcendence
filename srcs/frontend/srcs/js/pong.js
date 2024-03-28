@@ -198,8 +198,7 @@ export const renderPongGame = (is3DGraphics) => {
             p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
             p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
             ball.position.set(ball_x,  ball_y, 0);
-            console.log('values array', valuesArray);            
-            
+            console.log('values array', valuesArray);
             updateScoreboard(p1_score, p2_score);
         }).catch(error => {
             console.error('Error fetching game state:', error);
@@ -207,8 +206,8 @@ export const renderPongGame = (is3DGraphics) => {
     }
 
     // Update the game state 50 times per second
-    const gameStateInterval = setInterval(updateGameState, 1000 / 50);
-     
+    const gameStateInterval = setInterval(updateGameState, 1000 / 50)
+
     // Update the game state  times per second for debugging THIS IS FOR DEBUGGING ONLY
     // const gameStateInterval = setInterval(updateGameState, 3000);
 
