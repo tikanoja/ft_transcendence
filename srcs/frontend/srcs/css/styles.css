@@ -25,6 +25,12 @@ body {
     font-family: 'PressStart2P', sans-serif;
 }
 
+textarea {
+    font-family: sans-serif;
+    font-size: 12px;
+    resize: none;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -60,7 +66,7 @@ body {
     color: white; /* Change text color */
 }
 .nav-item {
-    /* padding-left: 15px; */
+    padding-left: 15px;
     margin-top: 10px;
 }
 
