@@ -116,8 +116,21 @@ function setup3DScene(scene) {
 
     return camera;
 }
+
+
+
 function create2DPaddle(color) {
-    const geometry = new THREE.BoxGeometry(20, 60, 0); ///will be plane geomatry?
+    // Adjust the dimensions of the paddle geometry based on the ratios
+    let widthRatio = 20 / 1920
+    let heightRatio = 90 / 1080
+
+	let screenWidth = window.innerWidth;
+    let screenHeight = window.innerHeight;
+
+    let paddleWidth = screenWidth * widthRatio;
+    let paddleHeight = screenHeight * heightRatio;
+
+    const geometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, 0);
     const material = new THREE.MeshStandardMaterial({ color });
     return new THREE.Mesh(geometry, material);
 }
@@ -194,7 +207,7 @@ export const renderPongGame = (is3DGraphics) => {
     }
 
     // Update the game state 50 times per second
-    const gameStateInterval = setInterval(updateGameState, 1000 / 70);
+    const gameStateInterval = setInterval(updateGameState, 1000 / 50);
      
     // Update the game state  times per second for debugging THIS IS FOR DEBUGGING ONLY
     // const gameStateInterval = setInterval(updateGameState, 3000);
