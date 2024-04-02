@@ -98,4 +98,19 @@ class UpdateEmailForm(forms.Form):
 		if email_exists:
 			raise ValidationError("Email is registered with another account")
 		return True
+
+
+class AddFriendForm(forms.Form):
+	username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
+
+	def is_valid(self):
+		valid = super().is_valid()
+
+		if not valid:
+			return False
 		
+		username_exists = CustomUser.objects.filter(username=self.cleaned_data["username"])
+		if not username_exists:
+			raise ValidationError("No user registered with such username")
+
+		return True

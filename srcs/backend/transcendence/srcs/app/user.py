@@ -1,4 +1,4 @@
-from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm
+from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, AddFriendForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
 from .models import CustomUser
@@ -138,3 +138,7 @@ def delete_accountPOST(request):
 	else:
 		return JsonResponse({'message': 'User needs to be logged into delete account'})
 
+def friendsGET(request):
+	form = AddFriendForm()
+	title = "Manage friends"
+	return render(request, 'user/friends.html', {"form": form, "title": title})	

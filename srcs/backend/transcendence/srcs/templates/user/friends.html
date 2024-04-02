@@ -1,7 +1,37 @@
-<h2>Friends</h2>
+{% extends "user/form_base.html" %}
+{% block form %}
+{% if error %}
+<p style="color: red">Error: {{error}}</p>
+{% endif %}
+{% if success %}
+<p style="color: green">Success: {{success}}</p>
+{% endif %}
+<form id="addFriendForm" >
+	{% csrf_token %}
+	{% for field in form %}
+	<div class="form-group">
+	<p style="color: red">{{ field.errors }}<p>
+	{{ field.label_tag }} {{ field }}
+	</div>
+	{% endfor %}
+	<input type="submit" value="Add friend">
+</form>
+<div>
+<h2>Pending Invites</h2>
 <ul>
-	<li>Guts</li>
-	<li>Griffith</li>
-	<li>Casca</li>
-	<li>Puck</li>
+	<li>Pippin - ACCEPT or REJECT</li>
+	<li>Judeau - ACCEPT or REJECT</li>
 </ul>
+<h2>List of friends</h2>
+<ul>
+	<li>Guts - ONLINE</li>
+	<li>Griffith - OFFLINE</li>
+	<li>Casca - INVITE PENDING</li>
+	<li>Puck - ONLINE</li>
+</ul>
+
+</div>
+{% endblock %}
+
+
+{% comment %} {% include {{real_html}} %} {% endcomment %}
