@@ -272,6 +272,11 @@ const get_game_state = async () => {
     return (responseData);
 }
 
-export { checkLogin, updateContent, start_game_loop, stop_game_loop, start_game, stop_game, get_game_state, left_paddle_up, left_paddle_up_release , left_paddle_down, left_paddle_down_release , right_paddle_up, right_paddle_up_release , right_paddle_down, right_paddle_down_release, updateEventListeners, setActive }
+const get_games_running = async () => {
+    const responseData = await sendGetRequest('pong/get_games_running/').then((response) => response.text());
+    console.log('from timo pong game_state:	', responseData);
+    return (responseData);
+}
 
-// export { updateEventListeners, setActive, checkLogin, updateContent }
+export { checkLogin, updateContent, start_game_loop, stop_game_loop, start_game, stop_game, get_game_state, left_paddle_up, left_paddle_up_release , left_paddle_down, left_paddle_down_release , right_paddle_up, right_paddle_up_release , right_paddle_down, right_paddle_down_release, updateEventListeners, setActive, get_games_running}
+

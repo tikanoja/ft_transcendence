@@ -161,18 +161,6 @@ def get_games_running(request):
         print(f"Error: {e}")
         return Response({"error": "An error occurred"}, status=500)
 
-
-# @api_view(['POST']) 
-# def recieve_game_state(request):
-#     try:
-#         response = requests.get('http://pong_c:8080/game_state')
-#         print(response.text)
-#         return Response(response.json())
-#     except Exception as e:
-#         print(f"Error: {e}")
-#         return Response({"error": "An error occurred"}, status=500)
-
-
 # api.add_resource(GetState, '/game_state/<int:number>')
 @api_view(['GET']) 
 def get_game_state(request):

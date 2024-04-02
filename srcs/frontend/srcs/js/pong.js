@@ -1,15 +1,18 @@
 // Import required modules
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.module.js';
-import { start_game_loop, stop_game_loop, start_game, stop_game, left_paddle_up, left_paddle_up_release , left_paddle_down, left_paddle_down_release , right_paddle_up, right_paddle_up_release , right_paddle_down, right_paddle_down_release, get_game_state} from './index.js'
+import { start_game_loop, stop_game_loop, start_game, stop_game, left_paddle_up, eft_paddle_up_release , left_paddle_down, left_paddle_down_release , right_paddle_up, right_paddle_up_release , right_paddle_down, right_paddle_down_release, get_game_state, get_games_running} from './index.js'
 //TODO:the size of paddles, ball and their positioning MUST BE DYNAMIC!
 //TODO: A better looking start screen the also shows user name, and opponent name
-//TODO: center line for court look
-//TODO: visable scoreboard with API calls
 //TODO: Make lighting better
 //TODO: boundrys working, potentially a canvas boarder
 
-let is3DGraphics = false; // Default to 3D graphics
-// Import required modules
+let is3DGraphics = false;
+
+function check_games_running()
+{
+	let games = get_games_running();
+	return false;
+}
 
 
 export const startScreen = () => {
@@ -19,7 +22,9 @@ export const startScreen = () => {
     const styleCheckbox = document.getElementById('styleCheckbox');
     
     //this is the background loop, this needs to be run if 0 games are running BEFORE calling the start game
-	start_game_loop();
+	check_games_running()
+	if (!get_games_running())
+		start_game_loop();
     playButton.addEventListener('click', () => {
         
         startScreen.style.display = 'none';
@@ -148,7 +153,7 @@ export const renderPongGame = (is3DGraphics) => {
     let keyDown = false; //
 
     const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight);
+	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
     
     let p1_paddle, p2_paddle, ball;
@@ -227,58 +232,51 @@ export const renderPongGame = (is3DGraphics) => {
         }
     }
     
-    document.addEventListener('keydown', (event) => {
-        if (!keyDown) {
-            keyDown = true;
-    
-            if (event.key == 'c') {
-                render = false;
-            }
-    
-            const speed = 3.0;
-            const moveP1 = () => {
-                switch (event.key) {
-                    case 'ArrowUp':
-                        right_paddle_up();
-                        break;
-                    case 'ArrowDown':
-                        right_paddle_down();
-                        break;
-                }
-            };
-    
-            const moveP2 = () => {
-                switch (event.key) {
-                    case 'w':
-                        left_paddle_up();
-                        break;
-                    case 's':
-                        left_paddle_down();
-                        break;
-                }
-            };
-    
-            const moveLoop = () => {
-                if (keyDown) {
-                    moveP1();
-                    moveP2();
-                    updateGameState(); // Update game state after each movement
-                    requestAnimationFrame(moveLoop);
-                }
-            };
-            
-            moveLoop();
+	document.addEventListener('keydown', (event) => {
+		event.preventDefault();
+		if (event.key == 'ArrowUp')
+        {
+            right_paddle_down();
         }
+        if (event.key  == 'ArrowDown')
+        {
+            right_paddle_up();
+        }
+        if (event.key  == 'w')
+        {
+            left_paddle_down();
+        }
+        if (event.key  == 's')
+        {
+            left_paddle_up();
+        }
+		if (event.key == 'c') {
+			render = false;
+		}
     });
-    
-    document.addEventListener('keyup', () => {
-        keyDown = false;
-        right_paddle_down_release() //not sure how to use these atm
-        right_paddle_up_release()
-        left_paddle_down_release() //not sure how to use these atm
-        left_paddle_up_release()
+
+    document.addEventListener('keyup', (event) => {
+		event.preventDefault();
+		if (event.key == 'ArrowUp')
+        {
+            right_paddle_down_release();
+        }
+        if (event.key  == 'ArrowDown')
+        {
+            right_paddle_up_release();
+        }
+        if (event.key  == 'w')
+        {
+            left_paddle_down_release();
+        }
+        if (event.key  == 's')
+        {
+            left_paddle_up_release();
+        }
+
     });
-    
+
+
     let animationId;
 
     function startAnimation() {
