@@ -9,6 +9,7 @@ from .models import CustomUser
 from django.contrib.auth import authenticate #, login, logout
 from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm
 from . import user
+from django.contrib.auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ def check_login(request):
 	if request.user.is_authenticated:
 		return JsonResponse({'status': 'authenticated'})
 	else:
-		return JsonResponse({'status': 'not authenticated'}, status=401)
+		return JsonResponse({'status': 'not authenticated'})
 
 
 def manage_account(request):
@@ -82,7 +83,63 @@ def delete_account(request):
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 	return response
-	
+
+
+@login_required
+def settings(request):
+	logger.debug('In settings()')
+	if request.method == 'GET':
+		return render(request, 'user/settings.html', {})
+	elif request.method == 'POST':
+		response = user.settingsPOST(request)
+	else:
+		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+	return response
+
+
+@login_required
+def play(request):
+	logger.debug('In play()')
+	if request.method == 'GET':
+		return render(request, 'user/play.html', {})
+	elif request.method == 'POST':
+		response = user.playPOST(request)
+	else:
+		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+	return response
+
+
+@login_required
+def friends(request):
+	logger.debug('In friends()')
+	if request.method == 'GET':
+		return render(request, 'user/friends.html', {})
+	elif request.method == 'POST':
+		response = user.playPOST(request)
+	else:
+		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+	return response
+
+
+@login_required
+def home(request):
+	logger.debug('In home()')
+	if request.method == 'GET':
+		return render(request, 'user/home.html', {})
+	elif request.method == 'POST':
+		response = user.playPOST(request)
+	else:
+		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+	return response
+
+
+def notfound(request):
+	logger.debug('in notfound()')
+	if request.method == 'GET':
+		return render(request, 'user/404.html', {})
+	else:
+		return JsonResponse({'error': "method not allowed. please use GET"})
+
 """ 
 on account delete, how to handle other recodrs tied to that username? if the username isn't purged from all,
 if another user uses it they will then be linked to the other records...

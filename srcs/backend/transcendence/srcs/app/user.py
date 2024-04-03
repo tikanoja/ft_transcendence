@@ -1,11 +1,12 @@
 from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
-from .models import CustomUser, GameInstance
+from .models import CustomUser
 from django.core.exceptions import ValidationError
 import logging
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +22,14 @@ def	registerPOST(request):
 	new_user = CustomUser(username=sent_form.cleaned_data["username"], first_name=sent_form.cleaned_data["first_name"], last_name=sent_form.cleaned_data["last_name"], email=sent_form.cleaned_data["email"], password=sent_form.cleaned_data["password"])
 	new_user = get_user_model()
 	new_user.objects.create_user(username=sent_form.cleaned_data['username'], email=sent_form.cleaned_data['email'], password=sent_form.cleaned_data['password'])
-	response = JsonResponse({'message': 'congrats you registered!'})
-	return response
+	# response = JsonResponse({'message': 'congrats you registered!'})
+	# return render(request, 'user/login.html', {"form": LoginForm(request.POST), "title": "Login", "success": "Account created!"})
+	# return response
+	res = JsonResponse({'success': "account created"}, status=301)
+	next = request.GET.get('next', '/login')
+	if next:
+		res['Location'] = next
+	return res
 
 
 def registerGET(request):
@@ -46,7 +53,9 @@ def loginPOST(request):
 		request.session['user_id'] = user.id #store user ID explicity to the request.session dictionary
 		# response = JsonResponse({'success': "you just logged in"})
 		res = JsonResponse({'success': "you just logged in"}, status=301)
-		res['Location'] = "/play"
+		next = request.GET.get('next', '/play')
+		if next:
+			res['Location'] = next
 		logger.debug("sending back a response w code %s", res.status_code)
 		return res
 		# could send a redirect to the home page or user profile
@@ -71,14 +80,15 @@ def loginGET(request):
 def	logoutPOST(request):
 	if request.user.is_authenticated:
 		logout(request)
-		response = JsonResponse({'success': "Logged out!"})
+		next = request.GET.get('next', '/login')
+		return HttpResponseRedirect(next)	
 	else:
-		response = JsonResponse({'error': "User is not logged in."}, status=401)
+		response = JsonResponse({'error': "Already logged out."})
 	return response
 
 def	get_current_usernamePOST(request):
 	if request.user.is_authenticated:
-			username = request.user.username
+		username = request.user.username
 	else:
 		username = 'unknown user'
 	return username
@@ -104,8 +114,8 @@ def manage_accountGET(request):
 
 
 def delete_accountGET(request):
-	form  = DeleteAccountForm()
-	return render(request, 'user/delete_account.html', {"form": form, "username": request.user})
+	return JsonResponse({'message': 'This will have the form to fill and send for account deletion'})
+
 
 def delete_accountPOST(request):
 	if request.user.is_authenticated:
@@ -122,75 +132,9 @@ def delete_accountPOST(request):
 			# check if this should cascade delete the profile etc. remove from friend lists...
 			CustomUser.objects.filter(username=username).delete()
 			# delete account, return a success page with a 'link' to go to homepage
-			res =  JsonResponse({'message': 'Your account has been deleted'}, status=301) #can I have the message show up in the next location?
-			res['Location'] = "/login"
-			return res
+			return JsonResponse({'message': 'Your account has been deleted'})
 		else:
 			return JsonResponse({'message': 'Unable to delete account. Check which account you are logged in as'})
 	else:
 		return JsonResponse({'message': 'User needs to be logged into delete account'})
 
-
-# basic details username, name, image link, other public viewable stuff
-# email, other spcific things? for self view
-def get_profile_details(username:str, self:bool) -> dict:
-	details = {}
-	user = CustomUser.objects.filter(username=username)
-	details["username"] = username
-	details["first_name"] = user.first_name
-	details["last_name"] = user.last_name
-	if self:
-		details["email"] = user.email
-	# details["img"] = user.img #how to get link for profile image?
-	return details
-
-
-# hadcode a dict of friends for now
-# does self matter for this one?
-def get_friends_dict(username:str) -> dict:
-	user = CustomUser.object.filter(username=username)
-	# will get friends list from the user
-	friends = {
-		"friend1": {
-			"username": "username1",
-			"picture_link": "picture_link"
-		},
-		"friend2": {
-			"username": "username2",
-			"picture_link": "picture_link"
-		}
-	}
-	return friends
-
-def get_game_result(self_score: int, opponent_score: int) -> str:
-	if self_score < opponent_score:
-		return "Won"
-	elif self_score == opponent_score:
-		return "Tie"
-	else:
-		return "Lost"
-
-
-def get_game_history(username:str) -> dict:
-	user = CustomUser.objects.get(username=username)
-	games = GameInstance.objects.filter(p1_user=user, p2_user=user)
-	history = {}
-	for iter, game in enumerate(games):
-		entry = {}
-		entry["game"] = game.game
-		entry["date"] = game.date
-		if game.p1_user == user:
-			entry["opponent"] = game.p2_user
-			entry["result"] = get_game_result(game.p1_score, game.p2_score)
-		else:
-			entry["opponent"] = game.p1_user
-			entry["result"] = get_game_result(game.p2_score, game.p1_score)
-		history[iter] = entry
-	return history
-
-
-
-def get_dashboard_stats(username:str) -> dict:
-	user = CustomUser.objects.get(username=username)
-	games = GameInstance.objects.filter(user1=user, user2=user)
-	pass
