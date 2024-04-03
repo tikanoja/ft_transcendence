@@ -114,8 +114,8 @@ def manage_accountGET(request):
 
 
 def delete_accountGET(request):
-	form  = DeleteAccountForm()
-	return render(request, 'user/delete_account.html', {"form": form, "username": request.user})
+	return JsonResponse({'message': 'This will have the form to fill and send for account deletion'})
+
 
 def delete_accountPOST(request):
 	if request.user.is_authenticated:
@@ -132,14 +132,11 @@ def delete_accountPOST(request):
 			# check if this should cascade delete the profile etc. remove from friend lists...
 			CustomUser.objects.filter(username=username).delete()
 			# delete account, return a success page with a 'link' to go to homepage
-			res =  JsonResponse({'message': 'Your account has been deleted'}, status=301) #can I have the message show up in the next location?
-			res['Location'] = "/login"
-			return res
+			return JsonResponse({'message': 'Your account has been deleted'})
 		else:
 			return JsonResponse({'message': 'Unable to delete account. Check which account you are logged in as'})
 	else:
 		return JsonResponse({'message': 'User needs to be logged into delete account'})
-
 
 # basic details username, name, image link, other public viewable stuff
 # email, other spcific things? for self view
@@ -204,4 +201,5 @@ def get_dashboard_stats(username:str) -> dict:
 	user = CustomUser.objects.get(username=username)
 	games = GameInstance.objects.filter(user1=user, user2=user)
 	pass
+
 

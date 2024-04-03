@@ -93,7 +93,13 @@ function updateEventListeners() {
     var loginForm = document.getElementById('loginForm');
     var registerForm = document.getElementById('registerForm');
     var logoutButton = document.getElementById('logoutButton');
-
+    var deleteForm = document.getElementById('deleteAccountForm');
+    var playButton = document.getElementById('playButton');
+    if (deleteForm) {
+        deleteForm.removeEventListener('submit', deleteFormHandler);
+    }
+	var playButton = document.getElementById('playButton');
+    
     if (loginForm) {
         loginForm.removeEventListener('submit', loginFormHandler);
     }
@@ -302,6 +308,42 @@ const get_game_state = async () => {
     const responseData = await sendGetRequest('pong/get_game_state/').then((response) => response.text());
     console.log('from timo pong game_state:	', responseData);
     return (responseData);
+}
+
+const deleteFormHandler= async (event) => {
+    event.preventDefault();
+    console.log("in loginFormHandler")
+    const formData = new FormData(event.target);
+
+	let response = await sendPostRequest('/app/delete_account/', formData);
+	// html = response.body();
+    // console.log(html);
+    console.log("Response status: ", response.status, "Redirect: ", response.redirected)
+    if (response.redirected) {
+        console.log('redirect status found');
+        // for now show the resulting message, redirect later
+        // response.text().then(function (text) {
+        //     document.getElementById("content").innerHTML = text;
+        //     document.title = "Delete Account | Pong";
+        //     document.querySelector('meta[name="description"]').setAttribute("content", "Delete Account");
+        //     updateEventListeners();
+        // })
+        routeRedirect('/login');
+    }
+	else if (response.ok) {
+        console.log('response,ok triggered');
+		// stay on this page, display the content again
+        response.text().then(function (text) {
+            document.getElementById("content").innerHTML = text;
+            document.title = "Delete Account | Pong";
+            document.querySelector('meta[name="description"]').setAttribute("content", "Delete Account");
+            updateEventListeners();
+        })
+	}
+	else {
+		console.log("Response status: ", response.status)
+		// some 400 or 500 code probably, show the error that was sent?
+	}
 }
 
 export { checkLogin, updateContent, start_game_loop, stop_game_loop, start_game, stop_game, get_game_state, left_paddle_up, left_paddle_up_release , left_paddle_down, left_paddle_down_release , right_paddle_up, right_paddle_up_release , right_paddle_down, right_paddle_down_release, updateEventListeners, setActive }
