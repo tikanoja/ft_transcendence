@@ -16,7 +16,7 @@
 	</form>
 	<p>E-mail: {{details.email}}</p>
 	<button style="btn-primary" id="change-email">Change E-mail</button>
-	<form id="email-change-form" style="display: none;">
+	<form id="email-change-form">
 		{{email_form}}
 	{% comment %} <div class="form-group">
 		<label for="email">New Email address</label>
@@ -25,8 +25,8 @@
 	<button type="submit" id="emailChange" class="btn btn-primary">Submit</button>
 	</form>
 	<button style="btn-primary" id="change-password">Change Password</button>
-	<form id="password-change-form" style="display: none;">
-		{{pasword_form}}
+	<form id="password-change-form">
+		{{password_form}}
 		{% comment %} <div class="form-group">
 			<label for="password">New Password</label>
 			<input type="password" class="form-control" id="password" name="password" placeholder="enter new password" required>
@@ -37,4 +37,7 @@
 		</div> {% endcomment %}
 		<button type="submit" id="passwordChange" class="btn btn-primary">Submit</button>
 	</form>
+
+	{% include "./delete_account.html" with form=delete_account_form%}
+
 	</div>

@@ -19,7 +19,7 @@ def	registerPOST(request):
 	except ValidationError as ve:
 		logger.debug(f"Error in registration form: {ve}")
 		return render(request, 'user/register.html', {"form": sent_form, "title": title, "error": ve})
-	new_user = CustomUser(username=sent_form.cleaned_data["username"], first_name=sent_form.cleaned_data["first_name"], last_name=sent_form.cleaned_data["last_name"], email=sent_form.cleaned_data["email"], password=sent_form.cleaned_data["password"])
+	# new_user = CustomUser(username=sent_form.cleaned_data["username"], first_name=sent_form.cleaned_data["first_name"], last_name=sent_form.cleaned_data["last_name"], email=sent_form.cleaned_data["email"], password=sent_form.cleaned_data["password"])
 	new_user = get_user_model()
 	new_user.objects.create_user(username=sent_form.cleaned_data['username'], email=sent_form.cleaned_data['email'], password=sent_form.cleaned_data['password'])
 	# response = JsonResponse({'message': 'congrats you registered!'})
@@ -144,29 +144,30 @@ def get_profile_details(username:str, self:bool) -> dict:
 	details = {}
 	user = CustomUser.objects.filter(username=username)
 	details["username"] = username
-	details["first_name"] = user.first_name
-	details["last_name"] = user.last_name
+	details["first_name"] = user[0].first_name
+	details["last_name"] = user[0].last_name
 	if self:
-		details["email"] = user.email
+		details["email"] = user[0].email
 	# details["img"] = user.img #how to get link for profile image?
+	print(details)
 	return details
 
 
 # hadcode a dict of friends for now
 # does self matter for this one?
 def get_friends_dict(username:str) -> dict:
-	user = CustomUser.object.filter(username=username)
+	user = CustomUser.objects.filter(username=username)
 	# will get friends list from the user
-	friends = {
-		"friend1": {
+	friends = [
+		{
 			"username": "username1",
 			"picture_link": "picture_link"
 		},
-		"friend2": {
+		{
 			"username": "username2",
 			"picture_link": "picture_link"
 		}
-	}
+	]
 	return friends
 
 def get_game_result(self_score: int, opponent_score: int) -> str:
@@ -180,9 +181,11 @@ def get_game_result(self_score: int, opponent_score: int) -> str:
 
 def get_game_history(username:str) -> dict:
 	user = CustomUser.objects.get(username=username)
-	games = GameInstance.objects.filter(p1_user=user, p2_user=user)
+	u1_games = GameInstance.objects.filter(p1_user=user)
+	u2_games = GameInstance.objects.filter(p2_user=user)
+	all_games = u1_games.union(u2_games)
 	history = {}
-	for iter, game in enumerate(games):
+	for iter, game in enumerate(all_games):
 		entry = {}
 		entry["game"] = game.game
 		entry["date"] = game.date
@@ -196,10 +199,11 @@ def get_game_history(username:str) -> dict:
 	return history
 
 
-
 def get_dashboard_stats(username:str) -> dict:
 	user = CustomUser.objects.get(username=username)
-	games = GameInstance.objects.filter(user1=user, user2=user)
+	u1_games = GameInstance.objects.filter(p1_user=user)
+	u2_games = GameInstance.objects.filter(p2_user=user)
+	all_games = u1_games.union(u2_games)
 	pass
 
 

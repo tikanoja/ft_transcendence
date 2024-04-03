@@ -146,17 +146,20 @@ if another user uses it they will then be linked to the other records...
 """
 
 def profile(request, username):
+	logger.debug('getting profile')
 	self = False
-	if request.user == username:
+	if request.user.username == username:
 		self = True
 	if request.method == "GET":
 		friends = user.get_friends_dict(username)
+		logger.debug(friends)
 		details = user.get_profile_details(username, self)
 		context = {}
 		context["friends"] = friends
 		context["details"] = details
 		context["email_form"] = UpdateEmailForm()
 		context["password_form"] = UpdatePasswordForm()
+		context["delete_account_form"] = DeleteAccountForm()
 		# need to add in the game stats and history here too
 		if self:
 			return render(request, 'user/profile_self.html', context)

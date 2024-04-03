@@ -68,6 +68,11 @@ const routes = {
 		view: "/pong/get_canvas/",
 		title: "testing | " +  pageTitle,
 		description: "Amazing 3D"
+	},
+	"/profile" : {
+		view: "/app/profile/jen",
+		title: "test_profile | " +  pageTitle,
+		description: "Only Jen's profile"
 	}
 }
 // route above should not be the same as the calls to the backend...seems fragile
