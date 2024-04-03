@@ -29,16 +29,20 @@ socket.onclose = (event) => {
 socket.onmessage = (event) => {
     const content = JSON.parse(event.data);
 
+    console.log(content);
+
     switch (content.type) {
         case "chat.error":
-            appendMessage(contentField, "System", content.message)
+            appendMessage(contentField, "System", content.message);
+            break;
         case "chat.message":
-            appendMessage(contentField, content.source, content.message)
+            appendMessage(contentField, content.source, content.message);
+            break;
     }
 };
 
 submitButton.onclick = () => {
-    if (!inputField.value) {
+    if (!inputField.value || socket.readyState != WebSocket.OPEN) {
         return;
     }
 

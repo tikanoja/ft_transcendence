@@ -20,36 +20,26 @@ class UserConsumer(AsyncWebsocketConsumer):
         for group in self.groups:
             await self.channel_layer.group_add(group, self.channel_name)
 
-        print(self.channel_layer.groups)
-
     async def disconnect(self, close_code):
         for group in self.groups:
             await self.channel_layer.group_discard(group, self.channel_name)
-
-        print("user disconnected :D")
     
     async def receive(self, text_data):
         event: dict = json.loads(text_data)
-        print("user sent:", event)
 
-        if not "type" in event:
-            logger.log("no event type defined")
-            return
+        event["source"] = self.scope["user"].username
 
-        match event["type"]:
-            case "chat.message":
-                if not "receiver" in event or not "message" in event:
-                    print("no receiver or message? :c")
-                    return
-                event["sender"] = self.groups[0]
-                print("sending")
-                await self.channel_layer.group_send("Global", { "type" : "chat.msg", "message" : "WHAT THE FUCK"} )
+        if not event["receiver"] in self.channel_layer.groups:
+            await self.error_response("Not a valid recipient")
 
-            case _:
-                print("what dis")
-                return
+        await self.channel_layer.group_send(event["receiver"], event)
 
-    async def chat_msg(self, event):
-        print(event)
+    async def chat_message(self, event : dict):
         await self.send(text_data = json.dumps(event))
-        
+
+    async def error_response(self, message : str):
+        print("ERRR")
+        await self.send(text_data = json.dumps({
+            "type" : "chat.error",
+            "message" : message
+        }));
