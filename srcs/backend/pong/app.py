@@ -1,30 +1,17 @@
-
 import time
-import threading
-#import random
+#import threading
 import asyncio
 import websockets
 import ssl
 from websockets.server import serve
 
-# own dataclass = c++ struct
-#from GameObject import GameObject
+# global stuff like locks and game objects
+import globals
 
-# own class that holds all game data
-from Game import Game
 
-games_lock = threading.Lock()
-games = [0,1,2,3]
-with games_lock:
-	games[0] = Game()
-	games[1] = Game()
-	games[2] = Game()
-	games[3] = Game()
 
-thread = 0
-thread_lock = threading.Lock()
-with thread_lock:
-	back_ground_thread_running = 0
+# own function that sets game data ready
+from set_game_settings import set_game_settings
 
 def game_loop():
 	# this is backgroung thread that is lurking in the background
@@ -237,41 +224,8 @@ def game_loop():
 # 				games[number].right_paddle_released_up()
 # 				return jsonify({'status': 'ok: right paddle released up'})
 
-# class LeftPlayerId(Resource):
-# 	def get(self,number,id):
-# 		global games
-# 		global games_lock
-# 		if number < 0 or number > 3:
-# 			return jsonify({'status': 'error: allowed game numbers are 0 to 3'})
-# 		with games_lock:
-# 			if games[number].is_game_running() == 1:
-# 				return jsonify({'status': 'error: game running so changing id'})
-# 			else:
-# 				#return jsonify({'status': 'ok: ' + str(state)})
-# 				games[number].left_player_id = id
-# 				return jsonify({'status': 'ok: left player id set'})
-
-# class RightPlayerId(Resource):
-# 	def get(self,number,id):
-# 		global games
-# 		global games_lock
-# 		if number < 0 or number > 3:
-# 			return jsonify({'status': 'error: allowed game numbers are 0 to 3'})
-# 		with games_lock:
-# 			if games[number].is_game_running() == 1:
-# 				return jsonify({'status': 'error: game running so changing id'})
-# 			else:
-# 				#return jsonify({'status': 'ok: ' + str(state)})
-# 				games[number].right_player_id = id
-# 				return jsonify({'status': 'ok: left player id set'})
-
 # query in which slots games are running
 #api.add_resource(GamesRunning, '/games_running')
-
-# set set player id when game is not running
-# otherwise error
-#api.add_resource(LeftPlayerId, '/left_player_id/<int:number>/<string:id>')
-#api.add_resource(RightPlayerId, '/right_player_id/<int:number>/<string:id>')
 
 # start game in specific slot
 #api.add_resource(StartGame, '/game_start/<int:number>')
@@ -375,23 +329,25 @@ import asyncio
 import ssl
 import websockets
 
-# async def main(websocket, path):
-# 	async for message in websocket:
-# 		splitted_command = message.split(",")
-# 		if splitted_command.empty() :
-# 			match splitted_command[0]:
-# 				case pattern-1:
-#          			action-1
-# 				case "pattern-2":
-# 					pass
-# 				case "pattern-3":
-# 					pass
-# 				case _:
-# 					await websocket.send(f"Hello, Client! You said: {message}")
-
 async def main(websocket, path):
 	async for message in websocket:
-		await websocket.send(f"Hello, Client! You said: {message}")
+		splitted_command = message.split(",")
+		if splitted_command:
+			match splitted_command[0]:
+				case 'set_game_settings':
+					await set_game_settings(websocket,splitted_command)
+				case "pattern-2":
+					pass
+				case "pattern-3":
+					pass
+				case _:
+					await websocket.send(f"Hello, Client! You said: {message} {splitted_command[0]}")
+		else:
+			websocket.send(f"ERROR, nothing send.")
+
+#async def main(websocket, path):
+#	async for message in websocket:
+#		await websocket.send(f"Hello, Client! You said: {message}")
 
 async def starter_main():
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
