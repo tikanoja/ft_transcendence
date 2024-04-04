@@ -151,11 +151,11 @@ def friendsContext(request, error, success):
     out_invites = all_friendships.filter(from_user=current_user, status=Friendship.PENDING)
 
     if not error and not success:
-        context = {'form': form, 'title': title, 'in_invites': in_invites, 'out_invites': out_invites, 'friendships': friendships}
+        context = {'current_user': current_user, 'form': form, 'title': title, 'in_invites': in_invites, 'out_invites': out_invites, 'friendships': friendships}
     elif error and not success:
-        context = {'form': form, 'title': title, 'in_invites': in_invites, 'out_invites': out_invites, 'friendships': friendships, 'error': error}
+        context = {'current_user': current_user, 'form': form, 'title': title, 'in_invites': in_invites, 'out_invites': out_invites, 'friendships': friendships, 'error': error}
     else:
-        context = {'form': form, 'title': title, 'in_invites': in_invites, 'out_invites': out_invites, 'friendships': friendships, 'success': success}
+        context = {'current_user': current_user, 'form': form, 'title': title, 'in_invites': in_invites, 'out_invites': out_invites, 'friendships': friendships, 'success': success}
     return context
 
 def friendsGET(request):
@@ -186,7 +186,7 @@ def friendResponse(request, data):
     if not from_user:
         return render(request, 'user/friends.html', friendsContext(request, "Could not find the friend candidate", None))    
     action = data.get('action')
-    friendship = Friendship.objects.filter(to_user=request.user, from_user=from_user).first()
+    friendship = Friendship.objects.filter(Q(to_user=request.user, from_user=from_user) | Q(to_user=from_user, from_user=request.user)).first()
     if not friendship:
         return render(request, 'user/friends.html', friendsContext(request, "Could not find the friendship", None))    
 
@@ -194,9 +194,12 @@ def friendResponse(request, data):
         friendship.status = Friendship.ACCEPTED
         friendship.save()
         return render(request, 'user/friends.html', friendsContext(request, None, "Congratulations, you made a new friend!"))
-    else:
+    elif action == 'reject':
         friendship.delete()
         return render(request, 'user/friends.html', friendsContext(request, None, "Friendship REJECTED!"))
+    elif action == 'delete':
+        friendship.delete()
+        return render(request, 'user/friends.html', friendsContext(request, None, "Friendship DELETED!"))
 
 
 def friendsPOST(request):
