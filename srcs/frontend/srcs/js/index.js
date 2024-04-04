@@ -68,14 +68,19 @@ function checkLogin() {
     });
 }
 
-const sendPostRequest = async (endpoint, data) => {
+const sendPostRequest = async (endpoint, data, isJson = false) => {
     console.log('In sendPostRequest()');
+    const headers = {
+        'X-CSRFToken': getCookie('csrftoken')
+    };
+    if (isJson) {
+        headers['Content-Type'] = 'application/json';
+        data = JSON.stringify(data);
+    }
     const response = await fetch(endpoint, {
         method: 'POST',
         credentials: 'include',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken')
-        },
+        headers: headers,
         body: data
     })
     console.log("Response status in sendrequest: ", response.status)
@@ -95,6 +100,7 @@ function updateEventListeners() {
     var logoutButton = document.getElementById('logoutButton');
 	var playButton = document.getElementById('playButton');
     var addFriendForm = document.getElementById('addFriendForm');
+    var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
     
     if (loginForm) {
         loginForm.removeEventListener('submit', loginFormHandler);
@@ -111,6 +117,11 @@ function updateEventListeners() {
     if (addFriendForm) {
         addFriendForm.removeEventListener('submit', addFriendHandler);
     }
+    if (friendRequestButtons) {
+        friendRequestButtons.forEach(function(button) {
+            button.removeEventListener('click', friendRequestHandler);
+        })
+    }
     
     if (loginForm) {
         loginForm.addEventListener('submit', loginFormHandler);
@@ -126,6 +137,11 @@ function updateEventListeners() {
     }
     if (addFriendForm) {
         addFriendForm.addEventListener('submit', addFriendHandler);
+    }
+    if (friendRequestButtons) {
+        friendRequestButtons.forEach(function(button) {
+            button.addEventListener('click', friendRequestHandler);
+        })
     }
 }
 
@@ -205,6 +221,34 @@ const addFriendHandler = async (event) => {
     const querystring = window.location.search;
     var endpoint = '/app/friends/' + querystring;
     const response = await sendPostRequest(endpoint, formData);
+    if (response.redirected) {
+        let redirect_location = response.url;
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        const html = await response.text();
+        updateContent(html, "Friends | Pong", "Add friend form");
+	} else {
+		console.log("Response status in addFriendHandler(): ", response.status)
+	}
+}
+
+const friendRequestHandler = async (event) => {
+    console.log('in friendRequestHandler');
+    event.preventDefault();
+
+    var fromUser = event.target.getAttribute('data-from-user');
+    var action = event.target.getAttribute('data-action');
+    console.log('from user: ', fromUser, 'action: ', action);
+
+    var data = {
+        'from_user': fromUser,
+        'action': action,
+        'request_type': 'friendResponse'
+    }
+
+    const querystring = window.location.search;
+    var endpoint = '/app/friends/' + querystring;
+    const response = await sendPostRequest(endpoint, data, true);
     if (response.redirected) {
         let redirect_location = response.url;
         routeRedirect(redirect_location);

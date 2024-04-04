@@ -23,7 +23,11 @@
 <h2>Pending Invites</h2>
 <ul>
 	{% for invite in in_invites %}
-		<li>{{ invite.from_user.username }} - ACCEPT or REJECT</li>
+		<li>
+			{{ invite.from_user.username }} - 
+			<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="accept" class="btn btn-primary">Accept</button> or
+			<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="reject" class="btn btn-primary">Reject</button>
+		</li>
 	{% empty %}
 		<li>No pending invites.</li>
 	{% endfor %}
