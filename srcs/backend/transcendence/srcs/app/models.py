@@ -17,6 +17,22 @@ class CustomUserManager(BaseUserManager):
 		user.save()
 		return user
 
+	def update_user(self, username, **kwargs):
+		user = CustomUser.objects.filter(username=username)
+		if not user:
+			raise ValidationError('user does not exist')
+		else:
+			user = user[0]
+		if "first_name" in kwargs and "last_name" in kwargs:
+			user.first_name = kwargs["first_name"]
+			user.last_name = kwargs["last_name"]
+		if "email" in kwargs:
+			email = self.normalize_email(kwargs["email"])
+			user.email = email
+		if "password" in kwargs:
+			user.set_password(kwargs["password"])
+		user.save()
+
 # Create your models here.
 class CustomUser(AbstractBaseUser):
 	username = models.CharField(max_length = 254, unique=True)

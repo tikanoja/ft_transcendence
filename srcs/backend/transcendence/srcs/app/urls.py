@@ -14,5 +14,6 @@ urlpatterns = [
 	path('play/', views.play, name="play"),
 	path('home/', views.home, name="home"),
 	path('notfound/', views.notfound, name="notfound"),
+	path('manage_account/', views.manage_account, name="manage_account"),
 ]
 

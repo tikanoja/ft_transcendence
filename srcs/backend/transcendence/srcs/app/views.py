@@ -7,7 +7,7 @@ import logging
 from .models import CustomUser
 # from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate #, login, logout
-from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm
+from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm
 from . import user
 from django.contrib.auth.decorators import login_required
 
@@ -62,12 +62,14 @@ def check_login(request):
 	else:
 		return JsonResponse({'status': 'not authenticated'})
 
-
+# maybe only allow POST for this one? the forms will be sent with the profile
+# returns JSON resonse with result of form handling success or error
 def manage_account(request):
 	logger.debug('In manage_account()')
 	if request.method =='GET':
 		response = user.manage_accountGET(request)
 	elif request.method == 'POST':
+		
 		response = user.manage_accountPOST(request)
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
@@ -157,6 +159,7 @@ def profile(request, username):
 		context = {}
 		context["friends"] = friends
 		context["details"] = details
+		context["name_form"] = UpdateNameForm()
 		context["email_form"] = UpdateEmailForm()
 		context["password_form"] = UpdatePasswordForm()
 		context["delete_account_form"] = DeleteAccountForm()

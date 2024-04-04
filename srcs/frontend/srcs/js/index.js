@@ -93,13 +93,25 @@ function updateEventListeners() {
     var loginForm = document.getElementById('loginForm');
     var registerForm = document.getElementById('registerForm');
     var logoutButton = document.getElementById('logoutButton');
-    var deleteForm = document.getElementById('deleteAccountForm');
     var playButton = document.getElementById('playButton');
+    var deleteForm = document.getElementById('deleteAccountForm');
+    var nameChangeForm = document.getElementById('name-change-form');
+    var emailChangeForm = document.getElementById('email-change-form');
+    var passwordChangeForm = document.getElementById('password-change-form');
+
     if (deleteForm) {
         deleteForm.removeEventListener('submit', deleteFormHandler);
     }
-	var playButton = document.getElementById('playButton');
-    
+    if (nameChangeForm) {
+        nameChangeForm.removeEventListener('submit', manageAccountHandler);
+    }
+    if (emailChangeForm) {
+        emailChangeForm.removeEventListener('submit', manageAccountHandler);
+    }
+    if (passwordChangeForm) {
+        passwordChangeForm.removeEventListener('submit', manageAccountHandler);
+    }
+
     if (loginForm) {
         loginForm.removeEventListener('submit', loginFormHandler);
     }
@@ -122,11 +134,20 @@ function updateEventListeners() {
     if (logoutButton) {
         logoutButton.addEventListener('click', logoutButtonClickHandler);
     }
+    if (playButton) {
+        playButton.addEventListener('click', playButtonClickHandler);
+    }
     if (deleteForm) {
         deleteForm.addEventListener('submit', deleteFormHandler);
     }
-	if (playButton) {
-        playButton.addEventListener('click', playButtonClickHandler);
+    if (nameChangeForm) {
+        nameChangeForm.addEventListener('submit', manageAccountHandler);
+    }
+    if (emailChangeForm) {
+        emailChangeForm.addEventListener('submit', manageAccountHandler);
+    }
+    if (passwordChangeForm) {
+        passwordChangeForm.addEventListener('submit', manageAccountHandler);
     }
 }
 
@@ -200,10 +221,36 @@ const loginFormHandler = async (event) => {
 	}
 }
 
+const manageAccountHandler = async (event) => {
+    event.preventDefault();
+    console.log("in manageAccountHandler");
+    console.log(event.target)
+    const formData = new FormData(event.target);
+    formData.append("form_id", event.target.id);
+
+	let response = await sendPostRequest('/app/manage_account/', formData);
+    if (response.redirected) {
+        console.log('redirect status found');
+        let redirect_location = response.url;
+        console.log("redir to: ", redirect_location);
+        routeRedirect(redirect_location);
+    }
+	else if (response.ok) {
+        console.log('response,ok triggered');
+		// stay on this page, display the content again
+        const html = await response.text();
+        updateContent(html, "Manage Account | Pong", "Manage Account");
+	}
+	else {
+		console.log("Response status: ", response.status)
+		// some 400 or 500 code probably, show the error that was sent?
+	}
+}
+
 
 const deleteFormHandler= async (event) => {
     event.preventDefault();
-    console.log("in loginFormHandler")
+    console.log("in deleteFormHandler")
 
     const formData = new FormData(event.target);
 
