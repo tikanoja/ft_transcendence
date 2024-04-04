@@ -1,36 +1,36 @@
-import time
-#import threading
-import asyncio
-import websockets
-import ssl
-from websockets.server import serve
+# import time
+# #import threading
+# import asyncio
+# import websockets
+# import ssl
+# from websockets.server import serve
 
-# global stuff like locks and game objects
-import globals
+# # global stuff like locks and game objects
+# import globals
 
 
 
-# own function that sets game data ready
-from set_game_settings import set_game_settings
+# # own function that sets game data ready
+# from set_game_settings import set_game_settings
 
-def game_loop():
-	# this is backgroung thread that is lurking in the background
-	# it needs to be started before setting up games
-	# yes it needs to be running even when games are not running
-	# so it will be ready when game start
-	global games
-	global games_lock
-	global back_ground_thread_running
+# def game_loop():
+# 	# this is backgroung thread that is lurking in the background
+# 	# it needs to be started before setting up games
+# 	# yes it needs to be running even when games are not running
+# 	# so it will be ready when game start
+# 	global games
+# 	global games_lock
+# 	global back_ground_thread_running
 
-	while True:
-		if back_ground_thread_running == 0:
-			return
-		with games_lock:
-			for game in range(4):
-				if games[game].is_game_running() == 1:
-					games[game].move_paddles()
-					games[game].move_ball()
-		time.sleep(0.02)
+# 	while True:
+# 		if back_ground_thread_running == 0:
+# 			return
+# 		with games_lock:
+# 			for game in range(4):
+# 				if games[game].is_game_running() == 1:
+# 					games[game].move_paddles()
+# 					games[game].move_ball()
+# 		time.sleep(0.02)
 
 # class StartGame(Resource):
 # 	def get(self,number):
@@ -325,35 +325,99 @@ def game_loop():
 # asyncio.get_event_loop().run_until_complete(start_server)
 # asyncio.get_event_loop().run_forever()
 
-import asyncio
+#############################################################
+
+# import asyncio
+# import ssl
+# import websockets
+
+# async def main(websocket, path):
+# 	async for message in websocket:
+# 		splitted_command = message.split(",")
+# 		if splitted_command:
+# 			match splitted_command[0]:
+# 				case 'set_game_settings':
+# 					await set_game_settings(websocket,splitted_command)
+# 				case "pattern-2":
+# 					pass
+# 				case "pattern-3":
+# 					pass
+# 				case _:
+# 					await websocket.send(f"Hello, Client! You said: {message}")
+# 		else:
+# 			websocket.send(f"ERROR, nothing send.")
+
+# #async def main(websocket, path):
+# #	async for message in websocket:
+# #		await websocket.send(f"Hello, Client! You said: {message}")
+
+# ##################################################################
+
+# async def starter_main():
+#     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+#     ssl_context.load_cert_chain("/server.crt", "/server.key")  # Replace with your SSL certificate and key path
+
+#     async with websockets.serve(main, "0.0.0.0", 8888, ssl=ssl_context):
+#         await asyncio.Future()  # Run forever
+
+# asyncio.run(starter_main())
+
+# import socketio
+
+# # Create a Socket.IO server instance
+# sio = socketio.Server(cors_allowed_origins='*')
+
+# # Define event handlers
+# @sio.event
+# def connect(sid, environ):
+#     print('Client connected:', sid)
+
+# @sio.event
+# def disconnect(sid):
+#     print('Client disconnected:', sid)
+
+# @sio.event
+# def message(sid, data):
+#     print('Message received from', sid, ':', data)
+#     sio.emit('my response', {'response': 'my response'})
+
+# # Create a WSGI application
+# app = socketio.WSGIApp(sio)
+
+# # Start the server
+# if __name__ == '__main__':
+#     # This starts the server on port 5000
+#     socketio.Middleware(app).listen(('0.0.0.0', 8888))
+#     print("Server started on port 8888...")
+
+from flask import Flask, render_template
+from flask_socketio import SocketIO, emit
 import ssl
-import websockets
 
-async def main(websocket, path):
-	async for message in websocket:
-		splitted_command = message.split(",")
-		if splitted_command:
-			match splitted_command[0]:
-				case 'set_game_settings':
-					await set_game_settings(websocket,splitted_command)
-				case "pattern-2":
-					pass
-				case "pattern-3":
-					pass
-				case _:
-					await websocket.send(f"Hello, Client! You said: {message} {splitted_command[0]}")
-		else:
-			websocket.send(f"ERROR, nothing send.")
+app = Flask(__name__)
+socketio = SocketIO(app)
 
-#async def main(websocket, path):
-#	async for message in websocket:
-#		await websocket.send(f"Hello, Client! You said: {message}")
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-async def starter_main():
+@socketio.on('connect')
+def handle_connect():
+	print('Client connected')
+	socketio.emit('message', 'hello client') # {'data': 'Server says: Client connected'})
+    #socketio.emit('server_says_client_connected')
+
+@socketio.on('disconnect')
+def handle_disconnect():
+	print('Client disconnected')
+
+@socketio.on('message')
+def handle_message(message):
+	print('Message:', message)
+	socketio.emit('message', 'Server received your message: ' + message)
+
+if __name__ == '__main__':
+    # Use SSL/TLS encryption for WSS
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    ssl_context.load_cert_chain("/server.crt", "/server.key")  # Replace with your SSL certificate and key path
-
-    async with websockets.serve(main, "0.0.0.0", 8888, ssl=ssl_context):
-        await asyncio.Future()  # Run forever
-
-asyncio.run(starter_main())
+    ssl_context.load_cert_chain('/server.crt', '/server.key')
+    socketio.run(app, host='0.0.0.0', port=8888, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
