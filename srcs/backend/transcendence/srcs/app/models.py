@@ -28,8 +28,19 @@ class CustomUser(AbstractBaseUser):
 
 	objects = CustomUserManager()
 
+class Friendship(models.Model):
+	PENDING = 'P'
+	ACCEPTED = 'A'
+	REJECTED = 'R'
+	STATUS_CHOICES = [
+		(PENDING, 'Pending'),
+		(ACCEPTED, 'Accepted'),
+		(REJECTED, 'Rejected'),
+	]
+	from_user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='friend_request_from')
+	to_user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='friend_request_to')
+	status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=PENDING)
 
-# user profile model
 #  language -> maybe add to CustomUser model?
 #  picture
 #  custom setting for paddle?

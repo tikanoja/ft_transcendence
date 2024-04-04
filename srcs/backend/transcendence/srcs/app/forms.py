@@ -2,6 +2,9 @@ from django import forms
 from .models import CustomUser
 from django.core.exceptions import ValidationError
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 class RegistrationForm(forms.Form):
 	username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
@@ -105,12 +108,18 @@ class AddFriendForm(forms.Form):
 
 	def is_valid(self):
 		valid = super().is_valid()
-
+		
 		if not valid:
 			return False
-		
-		username_exists = CustomUser.objects.filter(username=self.cleaned_data["username"])
-		if not username_exists:
-			raise ValidationError("No user registered with such username")
 
+		username = self.cleaned_data.get('username')
+
+		if not username or username.isspace():
+			raise ValidationError("Empty username")
+		
+		if not CustomUser.objects.filter(username=self.cleaned_data["username"]).exists():
+			logger.debug('trying to add a nonexisting user')
+			raise ValidationError("No such user")
+
+		
 		return True

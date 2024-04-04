@@ -94,6 +94,7 @@ function updateEventListeners() {
     var registerForm = document.getElementById('registerForm');
     var logoutButton = document.getElementById('logoutButton');
 	var playButton = document.getElementById('playButton');
+    var addFriendForm = document.getElementById('addFriendForm');
     
     if (loginForm) {
         loginForm.removeEventListener('submit', loginFormHandler);
@@ -107,6 +108,9 @@ function updateEventListeners() {
 	if (playButton) {
         playButton.removeEventListener('click', playButtonClickHandler);
     }
+    if (addFriendForm) {
+        addFriendForm.removeEventListener('submit', addFriendHandler);
+    }
     
     if (loginForm) {
         loginForm.addEventListener('submit', loginFormHandler);
@@ -119,6 +123,9 @@ function updateEventListeners() {
     }
 	if (playButton) {
         playButton.addEventListener('click', playButtonClickHandler);
+    }
+    if (addFriendForm) {
+        addFriendForm.addEventListener('submit', addFriendHandler);
     }
 }
 
@@ -182,13 +189,30 @@ const loginFormHandler = async (event) => {
 	const response = await sendPostRequest(endpoint, formData);
     if (response.redirected) {
         let redirect_location = response.url;
-        console.log("redir to: ", redirect_location);
         routeRedirect(redirect_location);
     } else if (response.ok) {
         const html = await response.text();
         updateContent(html, "Login | Pong", "Login form");
 	} else {
 		console.log("Response status in loginFormHandler(): ", response.status)
+	}
+}
+
+const addFriendHandler = async (event) => {
+    console.log('In addFriendHandler()');
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const querystring = window.location.search;
+    var endpoint = '/app/friends/' + querystring;
+    const response = await sendPostRequest(endpoint, formData);
+    if (response.redirected) {
+        let redirect_location = response.url;
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        const html = await response.text();
+        updateContent(html, "Friends | Pong", "Add friend form");
+	} else {
+		console.log("Response status in addFriendHandler(): ", response.status)
 	}
 }
 

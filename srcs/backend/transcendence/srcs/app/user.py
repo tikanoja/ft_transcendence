@@ -1,12 +1,13 @@
 from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, AddFriendForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
-from .models import CustomUser
+from .models import CustomUser, Friendship
 from django.core.exceptions import ValidationError
 import logging
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +23,6 @@ def	registerPOST(request):
 	new_user = CustomUser(username=sent_form.cleaned_data["username"], first_name=sent_form.cleaned_data["first_name"], last_name=sent_form.cleaned_data["last_name"], email=sent_form.cleaned_data["email"], password=sent_form.cleaned_data["password"])
 	new_user = get_user_model()
 	new_user.objects.create_user(username=sent_form.cleaned_data['username'], email=sent_form.cleaned_data['email'], password=sent_form.cleaned_data['password'])
-	# response = JsonResponse({'message': 'congrats you registered!'})
-	# return render(request, 'user/login.html', {"form": LoginForm(request.POST), "title": "Login", "success": "Account created!"})
-	# return response
 	res = JsonResponse({'success': "account created"}, status=301)
 	next = request.GET.get('next', '/login')
 	if next:
@@ -138,7 +136,92 @@ def delete_accountPOST(request):
 	else:
 		return JsonResponse({'message': 'User needs to be logged into delete account'})
 
+
+def friendsContext(request, error, success):
+	logger.debug('in friendsContext')
+	form = AddFriendForm()
+	title = "Manage friends"
+	current_user = request.user
+
+	all_friendships = Friendship.objects.filter(Q(from_user=current_user) | Q(to_user=current_user))
+
+	friendships = all_friendships.filter(status=Friendship.ACCEPTED)
+	in_invites = all_friendships.filter(to_user=current_user, status=Friendship.PENDING)
+	out_invites = all_friendships.filter(from_user=current_user, status=Friendship.PENDING)
+
+	if not error and not success:
+		context = {'form': form, 'title': title, 'in_invites': in_invites, 'out_invites': out_invites, 'friendships': friendships}
+	elif error and not success:
+		logger.debug('error context')
+		context = {'form': form, 'title': title, 'in_invites': in_invites, 'out_invites': out_invites, 'friendships': friendships, 'error': error}
+	else:
+		context = {'form': form, 'title': title, 'in_invites': in_invites, 'out_invites': out_invites, 'friendships': friendships, 'success': success}
+	return context
+
 def friendsGET(request):
 	form = AddFriendForm()
 	title = "Manage friends"
-	return render(request, 'user/friends.html', {"form": form, "title": title})	
+	current_user = request.user
+
+	all_friendships = Friendship.objects.filter(Q(from_user=current_user) | Q(to_user=current_user))
+
+	friendships = all_friendships.filter(status=Friendship.ACCEPTED)
+	in_invites = all_friendships.filter(to_user=current_user, status=Friendship.PENDING)
+	out_invites = all_friendships.filter(from_user=current_user, status=Friendship.PENDING)
+
+	context = {
+		'current_user': current_user,
+		'form': form,
+		'title': title,
+		'in_invites': in_invites,
+		'out_invites': out_invites,
+		'friendships': friendships,
+	}
+	return render(request, 'user/friends.html', context)	
+
+def friendsPOST(request):
+	logger.debug('in friendsPOST')
+	sent_form = AddFriendForm(request.POST)
+
+	try:
+		if not sent_form.is_valid():
+			raise ValidationError("Form filled incorrectly")
+	except ValidationError as ve:
+		return render(request, 'user/friends.html', friendsContext(request, ve, None))
+	
+	friend_username = sent_form.cleaned_data['username']
+
+	# check if they are trying to add themselves
+	if request.user.username == friend_username:
+		return render(request, 'user/friends.html', friendsContext(request, "Please do not add yourself", None))
+
+	current_user = request.user
+	friend_user = CustomUser.objects.filter(username=friend_username).first()
+	# all friendships where current_user is: no matter the status
+	all_friendships = Friendship.objects.filter(Q(from_user=current_user) | Q(to_user=current_user))
+	# all accepted friendships where current_user is
+	friendships = all_friendships.filter(status=Friendship.ACCEPTED)
+	# pending friend requests coming for current_user
+	in_invites = all_friendships.filter(to_user=current_user, status=Friendship.PENDING)
+	# the request current_user has sent out to other users
+	out_invites = all_friendships.filter(from_user=current_user, status=Friendship.PENDING)
+
+	# check if they are already friends
+	if friendships.filter(Q(from_user=friend_user) | Q(to_user=friend_user)):
+		return render(request, 'user/friends.html', friendsContext(request, "You are already friends", None))
+
+	# check if friend_user matches an incoming invite, and if yes, update the status of that Friendship to ACCEPTED
+	incoming_invite = in_invites.filter(from_user=friend_user)
+	if incoming_invite.exists():
+		incoming_invite.update(status=Friendship.ACCEPTED)
+		return render(request, 'user/friends.html', friendsContext(request, None, "Congratulations, you made a new friend!"))
+
+	# check if they have already sent a request to the user in question
+	if out_invites.filter(to_user=friend_user):
+		return render(request, 'user/friends.html', friendsContext(request, "You have already sent a request to this user", None))
+
+	# add to friends
+	new_friendship = Friendship(from_user=current_user, to_user=friend_user, status=Friendship.PENDING)
+	new_friendship.save()
+
+	return render(request, 'user/friends.html', friendsContext(request, None, "Friend request sent"))
