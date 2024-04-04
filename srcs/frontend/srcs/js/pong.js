@@ -44,31 +44,32 @@ export const startScreen = () => {
 	loadSocketIO();
 
     function connectWebSocket() {
-		console.log('In connectWebSocket');
-
-        function onConnect() {
-            console.log('Connected to server');
-            socket.emit('message', 'Hello, server from javascript!');
-        }
-
-        function onDisconnect() {
-            console.log('Disconnected from server');
-        }
-
-        function onMessage(data) {
-            console.log('Message from server:', data);
-        }
-
+        console.log('In connectWebSocket');
+    
         // Create a Socket.IO client instance
         const socket = io('wss://pong:8888/', {
             rejectUnauthorized: false // Ignore self-signed certificate warning
         });
-
+    
         // Register event handlers
-        socket.on('connect', onConnect);
-        socket.on('disconnect', onDisconnect);
-        socket.on('message', onMessage)
+        socket.on('connect', () => {
+            console.log('Connected to server');
+            socket.emit('Hello, server from JavaScript!');
+        });
+    
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+    
+        socket.on('message', (data) => {
+            console.log('Message from server:', data);
+        });
+    
+        socket.on('error', (error) => {
+            console.error('WebSocket error:', error);
+        });
     }
+    
 
     playButton.addEventListener('click', () => {
         startScreen.style.display = 'none';
