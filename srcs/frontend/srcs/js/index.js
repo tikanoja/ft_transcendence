@@ -170,6 +170,7 @@ const submitRegistrationHandler = async (event) => {
 
 const playButtonClickHandler = async (event) => {
     console.log('In playButtonClickHandler');
+	
     startScreen();
 }
 

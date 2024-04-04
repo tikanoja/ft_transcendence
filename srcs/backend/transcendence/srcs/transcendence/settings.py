@@ -25,20 +25,20 @@ SECRET_KEY = 'django-insecure-*9#ubcwnam1fwt8y$$*l3)+u-cpsh+ms)w%pglfthdiwgza*8u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'http://localhost', 'https://localhost', 'transcendence']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'http://localhost', 'https://localhost', 'transcendence', 'pong_c']
 CSRF_TRUSTED_ORIGINS = ['https://localhost']
 # Application definition
 INSTALLED_APPS = [
     'channels',
     'app',
     'daphne',
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+	'pong',
 ]
 
 MIDDLEWARE = [

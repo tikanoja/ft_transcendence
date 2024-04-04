@@ -1,3 +1,4 @@
-Flask-RESTful
-Flask==3.0.2
-
+flask
+flask_socketio
+python-socketio==5.0.4
+python-socketio[client]
