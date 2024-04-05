@@ -22,5 +22,5 @@ sio.on('disconnect', on_disconnect)
 sio.on('message', on_message)
 
 if __name__ == "__main__":
-    sio.connect('wss://pong:8888')
+    sio.connect('https://pong:8888')
     sio.wait()

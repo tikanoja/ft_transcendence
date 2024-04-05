@@ -11,32 +11,16 @@ RUN apt-get update && \
     apt-get install -y openssl && \
     apt-get clean
 
-# Copy SSL certificates into the container
-#COPY ./ssl_certs/server.crt /etc/ssl/certs/server.crt
-#COPY ./ssl_certs/server.key /etc/ssl/private/server.key
-#COPY ./ssl_certs/ca.crt /etc/ssl/certs/ca.crt
-
-# Generate SSL certificates if they don't exist
-RUN openssl req -newkey rsa:2048 -x509 -sha256 -days 365 -nodes \
+RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 10000 -nodes \
     -out /server.crt \
     -keyout /server.key \
     -subj "/C=FI/ST=Helsinki/L=Helsinki/O=42/OU=Hive/CN=pongchamps"
 
-
-#RUN openssl req -x509 -newkey rsa:4096 -keyout /etc/ssl/private/server.key -out /etc/ssl/certs/server.crt -days 10000 -nodes -subj "/CN=localhost"
-
 # Copy your application code into the container
 COPY . .
 
-RUN chmod +rwx /server.key
-RUN chmod +rwx /server.crt
-
-# Set up any environment variables if necessary
-# For example, setting environment variables for SSL
-#ENV SSL_CERT_FILE=/server.crt
-#ENV SSL_KEY_FILE=/server.key
-ENV PYTHONASYNCIODEBUG=1
-#ENV SSL_CA_FILE=/etc/ssl/certs/ca.crt
+RUN chmod +r /server.key
+RUN chmod +r /server.crt
 
 # Expose the port your application runs on
 EXPOSE 8888

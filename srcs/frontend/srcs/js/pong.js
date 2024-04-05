@@ -33,8 +33,8 @@ export const startScreen = () => {
 	function loadScript() {
 			
 					var script = document.createElement('script');
-					script.src = "https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"
-					script.integrity = "sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ=="
+					script.src = "https://cdn.socket.io/4.7.5/socket.io.min.js"
+					script.integrity = "sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
 					script.crossOrigin = "anonymous"
 					document.head.appendChild(script);
 
@@ -43,22 +43,12 @@ export const startScreen = () => {
 						// Load the next script in the array
 					};
 				}
-		// 	if (index < scriptUrls.length) {
-		// 		var script = document.createElement('script');
-		// 		script.src = scriptUrls[index];
-		// }
-	
-		// Start loading the scripts from index 0
-		// loadScript(0);
-	// }
 
 	loadScript();
 
     function connectWebSocket() {
         console.log('In connectWebSocket');
-        socket = io.connect('https://localhost:8888/', {
-            rejectUnauthorized: false  // Ignore self-signed certificate warning
-        });
+        socket = io.connect('https://localhost:8888/websocket/')
 
         // Register event handlers
         socket.on('connect', () => {
@@ -79,7 +69,6 @@ export const startScreen = () => {
         });
     }
     
-
     playButton.addEventListener('click', () => {
         startScreen.style.display = 'none';
         canvasContainer.style.display = 'block';

@@ -6,19 +6,19 @@ RUN apk update && apk add --no-cache \
     nginx \
     openssl \
 	python3 \
-	py3-pip
+	py3-pip \
+	certbot \
+	python3-certbot-nginx
 
 # Ensure that we have the dir to store PID and SSL certs
 RUN mkdir -p /run/nginx /etc/nginx/ssl /app/frontend
 
+RUN certbot --nginx -d example.com -d www.example.com
 # Generate SSL cert & key
 RUN openssl req -newkey rsa:2048 -x509 -sha256 -days 365 -nodes \
     -out /etc/nginx/ssl/certificate.crt \
     -keyout /etc/nginx/ssl/certificate.key \
     -subj "/C=FI/ST=Helsinki/L=Helsinki/O=42/OU=Hive/CN=pongchamps"
-
-RUN	openssl x509 -inform pem -in /etc/nginx/ssl/certificate.crt -out /etc/nginx/ssl/certificate.crt.pem
-
 
 # Add a new user within the container
 RUN adduser -D -H -s /sbin/nologin -g www-data -G www-data www-data
