@@ -395,7 +395,8 @@ from flask_socketio import SocketIO, emit
 import ssl
 
 app = Flask(__name__)
-socketio = SocketIO(app)
+
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 @app.route('/')
 def index():
@@ -411,6 +412,10 @@ def handle_connect():
 def handle_disconnect():
 	print('Client disconnected')
 
+@socketio.on('connect_error')
+def handle_connect_error(e):
+    print('Client connection failed:', e)
+
 @socketio.on('message')
 def handle_message(message):
 	print('Message:', message)
@@ -418,6 +423,7 @@ def handle_message(message):
 
 if __name__ == '__main__':
     # Use SSL/TLS encryption for WSS
-    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    ssl_context.load_cert_chain('/server.crt', '/server.key')
-    socketio.run(app, host='0.0.0.0', port=8888, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
+    # ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    # ssl_context.load_cert_chain('./server.crt', './server.key')
+    # socketio.run(app, host='0.0.0.0', port=8888, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
+	socketio.run(app, host='0.0.0.0', port=8888, debug=True, allow_unsafe_werkzeug=True)

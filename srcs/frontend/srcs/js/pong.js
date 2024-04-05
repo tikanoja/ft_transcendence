@@ -16,41 +16,50 @@
 
 // const socket = new WebSocket('wss://pong:8080', sslOptions);
 
-
+let socket
 export const startScreen = () => {
     const startScreen = document.getElementById('startScreen');
     const playButton = document.getElementById('playButton');
     const canvasContainer = document.getElementById('canvasContainer');
     const styleCheckbox = document.getElementById('styleCheckbox');
-	function loadSocketIO() {
-		// Create a new script element
-		var script = document.createElement('script');
-		
-		// Set the source attribute to the URL of the Socket.IO client library
-		script.src = 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.min.js';
-		
-		// Define a callback function to be executed when the script is loaded
-		script.onload = function() {
-			console.log('Socket.IO client library loaded');
-			// Now you can use the 'io' object provided by the Socket.IO client library
-			// Initialize your Socket.IO connection or perform other actions here
-		};
-		
-		// Append the script element to the document's head
-		document.head.appendChild(script);
-	}
+	// function loadScripts() {
+	// 	// Create an array to hold the URLs of the scripts to be loaded
+	// 	var scriptUrls = [
+	// "https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"
+	// 		// 'https://pong:8888/socket.io/socket.io.js'
+	// 		// Add more URLs if you have additional scripts to load
+	// 	];
+	// Define a recursive function to load scripts one by one
+	function loadScript() {
+			
+					var script = document.createElement('script');
+					script.src = "https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"
+					script.integrity = "sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ=="
+					script.crossOrigin = "anonymous"
+					document.head.appendChild(script);
+
+					script.onload = function() {
+						console.log(script.src + ' loaded');
+						// Load the next script in the array
+					};
+				}
+		// 	if (index < scriptUrls.length) {
+		// 		var script = document.createElement('script');
+		// 		script.src = scriptUrls[index];
+		// }
 	
-	// Call the function to load the Socket.IO client library
-	loadSocketIO();
+		// Start loading the scripts from index 0
+		// loadScript(0);
+	// }
+
+	loadScript();
 
     function connectWebSocket() {
         console.log('In connectWebSocket');
-    
-        // Create a Socket.IO client instance
-        const socket = io('wss://pong:8888/', {
-            rejectUnauthorized: false // Ignore self-signed certificate warning
+        socket = io.connect('https://localhost:8888/', {
+            rejectUnauthorized: false  // Ignore self-signed certificate warning
         });
-    
+
         // Register event handlers
         socket.on('connect', () => {
             console.log('Connected to server');
