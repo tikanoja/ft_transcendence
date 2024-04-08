@@ -261,34 +261,23 @@ def handle_connect():
 def handle_disconnect():
 	print('Client disconnected')
 
-class RightPaddleUpRelease(Resource):
-	def get(self,number):
-		global games
-		global games_lock
-		if number < 0 or number > 3:
-			return jsonify({'status': 'error: allowed game numbers are 0 to 3'})
-		with games_lock:
-			if games[number].is_game_running() == 0:
-				return jsonify({'status': 'error: game not running so no keypresses'})
-			else:
-				#return jsonify({'status': 'ok: ' + str(state)})
-				games[number].right_paddle_released_up()
-				return jsonify({'status': 'ok: right paddle released up'})
-
-api.add_resource(GamesRunning, '/games_running')
-api.add_resource(StartGame, '/game_start/<int:number>')
-api.add_resource(StopGame, '/game_stop/<int:number>')
-api.add_resource(GetState, '/game_state/<int:number>')
-api.add_resource(StartBackgroundLoop, '/start_background_loop')
-api.add_resource(StopBackgroundLoop, '/stop_background_loop')
-api.add_resource(LeftPaddleUp, '/left_paddle_up/<int:number>')
-api.add_resource(LeftPaddleUpRelease, '/left_paddle_up_release/<int:number>')
-api.add_resource(LeftPaddleDown, '/left_paddle_down/<int:number>')
-api.add_resource(LeftPaddleDownRelease, '/left_paddle_down_release/<int:number>')
-api.add_resource(RightPaddleUp, '/right_paddle_up/<int:number>')
-api.add_resource(RightPaddleUpRelease, '/right_paddle_up_release/<int:number>')
-api.add_resource(RightPaddleDown, '/right_paddle_down/<int:number>')
-api.add_resource(RightPaddleDownRelease, '/right_paddle_down_release/<int:number>')
+@socketio.on('message')
+def handle_message(message):
+	print('Message:', message)
+	socketio.emit('message', 'Server received your message: ' + message)
+	splitted_command = message.split(",")
+	if splitted_command:
+		match splitted_command[0]:
+			case 'start_background_loop':
+				start_background_loop(splitted_command)
+			case 'set_game_settings':
+				set_game_settings(splitted_command)
+			case "pattern-2":
+				pass
+			case _:
+				socketio.emit('message', 'ERROR, Command not recognised: ' + message)
+	else:
+		socketio.emit('message', 'ERROR, nothing was sent.')
 
 if __name__ == '__main__':
     # Use SSL/TLS encryption for WSS
