@@ -24,10 +24,9 @@ export const loadScript = () => {
 }
 
 let socket;
+
 function connectWebSocket() {
-    socket = io.connect('http://' + window.location.hostname + ':8888', {
-        withCredentials: true
-    });
+    socket = io.connect('https://' + window.location.hostname);
     // Register event handlers
     socket.on('connect', () => {
         socket.emit('message', 'hello from JS');
