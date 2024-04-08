@@ -14,6 +14,9 @@ from flask_socketio import SocketIO, emit
 from globals import socketio
 from globals import app
 
+# own function that starts backgrund loop
+from start_background_loop import start_background_loop
+
 # own function that sets game data ready
 from set_game_settings import set_game_settings
 
@@ -275,7 +278,7 @@ def handle_message(message):
 			case "pattern-2":
 				pass
 			case _:
-				socketio.emit('message', 'ERROR, Command not recognised: ' + message)
+				socketio.emit('message', 'ERROR, command not recognised: ' + message)
 	else:
 		socketio.emit('message', 'ERROR, nothing was sent.')
 
