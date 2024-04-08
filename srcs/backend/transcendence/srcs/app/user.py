@@ -21,9 +21,6 @@ def	registerPOST(request):
 		return render(request, 'user/register.html', {"form": sent_form, "title": title, "error": ve})
 	new_user = get_user_model()
 	new_user.objects.create_user(username=sent_form.cleaned_data['username'], email=sent_form.cleaned_data['email'], password=sent_form.cleaned_data['password'], first_name=sent_form.cleaned_data['first_name'], last_name=sent_form.cleaned_data['last_name'])
-	# response = JsonResponse({'message': 'congrats you registered!'})
-	# return render(request, 'user/login.html', {"form": LoginForm(request.POST), "title": "Login", "success": "Account created!"})
-	# return response
 	res = JsonResponse({'success': "account created"}, status=301)
 	next = request.GET.get('next', '/login')
 	if next:
@@ -139,7 +136,7 @@ def manage_accountPOST(request):
 			if not form.is_valid():
 				raise ValidationError("Form filled incorrectly")
 		except ValidationError as ve:
-			return JsonResposne({'message': ve})
+			return JsonResponse({'message': ve})
 		user_manager.update_user(request.user.username, email=form.cleaned_data["email"])
 		return JsonResponse({'message': f'Email updated successfully'})
 	elif "password-change-form" == request.POST['form_id']:
@@ -149,7 +146,7 @@ def manage_accountPOST(request):
 			if not form.is_valid():
 				raise ValidationError("Form filled incorrectly")
 		except ValidationError as ve:
-			return JsonResposne({'message': ve})
+			return JsonResponse({'message': ve})
 		user_manager.update_user(request.user.username, password=form.cleaned_data["password"])
 		return JsonResponse({'message': f'Password updated successfully'})
 	elif "delete-account-form" == request.POST['form_id']:
@@ -157,17 +154,6 @@ def manage_accountPOST(request):
 	else:
 		return JsonResponse({'message': 'Invalid form submitted'})
 	
-# maybe only allow POST for this one? the forms will be sent with the profile
-def manage_accountGET(request):
-		# send the interfacet hat will send POST reqs here
-	user = CustomUser.objects.filter(username=request.user)
-	# username = 
-	# 
-	password_form = UpdatePasswordForm()
-	email_form = UpdateEmailForm()
-	return render(request, "user/manage_account.html", {}) #"username"=user.get_field('username')
-
-
 
 # basic details username, name, image link, other public viewable stuff
 # email, other spcific things? for self view

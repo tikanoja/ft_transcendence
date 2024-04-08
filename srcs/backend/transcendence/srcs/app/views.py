@@ -62,17 +62,14 @@ def check_login(request):
 	else:
 		return JsonResponse({'status': 'not authenticated'})
 
-# maybe only allow POST for this one? the forms will be sent with the profile
+# POST only
 # returns JSON resonse with result of form handling success or error
 def manage_account(request):
 	logger.debug('In manage_account()')
-	if request.method =='GET':
-		response = user.manage_accountGET(request)
-	elif request.method == 'POST':
-		
+	if request.method =='POST':
 		response = user.manage_accountPOST(request)
 	else:
-		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+		response = JsonResponse({'error': "method not allowed. please use POST"})
 	return response
 
 # only allow interaction if user has session
