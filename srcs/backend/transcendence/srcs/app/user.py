@@ -1,7 +1,7 @@
-from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm
+from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
-from .models import CustomUser
+from .models import CustomUser, CustomUserManager, GameInstance
 from django.core.exceptions import ValidationError
 import logging
 from django.http import JsonResponse
@@ -19,12 +19,8 @@ def	registerPOST(request):
 	except ValidationError as ve:
 		logger.debug(f"Error in registration form: {ve}")
 		return render(request, 'user/register.html', {"form": sent_form, "title": title, "error": ve})
-	new_user = CustomUser(username=sent_form.cleaned_data["username"], first_name=sent_form.cleaned_data["first_name"], last_name=sent_form.cleaned_data["last_name"], email=sent_form.cleaned_data["email"], password=sent_form.cleaned_data["password"])
 	new_user = get_user_model()
-	new_user.objects.create_user(username=sent_form.cleaned_data['username'], email=sent_form.cleaned_data['email'], password=sent_form.cleaned_data['password'])
-	# response = JsonResponse({'message': 'congrats you registered!'})
-	# return render(request, 'user/login.html', {"form": LoginForm(request.POST), "title": "Login", "success": "Account created!"})
-	# return response
+	new_user.objects.create_user(username=sent_form.cleaned_data['username'], email=sent_form.cleaned_data['email'], password=sent_form.cleaned_data['password'], first_name=sent_form.cleaned_data['first_name'], last_name=sent_form.cleaned_data['last_name'])
 	res = JsonResponse({'success': "account created"}, status=301)
 	next = request.GET.get('next', '/login')
 	if next:
@@ -94,25 +90,6 @@ def	get_current_usernamePOST(request):
 	return username
 
 
-def manage_accountPOST(request):
-	if request.user.is_authenticated:
-		pass
-	# edit the user entry in db based off of info sent.
-	# only if authenticated.
-	else:
-		return JsonResponse({'message': 'User needs to be logged into make changes to account'})
-	
-	
-def manage_accountGET(request):
-		# send the interfacet hat will send POST reqs here
-	user = CustomUser.objects.filter(username=request.user)
-	# username = 
-	# 
-	password_form = UpdatePasswordForm()
-	email_form = UpdateEmailForm()
-	return render(request, "user/manage_account.html", {}) #"username"=user.get_field('username')
-
-
 def delete_accountGET(request):
 	return JsonResponse({'message': 'This will have the form to fill and send for account deletion'})
 
@@ -137,4 +114,116 @@ def delete_accountPOST(request):
 			return JsonResponse({'message': 'Unable to delete account. Check which account you are logged in as'})
 	else:
 		return JsonResponse({'message': 'User needs to be logged into delete account'})
+
+
+def manage_accountPOST(request):
+	user_manager = CustomUserManager()
+	logger.debug(request.POST)
+	if "name-change-form" == request.POST['form_id']:
+		logger.debug("name change form found")
+		form = UpdateNameForm(request.POST)
+		try:
+			if not form.is_valid():
+				raise ValidationError("Form filled incorrectly")
+		except ValidationError as ve:
+			return JsonResponse({'message': ve})
+		user_manager.update_user(request.user.username, first_name=form.cleaned_data["first_name"], last_name=form.cleaned_data["last_name"])
+		return JsonResponse({'message': f'Name updated successfully'})
+	elif "email-change-form" == request.POST['form_id']:
+		logger.debug("email change form found")
+		form = UpdateEmailForm(request.POST)
+		try:
+			if not form.is_valid():
+				raise ValidationError("Form filled incorrectly")
+		except ValidationError as ve:
+			return JsonResponse({'message': ve})
+		user_manager.update_user(request.user.username, email=form.cleaned_data["email"])
+		return JsonResponse({'message': f'Email updated successfully'})
+	elif "password-change-form" == request.POST['form_id']:
+		logger.debug("password change form found")
+		form = UpdatePasswordForm(request.POST)
+		try:
+			if not form.is_valid():
+				raise ValidationError("Form filled incorrectly")
+		except ValidationError as ve:
+			return JsonResponse({'message': ve})
+		user_manager.update_user(request.user.username, password=form.cleaned_data["password"])
+		return JsonResponse({'message': f'Password updated successfully'})
+	elif "delete-account-form" == request.POST['form_id']:
+		return delete_accountPOST(request)
+	else:
+		return JsonResponse({'message': 'Invalid form submitted'})
+	
+
+# basic details username, name, image link, other public viewable stuff
+# email, other spcific things? for self view
+def get_profile_details(username:str, self:bool) -> dict:
+	details = {}
+	user = CustomUser.objects.filter(username=username)
+	if not user:
+		details["error"] = "No users in system match the requested user"
+	else:
+		details["username"] = username
+		details["first_name"] = user[0].first_name
+		details["last_name"] = user[0].last_name
+		if self:
+			details["email"] = user[0].email
+	# details["img"] = user.img #how to get link for profile image?
+	print(details)
+	return details
+
+
+# hadcode a dict of friends for now
+# does self matter for this one?
+def get_friends_dict(username:str) -> dict:
+	user = CustomUser.objects.filter(username=username)
+	# will get friends list from the user
+	friends = [
+		{
+			"username": "username1",
+			"picture_link": "picture_link"
+		},
+		{
+			"username": "username2",
+			"picture_link": "picture_link"
+		}
+	]
+	return friends
+
+def get_game_result(self_score: int, opponent_score: int) -> str:
+	if self_score < opponent_score:
+		return "Won"
+	elif self_score == opponent_score:
+		return "Tie"
+	else:
+		return "Lost"
+
+
+def get_game_history(username:str) -> dict:
+	user = CustomUser.objects.get(username=username)
+	u1_games = GameInstance.objects.filter(p1_user=user)
+	u2_games = GameInstance.objects.filter(p2_user=user)
+	all_games = u1_games.union(u2_games)
+	history = {}
+	for iter, game in enumerate(all_games):
+		entry = {}
+		entry["game"] = game.game
+		entry["date"] = game.date
+		if game.p1_user == user:
+			entry["opponent"] = game.p2_user
+			entry["result"] = get_game_result(game.p1_score, game.p2_score)
+		else:
+			entry["opponent"] = game.p1_user
+			entry["result"] = get_game_result(game.p2_score, game.p1_score)
+		history[iter] = entry
+	return history
+
+
+def get_dashboard_stats(username:str) -> dict:
+	user = CustomUser.objects.get(username=username)
+	u1_games = GameInstance.objects.filter(p1_user=user)
+	u2_games = GameInstance.objects.filter(p2_user=user)
+	all_games = u1_games.union(u2_games)
+	pass
+
 

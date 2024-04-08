@@ -1,0 +1,13 @@
+<div id="self-profile">
+	<div id="profile-details">
+		{% include './profile_partials/manage_account.html' with details=details email_form=email_form password_form=password_form name_form=name_form %}
+	</div>
+	<div id="dashboard">
+		{% include './profile_partials/stats.html' %}
+		{% include './profile_partials/game_history.html' %}
+	</div>
+	<div id="friends">
+		<h3>Friends!</h3>
+		{% include './profile_partials/friends.html' with friends=friends %}
+	</div>
+</div>

@@ -51,7 +51,7 @@ class DeleteAccountForm(forms.Form):
 	confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
 
 	def is_valid(self):
-		valid = super.is_valid()
+		valid = super().is_valid()
 		
 		if not valid:
 			return False
@@ -98,4 +98,8 @@ class UpdateEmailForm(forms.Form):
 		if email_exists:
 			raise ValidationError("Email is registered with another account")
 		return True
-		
+
+
+class UpdateNameForm(forms.Form):
+	first_name = forms.CharField(label='First Name', widget=forms.TextInput(attrs={'placeholder': 'Enter given name'}), max_length=256, required=True)
+	last_name = forms.CharField(label='Last Name', widget=forms.TextInput(attrs={'placeholder': 'Enter family name'}), max_length=256, required=True)

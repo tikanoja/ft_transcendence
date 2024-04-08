@@ -7,7 +7,7 @@ import logging
 from .models import CustomUser
 # from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate #, login, logout
-# from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm
+from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm
 from . import user
 from django.contrib.auth.decorators import login_required
 
@@ -62,19 +62,18 @@ def check_login(request):
 	else:
 		return JsonResponse({'status': 'not authenticated'})
 
-
+# POST only
+# returns JSON resonse with result of form handling success or error
 def manage_account(request):
 	logger.debug('In manage_account()')
-	if request.method =='GET':
-		response = user.manage_accountGET(request)
-	elif request.method == 'POST':
+	if request.method =='POST':
 		response = user.manage_accountPOST(request)
 	else:
-		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+		response = JsonResponse({'error': "method not allowed. please use POST"})
 	return response
 
-
-def delete_account(request, username):
+# only allow interaction if user has session
+def delete_account(request):
 	logger.debug('In delete_account()')
 	if request.method == 'GET':
 		response = user.delete_accountGET(request)
@@ -144,3 +143,29 @@ def notfound(request):
 on account delete, how to handle other recodrs tied to that username? if the username isn't purged from all,
 if another user uses it they will then be linked to the other records...
 """
+
+def profile(request, username):
+	logger.debug('getting profile')
+	self = False
+	if request.user.username == username:
+		self = True
+	if request.method == "GET":
+		friends = user.get_friends_dict(username)
+		logger.debug(friends)
+		details = user.get_profile_details(username, self)
+		context = {}
+		context["friends"] = friends
+		context["details"] = details
+		context["name_form"] = UpdateNameForm()
+		context["email_form"] = UpdateEmailForm()
+		context["password_form"] = UpdatePasswordForm()
+		context["delete_account_form"] = DeleteAccountForm()
+		# need to add in the game stats and history here too
+		if self:
+			return render(request, 'user/profile_self.html', context)
+		else:
+			return render(request, 'user/profile_other.html', {})
+	else:
+		return JsonResponse({"message": "method not allowed, try GET"})
+
+	
