@@ -32,11 +32,6 @@ function connectWebSocket() {
     socket.on('connect', () => {
         socket.emit('message', 'hello from JS');
     });
-
-    //TODO: this happens on exit from game
-    socket.on('disconnect', () => {
-        console.log('Disconnected from server');
-    });
     //TODO: this happens to get game state
     socket.on('message', (data) => {
         console.log('Message from server:', data);
@@ -214,37 +209,35 @@ export const renderPongGame = (is3DGraphics) => {
     let p1_paddle_y, p1_paddle_x, p2_paddle_y, p2_paddle_x, ball_x, ball_y, p1_score, p2_score;
 
     function updateGameState() {
-    
-        get_game_state().then(response_data => {
-            const parsedData = JSON.parse(response_data);
-            const valuesString = parsedData.status.split(': ')[1];
-            const valuesArray = valuesString.split(',');
+		//TODO: this happens to get game state, does this have to happen live or in updateGameState okay?, definately a better way to parse these?
+		socket.on('state', (data) => {
+			console.log('State from server:', data);
+			const parsedData = JSON.parse(data);
+		    const valuesString = parsedData.status.split(': ')[1];
+		    const valuesArray = valuesString.split(',');
 
-            ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[0]);
-            ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[1]);
-            p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[2]);
-            p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[3]);
-            p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[4]);
-            p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[5]);
-            
-            p2_score = parseInt(valuesArray[6]);
-            p1_score = parseInt(valuesArray[7]);
+		    ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[0]);
+		    ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[1]);
+		    p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[2]);
+		    p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[3]);
+		    p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[4]);
+		    p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[5]);
+			p2_score = parseInt(valuesArray[6]);
+			p1_score = parseInt(valuesArray[7]);
 
-            p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
-            p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
-            ball.position.set(ball_x,  ball_y, 0);
-            console.log('values array', valuesArray);
-            updateScoreboard(p1_score, p2_score);
-        }).catch(error => {
-            console.error('Error fetching game state:', error);
-        });
+			p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
+			p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
+			ball.position.set(ball_x,  ball_y, 0);
+			console.log('values array', valuesArray);
+			updateScoreboard(p1_score, p2_score);
+		});
     }
 
     // Update the game state 50 times per second
-    const gameStateInterval = setInterval(updateGameState, 1000 / 50)
+    // const gameStateInterval = setInterval(updateGameState, 1000 / 50)
 
     // Update the game state  times per second for debugging THIS IS FOR DEBUGGING ONLY
-    // const gameStateInterval = setInterval(updateGameState, 3000);
+    const gameStateInterval = setInterval(updateGameState, 3000);
 
 
     function animate() {
@@ -252,6 +245,10 @@ export const renderPongGame = (is3DGraphics) => {
         if (render == false)
         {
             stopAnimation();
+			//TODO: this happens on exit from game
+			socket.on('disconnect', () => {
+				console.log('Disconnected from server');
+			});
 			//TODO: this is the background loop, this needs to be run if 0 games are running AFTER stopping the game Orthographic Camera
 			stop_game_loop();
 
@@ -261,24 +258,24 @@ export const renderPongGame = (is3DGraphics) => {
             renderer.render(scene, camera);
         }
     }
-    
+    //THESE ARE INVERTED DUE TO COORD DIFFERENCE
 	document.addEventListener('keydown', (event) => {
 		event.preventDefault();
 		if (event.key == 'ArrowUp')
         {
-            right_paddle_down();
+			socket.emit('message', 'right_paddle_down');
         }
         if (event.key  == 'ArrowDown')
         {
-            right_paddle_up();
+			socket.emit('message', 'right_paddle_up');
         }
         if (event.key  == 'w')
         {
-            left_paddle_down();
+			socket.emit('message', 'left_paddle_down');
         }
         if (event.key  == 's')
         {
-            left_paddle_up();
+			socket.emit('message', 'left_paddle_up');
         }
 		if (event.key == 'c') {
 			render = false;
@@ -289,19 +286,19 @@ export const renderPongGame = (is3DGraphics) => {
 		event.preventDefault();
 		if (event.key == 'ArrowUp')
         {
-            right_paddle_down_release();
+			socket.emit('message', 'right_paddle_down_release');
         }
         if (event.key  == 'ArrowDown')
         {
-            right_paddle_up_release();
+			socket.emit('message', 'right_paddle_up_release');
         }
         if (event.key  == 'w')
         {
-            left_paddle_down_release();
+			socket.emit('message', 'left_paddle_down_release');
         }
         if (event.key  == 's')
         {
-            left_paddle_up_release();
+			socket.emit('message', 'left_paddle_up_release');
         }
 
     });
