@@ -1,17 +1,17 @@
 from typing import Optional
 import random
 
-from GameObject import GameObject
+import GameObject
 
 class Game:
 	def __init__(self):
 		self.game_slot: int = -1
-		self.ball_coordinates: Optional[GameObject] = None # x,y,width,height
-		self.ball_initial_coordinates: Optional[GameObject] = None # x,y,width,height
-		self.left_paddle_coordinates: Optional[GameObject] = None # x,y,width,height
-		self.left_paddle_initial_coordinates: Optional[GameObject] = None # x,y,width,height
-		self.right_paddle_coordinates: Optional[GameObject] = None # x,y,width,height
-		self.right_paddle_initial_coordinates: Optional[GameObject] = None # x,y,width,height
+		self.ball_coordinates: Optional[GAmeObject.GameObject] = None # x,y,width,height
+		self.ball_initial_coordinates: Optional[Gameobject.GameObject] = None # x,y,width,height
+		self.left_paddle_coordinates: Optional[GameObject.GameObject] = None # x,y,width,height
+		self.left_paddle_initial_coordinates: Optional[GameObject.GameObject] = None # x,y,width,height
+		self.right_paddle_coordinates: Optional[GameObject.GameObject] = None # x,y,width,height
+		self.right_paddle_initial_coordinates: Optional[GameObject.GameObject] = None # x,y,width,height
 		self.screen_width: int = 1920 # x
 		self.screen_height: int = 1080 # y
 		self.screen_middle_point = [float((self.screen_width / 2)), float((self.screen_height / 2))] # [x, y]
@@ -57,13 +57,13 @@ class Game:
 		self.down_pressed = 0
 
 	def create_ball_initial_coordinates(self):
-		self.ball_initial_coordinates = GameObject(
+		self.ball_initial_coordinates = GameObject.GameObject(
 		self.screen_middle_point[0],
 		self.screen_middle_point[1],
 		self.ball_R,
 		self.ball_R
 		)
-		self.ball_coordinates = GameObject(
+		self.ball_coordinates = GameObject.GameObject(
 		self.screen_middle_point[0],
 		self.screen_middle_point[1],
 		self.ball_R,
@@ -71,13 +71,13 @@ class Game:
     	)
 
 	def create_left_paddle_initial_coordinates(self):
-		self.left_paddle_initial_coordinates = GameObject(
+		self.left_paddle_initial_coordinates = GameObject.GameObject(
 		self.paddle_distance_to_wall + self.paddle_width,
 		self.screen_middle_point[1],
 		self.paddle_width,
 		self.paddle_height
     	)
-		self.left_paddle_coordinates = GameObject(
+		self.left_paddle_coordinates = GameObject.GameObject(
 		self.paddle_distance_to_wall + self.paddle_width,
 		self.screen_middle_point[1],
 		self.paddle_width,
@@ -85,13 +85,13 @@ class Game:
 		)
 
 	def create_right_paddle_initial_coordinates(self):
-		self.right_paddle_initial_coordinates = GameObject(
+		self.right_paddle_initial_coordinates = GameObject.GameObject(
 		self.screen_width - self.paddle_distance_to_wall - self.paddle_width,
 		self.screen_middle_point[1],
 		self.paddle_width,
 		self.paddle_height
     	)
-		self.right_paddle_coordinates = GameObject(
+		self.right_paddle_coordinates = GameObject.GameObject(
 		self.screen_width - self.paddle_distance_to_wall - self.paddle_width,
 		self.screen_middle_point[1],
 		self.paddle_width,
