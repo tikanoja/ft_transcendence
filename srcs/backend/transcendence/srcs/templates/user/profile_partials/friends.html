@@ -1,0 +1,14 @@
+<div>
+{% if friends %}
+	<table>
+	{% for friend in friends %}
+		<tr>
+			<td>{{friend.picture_link}}</td>
+			<td><nav><a href="/profile/{{friend.username}}">{{friend.username}}</a></nav></td>
+		</tr>
+	{% endfor%}
+	</table>
+{% else %}
+	<p>I have no friends :o</p>
+{% endif %}
+</div>
