@@ -103,7 +103,7 @@ def delete_accountPOST(request):
             if not delete_form.is_valid():
                 raise ValidationError("Values given are not valid") 
         except ValidationError as ve:
-            return render(request, 'user/delete_account.html', {"form": delete_form, "error": ve})
+            return render(request, 'user/profile_partials/delete_account.html', {"form": delete_form, "error": ve})
         username = request.user
         password = delete_form.cleaned_data["password"]
         user = authenticate(request, username=username, password=password)

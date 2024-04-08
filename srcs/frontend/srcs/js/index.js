@@ -103,7 +103,7 @@ function updateEventListeners() {
     var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
     
     var playButton = document.getElementById('playButton');
-    var deleteForm = document.getElementById('deleteAccountForm');
+    var deleteForm = document.getElementById('delete-account-form');
     var nameChangeForm = document.getElementById('name-change-form');
     var emailChangeForm = document.getElementById('email-change-form');
     var passwordChangeForm = document.getElementById('password-change-form');
