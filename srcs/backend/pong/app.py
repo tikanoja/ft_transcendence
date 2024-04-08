@@ -255,7 +255,6 @@ def game_loop():
 def handle_connect():
 	print('Client connected')
 	socketio.emit('message', 'hello client') # {'data': 'Server says: Client connected'})
-    #socketio.emit('server_says_client_connected')
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -263,6 +262,7 @@ def handle_disconnect():
 
 @socketio.on('message')
 def handle_message(message):
+	print('Client recieved message')
 	print('Message:', message)
 	socketio.emit('message', 'Server received your message: ' + message)
 	splitted_command = message.split(",")
