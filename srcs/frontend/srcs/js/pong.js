@@ -48,7 +48,9 @@ export const startScreen = () => {
 
     function connectWebSocket() {
         console.log('In connectWebSocket');
-        socket = io.connect('https://localhost:8888/websocket/')
+        socket = io.connect('http://' + window.location.hostname + ':8888', {
+            withCredentials: true
+        });
 
         // Register event handlers
         socket.on('connect', () => {
