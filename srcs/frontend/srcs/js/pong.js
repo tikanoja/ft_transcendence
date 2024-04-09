@@ -1,6 +1,6 @@
 // // Import required modules
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.module.js';
-// import { start_game_loop, stop_game_loop, start_game, stop_game, left_paddle_up, left_paddle_up_release , left_paddle_down, left_paddle_down_release , right_paddle_up, right_paddle_up_release , right_paddle_down, right_paddle_down_release, get_game_state, get_games_running} from './index.js'
+
 // //TODO:the size of paddles, ball and their positioning MUST BE DYNAMIC!
 // //TODO: A better looking start screen the also shows user name, and opponent name
 // //TODO: Make lighting better
@@ -31,10 +31,6 @@ function connectWebSocket() {
     socket.on('connect', () => {
         socket.emit('message', 'hello from JS');
     });
-    //TODO: this happens to get game state
-    socket.on('message', (data) => {
-        console.log('Message from server:', data);
-    });
     socket.on('error', (error) => {
         console.error('WebSocket error:', error);
     });
@@ -42,25 +38,26 @@ function connectWebSocket() {
 
 export const startScreen = async () => {
     try {
-        await loadScript();
-        connectWebSocket();
-		//parse game_running
-        const startScreen = document.getElementById('startScreen');
-        const playButton = document.getElementById('playButton');
-        const canvasContainer = document.getElementById('canvasContainer');
-        const styleCheckbox = document.getElementById('styleCheckbox');
-        let is3DGraphics = false;
+			await loadScript();
+			connectWebSocket();
+			//parse game_running
+			const startScreen = document.getElementById('startScreen');
+			const playButton = document.getElementById('playButton');
+			const canvasContainer = document.getElementById('canvasContainer');
+			const styleCheckbox = document.getElementById('styleCheckbox');
+			let is3DGraphics = false;
 
-        playButton.addEventListener('click', () => {
-            startScreen.style.display = 'none';
-            canvasContainer.style.display = 'block';
-            
-            is3DGraphics = styleCheckbox.checked;
-
-            socket.emit('message', 'start_background_loop');
-            renderPongGame(is3DGraphics);
+			playButton.addEventListener('click', () => {
+				startScreen.style.display = 'none';
+				canvasContainer.style.display = 'block';
+				
+				is3DGraphics = styleCheckbox.checked;
+				socket.emit('message', 'games_running'); //TODO: this neeeds to check if its already running
+				socket.emit('message', 'start_background_loop');
+				socket.emit('message', 'start_game,0'); //TODO: need to check how this will decide what number??
+				let gameNumber = 0
+				renderPongGame(is3DGraphics, gameNumber);
         });
-
     } catch (error) {
         console.error('Error loading script:', error);
     }
@@ -107,8 +104,6 @@ function addLighting(scene) {
     scene.add(light.target);
     scene.add(amb_light);
 }
-
-
 
 function setup2DScene(scene) {
     //const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -171,7 +166,7 @@ function create3DPaddle(color) {
     return new THREE.Mesh(geometry, material);
 }
 
-export const renderPongGame = (is3DGraphics) => {
+export const renderPongGame = (is3DGraphics, gameNumber) => {
     const scene = new THREE.Scene();
     let camera;
 
@@ -179,7 +174,7 @@ export const renderPongGame = (is3DGraphics) => {
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
     
-    let p1_paddle, p2_paddle, ball;
+    let p1_paddle, p2_paddle, ball; //TODO: take into account the paddle width and height?
     if (is3DGraphics) {
         camera = setup3DScene(scene);
     } else {
@@ -260,13 +255,13 @@ export const renderPongGame = (is3DGraphics) => {
 	document.addEventListener('keydown', (event) => {
 		event.preventDefault();
 		if (event.key == 'ArrowUp')
-			socket.emit('message', 'right_paddle_down');
+			socket.emit('message', 'right_paddle_down,' + gameNumber);
         if (event.key  == 'ArrowDown')
-			socket.emit('message', 'right_paddle_up');
+			socket.emit('message', 'right_paddle_up,' + gameNumber);
         if (event.key  == 'w')
-			socket.emit('message', 'left_paddle_down');
+			socket.emit('message', 'left_paddle_down,' + gameNumber);
         if (event.key  == 's')
-			socket.emit('message', 'left_paddle_up');
+			socket.emit('message', 'left_paddle_up,' + gameNumber);
 		if (event.key == 'c')
 			render = false;
     });
@@ -274,13 +269,13 @@ export const renderPongGame = (is3DGraphics) => {
     document.addEventListener('keyup', (event) => {
 		event.preventDefault();
 		if (event.key == 'ArrowUp')
-			socket.emit('message', 'right_paddle_down_release');
+			socket.emit('message', 'right_paddle_down_release,' + gameNumber);
         if (event.key  == 'ArrowDown')
-			socket.emit('message', 'right_paddle_up_release');
+			socket.emit('message', 'right_paddle_up_release,' + gameNumber);
         if (event.key  == 'w')
-			socket.emit('message', 'left_paddle_down_release');
+			socket.emit('message', 'left_paddle_down_release,' + gameNumber);
         if (event.key  == 's')
-			socket.emit('message', 'left_paddle_up_release');
+			socket.emit('message', 'left_paddle_up_release,' + gameNumber);
     });
 
 
@@ -292,9 +287,9 @@ export const renderPongGame = (is3DGraphics) => {
     }
 
 		function stopAnimation() {
-		socket.emit('message', 'stop_game');
+		socket.emit('message', 'stop_game,0');
 		//TODO: get games_running, parse then end loop if all 0
-		socket.emit('message', 'stop_game');
+		// socket.emit('message', 'stop_game');
 		// socket.on('games_running', (data) => {
 		// 	//parse jason
 		// 	//if ()
