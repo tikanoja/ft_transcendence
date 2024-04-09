@@ -35,7 +35,6 @@ function connectWebSocket() {
     socket.on('message', (data) => {
         console.log('Message from server:', data);
     });
-
     socket.on('error', (error) => {
         console.error('WebSocket error:', error);
     });
@@ -45,7 +44,7 @@ export const startScreen = async () => {
     try {
         await loadScript();
         connectWebSocket();
-
+		//parse game_running
         const startScreen = document.getElementById('startScreen');
         const playButton = document.getElementById('playButton');
         const canvasContainer = document.getElementById('canvasContainer');
@@ -261,73 +260,47 @@ export const renderPongGame = (is3DGraphics) => {
 	document.addEventListener('keydown', (event) => {
 		event.preventDefault();
 		if (event.key == 'ArrowUp')
-        {
 			socket.emit('message', 'right_paddle_down');
-        }
         if (event.key  == 'ArrowDown')
-        {
 			socket.emit('message', 'right_paddle_up');
-        }
         if (event.key  == 'w')
-        {
 			socket.emit('message', 'left_paddle_down');
-        }
         if (event.key  == 's')
-        {
 			socket.emit('message', 'left_paddle_up');
-        }
-		if (event.key == 'c') {
+		if (event.key == 'c')
 			render = false;
-		}
     });
 
     document.addEventListener('keyup', (event) => {
 		event.preventDefault();
 		if (event.key == 'ArrowUp')
-        {
 			socket.emit('message', 'right_paddle_down_release');
-        }
         if (event.key  == 'ArrowDown')
-        {
 			socket.emit('message', 'right_paddle_up_release');
-        }
         if (event.key  == 'w')
-        {
 			socket.emit('message', 'left_paddle_down_release');
-        }
         if (event.key  == 's')
-        {
 			socket.emit('message', 'left_paddle_up_release');
-        }
-
     });
 
 
     let animationId;
 
     function startAnimation() {
-
         animationId = requestAnimationFrame(animate);
         animate();
     }
 
 		function stopAnimation() {
-
-        //TODO: this would need to take into account which game number this is?
-        stop_game().then(response => {
-            console.log('response from stop_game', response);
-            
-        }).catch(error => {
-            console.error('Error with stopping game:', error);
-        });
-
-        //TODO: this would be depended on whether there were other games running, if there are it wont run "game running call"
-        stop_game_loop().then(response => {
-            console.log('response from stop_game_loop', response);
-            
-        }).catch(error => {
-            console.error('Error with stopping game:', error);
-        });
+		socket.emit('message', 'stop_game');
+		//TODO: get games_running, parse then end loop if all 0
+		socket.emit('message', 'stop_game');
+		// socket.on('games_running', (data) => {
+		// 	//parse jason
+		// 	//if ()
+		// 	console.log('Games still running');
+		// 	socket.emit('message', 'stop_background_loop');
+		// });
 
         clearInterval(gameStateInterval);
         cancelAnimationFrame(animationId);
