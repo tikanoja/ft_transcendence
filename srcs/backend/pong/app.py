@@ -365,6 +365,7 @@ def game_loop():
 	global background_thread_running
 	global games_lock
 	global games
+	global socketio
 	while True:
 		if background_thread_running == 0:
 			return
@@ -373,6 +374,8 @@ def game_loop():
 				if games[game].is_game_running() == 1:
 					games[game].move_paddles()
 					games[game].move_ball()
+					socketio.emit('state', games[game].return_game_state())
+
 		time.sleep(0.02)
 
 def start_background_loop(splitted_command):
