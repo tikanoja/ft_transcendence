@@ -293,7 +293,6 @@ class Game:
 		self.game_running = running_or_not
 
 	def return_game_state(self):
-
 		# self.screen_width: int = 1920 # x
 		# self.screen_height: int = 1080 # y
 		ball_world_pos_x = self.ball_coordinates.x / self.screen_width
@@ -317,22 +316,8 @@ class Game:
 		state += str(self.left_score)
 		state += ','
 		state += str(self.right_score)
-
-		# state = str(self.ball_coordinates.x)
-		# state += ','
-		# state += str(self.ball_coordinates.y)
-		# state += ','
-		# state += str(self.left_paddle_coordinates.x)
-		# state += ','
-		# state += str(self.left_paddle_coordinates.y)
-		# state += ','
-		# state += str(self.right_paddle_coordinates.x)
-		# state += ','
-		# state += str(self.right_paddle_coordinates.y)
-		# state += ','
-		# state += str(self.right_score)
-		# state += ','
-		# state += str(self.left_score)
+		state += ','
+		state += str(self.game_running)
 		return state
 
 	def left_paddle_pressed_up(self):
