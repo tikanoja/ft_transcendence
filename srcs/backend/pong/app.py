@@ -399,6 +399,9 @@ def stop_background_loop(splitted_command):
 	global thread_lock
 	global background_thread_running
 	global socketio
+	if len(splitted_command) != 1:
+		socketio.emit('message', 'ERROR, string not in right format.')
+		return
 	with thread_lock:
 		if background_thread_running == 0:
 			socketio.emit('message', 'ERROR, game loop already stopped.')
@@ -510,6 +513,9 @@ def get_state(splitted_command):
 def	games_running(splitted_command):
 	global games
 	global games_lock
+	if len(splitted_command) != 1:
+		socketio.emit('message', 'ERROR, string not in right format.')
+		return
 	games_running = ['0','0','0','0']
 	with games_lock:
 		for index in range(4):
@@ -521,6 +527,10 @@ def	games_running(splitted_command):
 def left_paddle_up(splitted_command):
 	global games
 	global games_lock
+	if len(splitted_command) != 2:
+		socketio.emit('message', 'ERROR, string not in right format.')
+		return
+	number = int(splitted_command[1])
 	if number < 0 or number > 3:
 		socketio.emit('message', 'ERROR, allowed game numbers are 0 to 3.')
 		return
@@ -536,6 +546,10 @@ def left_paddle_up(splitted_command):
 def left_paddle_down(splitted_command):
 	global games
 	global games_lock
+	if len(splitted_command) != 2:
+		socketio.emit('message', 'ERROR, string not in right format.')
+		return
+	number = int(splitted_command[1])
 	if number < 0 or number > 3:
 		socketio.emit('message', 'ERROR, allowed game numbers are 0 to 3.')
 		return
@@ -551,6 +565,10 @@ def left_paddle_down(splitted_command):
 def left_paddle_down_release(splitted_command):
 	global games
 	global games_lock
+	if len(splitted_command) != 2:
+		socketio.emit('message', 'ERROR, string not in right format.')
+		return
+	number = int(splitted_command[1])
 	if number < 0 or number > 3:
 		socketio.emit('message', 'ERROR: allowed game numbers are 0 to 3.')
 		return
@@ -566,6 +584,10 @@ def left_paddle_down_release(splitted_command):
 def left_paddle_up_release(splitted_command):
 	global games
 	global games_lock
+	if len(splitted_command) != 2:
+		socketio.emit('message', 'ERROR, string not in right format.')
+		return
+	number = int(splitted_command[1])
 	if number < 0 or number > 3:
 		socketio.emit('message', 'ERROR, allowed game numbers are 0 to 3.')
 		return
@@ -581,6 +603,10 @@ def left_paddle_up_release(splitted_command):
 def right_paddle_up(splitted_command):
 	global games
 	global games_lock
+	if len(splitted_command) != 2:
+		socketio.emit('message', 'ERROR, string not in right format.')
+		return
+	number = int(splitted_command[1])
 	if number < 0 or number > 3:
 		socketio.emit('message', 'ERROR, allowed game numbers are 0 to 3.')
 		return
@@ -596,6 +622,10 @@ def right_paddle_up(splitted_command):
 def right_paddle_down(splitted_command):
 	global games
 	global games_lock
+	if len(splitted_command) != 2:
+		socketio.emit('message', 'ERROR, string not in right format.')
+		return
+	number = int(splitted_command[1])
 	if number < 0 or number > 3:
 		socketio.emit('message', 'ERROR, allowed game numbers are 0 to 3.')
 		return
@@ -611,6 +641,10 @@ def right_paddle_down(splitted_command):
 def right_paddle_down_release(splitted_command):
 	global games
 	global games_lock
+	if len(splitted_command) != 2:
+		socketio.emit('message', 'ERROR, string not in right format.')
+		return
+	number = int(splitted_command[1])
 	if number < 0 or number > 3:
 		socketio.emit('message', 'ERROR, allowed game numbers are 0 to 3.')
 		return
@@ -626,6 +660,10 @@ def right_paddle_down_release(splitted_command):
 def right_paddle_up_release(splitted_command):
 	global games
 	global games_lock
+	if len(splitted_command) != 2:
+		socketio.emit('message', 'ERROR, string not in right format.')
+		return
+	number = int(splitted_command[1])
 	if number < 0 or number > 3:
 		socketio.emit('message', 'ERROR, allowed game numbers are 0 to 3.')
 		return
