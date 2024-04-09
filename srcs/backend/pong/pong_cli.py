@@ -14,11 +14,12 @@ prGreen("""██████╗  ██████╗ ███╗   ██╗
 
 def interactive_cli():
 	print("entering interactive mode: instructions would go here ie which game game settings etc")
-	print("1: get number of games in progress")
-	print("2: get scores of games in progress")
-	print("3: access user dashboard")
+	print("1: Get number of games in progress")
+	print("2: Get scores of games in progress")
+	print("3: Access user dashboard")
 	user_input = input("basic command input: ")
 	if user_input == '3':
+		#would need to be an API call?
 		print("""
 		Username:
 		win percentage:
