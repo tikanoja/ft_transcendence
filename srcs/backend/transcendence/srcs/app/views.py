@@ -112,9 +112,9 @@ def play(request):
 def friends(request):
 	logger.debug('In friends()')
 	if request.method == 'GET':
-		return render(request, 'user/friends.html', {})
+		response = user.friendsGET(request)
 	elif request.method == 'POST':
-		response = user.playPOST(request)
+		response = user.friendsPOST(request)
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 	return response

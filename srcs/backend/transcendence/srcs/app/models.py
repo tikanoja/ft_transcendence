@@ -40,12 +40,26 @@ class CustomUser(AbstractBaseUser):
 	first_name = models.CharField(max_length = 254, null=True)
 	last_name = models.CharField(max_length = 254, null=True)
 	email = models.EmailField(max_length = 320, blank=True, null=True)
+	is_online = models.BooleanField(default=False)
+	last_seen = models.DateTimeField(auto_now=True) 
 
 	USERNAME_FIELD = 'username'
 	REQUIRED_FIELDS = []
 
 	objects = CustomUserManager()
 
+class Friendship(models.Model):
+	PENDING = 'P'
+	ACCEPTED = 'A'
+	REJECTED = 'R'
+	STATUS_CHOICES = [
+		(PENDING, 'Pending'),
+		(ACCEPTED, 'Accepted'),
+		(REJECTED, 'Rejected'),
+	]
+	from_user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='friend_request_from')
+	to_user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='friend_request_to')
+	status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=PENDING)
 
 """
 GameInstance {
