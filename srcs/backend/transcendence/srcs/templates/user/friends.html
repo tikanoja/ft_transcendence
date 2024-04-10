@@ -45,7 +45,7 @@
 		{% if current_user == friendship.to_user %}
 			<li>
 				{{ friendship.from_user.username }} - 
-				{% if friendship.from_user.is_authenticated %}
+				{% if friendship.from_user.is_online %}
 					<span style="color:green;">Online</span>
 				{% else %}
 					<span style="color:grey;">Offline</span>
@@ -55,7 +55,7 @@
 		{% else %}
 			<li>
 				{{ friendship.to_user.username }} - 
-				{% if friendship.to_user.is_authenticated %}
+				{% if friendship.to_user.is_online %}
 					<span style="color:green;">Online</span>
 				{% else %}
 					<span style="color:grey;">Offline</span>

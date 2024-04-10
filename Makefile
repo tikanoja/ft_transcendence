@@ -24,4 +24,7 @@ logs:
 	@echo "\n* * * * * * * * * * USER LOGS * * * * * * * * * *"
 	docker logs --tail 10 transcendence_c
 
+log:
+	docker logs transcendence_c
+
 .PHONY: all clean fclean re up down

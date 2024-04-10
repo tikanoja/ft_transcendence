@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from django.db.models import Q
 import json
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -49,12 +50,12 @@ def loginPOST(request):
     if user is not None:
         login(request, user) #log user in, create new session, add sessionID cookie for the response
         request.session['user_id'] = user.id #store user ID explicity to the request.session dictionary
-        # response = JsonResponse({'success': "you just logged in"})
+        user.is_online = True
+        user.save()
         res = JsonResponse({'success': "you just logged in"}, status=301)
         next = request.GET.get('next', '/play')
         if next:
             res['Location'] = next
-        logger.debug("sending back a response w code %s", res.status_code)
         return res
         # could send a redirect to the home page or user profile
     else:
@@ -77,6 +78,8 @@ def loginGET(request):
 
 def	logoutPOST(request):
     if request.user.is_authenticated:
+        request.user.is_online = False
+        request.user.save()
         logout(request)
         next = request.GET.get('next', '/login')
         return HttpResponseRedirect(next)	
@@ -231,6 +234,7 @@ def get_dashboard_stats(username:str) -> dict:
     all_games = u1_games.union(u2_games)
     pass
 
+
 def friendsContext(request, error, success):
     logger.debug('in friendsContext')
     form = AddFriendForm()
@@ -243,6 +247,14 @@ def friendsContext(request, error, success):
     in_invites = all_friendships.filter(to_user=current_user, status=Friendship.PENDING)
     out_invites = all_friendships.filter(from_user=current_user, status=Friendship.PENDING)
 
+    for friendship in friendships:
+        other_user = friendship.from_user if friendship.from_user != current_user else friendship.to_user
+        logger.debug('username: ' + other_user.username + ', last seen at: ' + other_user.last_seen.strftime('%Y-%m-%d %H:%M:%S'))
+        if other_user.is_online and timezone.now() - other_user.last_seen > timezone.timedelta(minutes=42):
+            other_user.is_online = False
+            other_user.save()
+
+
     if not error and not success:
         context = {'current_user': current_user, 'form': form, 'title': title, 'in_invites': in_invites, 'out_invites': out_invites, 'friendships': friendships}
     elif error and not success:
@@ -253,25 +265,7 @@ def friendsContext(request, error, success):
 
 
 def friendsGET(request):
-    form = AddFriendForm()
-    title = "Manage friends"
-    current_user = request.user
-
-    all_friendships = Friendship.objects.filter(Q(from_user=current_user) | Q(to_user=current_user))
-
-    friendships = all_friendships.filter(status=Friendship.ACCEPTED)
-    in_invites = all_friendships.filter(to_user=current_user, status=Friendship.PENDING)
-    out_invites = all_friendships.filter(from_user=current_user, status=Friendship.PENDING)
-
-    context = {
-        'current_user': current_user,
-        'form': form,
-        'title': title,
-        'in_invites': in_invites,
-        'out_invites': out_invites,
-        'friendships': friendships,
-    }
-    return render(request, 'user/friends.html', context)	
+    return render(request, 'user/friends.html', friendsContext(request, None, None))	
 
 
 def friendResponse(request, data):

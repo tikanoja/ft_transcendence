@@ -40,6 +40,8 @@ class CustomUser(AbstractBaseUser):
 	first_name = models.CharField(max_length = 254, null=True)
 	last_name = models.CharField(max_length = 254, null=True)
 	email = models.EmailField(max_length = 320, blank=True, null=True)
+	is_online = models.BooleanField(default=False)
+	last_seen = models.DateTimeField(auto_now=True) 
 
 	USERNAME_FIELD = 'username'
 	REQUIRED_FIELDS = []

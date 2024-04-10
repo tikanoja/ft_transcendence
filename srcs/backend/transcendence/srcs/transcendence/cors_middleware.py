@@ -1,3 +1,7 @@
+from django.utils import timezone
+from app.models import CustomUser
+from django.contrib.auth import get_user_model
+
 class CorsMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -13,4 +17,19 @@ class CorsMiddleware:
         response["Access-Control-Allow-Headers"] = "Content-Type, Accept, X-CSRFToken, Location"
         response["Access-Control-Expose-Headers"] = "Location"
         response["Access-Control-Allow-Credentials"] = "true"
+        return response
+
+
+class UpdateLastSeenMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        if request.user.is_authenticated:
+            user = request.user
+            user.last_seen = timezone.now()
+            user.save()
+
         return response
