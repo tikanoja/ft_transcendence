@@ -87,16 +87,12 @@ def	logoutPOST(request):
         response = JsonResponse({'error': "Already logged out."})
     return response
 
-def	get_current_usernamePOST(request):
+def	get_current_usernameGET(request):
     if request.user.is_authenticated:
         username = request.user.username
     else:
         username = 'unknown user'
     return username
-
-
-def delete_accountGET(request):
-    return JsonResponse({'message': 'This will have the form to fill and send for account deletion'})
 
 
 def delete_accountPOST(request):
@@ -123,6 +119,7 @@ def delete_accountPOST(request):
         return JsonResponse({'message': 'User needs to be logged into delete account'})
 
 
+# return dictionary for context with the resulting vars that can be rendered into the profile
 def manage_accountPOST(request):
     user_manager = CustomUserManager()
     logger.debug(request.POST)
@@ -187,11 +184,11 @@ def get_friends_dict(username:str) -> dict:
     # will get friends list from the user
     friends = [
         {
-            "username": "username1",
+            "username": "hen",
             "picture_link": "picture_link"
         },
         {
-            "username": "username2",
+            "username": "ben",
             "picture_link": "picture_link"
         }
     ]

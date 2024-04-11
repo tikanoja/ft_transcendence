@@ -70,7 +70,7 @@ const routes = {
 		description: "Amazing 3D"
 	},
 	"/profile" : {
-		view: "/app/profile/jen",
+		view: "app/profile/",
 		title: "test_profile | " +  pageTitle,
 		description: "Only Jen's profile"
 	}
@@ -117,6 +117,12 @@ const locationHandler = async () => {
 	console.log('locationHandler(): matching this to routes: ' + location)
 	// Check the routes (the views above) for a match, if no match: 404
 	const route = routes[location] || routes[404];
+	if (location === '/profile') {
+		let userQuery = await fetch('app/get_current_username/');
+		let username = await userQuery.json()
+		console.log('curent username returned as' + username)
+		route.view = route.view + username['message']
+	}
 	const querystring = window.location.search;
 	console.log('locationHandler(): fetching this: ' + route.view + querystring);
 	const response = await fetch(route.view + querystring)//, {redirect: 'manual'});

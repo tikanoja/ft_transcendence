@@ -47,10 +47,10 @@ def logout_user(request):
 
 def get_current_username(request):
 	logger.debug('In get_current_username()')
-	if request.method == 'POST':
-		username = user.get_current_usernamePOST(request)
+	if request.method == 'GET':
+		username = user.get_current_usernameGET(request)
 	else:
-		username = 'only POST allowed'
+		username = 'only GET allowed'
 	response = JsonResponse({'message': username})
 	return response
 

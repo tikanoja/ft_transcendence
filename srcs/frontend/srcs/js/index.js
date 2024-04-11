@@ -101,13 +101,14 @@ function updateEventListeners() {
 	var playButton = document.getElementById('playButton');
     var addFriendForm = document.getElementById('addFriendForm');
     var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
-    
+    var profileLinks = document.querySelectorAll('#profileLinkTag')
     var playButton = document.getElementById('playButton');
     var deleteForm = document.getElementById('delete-account-form');
     var nameChangeForm = document.getElementById('name-change-form');
     var emailChangeForm = document.getElementById('email-change-form');
     var passwordChangeForm = document.getElementById('password-change-form');
 
+    // remove listeners
     if (deleteForm) {
         deleteForm.removeEventListener('submit', deleteFormHandler);
     }
@@ -141,7 +142,12 @@ function updateEventListeners() {
             button.removeEventListener('click', friendRequestHandler);
         })
     }
-    
+    if (profileLinks) {
+        profileLinks.forEach(function(link) {
+            link.removeEventListener('click', profileLinkHandler);
+        })
+    }
+    // begin add listeners if currently present
     if (loginForm) {
         loginForm.addEventListener('submit', loginFormHandler);
     }
@@ -173,6 +179,11 @@ function updateEventListeners() {
     }
     if (passwordChangeForm) {
         passwordChangeForm.addEventListener('submit', manageAccountHandler);
+    }
+    if (profileLinks) {
+        profileLinks.forEach(function(link) {
+            link.addEventListener('click', profileLinkHandler);
+        })
     }
 }
 
@@ -317,10 +328,9 @@ const manageAccountHandler = async (event) => {
 	}
 }
 
-
 const deleteFormHandler= async (event) => {
     event.preventDefault();
-    console.log("in deleteFormHandler")
+    console.log("in deleteFormHandler");
 
     const formData = new FormData(event.target);
 
@@ -347,6 +357,36 @@ const deleteFormHandler= async (event) => {
 		// some 400 or 500 code probably, show the error that was sent?
 	}
 }
+
+const profileLinkHandler = async (event) => {
+    event.preventDefault();
+    console.log("in profileLinkHandler");
+
+    let profileUrl = new URL(event.target.href);
+    console.log("profile url " + profileUrl);
+    let profilePath = profileUrl.pathname;
+    console.log("profile path " + profilePath);
+    let profileUsername = event.target.textContent;
+    let response = await sendGetRequest('app' + profilePath);
+    if (response.redirected) {
+        console.log('redirect status found');
+        let redirect_location = response.url;
+        console.log("redir to: ", redirect_location);
+        routeRedirect(redirect_location);
+    }
+	else if (response.ok) {
+        console.log('response,ok triggered');
+		// stay on this page, display the content again
+        const html = await response.text();
+        window.history.pushState("", "", profilePath);
+        updateContent(html, "Profile | " + profileUsername, "Personal Profile");
+	}
+	else {
+		console.log("Response status: ", response.status)
+		// some 400 or 500 code probably, show the error that was sent?
+	}
+}
+
 const start_game_loop = async () => {
     const responseData = await sendGetRequest('pong/start_background_loop').then((response) => response.text());
     console.log('start game loop:	', responseData);
@@ -426,6 +466,7 @@ const get_game_state = async () => {
     console.log('from timo pong game_state:	', responseData);
     return (responseData);
 }
+
 
 export { checkLogin, updateContent, start_game_loop, stop_game_loop, start_game, stop_game, get_game_state, left_paddle_up, left_paddle_up_release , left_paddle_down, left_paddle_down_release , right_paddle_up, right_paddle_up_release , right_paddle_down, right_paddle_down_release, updateEventListeners, setActive }
 

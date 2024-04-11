@@ -44,7 +44,7 @@
 	{% for friendship in friendships %}
 		{% if current_user == friendship.to_user %}
 			<li>
-				{{ friendship.from_user.username }} - 
+				<a id="profileLinkTag" href="/profile/{{friendship.from_user.username}}" >{{ friendship.from_user.username }}</a> - 
 				{% if friendship.from_user.is_online %}
 					<span style="color:green;">Online</span>
 				{% else %}
