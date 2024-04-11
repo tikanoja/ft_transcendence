@@ -305,6 +305,8 @@ class Game:
 		left_paddle_world_pos_y = self.left_paddle_coordinates.y / self.screen_height
 		right_paddle_world_pos_x = self.right_paddle_coordinates.x / self.screen_width
 		right_paddle_world_pos_y = self.right_paddle_coordinates.y / self.screen_height
+		state = str(self.game_number)
+		state += ','
 		state = str(ball_world_pos_x)
 		state += ','
 		state += str(ball_world_pos_y)
@@ -381,7 +383,7 @@ def game_loop():
 					games[game].move_paddles()
 					games[game].move_ball()
 					socketio.emit('state', games[game].return_game_state())
-
+	
 		time.sleep(0.02)
 
 def start_background_loop(splitted_command):
