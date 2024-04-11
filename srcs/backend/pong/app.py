@@ -305,9 +305,9 @@ class Game:
 		left_paddle_world_pos_y = self.left_paddle_coordinates.y / self.screen_height
 		right_paddle_world_pos_x = self.right_paddle_coordinates.x / self.screen_width
 		right_paddle_world_pos_y = self.right_paddle_coordinates.y / self.screen_height
-		state = str(self.game_number)
+		state = str(self.game_slot)
 		state += ','
-		state = str(ball_world_pos_x)
+		state += str(ball_world_pos_x)
 		state += ','
 		state += str(ball_world_pos_y)
 		state += ','
