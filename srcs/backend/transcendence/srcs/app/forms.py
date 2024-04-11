@@ -2,6 +2,9 @@ from django import forms
 from .models import CustomUser
 from django.core.exceptions import ValidationError
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 class RegistrationForm(forms.Form):
 	username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
@@ -51,7 +54,7 @@ class DeleteAccountForm(forms.Form):
 	confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
 
 	def is_valid(self):
-		valid = super.is_valid()
+		valid = super().is_valid()
 		
 		if not valid:
 			return False
@@ -98,4 +101,29 @@ class UpdateEmailForm(forms.Form):
 		if email_exists:
 			raise ValidationError("Email is registered with another account")
 		return True
+
+
+class AddFriendForm(forms.Form):
+	username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
+
+	def is_valid(self):
+		valid = super().is_valid()
 		
+		if not valid:
+			return False
+
+		username = self.cleaned_data.get('username')
+
+		if not username or username.isspace():
+			raise ValidationError("Empty username")
+		
+		if not CustomUser.objects.filter(username=self.cleaned_data["username"]).exists():
+			logger.debug('trying to add a nonexisting user')
+			raise ValidationError("No such user")
+
+		
+		return True
+
+class UpdateNameForm(forms.Form):
+	first_name = forms.CharField(label='First Name', widget=forms.TextInput(attrs={'placeholder': 'Enter given name'}), max_length=256, required=True)
+	last_name = forms.CharField(label='Last Name', widget=forms.TextInput(attrs={'placeholder': 'Enter family name'}), max_length=256, required=True)

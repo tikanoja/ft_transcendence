@@ -68,14 +68,19 @@ function checkLogin() {
     });
 }
 
-const sendPostRequest = async (endpoint, data) => {
+const sendPostRequest = async (endpoint, data, isJson = false) => {
     console.log('In sendPostRequest()');
+    const headers = {
+        'X-CSRFToken': getCookie('csrftoken')
+    };
+    if (isJson) {
+        headers['Content-Type'] = 'application/json';
+        data = JSON.stringify(data);
+    }
     const response = await fetch(endpoint, {
         method: 'POST',
         credentials: 'include',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken')
-        },
+        headers: headers,
         body: data
     })
     console.log("Response status in sendrequest: ", response.status)
@@ -94,7 +99,28 @@ function updateEventListeners() {
     var registerForm = document.getElementById('registerForm');
     var logoutButton = document.getElementById('logoutButton');
 	var playButton = document.getElementById('playButton');
+    var addFriendForm = document.getElementById('addFriendForm');
+    var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
     
+    var playButton = document.getElementById('playButton');
+    var deleteForm = document.getElementById('delete-account-form');
+    var nameChangeForm = document.getElementById('name-change-form');
+    var emailChangeForm = document.getElementById('email-change-form');
+    var passwordChangeForm = document.getElementById('password-change-form');
+
+    if (deleteForm) {
+        deleteForm.removeEventListener('submit', deleteFormHandler);
+    }
+    if (nameChangeForm) {
+        nameChangeForm.removeEventListener('submit', manageAccountHandler);
+    }
+    if (emailChangeForm) {
+        emailChangeForm.removeEventListener('submit', manageAccountHandler);
+    }
+    if (passwordChangeForm) {
+        passwordChangeForm.removeEventListener('submit', manageAccountHandler);
+    }
+
     if (loginForm) {
         loginForm.removeEventListener('submit', loginFormHandler);
     }
@@ -107,6 +133,14 @@ function updateEventListeners() {
 	if (playButton) {
         playButton.removeEventListener('click', playButtonClickHandler);
     }
+    if (addFriendForm) {
+        addFriendForm.removeEventListener('submit', addFriendHandler);
+    }
+    if (friendRequestButtons) {
+        friendRequestButtons.forEach(function(button) {
+            button.removeEventListener('click', friendRequestHandler);
+        })
+    }
     
     if (loginForm) {
         loginForm.addEventListener('submit', loginFormHandler);
@@ -117,8 +151,28 @@ function updateEventListeners() {
     if (logoutButton) {
         logoutButton.addEventListener('click', logoutButtonClickHandler);
     }
-	if (playButton) {
+    if (playButton) {
         playButton.addEventListener('click', playButtonClickHandler);
+    }
+    if (addFriendForm) {
+        addFriendForm.addEventListener('submit', addFriendHandler);
+    }
+    if (friendRequestButtons) {
+        friendRequestButtons.forEach(function(button) {
+            button.addEventListener('click', friendRequestHandler);
+        })
+    }
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', deleteFormHandler);
+    }
+    if (nameChangeForm) {
+        nameChangeForm.addEventListener('submit', manageAccountHandler);
+    }
+    if (emailChangeForm) {
+        emailChangeForm.addEventListener('submit', manageAccountHandler);
+    }
+    if (passwordChangeForm) {
+        passwordChangeForm.addEventListener('submit', manageAccountHandler);
     }
 }
 
@@ -181,7 +235,6 @@ const loginFormHandler = async (event) => {
 	const response = await sendPostRequest(endpoint, formData);
     if (response.redirected) {
         let redirect_location = response.url;
-        console.log("redir to: ", redirect_location);
         routeRedirect(redirect_location);
     } else if (response.ok) {
         const html = await response.text();
@@ -191,6 +244,108 @@ const loginFormHandler = async (event) => {
 	}
 }
 
+const addFriendHandler = async (event) => {
+    console.log('In addFriendHandler()');
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const querystring = window.location.search;
+    var endpoint = '/app/friends/' + querystring;
+    const response = await sendPostRequest(endpoint, formData);
+    if (response.redirected) {
+        let redirect_location = response.url;
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        const html = await response.text();
+        updateContent(html, "Friends | Pong", "Add friend form");
+	} else {
+		console.log("Response status in addFriendHandler(): ", response.status)
+	}
+}
+
+const friendRequestHandler = async (event) => {
+    console.log('in friendRequestHandler');
+    event.preventDefault();
+
+    var fromUser = event.target.getAttribute('data-from-user');
+    var action = event.target.getAttribute('data-action');
+    console.log('from user: ', fromUser, 'action: ', action);
+
+    var data = {
+        'from_user': fromUser,
+        'action': action,
+        'request_type': 'friendResponse'
+    }
+
+    const querystring = window.location.search;
+    var endpoint = '/app/friends/' + querystring;
+    const response = await sendPostRequest(endpoint, data, true);
+    if (response.redirected) {
+        let redirect_location = response.url;
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        const html = await response.text();
+        updateContent(html, "Friends | Pong", "Add friend form");
+	} else {
+		console.log("Response status in addFriendHandler(): ", response.status)
+	}
+}
+
+const manageAccountHandler = async (event) => {
+    event.preventDefault();
+    console.log("in manageAccountHandler");
+    console.log(event.target)
+    const formData = new FormData(event.target);
+    formData.append("form_id", event.target.id);
+
+	let response = await sendPostRequest('/app/manage_account/', formData);
+    if (response.redirected) {
+        console.log('redirect status found');
+        let redirect_location = response.url;
+        console.log("redir to: ", redirect_location);
+        routeRedirect(redirect_location);
+    }
+	else if (response.ok) {
+        console.log('response,ok triggered');
+		// stay on this page, display the content again
+        const html = await response.text();
+        updateContent(html, "Manage Account | Pong", "Manage Account");
+	}
+	else {
+		console.log("Response status: ", response.status)
+		// some 400 or 500 code probably, show the error that was sent?
+	}
+}
+
+
+const deleteFormHandler= async (event) => {
+    event.preventDefault();
+    console.log("in deleteFormHandler")
+
+    const formData = new FormData(event.target);
+
+	let response = await sendPostRequest('/app/delete_account/', formData);
+	
+    console.log("Response status: ", response.status, "Redirect: ", response.redirected)
+    if (response.redirected) {
+        console.log('redirect status found');
+      
+        routeRedirect('/login');
+    }
+	else if (response.ok) {
+        console.log('response,ok triggered');
+		// stay on this page, display the content again
+        response.text().then(function (text) {
+            document.getElementById("content").innerHTML = text;
+            document.title = "Delete Account | Pong";
+            document.querySelector('meta[name="description"]').setAttribute("content", "Delete Account");
+            updateEventListeners();
+        })
+	}
+	else {
+		console.log("Response status: ", response.status)
+		// some 400 or 500 code probably, show the error that was sent?
+	}
+}
 const start_game_loop = async () => {
     const responseData = await sendGetRequest('pong/start_background_loop').then((response) => response.text());
     console.log('start game loop:	', responseData);
@@ -271,11 +426,6 @@ const get_game_state = async () => {
     return (responseData);
 }
 
-const get_games_running = async () => {
-    const responseData = await sendGetRequest('pong/get_games_running/').then((response) => response.text());
-    console.log('from timo pong game_state:	', responseData);
-    return (responseData);
-}
+export { checkLogin, updateContent, start_game_loop, stop_game_loop, start_game, stop_game, get_game_state, left_paddle_up, left_paddle_up_release , left_paddle_down, left_paddle_down_release , right_paddle_up, right_paddle_up_release , right_paddle_down, right_paddle_down_release, updateEventListeners, setActive }
 
-export { checkLogin, updateContent, start_game_loop, stop_game_loop, start_game, stop_game, get_game_state, left_paddle_up, left_paddle_up_release , left_paddle_down, left_paddle_down_release , right_paddle_up, right_paddle_up_release , right_paddle_down, right_paddle_down_release, updateEventListeners, setActive, get_games_running}
-
+// export { updateEventListeners, setActive, checkLogin, updateContent }
