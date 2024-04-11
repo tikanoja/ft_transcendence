@@ -63,6 +63,7 @@ class Game:
 		self.create_ball_initial_coordinates()
 		self.create_left_paddle_initial_coordinates()
 		self.create_right_paddle_initial_coordinates()
+		self.ball_bounces: int = 0
 
 	def set_game_slot(self, number):
 		self.game_slot = number
@@ -150,6 +151,7 @@ class Game:
 				and self.ball_coordinates.y <= self.left_paddle_coordinates.y + self.paddle_height):
 				self.ball_speed[0] = abs(self.ball_speed[0]) # x speed
 				self.ball_speed[0] += 1
+				self.ball_bounces += 1
 				# Adjust angle based on where it hits the left paddle
 				relative_position = (self.ball_coordinates.y - (self.left_paddle_coordinates.y -self.paddle_height)) / (self.paddle_height * 2)
 				self.ball_speed[1] = ((relative_position - 0.5) * 2) * abs(self.ball_speed[0]) # y speed
@@ -169,6 +171,7 @@ class Game:
 				and self.ball_coordinates.y <= self.right_paddle_coordinates.y + self.paddle_height):
 				self.ball_speed[0] = -abs(self.ball_speed[0]) # x speed
 				self.ball_speed[0] -= 1
+				self.ball_bounces += 1
 				# Adjust angle based on where it hits the right paddle
 				relative_position = (self.ball_coordinates.y - (self.right_paddle_coordinates.y - self.paddle_height)) / (self.paddle_height * 2)
 				self.ball_speed[1] = ((relative_position - 0.5) * 2) * abs(self.ball_speed[0]) # y speed
@@ -281,6 +284,7 @@ class Game:
 		# Game end condition the stop the game
 		if (self.left_score or self.right_score) >= self.game_end_condition:
 			self.game_running = 0
+			self.ball_bounces = 0
 			self.winner = "left player"
 			if self.right_score > self.left_score:
 				self.winner = "right player"
@@ -318,6 +322,8 @@ class Game:
 		state += str(self.right_score)
 		state += ','
 		state += str(self.game_running)
+		state += ','
+		state += str(self.ball_bounces)
 		return state
 
 	def left_paddle_pressed_up(self):
