@@ -219,14 +219,31 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     camera.position.set(0, 0, 100);
     let p1_paddle_y, p1_paddle_x, p2_paddle_y, p2_paddle_x, ball_x, ball_y, p1_score, p2_score;
 
-    function updateGameState() {
+    function updateGameState(data) {
 		//TODO: this happens to get game state, does this have to happen live or in updateGameState okay?, definately a better way to parse these?
-		// socket.emit('message', 'get_state,' + gameNumber);
-        socket.on('state', (data) => {
-            // console.log('State from server:', data);
+    /*  state = str(ball_world_pos_x)
+        state += ','
+        state += str(ball_world_pos_y)
+        state += ','
+        state += str(left_paddle_world_pos_x)
+        state += ','
+        state += str(left_paddle_world_pos_y)
+        state += ','
+        state += str(right_paddle_world_pos_x)
+        state += ','
+        state += str(right_paddle_world_pos_y)
+        state += ','
+        state += str(self.left_score)
+        state += ','
+        state += str(self.right_score)
+        state += ','
+        state += str(self.game_running)
+        state += ','
+        state += str(self.ball_bounces)*/
     
-            // Split the data string into an array of values
             const valuesArray = data.split(',');
+            // let game_state_number = valuesArray[0];
+
             ball_x = parseFloat(valuesArray[0]);
             ball_y = parseFloat(valuesArray[1]);
             p2_paddle_x = parseFloat(valuesArray[2]);
@@ -236,22 +253,28 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
             p2_score = parseInt(valuesArray[6]);
             p1_score = parseInt(valuesArray[7]);
 
-		    ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
-		    ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);
-		    p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[3]);
-		    p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[4]);
-		    p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[5]);
-		    p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[6]);
+		    ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[0]);
+		    ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[1]);
+		    p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[2]);
+		    p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[3]);
+		    p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[4]);
+		    p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[5]);
 			p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
 			p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
 			ball.position.set(ball_x,  ball_y, 0);
-			// console.log('values array', valuesArray);
+
 			updateScoreboard(p1_score, p2_score);
-		});
+		// });
     }
 
+    socket.on('state', (data) => {
+    //    console.log("state recieved") 
+        updateGameState(data)
+
+    });
+
     // Update the game state 50 times per second
-    const gameStateInterval = setInterval(updateGameState, 1000 / 50);
+    // const gameStateInterval = setInterval(updateGameState, 1000 / 50);
 
     // Update the game state  times per second for debugging THIS IS FOR DEBUGGING ONLY
     // const gameStateInterval = setInterval(updateGameState, 3000);
@@ -314,7 +337,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
                 socket.emit('message', 'stop_background_loop');
         });
 
-        clearInterval(gameStateInterval);
+        // clearInterval(gameStateInterval);
         cancelAnimationFrame(animationId);
         render = true
     }
