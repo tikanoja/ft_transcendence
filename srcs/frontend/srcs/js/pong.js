@@ -40,7 +40,7 @@ export const startScreen = async () => {
     try {
 			await loadScript();
 			connectWebSocket();
-			//parse game_running
+            
 			const startScreen = document.getElementById('startScreen');
 			const playButton = document.getElementById('playButton');
 			const canvasContainer = document.getElementById('canvasContainer');
@@ -53,7 +53,12 @@ export const startScreen = async () => {
 				
 				is3DGraphics = styleCheckbox.checked;
 				socket.emit('message', 'games_running'); //TODO: this neeeds to check if its already running
-				socket.emit('message', 'start_background_loop');
+                socket.on('games_running_response', (data) => {
+                    const gameStates = data.split(',').slice(1);
+                    const areAllZero = gameStates.every(state => state.trim() === '0');
+                    if (areAllZero == true)
+                        socket.emit('message', 'start_background_loop');
+                });
 				socket.emit('message', 'start_game,0'); //TODO: need to check how this will decide what number??
 				let gameNumber = 0
 				renderPongGame(is3DGraphics, gameNumber);
@@ -71,11 +76,9 @@ export const updateScoreboard = (p1Score, p2Score) => {
     const scoreRightElement = document.querySelector('.score-right');
     
     if (isNaN(p1Score) || isNaN(p2Score)) {
-        // console.error('Invalid score values:', p1Score, p2Score);
-        return; // Exit the function early if score values are not valid
+        return;
     }
     if (scoreLeftElement && scoreRightElement) {
-        // Check if the scores have changed
         if (p1Score !== previousP1Score || p2Score !== previousP2Score) {
             // Update the scoreboard only if the scores have changed
             scoreLeftElement.textContent = `P1 SCORE: ${p1Score}`;
@@ -301,14 +304,14 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
 
 		function stopAnimation() {
 		socket.emit('message', 'stop_game,' + gameNumber);
-		//TODO: get games_running, parse then end loop if all 0
-		// socket.emit('message', 'stop_game');
-		// socket.on('games_running', (data) => {
-		// 	//parse jason
-		// 	//if ()
-		// 	console.log('Games still running');
-		// 	socket.emit('message', 'stop_background_loop');
-		// });
+        socket.emit('message', 'games_running');
+        socket.on('games_running_response', (data) => {
+            const gameStates = data.split(',').slice(1);
+            const areAllZero = gameStates.every(state => state.trim() === '0');
+            console.log('Games still running');
+            if (areAllZero == false)
+                socket.emit('message', 'stop_background_loop');
+        });
 
         clearInterval(gameStateInterval);
         cancelAnimationFrame(animationId);

@@ -521,7 +521,7 @@ def	games_running(splitted_command):
 		for index in range(4):
 			if games[index].game_running == 1:
 				games_running[index] = '1'
-	socketio.emit('message', 'OK, {}'.format(str(','.join(games_running))))
+	socketio.emit('games_running_response', 'OK, {}'.format(str(','.join(games_running))))
 	return
 
 def left_paddle_up(splitted_command):
