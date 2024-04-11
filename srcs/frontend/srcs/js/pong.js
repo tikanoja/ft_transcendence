@@ -221,20 +221,20 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
 
     function updateGameState() {
 		//TODO: this happens to get game state, does this have to happen live or in updateGameState okay?, definately a better way to parse these?
-		socket.emit('message', 'get_state,' + gameNumber);
-        socket.on('message', (data) => {
-            console.log('State from server:', data);
+		// socket.emit('message', 'get_state,' + gameNumber);
+        socket.on('state', (data) => {
+            // console.log('State from server:', data);
     
             // Split the data string into an array of values
             const valuesArray = data.split(',');
-            ball_x = parseFloat(valuesArray[1]);
-            ball_y = parseFloat(valuesArray[2]);
-            p2_paddle_x = parseFloat(valuesArray[3]);
-            p2_paddle_y = parseFloat(valuesArray[4]);
-            p1_paddle_x = parseFloat(valuesArray[5]);
-            p1_paddle_y = parseFloat(valuesArray[6]);
-            p2_score = parseInt(valuesArray[7]);
-            p1_score = parseInt(valuesArray[8]);
+            ball_x = parseFloat(valuesArray[0]);
+            ball_y = parseFloat(valuesArray[1]);
+            p2_paddle_x = parseFloat(valuesArray[2]);
+            p2_paddle_y = parseFloat(valuesArray[3]);
+            p1_paddle_x = parseFloat(valuesArray[4]);
+            p1_paddle_y = parseFloat(valuesArray[5]);
+            p2_score = parseInt(valuesArray[6]);
+            p1_score = parseInt(valuesArray[7]);
 
 		    ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
 		    ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);
@@ -308,8 +308,9 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
         socket.on('games_running_response', (data) => {
             const gameStates = data.split(',').slice(1);
             const areAllZero = gameStates.every(state => state.trim() === '0');
-            console.log('Games still running');
-            if (areAllZero == false)
+            console.log('Games still running?', data);
+            if (areAllZero == true)
+            console.log('stopping loop');
                 socket.emit('message', 'stop_background_loop');
         });
 
