@@ -119,8 +119,8 @@ function addLighting(scene) {
 }
 
 function setup2DScene(scene) {
-    const camera = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000);
-    // scene.add( camera );
+    const camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 1000);
+    // scene.add(camera);
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -129,7 +129,12 @@ function setup2DScene(scene) {
 
     const p1_paddle = create2DPaddle(0x808080); // Old-school TV Pong grey
     const p2_paddle = create2DPaddle(0x808080);
-    const ball = new THREE.Mesh(new THREE.PlaneGeometry(15, 15), new THREE.MeshStandardMaterial({color: 0x808080}));
+
+    // Calculate ball radius based on screen width
+    const sizeFactor = 0.7; // Adjust this value to make the ball slightly smaller while keeping the ratio
+    const ballRadiusScreen = 25 * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
+    const ball = new THREE.Mesh(new THREE.PlaneGeometry(ballRadiusScreen * 2, ballRadiusScreen * 2), new THREE.MeshStandardMaterial({ color: 0x808080 }));
+    
     scene.add(p1_paddle);
     scene.add(p2_paddle);
     scene.add(ball);
@@ -154,14 +159,15 @@ function setup3DScene(scene) {
 }
 
 
-
 function create2DPaddle(color) {
     // Adjust the dimensions of the paddle geometry based on the ratios
     let widthRatio = 20 / 1920
     let heightRatio = 90 / 1080
-
 	let screenWidth = window.innerWidth;
     let screenHeight = window.innerHeight;
+
+    const ballRadiusScreen = 25 * (Math.min(screenWidth / 1920, screenHeight / 1080));
+
     
     let paddleWidth = screenWidth * widthRatio;
     let paddleHeight = screenHeight * heightRatio;
@@ -214,22 +220,22 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     function updateGameState(data) {
         const valuesArray = data.split(',');
         // let game_state_number = valuesArray[0];
+        console.log(valuesArray)
+        ball_x = parseFloat(valuesArray[1]);
+        ball_y = parseFloat(valuesArray[2]);
+        p2_paddle_x = parseFloat(valuesArray[3]);
+        p2_paddle_y = parseFloat(valuesArray[4]);
+        p1_paddle_x = parseFloat(valuesArray[5]);
+        p1_paddle_y = parseFloat(valuesArray[6]);
+        p2_score = parseInt(valuesArray[7]);
+        p1_score = parseInt(valuesArray[8]);
 
-        ball_x = parseFloat(valuesArray[0]);
-        ball_y = parseFloat(valuesArray[1]);
-        p2_paddle_x = parseFloat(valuesArray[2]);
-        p2_paddle_y = parseFloat(valuesArray[3]);
-        p1_paddle_x = parseFloat(valuesArray[4]);
-        p1_paddle_y = parseFloat(valuesArray[5]);
-        p2_score = parseInt(valuesArray[6]);
-        p1_score = parseInt(valuesArray[7]);
-
-        ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[0]);
-        ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[1]);
-        p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[2]);
-        p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[3]);
-        p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[4]);
-        p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[5]);
+        ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
+        ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);
+        p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[3]);
+        p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[4]);
+        p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[5]);
+        p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[6]);
         p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
         p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
         ball.position.set(ball_x,  ball_y, 0);
