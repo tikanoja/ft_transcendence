@@ -515,8 +515,7 @@ def get_state(splitted_command):
 			socketio.emit('message', 'ERROR, game not running so no state.')
 			return
 		else:
-			state = games[number].return_game_state()
-			socketio.emit('message', 'OK, ' + str(state) + '.')
+			socketio.emit('state', games[number].return_game_state())
 			return
 
 def	games_running(splitted_command):
