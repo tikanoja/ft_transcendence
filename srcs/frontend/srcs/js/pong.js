@@ -63,18 +63,33 @@ export const startScreen = async () => {
     }
 };
 
-	
+let previousP1Score = null;
+let previousP2Score = null;
+
 export const updateScoreboard = (p1Score, p2Score) => {
     const scoreLeftElement = document.querySelector('.score-left');
     const scoreRightElement = document.querySelector('.score-right');
-
+    
+    if (isNaN(p1Score) || isNaN(p2Score)) {
+        // console.error('Invalid score values:', p1Score, p2Score);
+        return; // Exit the function early if score values are not valid
+    }
     if (scoreLeftElement && scoreRightElement) {
-        scoreLeftElement.textContent = `P1 SCORE: ${p1Score}`;
-        scoreRightElement.textContent = `P2 SCORE: ${p2Score}`;
+        // Check if the scores have changed
+        if (p1Score !== previousP1Score || p2Score !== previousP2Score) {
+            // Update the scoreboard only if the scores have changed
+            scoreLeftElement.textContent = `P1 SCORE: ${p1Score}`;
+            scoreRightElement.textContent = `P2 SCORE: ${p2Score}`;
+            
+            // Update the previous scores for the next comparison
+            previousP1Score = p1Score;
+            previousP2Score = p2Score;
+        }
     } else {
         console.error('Scoreboard elements not found.');
     }
 };
+
 
 
 window.addEventListener('resize', function() {
@@ -106,7 +121,6 @@ function addLighting(scene) {
 }
 
 function setup2DScene(scene) {
-    //const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const camera = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000);
     // scene.add( camera );
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -150,7 +164,7 @@ function create2DPaddle(color) {
 
 	let screenWidth = window.innerWidth;
     let screenHeight = window.innerHeight;
-
+    
     let paddleWidth = screenWidth * widthRatio;
     let paddleHeight = screenHeight * heightRatio;
 
@@ -171,9 +185,10 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     let camera;
 
     const renderer = new THREE.WebGLRenderer();
+    const pixelRatio = window.devicePixelRatio;
+    renderer.setPixelRatio(pixelRatio);
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
-    
     let p1_paddle, p2_paddle, ball; //TODO: take into account the paddle width and height?
     if (is3DGraphics) {
         camera = setup3DScene(scene);
@@ -204,49 +219,50 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     function updateGameState() {
 		//TODO: this happens to get game state, does this have to happen live or in updateGameState okay?, definately a better way to parse these?
 		socket.emit('message', 'get_state,' + gameNumber);
-		socket.on('message', (data) => {
-			console.log('State from server:', data);
-			// const parsedData = JSON.parse(data);
-		    // const valuesString = parsedData.status.split(': ')[1];
-		    // const valuesArray = valuesString.split(',');
+        socket.on('message', (data) => {
+            console.log('State from server:', data);
+    
+            // Split the data string into an array of values
+            const valuesArray = data.split(',');
+            ball_x = parseFloat(valuesArray[1]);
+            ball_y = parseFloat(valuesArray[2]);
+            p2_paddle_x = parseFloat(valuesArray[3]);
+            p2_paddle_y = parseFloat(valuesArray[4]);
+            p1_paddle_x = parseFloat(valuesArray[5]);
+            p1_paddle_y = parseFloat(valuesArray[6]);
+            p2_score = parseInt(valuesArray[7]);
+            p1_score = parseInt(valuesArray[8]);
 
-		    // ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[0]);
-		    // ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[1]);
-		    // p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[2]);
-		    // p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[3]);
-		    // p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[4]);
-		    // p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[5]);
-			// p2_score = parseInt(valuesArray[6]);
-			// p1_score = parseInt(valuesArray[7]);
-
-			// p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
-			// p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
-			// ball.position.set(ball_x,  ball_y, 0);
+		    ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
+		    ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);
+		    p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[3]);
+		    p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[4]);
+		    p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[5]);
+		    p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[6]);
+			p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
+			p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
+			ball.position.set(ball_x,  ball_y, 0);
 			// console.log('values array', valuesArray);
-			// updateScoreboard(p1_score, p2_score);
+			updateScoreboard(p1_score, p2_score);
 		});
     }
 
     // Update the game state 50 times per second
-    // const gameStateInterval = setInterval(updateGameState, 1000 / 50)
+    const gameStateInterval = setInterval(updateGameState, 1000 / 50);
 
     // Update the game state  times per second for debugging THIS IS FOR DEBUGGING ONLY
-    const gameStateInterval = setInterval(updateGameState, 3000);
-
+    // const gameStateInterval = setInterval(updateGameState, 3000);
 
     function animate() {
-        requestAnimationFrame(animate);
-        if (render == false)
-        {
-            stopAnimation();
-			//TODO: this happens on exit from game
-			socket.on('disconnect', () => {
-				console.log('Disconnected from server');
-			});
-        }
-        else
-        {
+        if (render) {
+            requestAnimationFrame(animate);
             renderer.render(scene, camera);
+        } else {
+            stopAnimation();
+            //TODO: this happens on exit from the game
+            socket.on('disconnect', () => {
+                console.log('Disconnected from server');
+            });
         }
     }
     //THESE ARE INVERTED DUE TO COORD DIFFERENCE
@@ -281,8 +297,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
 
     function startAnimation() {
         animationId = requestAnimationFrame(animate);
-        animate();
-    }
+        animate();}
 
 		function stopAnimation() {
 		socket.emit('message', 'stop_game,' + gameNumber);

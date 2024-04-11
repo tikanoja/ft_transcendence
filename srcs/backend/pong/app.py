@@ -597,7 +597,7 @@ def left_paddle_up_release(splitted_command):
 			return
 		else:
 			games[number].left_paddle_released_up()
-			socketio.emit('message', 'OK, left paddle released up.')
+			# socketio.emit('message', 'OK, left paddle released up.')
 			return
 
 def right_paddle_up(splitted_command):
@@ -616,7 +616,7 @@ def right_paddle_up(splitted_command):
 			return
 		else:
 			games[number].right_paddle_pressed_up()
-			socketio.emit('message', 'OK, right paddle pressed up.')
+			# socketio.emit('message', 'OK, right paddle pressed up.')
 			return
 
 def right_paddle_down(splitted_command):
@@ -635,7 +635,7 @@ def right_paddle_down(splitted_command):
 			return
 		else:
 			games[number].right_paddle_pressed_down()
-			socketio.emit('message', 'OK, right paddle pressed down.')
+			# socketio.emit('message', 'OK, right paddle pressed down.')
 			return
 
 def right_paddle_down_release(splitted_command):
@@ -654,7 +654,7 @@ def right_paddle_down_release(splitted_command):
 			return
 		else:
 			games[number].right_paddle_released_down()
-			socketio.emit('message', 'OK, right paddle released down.')
+			# socketio.emit('message', 'OK, right paddle released down.')
 			return
 
 def right_paddle_up_release(splitted_command):
@@ -673,7 +673,7 @@ def right_paddle_up_release(splitted_command):
 			return
 		else:
 			games[number].right_paddle_released_up()
-			socketio.emit('message', 'OK, right paddle released up.')
+			# socketio.emit('message', 'OK, right paddle released up.')
 			return
 
 #@app.route('/')
@@ -695,7 +695,7 @@ def handle_disconnect():
 def handle_message(message):
 	#print('Message:', message)
 	global socketio
-	socketio.emit('message', 'Server received your message: ' + message)
+	# socketio.emit('message', 'Server received your message: ' + message)
 	splitted_command = message.split(",")
 	if splitted_command:
 		match splitted_command[0]:
