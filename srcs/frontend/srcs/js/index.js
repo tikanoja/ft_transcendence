@@ -1,5 +1,5 @@
 import { routeRedirect } from './router.js'
-import { startScreen } from './pong.js'
+import { startScreen} from './pong.js'
 
 document.addEventListener("DOMContentLoaded", function () {
 	// Get the current URL path
@@ -222,8 +222,7 @@ const submitRegistrationHandler = async (event) => {
     }
 }
 
-const playButtonClickHandler = async (event) => {
-    console.log('In playButtonClickHandler');
+const playButtonClickHandler = async (event) => {	
     startScreen();
 }
 

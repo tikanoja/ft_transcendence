@@ -18,10 +18,9 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 
+
+
 urlpatterns = [
-    path('increase_number/', views.increase_number, name='increase_number'),
-    path('decrease_number/', views.decrease_number, name='decrease_number'),
-    path('get_number/', views.get_number, name='get_number'),
     path('get_game_state/', views.get_game_state, name='get_game_state'),
     path('start_background_loop/', views.start_background_loop, name='start_background_loop'),
     path('stop_background_loop/', views.stop_background_loop, name='stop_background_loop'),
