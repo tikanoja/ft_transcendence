@@ -42,6 +42,7 @@ class CustomUser(AbstractBaseUser):
 	email = models.EmailField(max_length = 320, blank=True, null=True)
 	is_online = models.BooleanField(default=False)
 	last_seen = models.DateTimeField(auto_now=True) 
+	blocked_users = models.ManyToManyField('self', related_name='blocked_by', symmetrical=False, blank=True)
 
 	USERNAME_FIELD = 'username'
 	REQUIRED_FIELDS = []

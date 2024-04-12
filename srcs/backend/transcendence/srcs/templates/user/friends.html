@@ -6,6 +6,7 @@
 {% if success %}
 <p style="color: green">Success: {{success}}</p>
 {% endif %}
+
 <form id="addFriendForm" >
 	{% csrf_token %}
 	{% for field in form %}
@@ -15,6 +16,17 @@
 	</div>
 	{% endfor %}
 	<input type="submit" value="Add friend">
+</form>
+
+<form id="blockUserForm" >
+	{% csrf_token %}
+	{% for field in form %}
+	<div class="form-group">
+	<p style="color: red">{{ field.errors }}<p>
+	{{ field.label_tag }} {{ field }}
+	</div>
+	{% endfor %}
+	<input type="submit" value="Block user">
 </form>
 
 </br>
@@ -30,6 +42,20 @@
 		</li>
 	{% empty %}
 		<li>No pending invites.</li>
+	{% endfor %}
+</ul>
+
+<br>
+
+<h2>Blocked Users</h2>
+<ul>
+	{% for blocked in blocked_users %}
+		<li>
+			{{ blocked.username }} - 
+			<button type="submit" id="friendRequestButton" data-from-user={{ blocked.username }} data-action="unblock" class="btn btn-primary">Unblock</button>
+		</li>
+	{% empty %}
+		<li>No blocked users.</li>
 	{% endfor %}
 </ul>
 
