@@ -27,6 +27,7 @@ let socket;
 
 function connectWebSocket() {
     socket = io.connect('https://' + window.location.hostname);
+	console.log(window.location.hostname)
     socket.on('connect', () => {
     });
     socket.on('error', (error) => {
@@ -131,7 +132,7 @@ function setup2DScene(scene) {
     const p2_paddle = create2DPaddle(0x808080);
 
     // Calculate ball radius based on screen width
-    const sizeFactor = 0.7; // Adjust this value to make the ball slightly smaller while keeping the ratio
+    const sizeFactor = 0.5; // Adjust this value to make the ball slightly smaller while keeping the ratio
     const ballRadiusScreen = 25 * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
     const ball = new THREE.Mesh(new THREE.PlaneGeometry(ballRadiusScreen * 2, ballRadiusScreen * 2), new THREE.MeshStandardMaterial({ color: 0x808080 }));
     
@@ -165,8 +166,9 @@ function create2DPaddle(color) {
     let heightRatio = 90 / 1080
 	let screenWidth = window.innerWidth;
     let screenHeight = window.innerHeight;
+	
 
-    const ballRadiusScreen = 25 * (Math.min(screenWidth / 1920, screenHeight / 1080));
+    const ballRadiusScreen = 25 * (Math.min( window.innerWidth / 1920, screenHeight / 1080));
 
     
     let paddleWidth = screenWidth * widthRatio;
