@@ -4,7 +4,7 @@ import time
 
 class colors:
     HEADER = '\033[96m'
-    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
     OKPINK = '\033[95m'
     WARNING = '\033[93m'
     ENDC = '\033[0m'
@@ -13,6 +13,31 @@ class colors:
 
 def print_color(text, color):
     print(color + text + colors.ENDC)
+
+
+def print_banner():
+    print(colors.OKGREEN + """
+    \t██████╗  ██████╗ ███╗   ██╗ ██████╗ 
+    \t██╔══██╗██╔═══██╗████╗  ██║██╔════╝ 
+    \t██████╔╝██║   ██║██╔██╗ ██║██║  ███╗
+    \t██╔═══╝ ██║   ██║██║╚██╗██║██║   ██║
+    \t██║     ╚██████╔╝██║ ╚████║╚██████╔╝
+    \t╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝    
+                                        """ + colors.ENDC)
+
+def print_commands():
+    header = colors.HEADER + colors.BOLD + colors.UNDERLINE + "\n\t\t\tAvailable Commands" + colors.HEADER + colors.ENDC
+    games_running = colors.HEADER + "\n\ngames_running:" + colors.ENDC + "\tshows all currently running games"
+    watch_game = colors.HEADER + "\n\nwatch_game,<game number>:" + colors.ENDC + "\tshows the current score of the chosen game"
+    print(header + games_running + "\n" + watch_game + "\n\n")
+
+def print_help():
+    header = colors.HEADER + colors.BOLD + colors.UNDERLINE + "\n\t\tPong CLI Usage" + colors.HEADER + colors.ENDC
+    usage = colors.HEADER + "Usage:" + colors.ENDC + "  pong_cli.py [-h] [-i] <command>" + colors.ENDC
+    available_commands = colors.HEADER + """\n\nAvailable commands:""" + colors.ENDC 
+    options = colors.HEADER + "\n\nOptions:" + colors.ENDC + "\n\t-h, --help show this help message and exit \n\t-i, --interactive  Interactive mode"
+    help_message = header + "\n\n" + usage + available_commands + options
+    print(help_message)
 
 # Define event handlers
 def on_connect():
@@ -53,26 +78,14 @@ def on_message(data):
     if interactive_mode == False:
         sio.disconnect()
 
-def print_commands():
-    header = colors.HEADER + colors.BOLD + colors.UNDERLINE + "\n\t\t\tAvailable Commands" + colors.HEADER + colors.ENDC
-    games_running = colors.HEADER + "\n\ngames_running:" + colors.ENDC + "\tshows all currently running games"
-    watch_game = colors.HEADER + "\n\nwatch_game,<game number>:" + colors.ENDC + "\tshows the current score of the chosen game"
-    print(header + games_running + "\n" + watch_game + "\n\n")
-
-def print_help():
-    header = colors.HEADER + colors.BOLD + colors.UNDERLINE + "\n\t\t\tPong CLI Usage" + colors.HEADER + colors.ENDC
-    usage = colors.HEADER + "Usage:" + colors.ENDC + "  pong_cli.py [-h] [-i] <command>" + colors.ENDC
-    available_commands = colors.HEADER + """\n\nAvailable commands:""" + colors.ENDC 
-    options = colors.HEADER + "\n\nOptions:" + colors.ENDC + "\n\t-h, --help show this help message and exit \n\t-i, --interactive  Interactive mode"
-    help_message = header + "\n\n" + usage + available_commands + options
-    print(help_message)
 
 
 if __name__ == "__main__":
 
     interactive_mode = False
 
-    if '-h' in sys.argv or '--help' in sys.argv:
+    if '-h' in sys.argv or '--help' in sys.argv or len(sys.argv) == 1:
+        print_banner()
         print_help()
         sys.exit()
 
@@ -93,6 +106,7 @@ if __name__ == "__main__":
         sio.emit('message', sys.argv[1])
         sio.wait()
     else:
+        print_banner()
         print_commands()
         while True:
             try:
