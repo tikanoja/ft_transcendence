@@ -120,7 +120,8 @@ const locationHandler = async () => {
 	if (location === '/profile') {
 		let userQuery = await fetch('app/get_current_username/');
 		let username = await userQuery.json()
-		console.log('curent username returned as' + username)
+		console.log('curent username returned as' + username['message'])
+		// TODO: don't change the route view !!!!!!!
 		route.view = route.view + username['message']
 	}
 	const querystring = window.location.search;

@@ -1,13 +1,29 @@
 <div id="self-profile">
-	<div id="profile-details">
-		{% include './profile_partials/manage_account.html' with details=details email_form=email_form password_form=password_form name_form=name_form %}
-	</div>
-	<div id="dashboard">
-		{% include './profile_partials/stats.html' %}
-		{% include './profile_partials/game_history.html' %}
-	</div>
-	<div id="friends">
-		<h3>Friends!</h3>
-		{% include './profile_partials/friends.html' with friends=friends %}
-	</div>
+	{% comment %} <table>
+		<tr> {% endcomment %}
+			<div id="profile-picture">
+				<img src="" alt="profile picture for user {{details.username}}"></img>
+				{% comment %} form for uploading new photo {% endcomment %}
+			</div>
+		{% comment %} </tr>
+		<tr>
+			<td> {% endcomment %}
+			<div id="manage-account">
+				{% include './profile_partials/manage_account.html' with details=details email_form=email_form password_form=password_form name_form=name_form %}
+			</div>
+			{% comment %} </td>
+			<td> {% endcomment %}
+				<div id="dashboard">
+					{% include './profile_partials/stats.html' %}
+					{% include './profile_partials/game_history.html' %}
+				</div>
+			{% comment %} </td>
+			<td> {% endcomment %}
+				<div id="friends">
+					<h3>Friends!</h3>
+					{% include './profile_partials/friends.html' with friends=friends %}
+				</div>
+			{% comment %} </td>
+		</tr> {% endcomment %}
+	</table>
 </div>

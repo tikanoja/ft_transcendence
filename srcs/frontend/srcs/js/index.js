@@ -318,9 +318,11 @@ const manageAccountHandler = async (event) => {
     }
 	else if (response.ok) {
         console.log('response,ok triggered');
-		// stay on this page, display the content again
+		// stay on this page, display the content only for the manage-content div
         const html = await response.text();
-        updateContent(html, "Manage Account | Pong", "Manage Account");
+        let to_update = document.getElementById("manage-account");
+        to_update.innerHTML = html;
+        updateEventListeners();
 	}
 	else {
 		console.log("Response status: ", response.status)

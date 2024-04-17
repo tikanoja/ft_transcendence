@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db.models.functions import Now
 from django.core.exceptions import ValidationError
@@ -19,11 +20,12 @@ class CustomUserManager(BaseUserManager):
 		return user
 
 	def update_user(self, username, **kwargs):
-		user = CustomUser.objects.filter(username=username)
-		if not user:
-			raise ValidationError('user does not exist')
-		else:
-			user = user[0]
+		User = get_user_model()
+		try:
+			user = User.objects.get(username=username)
+		except User.DoesNotExist:
+			raise ValidationError('User does not exist')
+
 		if "first_name" in kwargs and "last_name" in kwargs:
 			user.first_name = kwargs["first_name"]
 			user.last_name = kwargs["last_name"]

@@ -95,14 +95,17 @@ def	get_current_usernameGET(request):
     return username
 
 
-def delete_accountPOST(request):
+def delete_accountPOST(request, context):
     if request.user.is_authenticated:
+        context["details"] = get_profile_details(request.user.username, True)
         delete_form = DeleteAccountForm(request.POST)
         try:
             if not delete_form.is_valid():
                 raise ValidationError("Values given are not valid") 
         except ValidationError as ve:
-            return render(request, 'user/profile_partials/delete_account.html', {"form": delete_form, "error": ve})
+            context["form"] = delete_form
+            context["error"] = ve
+            return render(request, "user/profile_partials/manage_account.html", context)
         username = request.user
         password = delete_form.cleaned_data["password"]
         user = authenticate(request, username=username, password=password)
@@ -114,56 +117,18 @@ def delete_accountPOST(request):
             # delete account, return a success page with a 'link' to go to homepage
             return JsonResponse({'message': 'Your account has been deleted'})
         else:
-            return JsonResponse({'message': 'Unable to delete account. Check which account you are logged in as'})
+            context["error"] = 'Unable to delete account. Check which account you are logged in as'
+            return render(request, "user/profile_partials/manage_account.html", context)
     else:
-        return JsonResponse({'message': 'User needs to be logged into delete account'})
-
-
-# return dictionary for context with the resulting vars that can be rendered into the profile
-def manage_accountPOST(request):
-    user_manager = CustomUserManager()
-    logger.debug(request.POST)
-    if "name-change-form" == request.POST['form_id']:
-        logger.debug("name change form found")
-        form = UpdateNameForm(request.POST)
-        try:
-            if not form.is_valid():
-                raise ValidationError("Form filled incorrectly")
-        except ValidationError as ve:
-            return JsonResponse({'message': ve})
-        user_manager.update_user(request.user.username, first_name=form.cleaned_data["first_name"], last_name=form.cleaned_data["last_name"])
-        return JsonResponse({'message': f'Name updated successfully'})
-    elif "email-change-form" == request.POST['form_id']:
-        logger.debug("email change form found")
-        form = UpdateEmailForm(request.POST)
-        try:
-            if not form.is_valid():
-                raise ValidationError("Form filled incorrectly")
-        except ValidationError as ve:
-            return JsonResponse({'message': ve})
-        user_manager.update_user(request.user.username, email=form.cleaned_data["email"])
-        return JsonResponse({'message': f'Email updated successfully'})
-    elif "password-change-form" == request.POST['form_id']:
-        logger.debug("password change form found")
-        form = UpdatePasswordForm(request.POST)
-        try:
-            if not form.is_valid():
-                raise ValidationError("Form filled incorrectly")
-        except ValidationError as ve:
-            return JsonResponse({'message': ve})
-        user_manager.update_user(request.user.username, password=form.cleaned_data["password"])
-        return JsonResponse({'message': f'Password updated successfully'})
-    elif "delete-account-form" == request.POST['form_id']:
-        return delete_accountPOST(request)
-    else:
-        return JsonResponse({'message': 'Invalid form submitted'})
-    
+        context["error"] = 'User needs to be logged into delete account'
+        return render(request, "user/profile_partials/manage_account.html", context)
 
 # basic details username, name, image link, other public viewable stuff
 # email, other spcific things? for self view
 def get_profile_details(username:str, self:bool) -> dict:
     details = {}
     user = CustomUser.objects.filter(username=username)
+    logger.debug(user[0])
     if not user:
         details["error"] = "No users in system match the requested user"
     else:
@@ -176,8 +141,62 @@ def get_profile_details(username:str, self:bool) -> dict:
     print(details)
     return details
 
+def create_manage_account_context(username: str) -> dict:
+    context = {}
+    # context["details"] = get_profile_details(username, self) want to add after any updates
+    context["name_form"] = UpdateNameForm()
+    context["email_form"] = UpdateEmailForm()
+    context["password_form"] = UpdatePasswordForm()
+    context["delete_account_form"] = DeleteAccountForm()
+    return context
 
-# hadcode a dict of friends for now
+# return dictionary for context with the resulting vars that can be rendered into the profile
+def manage_accountPOST(request):
+    user_manager = CustomUserManager()
+    logger.debug(request.POST)
+    context = create_manage_account_context(request.user.username)
+    if "name-change-form" == request.POST['form_id']:
+        logger.debug("name change form found")
+        form = UpdateNameForm(request.POST)
+        try:
+            if not form.is_valid():
+                raise ValidationError("Form filled incorrectly")
+            user_manager.update_user(request.user.username, first_name=form.cleaned_data["first_name"], last_name=form.cleaned_data["last_name"])
+            context["name_form_result"] = 'Name updated successfully'
+        except ValidationError as ve:
+            context["error"] = ve
+            context["name_form"] = form
+    elif "email-change-form" == request.POST['form_id']:
+        logger.debug("email change form found")
+        form = UpdateEmailForm(request.POST)
+        try:
+            if not form.is_valid():
+                raise ValidationError("Form filled incorrectly")
+            user_manager.update_user(request.user.username, email=form.cleaned_data["email"])
+            context['email_form_result'] = 'Email updated successfully'
+        except ValidationError as ve:
+            context["error"] = ve
+            context["email_form"] = form 
+    elif "password-change-form" == request.POST['form_id']:
+        logger.debug("password change form found")
+        form = UpdatePasswordForm(request.POST)
+        try:
+            if not form.is_valid():
+                raise ValidationError("Form filled incorrectly")
+            user_manager.update_user(request.user.username, password=form.cleaned_data["password"])
+            context['pasword_form_result'] = 'Password updated successfully. Please log back in with your new password'
+        except ValidationError as ve:
+            context["error"] = ve
+            context["email_form"] = form 
+    elif "delete-account-form" == request.POST['form_id']:
+        return delete_accountPOST(request, context)
+    else:
+        context["error"] = 'Invalid form submitted'
+    context["details"] = get_profile_details(request.user.username, True)
+    return render(request, "user/profile_partials/manage_account.html", context)
+    
+
+# hardcode a dict of friends for now
 # does self matter for this one?
 def get_friends_dict(username:str) -> dict:
     user = CustomUser.objects.filter(username=username)
