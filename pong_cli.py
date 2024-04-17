@@ -29,7 +29,7 @@ def print_banner():
                                         """ + colors.ENDC)
 
 def print_commands():
-    header = colors.HEADER + colors.BOLD + colors.UNDERLINE + "\n\t\t\tAvailable Commands" + colors.HEADER + colors.ENDC
+    header = colors.HEADER + colors.BOLD + "\n\t\t" + colors.UNDERLINE + "Available Commands" + colors.HEADER + colors.ENDC
     games_running = colors.HEADER + "\n\ngames_running:" + colors.ENDC + "\tshows all currently running games"
     watch_game = colors.HEADER + "\n\nwatch_game,<game number>:" + colors.ENDC + "\tshows the current score of the chosen game"
     print(header + games_running + "\n" + watch_game + "\n\n")
@@ -62,31 +62,35 @@ def on_games_running_response(data):
         sio.disconnect()
 
 def watch_game(game_number):
+    sio.on('state_cli', lambda data: print_state(data)) 
     try:
-        last_print_time = time.time()  # Initialize last print time
         while True:
-            sio.emit('message', 'get_state,' + game_number)
-            # Wait for 3 seconds
-            time.sleep(3)
-            sio.on('state', lambda data: on_state(data, last_print_time))
+            # Check if it's time to print the game state
+            sio.emit('message', 'get_state_cli,' + game_number)
+            time.sleep(5)
+            sio.eio.poll()  # Manually process events
     except KeyboardInterrupt:
         print('Press Enter to stop watching')
 
-def on_state(data, last_print_time):
-    current_time = time.time()
-    if current_time - last_print_time >= 3:  # Check if 3 seconds have passed
-        print("in onstate")
-        print('Game State:', data)
-        last_print_time = current_time  # Update last print time
 
+def print_state(data):
+    #  0,0.16145833333333334,0.5,0.036458333333333336,0.5,0.9635416666666666,0.5,0,0,1,421
+    valuesArray = data.split(',')
+    print("\n\n\n")
+    print(colors.HEADER + colors.BOLD + "P1 score:   " + colors.ENDC)
+    print(valuesArray[7])
+    print(colors.HEADER + colors.BOLD + "P2 score:   " + colors.ENDC)
+    print(valuesArray[8])
+    print(colors.HEADER + colors.BOLD + "Longest Rally:   " + colors.ENDC)
+    print(valuesArray[10])
 
 def on_disconnect():
     print('Disconnected from server')
 
-def on_message(data):
-    print('Message from server:', data)
-    if interactive_mode == False:
-        sio.disconnect()
+# def on_message(data):
+#     print('Message from server:', data)
+#     if interactive_mode == False:
+#         sio.disconnect()
 
 
 
@@ -108,7 +112,7 @@ if __name__ == "__main__":
 
     # Register event handlers
     sio.on('connect', on_connect)
-    sio.on('message', on_message)
+    # sio.on('message', on_message)
     sio.on('games_running_response', on_games_running_response)
     sio.on('disconnect', on_disconnect)
 

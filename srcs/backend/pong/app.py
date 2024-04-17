@@ -520,6 +520,25 @@ def get_state(splitted_command):
 			socketio.emit('state', games[number].return_game_state())
 			return
 
+def get_state_cli(splitted_command):
+	global socketio
+	global games_lock
+	global games
+	if len(splitted_command) != 2:
+		socketio.emit('message', 'ERROR, string not in right format.')
+		return
+	number = int(splitted_command[1])
+	if number < 0 or number > 3:
+		socketio.emit('message', 'ERROR, allowed game numbers are 0 to 3.')
+		return
+	with games_lock:
+		if games[number].is_game_running() == 0:
+			socketio.emit('message', 'ERROR, game not running so no state.')
+			return
+		else:
+			socketio.emit('state_cli', games[number].return_game_state())
+			return
+
 def	games_running(splitted_command):
 	global games
 	global games_lock
@@ -739,6 +758,8 @@ def handle_message(message):
 				right_paddle_down_release(splitted_command)
 			case 'right_paddle_up_release':
 				right_paddle_up_release(splitted_command)
+			case 'get_state_cli':
+				get_state_cli(splitted_command)
 			case _:
 				socketio.emit('message', 'ERROR, command not recognised: ' + message)
 	else:
