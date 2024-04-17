@@ -2,6 +2,7 @@ import socketio
 import socketio.client
 import sys
 import time
+import select
 import warnings
 from urllib3.exceptions import InsecureRequestWarning
 
@@ -16,7 +17,6 @@ class colors:
 
 def print_color(text, color):
     print(color + text + colors.ENDC)
-
 
 def print_banner():
     print(colors.OKGREEN + """
@@ -46,8 +46,6 @@ def print_help():
 def on_connect():
     print('Connected to server')
 
-
-
 def on_games_running_response(data):
     print('Games running response:', data)
     valuesArray = data.split(',')
@@ -61,20 +59,21 @@ def on_games_running_response(data):
     if interactive_mode == False:
         sio.disconnect()
 
+
 def watch_game(game_number):
     sio.on('state_cli', lambda data: print_state(data)) 
-    try:
-        while True:
-            # Check if it's time to print the game state
-            sio.emit('message', 'get_state_cli,' + game_number)
-            time.sleep(5)
-            sio.eio.poll()  # Manually process events
-    except KeyboardInterrupt:
-        print('Press Enter to stop watching')
+    print(colors.HEADER + colors.BOLD + "Watching game: " + game_number + colors.ENDC)
+    while True:
+        if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+            print(colors.WARNING + "Exiting watch_game......" + colors.ENDC)
+            _ = sys.stdin.readline()
+            return 
+        sio.emit('message', 'get_state_cli,' + game_number)
+        time.sleep(5)
+
 
 
 def print_state(data):
-    #  0,0.16145833333333334,0.5,0.036458333333333336,0.5,0.9635416666666666,0.5,0,0,1,421
     valuesArray = data.split(',')
     print("\n\n\n")
     print(colors.HEADER + colors.BOLD + "P1 score:   " + colors.ENDC)
@@ -92,7 +91,20 @@ def on_disconnect():
 #     if interactive_mode == False:
 #         sio.disconnect()
 
-
+def run_command(argv):
+    if argv[1] == "games_running":
+        sio.emit('message', argv[1])
+    elif argv[1] == "sabotage-1":
+        sio.emit('message', "left_paddle_up,0")
+        time.sleep(0.2)
+        sio.emit('message', "left_paddle_up_release,0")
+    elif argv[1] == "sabotage-12":
+        sio.emit('message', "left_paddle_down,0")
+        time.sleep(0.2)
+        sio.emit('message', "left_paddle_release,0")
+    else:
+        print(colors.WARNING + "not a valid command use -h for help")
+    sio.disconnect()
 
 if __name__ == "__main__":
 
@@ -117,7 +129,7 @@ if __name__ == "__main__":
     sio.on('disconnect', on_disconnect)
 
     if interactive_mode == False:
-        sio.emit('message', sys.argv[1])
+        run_command(sys.argv)
         sio.wait()
     else:
         print_banner()
