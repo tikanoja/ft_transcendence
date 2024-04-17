@@ -59,6 +59,7 @@ export const startScreen = async () => {
                         socket.emit('message', 'start_background_loop');
                 });
 				socket.emit('message', 'start_game,0'); //TODO: need to check how this will decide what number??
+				
 				let gameNumber = 0
 				renderPongGame(is3DGraphics, gameNumber);
         });

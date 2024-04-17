@@ -1,6 +1,9 @@
 import socketio
+import socketio.client
 import sys
 import time
+import warnings
+from urllib3.exceptions import InsecureRequestWarning
 
 class colors:
     HEADER = '\033[96m'
@@ -32,7 +35,7 @@ def print_commands():
     print(header + games_running + "\n" + watch_game + "\n\n")
 
 def print_help():
-    header = colors.HEADER + colors.BOLD + colors.UNDERLINE + "\n\t\tPong CLI Usage" + colors.HEADER + colors.ENDC
+    header = colors.HEADER + colors.BOLD + "\n\t\t" + colors.UNDERLINE + "Pong CLI Usage" + colors.HEADER + colors.ENDC
     usage = colors.HEADER + "Usage:" + colors.ENDC + "  pong_cli.py [-h] [-i] <command>" + colors.ENDC
     available_commands = colors.HEADER + """\n\nAvailable commands:""" + colors.ENDC 
     options = colors.HEADER + "\n\nOptions:" + colors.ENDC + "\n\t-h, --help show this help message and exit \n\t-i, --interactive  Interactive mode"
@@ -42,6 +45,7 @@ def print_help():
 # Define event handlers
 def on_connect():
     print('Connected to server')
+
 
 
 def on_games_running_response(data):
@@ -57,18 +61,24 @@ def on_games_running_response(data):
     if interactive_mode == False:
         sio.disconnect()
 
-
 def watch_game(game_number):
-    last_print_time = [time.time()]  # Mutable list to store last print time
-    sio.on('state', lambda data: on_state(data, last_print_time))
-    # while not stop_flag[0]:
-    #     time.sleep(1)
+    try:
+        last_print_time = time.time()  # Initialize last print time
+        while True:
+            sio.emit('message', 'get_state,' + game_number)
+            # Wait for 3 seconds
+            time.sleep(3)
+            sio.on('state', lambda data: on_state(data, last_print_time))
+    except KeyboardInterrupt:
+        print('Press Enter to stop watching')
 
 def on_state(data, last_print_time):
     current_time = time.time()
-    if current_time - last_print_time[0] >= 2:
+    if current_time - last_print_time >= 3:  # Check if 3 seconds have passed
+        print("in onstate")
         print('Game State:', data)
-        last_print_time[0] = current_time  # Update last print time
+        last_print_time = current_time  # Update last print time
+
 
 def on_disconnect():
     print('Disconnected from server')
@@ -83,7 +93,7 @@ def on_message(data):
 if __name__ == "__main__":
 
     interactive_mode = False
-
+    warnings.filterwarnings("ignore", category=InsecureRequestWarning)
     if '-h' in sys.argv or '--help' in sys.argv or len(sys.argv) == 1:
         print_banner()
         print_help()
@@ -113,9 +123,9 @@ if __name__ == "__main__":
                 command = input("Enter command (type 'exit' to quit): ")
                 if command.lower() == 'exit':
                     break
-                # if command == 'watch_game,0':
-                #     game_number = 0
-                #     watch_game(game_number)
+                if command == 'watch_game':
+                    game_number = input("Enter a game number: ")
+                    watch_game(game_number)
                 sio.emit('message', command)
             except KeyboardInterrupt:
                 break
