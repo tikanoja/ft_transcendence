@@ -64,6 +64,7 @@ class DeleteAccountForm(forms.Form):
 			del self.cleaned_data['confirm_password']
 			return True
 
+
 class UpdatePasswordForm(forms.Form):
 	password = forms.CharField(label="Password", widget=forms.PasswordInput)
 	confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
@@ -126,3 +127,13 @@ class AddFriendForm(forms.Form):
 class UpdateNameForm(forms.Form):
 	first_name = forms.CharField(label='First Name', widget=forms.TextInput(attrs={'placeholder': 'Enter given name'}), max_length=256, required=True)
 	last_name = forms.CharField(label='Last Name', widget=forms.TextInput(attrs={'placeholder': 'Enter family name'}), max_length=256, required=True)
+
+
+class GameRequestForm(forms.Form):
+	username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
+	GAME_TYPE_CHOICES = [
+        ('pong', 'Pong'),
+        ('color', 'Color'),
+    ]
+    game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
+	

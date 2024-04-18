@@ -100,15 +100,8 @@ def settings(request):
 @login_required
 def play(request):
 	logger.debug('In play()')
-	current_user = request.user
 	if request.method == 'GET':
-		all_games = GameInstance.objects.filter(Q(p1=current_user) | Q(p2=current_user))
-		active_game = all_games.filter(Q(p1=current_user) | Q(p2=current_user), status='Active').first()
-		invites_sent = all_games.filter(p1=current_user, status='Pending')
-		invites_received = all_games.filter(p2=current_user, status='Pending')
-		# if they are not currently playing, show game invite creation / pending invites
-		# if they ARE currently listed as a part of a game, show the game canvas
-		return render(request, 'user/play.html', {})
+		response = user.playGET(request)
 	elif request.method == 'POST':
 		response = user.playPOST(request)
 	else:

@@ -1,4 +1,4 @@
-from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm, AddFriendForm
+from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm, AddFriendForm, GameRequestForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
 from .models import CustomUser, CustomUserManager, GameInstance, Friendship
@@ -255,7 +255,6 @@ def friendsContext(request, error, success):
             other_user.is_online = False
             other_user.save()
 
-
     if not error and not success:
         context = {'current_user': current_user, 'form': form, 'title': title, 'in_invites': in_invites, 'out_invites': out_invites, 'friendships': friendships, 'blocked_users': blocked_users}
     elif error and not success:
@@ -263,6 +262,7 @@ def friendsContext(request, error, success):
     else:
         context = {'current_user': current_user, 'form': form, 'title': title, 'in_invites': in_invites, 'out_invites': out_invites, 'friendships': friendships, 'blocked_users': blocked_users, 'success': success}
     return context
+
 
 def friendsGET(request):
     return render(request, 'user/friends.html', friendsContext(request, None, None))	
@@ -354,15 +354,6 @@ def friendsPOST(request):
 
 def block_user(request):
     logger.debug('in block_user')
-
-    # handle unblock / block button json stuff like this:
-    # if request.content_type == 'application/json':
-    #     data = json.loads(request.body)
-    #     if data.get('request_type') == 'unblock':
-    #         return unblock_user(request, data)
-    #     else:
-    #         return render(request, 'user/friends.html', friendsContext(request, ve, "Unknown content type"))
-
     sent_form = AddFriendForm(request.POST)
 
     try:
@@ -391,3 +382,42 @@ def block_user(request):
     current_user.save()
 
     return render(request, 'user/friends.html', friendsContext(request, None, "Blocked " + blocked_username + "!"))
+
+
+def playContext(request, error, success):
+    logger.debug('in playContext()')
+    current_user = request.user
+    form = GameRequestForm()
+
+    all_games = GameInstance.objects.filter(Q(p1=current_user) | Q(p2=current_user))
+	invites_sent = all_games.filter(p1=current_user, status='Pending')
+	invites_received = all_games.filter(p2=current_user, status='Pending')
+
+    context = {
+        'invites_sent': invites_sent,
+        'invites_received': invites_received,
+    }
+
+    if error:
+        context['error'] = error
+    elif success:
+        context['success'] = success
+
+def playGET(request):
+    all_games = GameInstance.objects.filter(Q(p1=current_user) | Q(p2=current_user))
+	active_game = all_games.filter(Q(p1=current_user) | Q(p2=current_user), status='Active').first()
+	if active_game is not None
+		# render the game canvas with the active game
+		# they should never be able to be active in more than one game
+		logger.debug('the user has an active game going on')
+		return render(request, 'pong/3dgen.html', {})
+	else #we render a menu in which they can choose game and send an invite to an opponent / reply to requests
+		# if they are not currently playing, show game invite creation / pending invites
+		# if they ARE currently listed as a part of a game, show the game canvas
+		return render(request, 'user/play.html', playContext(request, None, None))
+
+
+def playPOST(request):
+    current_user = request.user
+    # we handle users sending the challenge form here
+    pass
