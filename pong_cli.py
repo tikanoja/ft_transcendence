@@ -15,6 +15,9 @@ class colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+LINE_UP = '\033[1A'
+LINE_CLEAR = '\x1b[2K'
+
 def print_color(text, color):
     print(color + text + colors.ENDC)
 
@@ -59,23 +62,29 @@ def on_games_running_response(data):
     if interactive_mode == False:
         sio.disconnect()
 
+game_over = False
 
 def watch_game(game_number):
-    sio.on('state_cli', lambda data: print_state(data)) 
+    global game_over
+    sio.on('state_cli', lambda data: print_state(data))
+	sio.on('game_over', game_over=True) #this may not work
     print(colors.HEADER + colors.BOLD + "Watching game: " + game_number + colors.ENDC)
     while True:
-        if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+        if sys.stdin in select.select([sys.stdin], [], [], 0)[0] or game_over == True:
+            game_over = False
             print(colors.WARNING + "Exiting watch_game......" + colors.ENDC)
             _ = sys.stdin.readline()
-            return 
         sio.emit('message', 'get_state_cli,' + game_number)
         time.sleep(5)
 
-
-
 def print_state(data):
     valuesArray = data.split(',')
-    print("\n\n\n")
+    global game_over
+
+    index = 0
+    while index != 6:
+        print(LINE_UP, end=LINE_CLEAR)
+        index += 1
     print(colors.HEADER + colors.BOLD + "P1 score:   " + colors.ENDC)
     print(valuesArray[7])
     print(colors.HEADER + colors.BOLD + "P2 score:   " + colors.ENDC)
@@ -91,19 +100,29 @@ def on_disconnect():
 #     if interactive_mode == False:
 #         sio.disconnect()
 
+#TODO: sabotage MUST be password protected some how
+
 def run_command(argv):
     if argv[1] == "games_running":
         sio.emit('message', argv[1])
-    elif argv[1] == "sabotage-1":
+    elif argv[1] == "sabotage-1 L":
         sio.emit('message', "left_paddle_up,0")
         time.sleep(0.2)
         sio.emit('message', "left_paddle_up_release,0")
-    elif argv[1] == "sabotage-12":
+    elif argv[1] == "sabotage-12 L":
         sio.emit('message', "left_paddle_down,0")
         time.sleep(0.2)
         sio.emit('message', "left_paddle_release,0")
+	elif argv[1] == "sabotage-1 R":
+        sio.emit('message', "right_paddle_up,0")
+        time.sleep(0.2)
+        sio.emit('message', "right_paddle_up_release,0")
+    elif argv[1] == "sabotage-12 R":
+        sio.emit('message', "right_paddle_down,0")
+        time.sleep(0.2)
+        sio.emit('message', "right_paddle_release,0")
     else:
-        print(colors.WARNING + "not a valid command use -h for help")
+        print(colors.WARNING + "not a valid command use -h for help" + colors.ENDC)
     sio.disconnect()
 
 if __name__ == "__main__":
