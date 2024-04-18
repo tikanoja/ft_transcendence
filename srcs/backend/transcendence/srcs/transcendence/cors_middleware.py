@@ -26,10 +26,13 @@ class UpdateLastSeenMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
-
+        User = get_user_model()
         if request.user.is_authenticated:
-            user = request.user
-            user.last_seen = timezone.now()
-            user.save()
+            try:
+                user = User.objects.get(username=request.user.username)
+                user.last_seen = timezone.now()
+                user.save()
+            except User.DoesNotExist:
+                return response
 
         return response
