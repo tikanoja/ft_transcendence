@@ -377,6 +377,10 @@ def block_user(request):
     friendships_to_delete = Friendship.objects.filter(Q(from_user=current_user, to_user=blocked_user) | Q(from_user=blocked_user, to_user=current_user))
     friendships_to_delete.delete()
 
+    # Delete pending game invites
+    game_instances_to_delete = GameInstance.objects.filter(Q(p1=current_user, p2=blocked_user) | Q(p2=blocked_user, p1=current_user), status='Pending')
+    game_instances_to_delete.delete()
+
     # Add to blocked
     current_user.blocked_users.add(blocked_user)
     current_user.save()
@@ -388,12 +392,15 @@ def playContext(request, error, success):
     logger.debug('in playContext()')
     current_user = request.user
     form = GameRequestForm()
-
+    title = 'Play'
     all_games = GameInstance.objects.filter(Q(p1=current_user) | Q(p2=current_user))
-	invites_sent = all_games.filter(p1=current_user, status='Pending')
-	invites_received = all_games.filter(p2=current_user, status='Pending')
+    invites_sent = all_games.filter(p1=current_user, status='Pending')
+    invites_received = all_games.filter(p2=current_user, status='Pending')
 
     context = {
+        'current_user': current_user,
+        'form': form,
+        'all_games': all_games,
         'invites_sent': invites_sent,
         'invites_received': invites_received,
     }
@@ -402,22 +409,47 @@ def playContext(request, error, success):
         context['error'] = error
     elif success:
         context['success'] = success
+    return context
 
 def playGET(request):
+    current_user = request.user
     all_games = GameInstance.objects.filter(Q(p1=current_user) | Q(p2=current_user))
-	active_game = all_games.filter(Q(p1=current_user) | Q(p2=current_user), status='Active').first()
-	if active_game is not None
-		# render the game canvas with the active game
-		# they should never be able to be active in more than one game
-		logger.debug('the user has an active game going on')
-		return render(request, 'pong/3dgen.html', {})
-	else #we render a menu in which they can choose game and send an invite to an opponent / reply to requests
-		# if they are not currently playing, show game invite creation / pending invites
-		# if they ARE currently listed as a part of a game, show the game canvas
-		return render(request, 'user/play.html', playContext(request, None, None))
+    active_game = all_games.filter(Q(p1=current_user) | Q(p2=current_user), status='Active').first()
+    if active_game is not None:
+        # render the game canvas with the active game
+        # they should never be able to be active in more than one game
+        logger.debug('the user has an active game going on')
+        return render(request, 'pong/3dgen.html', {})
+    else: #we render a menu in which they can choose game and send an invite to an opponent / reply to requests
+        # if they are not currently playing, show game invite creation / pending invites
+        # if they ARE currently listed as a part of a game, show the game canvas
+        return render(request, 'user/play.html', playContext(request, None, None))
 
 
 def playPOST(request):
     current_user = request.user
-    # we handle users sending the challenge form here
-    pass
+    sent_form = GameRequestForm(request.POST)
+    try:
+        if not sent_form.is_valid():
+            raise ValidationError("Form filled incorrectly")
+    except ValidationError as ve:
+        return render(request, 'user/play.html', playContext(request, ve, None))
+    
+    challenged_username = sent_form.cleaned_data['username']
+    challenged_user = CustomUser.objects.filter(username=challenged_username).first()
+    if challenged_user in current_user.blocked_users.all() or current_user in challenged_user.blocked_users.all():
+        return render(request, 'user/play.html', playContext(request, "Blocked", None))
+
+    # check if they are trying to add themselves
+    if request.user.username == challenged_username:
+        return render(request, 'user/play.html', playContext(request, "No single player mode...", None))
+
+    # request already sent?
+    all_pending_games = GameInstance.object.filter(Q(p1=current_user) | Q(p2=current_user), status='Pending')
+    prior_request = all_pending_games.filter(Q(p1=challenged_user) | Q(p2=challenged_user)).first()
+    if prior_request is not None:
+        return render(request, 'user/play.html', playContext(request, "You have already sent a game request to this user", None)) 
+
+    new_game_instance = GameInstance(p1=current_user, p2=challenged_user, game=game_type)
+    new_game_instance.save()
+    
