@@ -386,25 +386,6 @@ def game_loop():
 	
 		time.sleep(0.02)
 
-def start_background_loop(splitted_command):
-	global thread
-	global thread_lock
-	global socketio
-	global background_thread_running
-	if len(splitted_command) != 1:
-		socketio.emit('message', 'ERROR, string not in right format.')
-		return
-	with thread_lock:
-		if thread:
-			socketio.emit('message', 'ERROR, background loop already running.')
-			return
-		else:
-			background_thread_running = 1
-			thread = threading.Thread(target=game_loop)
-			thread.start()
-			socketio.emit('message', 'OK: background loop started.')
-			return
-
 def stop_background_loop(splitted_command):
 	global thread
 	global thread_lock
@@ -452,7 +433,7 @@ def start_game(splitted_command):
 	global thread
 	global games_lock
 	global games
-	if len(splitted_command) != 2:
+	if len(splitted_command) != 1:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
 	with thread_lock:
@@ -748,5 +729,9 @@ if __name__ == '__main__':
 	# Use SSL/TLS encryption for WSS
 	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 	ssl_context.load_cert_chain('/server.crt', '/server.key')
+	with thread_lock:
+		background_thread_running = 1
+		thread = threading.Thread(target=game_loop)
+		thread.start()
 	socketio.run(app, host='0.0.0.0', port=8888, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
 	#socketio.run(app, host='0.0.0.0', port=8888, debug=True, allow_unsafe_werkzeug=True)
