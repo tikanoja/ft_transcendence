@@ -383,26 +383,7 @@ def game_loop():
 					games[game].move_paddles()
 					games[game].move_ball()
 					socketio.emit('state', games[game].return_game_state())
-	
 		time.sleep(0.02)
-
-def stop_background_loop(splitted_command):
-	global thread
-	global thread_lock
-	global background_thread_running
-	global socketio
-	if len(splitted_command) != 1:
-		socketio.emit('message', 'ERROR, string not in right format.')
-		return
-	with thread_lock:
-		if background_thread_running == 0:
-			socketio.emit('message', 'ERROR, game loop already stopped.')
-			return
-		else:
-			background_thread_running = 0
-			thread = None
-			socketio.emit('message', 'OK, gameloop stopped.')
-			return
 
 # string format is set_game_settings,game_number(0,1,2,3),left_player_id(any string)
 # set_game_settings,0,player1,player2,127.0.0.1,80,127.0.0.1,80 
@@ -427,6 +408,20 @@ def set_game_settings(splitted_command):
 			socketio.emit('message', 'OK, game settings set.')
 			return
 
+def	games_running(splitted_command):
+	global games
+	global games_lock
+	if len(splitted_command) != 1:
+		socketio.emit('message', 'ERROR, string not in right format.')
+		return
+	games_running = ['0','0','0','0']
+	with games_lock:
+		for index in range(4):
+			if games[index].game_running == 1:
+				games_running[index] = '1'
+	socketio.emit('games_running_response', 'OK, {}'.format(str(','.join(games_running))))
+	return
+
 def start_game(splitted_command):
 	global socketio
 	global thread_lock
@@ -440,12 +435,14 @@ def start_game(splitted_command):
 		if not thread:
 			socketio.emit('message', 'ERROR, background loop not running.')
 			return
-	number = int(splitted_command[1])
-	if number < 0 or number > 3:
-		socketio.emit('message', 'ERROR, allowed game numbers are 0 to 3.')
-		return
+	number = -1
 	with games_lock:
-		if games[number].is_game_running() == 1:
+		for index in range(4):
+			if games[index].game_running == 0:
+				number = index
+				break
+	with games_lock:
+		if number == -1:
 			socketio.emit('message', 'ERROR, game already running cannot create new.')
 			return
 		else:
@@ -500,20 +497,6 @@ def get_state(splitted_command):
 		else:
 			socketio.emit('state', games[number].return_game_state())
 			return
-
-def	games_running(splitted_command):
-	global games
-	global games_lock
-	if len(splitted_command) != 1:
-		socketio.emit('message', 'ERROR, string not in right format.')
-		return
-	games_running = ['0','0','0','0']
-	with games_lock:
-		for index in range(4):
-			if games[index].game_running == 1:
-				games_running[index] = '1'
-	socketio.emit('games_running_response', 'OK, {}'.format(str(','.join(games_running))))
-	return
 
 def left_paddle_up(splitted_command):
 	global games
@@ -655,7 +638,7 @@ def right_paddle_up_release(splitted_command):
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
 	number = int(splitted_command[1])
-	if number < 0 or number > 3:
+ 	if number < 0 or number > 3:
 		socketio.emit('message', 'ERROR, allowed game numbers are 0 to 3.')
 		return
 	with games_lock:
@@ -690,10 +673,6 @@ def handle_message(message):
 	splitted_command = message.split(",")
 	if splitted_command:
 		match splitted_command[0]:
-			case 'start_background_loop':
-				start_background_loop(splitted_command)
-			case 'stop_background_loop':
-				stop_background_loop(splitted_command)
 			case 'set_game_settings':
 				set_game_settings(splitted_command)
 			case 'start_game':
