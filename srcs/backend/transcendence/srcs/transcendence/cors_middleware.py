@@ -28,7 +28,7 @@ class UpdateLastSeenMiddleware:
         response = self.get_response(request)
 
         if request.user.is_authenticated:
-            user = request.user
+            user = CustomUser.objects.get(username=request.user.username)
             user.last_seen = timezone.now()
             user.save()
 
