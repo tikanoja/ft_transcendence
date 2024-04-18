@@ -281,29 +281,29 @@ def friendsContext(request, error, success):
 
 
 def friendsGET(request):
-    return render(request, 'user/friends.html', friendsContext(request, None, None))	
+    return render(request, 'user/profile_partials/friends.html', friendsContext(request, None, None))	
 
 
 def friendResponse(request, data):
     from_username = data.get('from_user')
     from_user = CustomUser.objects.filter(username=from_username).first()
     if not from_user:
-        return render(request, 'user/friends.html', friendsContext(request, "Could not find the friend candidate", None))    
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request, "Could not find the friend candidate", None))    
     action = data.get('action')
     friendship = Friendship.objects.filter(Q(to_user=request.user, from_user=from_user) | Q(to_user=from_user, from_user=request.user)).first()
     if not friendship:
-        return render(request, 'user/friends.html', friendsContext(request, "Could not find the friendship", None))    
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request, "Could not find the friendship", None))    
 
     if action == 'accept':
         friendship.status = Friendship.ACCEPTED
         friendship.save()
-        return render(request, 'user/friends.html', friendsContext(request, None, "Congratulations, you made a new friend!"))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request, None, "Congratulations, you made a new friend!"))
     elif action == 'reject':
         friendship.delete()
-        return render(request, 'user/friends.html', friendsContext(request, None, "Friendship REJECTED!"))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request, None, "Friendship REJECTED!"))
     elif action == 'delete':
         friendship.delete()
-        return render(request, 'user/friends.html', friendsContext(request, None, "Friendship DELETED!"))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request, None, "Friendship DELETED!"))
 
 
 def friendsPOST(request):
@@ -313,19 +313,19 @@ def friendsPOST(request):
         if data.get('request_type') == 'friendResponse':
             return friendResponse(request, data)
         else:
-            return render(request, 'user/friends.html', friendsContext(request, ve, "Unknown content type"))
+            return render(request, 'user/profile_partials/friends.html', friendsContext(request, ve, "Unknown content type"))
 
     sent_form = AddFriendForm(request.POST)
     try:
         if not sent_form.is_valid():
             raise ValidationError("Form filled incorrectly")
     except ValidationError as ve:
-        return render(request, 'user/friends.html', friendsContext(request, ve, None))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request, ve, None))
     friend_username = sent_form.cleaned_data['username']
 
     # check if they are trying to add themselves
     if request.user.username == friend_username:
-        return render(request, 'user/friends.html', friendsContext(request, "Please do not add yourself", None))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request, "Please do not add yourself", None))
 
     current_user = request.user
     friend_user = CustomUser.objects.filter(username=friend_username).first()
@@ -340,20 +340,20 @@ def friendsPOST(request):
 
     # check if they are already friends
     if friendships.filter(Q(from_user=friend_user) | Q(to_user=friend_user)):
-        return render(request, 'user/friends.html', friendsContext(request, "You are already friends", None))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request, "You are already friends", None))
 
     # check if friend_user matches an incoming invite, and if yes, update the status of that Friendship to ACCEPTED
     incoming_invite = in_invites.filter(from_user=friend_user)
     if incoming_invite.exists():
         incoming_invite.update(status=Friendship.ACCEPTED)
-        return render(request, 'user/friends.html', friendsContext(request, None, "Congratulations, you made a new friend!"))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request, None, "Congratulations, you made a new friend!"))
 
     # check if they have already sent a request to the user in question
     if out_invites.filter(to_user=friend_user):
-        return render(request, 'user/friends.html', friendsContext(request, "You have already sent a request to this user", None))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request, "You have already sent a request to this user", None))
 
     # add to friends
     new_friendship = Friendship(from_user=current_user, to_user=friend_user, status=Friendship.PENDING)
     new_friendship.save()
 
-    return render(request, 'user/friends.html', friendsContext(request, None, "Friend request sent"))
+    return render(request, 'user/profile_partials/friends.html', friendsContext(request, None, "Friend request sent"))

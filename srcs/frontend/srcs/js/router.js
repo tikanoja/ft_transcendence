@@ -121,8 +121,14 @@ const locationHandler = async () => {
 		let userQuery = await fetch('app/get_current_username/');
 		let username = await userQuery.json()
 		console.log('curent username returned as' + username['message'])
-		// TODO: don't change the route view !!!!!!!
-		route.view = route.view + username['message']
+		if (username['message'] === 'unknown user') {
+			// TODO: take this out and make sure that the routing for the profile requires login. this results in wrong url shown
+			route.view = "app/login/"
+		}
+		else {
+			route.view = "app/profile/" + username['message']
+		}
+
 	}
 	const querystring = window.location.search;
 	console.log('locationHandler(): fetching this: ' + route.view + querystring);

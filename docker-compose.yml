@@ -32,6 +32,7 @@ services:
     volumes:
       - ./srcs/backend/transcendence/srcs:/transcendence:ro
       - ./srcs/backend/transcendence/srcs/app/migrations:/transcendence/app/migrations:rw
+      - ./srcs/backend/transcendence/srcs/media:/transcendence/media
     depends_on:
       database:
         condition: service_healthy

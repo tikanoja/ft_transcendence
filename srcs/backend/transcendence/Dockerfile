@@ -7,7 +7,8 @@ RUN apt-get update && apt-get install -y \
 	libpq-dev \
 	openssl
 
-RUN mkdir -p /transcendence/ssl
+RUN mkdir -p /transcendence/ssl \
+	mkdir -p /transcendence/media
 RUN openssl req -newkey rsa:2048 -x509 -sha256 -days 365 -nodes \
     -out /transcendence/ssl/certificate.crt \
     -keyout /transcendence/ssl/certificate.key \

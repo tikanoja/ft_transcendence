@@ -110,7 +110,7 @@ function updateEventListeners() {
 
     // remove listeners
     if (deleteForm) {
-        deleteForm.removeEventListener('submit', deleteFormHandler);
+        deleteForm.removeEventListener('submit', manageAccountHandler);
     }
     if (nameChangeForm) {
         nameChangeForm.removeEventListener('submit', manageAccountHandler);
@@ -169,7 +169,7 @@ function updateEventListeners() {
         })
     }
     if (deleteForm) {
-        deleteForm.addEventListener('submit', deleteFormHandler);
+        deleteForm.addEventListener('submit', manageAccountHandler);
     }
     if (nameChangeForm) {
         nameChangeForm.addEventListener('submit', manageAccountHandler);
@@ -323,36 +323,6 @@ const manageAccountHandler = async (event) => {
         let to_update = document.getElementById("manage-account");
         to_update.innerHTML = html;
         updateEventListeners();
-	}
-	else {
-		console.log("Response status: ", response.status)
-		// some 400 or 500 code probably, show the error that was sent?
-	}
-}
-
-const deleteFormHandler= async (event) => {
-    event.preventDefault();
-    console.log("in deleteFormHandler");
-
-    const formData = new FormData(event.target);
-
-	let response = await sendPostRequest('/app/delete_account/', formData);
-	
-    console.log("Response status: ", response.status, "Redirect: ", response.redirected)
-    if (response.redirected) {
-        console.log('redirect status found');
-      
-        routeRedirect('/login');
-    }
-	else if (response.ok) {
-        console.log('response,ok triggered');
-		// stay on this page, display the content again
-        response.text().then(function (text) {
-            document.getElementById("content").innerHTML = text;
-            document.title = "Delete Account | Pong";
-            document.querySelector('meta[name="description"]').setAttribute("content", "Delete Account");
-            updateEventListeners();
-        })
 	}
 	else {
 		console.log("Response status: ", response.status)

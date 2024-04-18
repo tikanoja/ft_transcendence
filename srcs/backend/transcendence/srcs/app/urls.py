@@ -7,7 +7,6 @@ urlpatterns = [
 	path('logout/', views.logout_user, name="logout_user"),
 	path('get_current_username/', views.get_current_username, name="get_current_username"),
 	path('check_login/', views.check_login, name="check_login"),
-    path('delete_account/', views.delete_account, name="delete_account"),
 	path('profile/<str:username>', views.profile, name="profile"),
 	path('settings/', views.settings, name="settings"),
 	path('friends/', views.friends, name="friends"),
