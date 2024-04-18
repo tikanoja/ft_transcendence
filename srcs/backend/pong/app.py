@@ -59,7 +59,7 @@ class Game:
 		self.game_running: int = 0 # 1 running, 0 end
 		self.winner: str = 'nobody'
 		self.left_player_id: str = 'left_player'
-		self.right_player_id: str = 'righ_player'
+		self.right_player_id: str = 'right_player'
 		self.create_ball_initial_coordinates()
 		self.create_left_paddle_initial_coordinates()
 		self.create_right_paddle_initial_coordinates()
@@ -284,11 +284,11 @@ class Game:
 		# Game end condition the stop the game
 		if (self.left_score or self.right_score) >= self.game_end_condition:
 			self.game_running = 0
-			self.ball_bounces = 0
-			self.winner = "left player"
+			self.winner = self.left_player_id
 			if self.right_score > self.left_score:
-				self.winner = "right player"
-			# remember to add call to sheris api and notify that game has ended
+				self.winner = self.right_player_id
+			socketio.emit('state', games[game].return_game_state())
+			self.ball_bounces = 0
 
 	def is_game_running(self):
 		return self.game_running
@@ -638,7 +638,7 @@ def right_paddle_up_release(splitted_command):
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
 	number = int(splitted_command[1])
- 	if number < 0 or number > 3:
+	if number < 0 or number > 3:
 		socketio.emit('message', 'ERROR, allowed game numbers are 0 to 3.')
 		return
 	with games_lock:
