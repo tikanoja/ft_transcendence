@@ -134,7 +134,7 @@ function setup2DScene(scene) {
 
     // Calculate ball radius based on screen width
     const sizeFactor = 0.5; // Adjust this value to make the ball slightly smaller while keeping the ratio
-    const ballRadiusScreen = 25 * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
+    const ballRadiusScreen = (25 * 2) * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
     const ball = new THREE.Mesh(new THREE.PlaneGeometry(ballRadiusScreen * 2, ballRadiusScreen * 2), new THREE.MeshStandardMaterial({ color: 0x808080 }));
     
     scene.add(p1_paddle);
@@ -163,13 +163,10 @@ function setup3DScene(scene) {
 
 function create2DPaddle(color) {
     // Adjust the dimensions of the paddle geometry based on the ratios
-    let widthRatio = 20 / 1920
-    let heightRatio = 90 / 1080
+    let widthRatio = (20 * 2) / 1920
+    let heightRatio = (90 * 2) / 1080
 	let screenWidth = window.innerWidth;
     let screenHeight = window.innerHeight;
-	
-
-    const ballRadiusScreen = 25 * (Math.min( window.innerWidth / 1920, screenHeight / 1080));
 
     
     let paddleWidth = screenWidth * widthRatio;
@@ -196,7 +193,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     renderer.setPixelRatio(pixelRatio);
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
-    let p1_paddle, p2_paddle, ball; //TODO: take into account the paddle width and height?
+    let p1_paddle, p2_paddle, ball;
     if (is3DGraphics) {
         camera = setup3DScene(scene);
     } else {

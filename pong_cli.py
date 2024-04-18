@@ -92,6 +92,11 @@ def print_state(data):
     print(colors.HEADER + colors.BOLD + "Longest Rally:   " + colors.ENDC)
     print(valuesArray[10])
 
+def get_score(game_number):
+	sio.on('state_cli', lambda data: print_state(data))
+	sio.emit('message', 'get_state_cli' + game_number)
+
+
 def on_disconnect():
     print('Disconnected from server')
 
@@ -105,6 +110,9 @@ def on_disconnect():
 def run_command(argv):
     if argv[1] == "games_running":
         sio.emit('message', argv[1])
+	if argv[1] == "get_score":
+		game_number = input("Enter a game number: ")
+		get_score(game_number)
     elif argv[1] == "sabotage-1 L":
         sio.emit('message', "left_paddle_up,0")
         time.sleep(0.2)
