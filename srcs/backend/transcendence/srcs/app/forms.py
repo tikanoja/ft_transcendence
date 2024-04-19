@@ -1,5 +1,5 @@
 from django import forms
-from .models import CustomUser
+from .models import CustomUser, GameInstance
 from django.core.exceptions import ValidationError
 import re
 import logging
@@ -132,8 +132,8 @@ class UpdateNameForm(forms.Form):
 class GameRequestForm(forms.Form):
     username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
     GAME_TYPE_CHOICES = [
-        ('pong', 'Pong'),
-        ('color', 'Color'),
+        (GameInstance.PONG, 'Pong'),
+        (GameInstance.COLOR, 'Color'),
     ]
     game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
 

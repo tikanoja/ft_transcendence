@@ -38,9 +38,9 @@
 <ul>
 	{% for invite in invites_received %}
 		<li>
-			{{ invite.from_user.username }} - 
-			<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="accept" class="btn btn-primary">Accept</button> or
-			<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="reject" class="btn btn-danger">Reject</button>
+			Challenger: {{ invite.p1.username }} - Game: {{ invite.game }} -
+			<button type="submit" id="gameRequestButton" data-from-user={{ invite.p1.username }} data-action="accept" class="btn btn-primary">✓</button> or
+			<button type="submit" id="gameRequestButton" data-from-user={{ invite.p1.username }} data-action="reject" class="btn btn-danger">✗</button>
 		</li>
 	{% empty %}
 		<li>No pending invites.</li>

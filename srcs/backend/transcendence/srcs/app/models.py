@@ -53,9 +53,9 @@ class CustomUser(AbstractBaseUser):
     objects = CustomUserManager()
 
 class Friendship(models.Model):
-    PENDING = 'P'
-    ACCEPTED = 'A'
-    REJECTED = 'R'
+    PENDING = 'Pending'
+    ACCEPTED = 'Accepted'
+    REJECTED = 'Rejected'
     STATUS_CHOICES = [
         (PENDING, 'Pending'),
         (ACCEPTED, 'Accepted'),
@@ -63,24 +63,26 @@ class Friendship(models.Model):
     ]
     from_user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='friend_request_from')
     to_user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='friend_request_to')
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=PENDING)
+    status = models.CharField(max_length=8, choices=STATUS_CHOICES, default=PENDING)
 
 
 class GameInstance(models.Model):
-    PENDING = 'P'
-    ACTIVE = 'A'
-    ERROR = 'E'
-    FINISHED = 'F'
+    PENDING = 'Pending'
+    ACTIVE = 'Active'
+    ERROR = 'Error'
+    FINISHED = 'Finished'
+    SURRENDER = 'Surrender'
 
     STATUS_CHOICES = [
         (PENDING, 'Pending'),
         (ACTIVE, 'Active'),
         (ERROR, 'Error'),
         (FINISHED, 'Finished'),
+        (SURRENDER, 'Surrender')
     ]
 
-    PONG = 'P'
-    COLOR = 'C'
+    PONG = 'Pong'
+    COLOR = 'Color'
     GAME_CHOICES = [
         (PONG, 'Pong'),
         (COLOR, 'Color'),
@@ -88,8 +90,8 @@ class GameInstance(models.Model):
 
     p1 = models.ForeignKey("CustomUser", related_name="player_one", on_delete=models.SET_NULL, null=True)
     p2 = models.ForeignKey("CustomUser", related_name="player_two", on_delete=models.SET_NULL, null=True)
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=PENDING)
-    game = models.CharField(max_length=1, choices=GAME_CHOICES, default=PONG)
+    status = models.CharField(max_length=9, choices=STATUS_CHOICES, default=PENDING)
+    game = models.CharField(max_length=5, choices=GAME_CHOICES, default=PONG)
     winner = models.ForeignKey("CustomUser", related_name="winner", on_delete=models.SET_NULL, null=True) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

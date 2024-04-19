@@ -102,13 +102,13 @@ function updateEventListeners() {
     var addFriendForm = document.getElementById('addFriendForm');
     var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
     var blockUserButton = document.getElementById('blockUserForm');
-    var gameRequestForm = document.getElementById('gameRequestForm');
-    
+    var gameRequestForm = document.getElementById('gameRequestForm'); 
     var playButton = document.getElementById('playButton');
     var deleteForm = document.getElementById('delete-account-form');
     var nameChangeForm = document.getElementById('name-change-form');
     var emailChangeForm = document.getElementById('email-change-form');
     var passwordChangeForm = document.getElementById('password-change-form');
+    var gameRequestButtons = document.querySelectorAll('[id^="gameRequestButton"]');
 
     // REMOVE
     if (deleteForm)
@@ -138,6 +138,11 @@ function updateEventListeners() {
         blockUserButton.removeEventListener('submit', blockUserHandler)
     if (gameRequestForm)
         gameRequestForm.removeEventListener('submit', gameRequestHandler)
+    if (gameRequestButtons) {
+        gameRequestButtons.forEach(function(button) {
+            button.removeEventListener('click', gameResponseHandler);
+        })
+    }
 
     // ADD
     if (loginForm)
@@ -167,6 +172,11 @@ function updateEventListeners() {
         blockUserButton.addEventListener('submit', blockUserHandler);
     if (gameRequestForm)
         gameRequestForm.addEventListener('submit', gameRequestHandler)
+    if (gameRequestButtons) {
+        gameRequestButtons.forEach(function(button) {
+            button.addEventListener('click', gameResponseHandler);
+        })
+    }
 }
 
 function updateContent(html, title, description) {
@@ -271,6 +281,34 @@ const addFriendHandler = async (event) => {
 	} else {
 		console.log("Response status in addFriendHandler(): ", response.status)
 	}
+}
+
+const gameResponseHandler = async (event) => {
+    console.log('gameResponseHandler()');
+    event.preventDefault();
+
+    var fromUser = event.target.getAttribute('data-from-user');
+    var action = event.target.getAttribute('data-action');
+    console.log('from user: ', fromUser, 'action: ', action);
+
+    var data = {
+        'from_user': fromUser,
+        'action': action,
+        'request_type': 'gameResponse'
+    }
+
+    const querystring = window.location.search;
+    var endpoint = '/app/play/' + querystring;
+    const response = await sendPostRequest(endpoint, data, true);
+    if (response.redirected) {
+        let redirect_location = response.url;
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        const html = await response.text();
+        updateContent(html, "Play | Pong", "Play");
+	} else {
+		console.log("Response status in gameResponseHandler(): ", response.status)
+	} 
 }
 
 const friendRequestHandler = async (event) => {

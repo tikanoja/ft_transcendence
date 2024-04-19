@@ -70,7 +70,6 @@ def loginGET(request):
     if request.user.is_authenticated:
         return render(request, "user/logout.html", {}) #redirect to show game view
         # return redirect("/user/logout")
-    logger.debug('hello, will send login form!')
     form = LoginForm()
     logger.debug(form)
     return render(request, 'user/login.html', {"form": form, "title": title})
@@ -394,8 +393,10 @@ def playContext(request, error, success):
     form = GameRequestForm()
     title = 'Play'
     all_games = GameInstance.objects.filter(Q(p1=current_user) | Q(p2=current_user))
+    logger.debug('num of all_games(): ' + str(all_games.count()))
     invites_sent = all_games.filter(p1=current_user, status='Pending')
     invites_received = all_games.filter(p2=current_user, status='Pending')
+    logger.debug('num of invites_received(): ' + str(invites_received.count()))
 
     context = {
         'current_user': current_user,
@@ -426,7 +427,43 @@ def playGET(request):
         return render(request, 'user/play.html', playContext(request, None, None))
 
 
+def gameResponse(request, data):
+    challenger = data.get('from_user')
+    challenger_user = CustomUser.objects.filter(username=challenger).first()
+    if not challenger_user:
+        return render(request, 'user/play.html', playContext(request, "Error: could not find player", None))    
+    action = data.get('action')
+    game_instance = GameInstance.objects.filter(p1=challenger_user, p2=request.user).first()
+    if action == 'accept':
+        game_instance.status = 'Active'
+        game_instance.save()
+        return render(request, 'user/play.html', playContext(request, None, "Game accepted! (this should redirect to game and start it)"))
+    else: # action == 'reject'
+        game_instance.delete()
+        return render(request, 'user/play.html', playContext(request, None, "Game rejected"))
+    # friendship = Friendship.objects.filter(Q(to_user=request.user, challenger_user) | Q(to_user=challenger_user, challenger_user=request.user)).first()
+    # if not friendship:
+    #     return render(request, 'user/friends.html', friendsContext(request, "Could not find the friendship", None))    
+    # if action == 'accept':
+    #     friendship.status = Friendship.ACCEPTED
+    #     friendship.save()
+    #     return render(request, 'user/friends.html', friendsContext(request, None, "Congratulations, you made a new friend!"))
+    # elif action == 'reject':
+    #     friendship.delete()
+    #     return render(request, 'user/friends.html', friendsContext(request, None, "Friendship REJECTED!"))
+    # elif action == 'delete':
+    #     friendship.delete()
+    #     return render(request, 'user/friends.html', friendsContext(request, None, "Friendship DELETED!"))
+
+
 def playPOST(request):
+    if request.content_type == 'application/json':
+        data = json.loads(request.body)
+        if data.get('request_type') == 'gameResponse':
+            return gameResponse(request, data)
+        else:
+            return render(request, 'user/friends.html', friendsContext(request, ve, "Unknown content type"))
+
     current_user = request.user
     sent_form = GameRequestForm(request.POST)
     try:
@@ -445,11 +482,16 @@ def playPOST(request):
         return render(request, 'user/play.html', playContext(request, "No single player mode...", None))
 
     # request already sent?
-    all_pending_games = GameInstance.object.filter(Q(p1=current_user) | Q(p2=current_user), status='Pending')
+    all_pending_games = GameInstance.objects.filter(Q(p1=current_user) | Q(p2=current_user), status='Pending')
     prior_request = all_pending_games.filter(Q(p1=challenged_user) | Q(p2=challenged_user)).first()
     if prior_request is not None:
         return render(request, 'user/play.html', playContext(request, "You have already sent a game request to this user", None)) 
 
-    new_game_instance = GameInstance(p1=current_user, p2=challenged_user, game=game_type)
+    new_game_instance = GameInstance(p1=current_user, p2=challenged_user, game=sent_form.cleaned_data['game_type'], status='Pending')
     new_game_instance.save()
+    logger.debug('new gameInstance created at %s', new_game_instance.created_at)
+    logger.debug('new gameInstance modified at %s', new_game_instance.updated_at)
+    logger.debug('game mode: %s', new_game_instance.game)
+    logger.debug('p1: ' + new_game_instance.p1.username + ' p2: ' + new_game_instance.p2.username)
+    return render(request, 'user/play.html', playContext(request, None, "Game invite sent! Should we be redirected to game here?")) 
     
