@@ -29,14 +29,10 @@ class Square:
 
 class Game:
 	def __init__(self):
-		#main: int = 0
-		#canvas: int = 0
-		#rectangle_width: int = 50
-		#rectangle_height: int = 50
 		screen_width: int = 1920 # x width
 		screen_height: int = 1080 # y height
-		width: int = 36
-		height: int = 19
+		width: int = 36 # x squares
+		height: int = 19 # y squares
 		squares = [Square(random.choice([1, 2, 3, 4]), 0) for i in range(all.width * all.height)]
 		which_player_starts: int = random.choice([0, 1])
 		which_player_turn: int = which_player_starts
@@ -213,7 +209,6 @@ def start_game(splitted_command):
 			games[number].set_game_slot(number)
 			games[number].set_game_running(1)
 			socketio.emit('message', 'OK,{}'.format(number) + str(games[number].which_player_turn()))
-			return
 
 def stop_game(splitted_command):
 	global socketio
@@ -298,6 +293,7 @@ def make_move(splitted_command):
 	for i in range(len(games[number].squares)):
 		games[number].squares[i].used = False
 	paint_with_colour(games[number].start_x, games[number].start_y, colour, games[number])
+	socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
 
 # #@app.route('/')
 # #def index():
@@ -423,18 +419,6 @@ def paint_with_colour(x, y, colour, game):
 		paint_with_colour(x, y + 1, colour, game)
 		paint_with_colour(x, y - 1, colour, game)
 
-
-
-def initialize_and_return_Game():
-	all.characters = [0] * (all.height * all.width)
-	for i in range(all.height * all.width):
-		character = ''
-		if all.squares[i].owner == 1:
-			character = '1'
-		elif all.squares[i].owner == 2:
-			character = '2'
-	return all
-
 def who_won_or_draw(all):
 	total_squares = all.width * all.height
 	half_squares = int(total_squares / 2)
@@ -462,9 +446,6 @@ def who_won_or_draw(all):
 		return
 	
 if __name__ == '__main__':
-	
-	all = initialize_and_return_all()
-
 	while(check_game_running_conditions(all.squares)):
 		pretty_print_game_board(all.squares)
 		if all.which_player_turn == 0:
