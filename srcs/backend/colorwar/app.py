@@ -31,8 +31,6 @@ class Game:
 	def __init__(self):
 		#main: int = 0
 		#canvas: int = 0
-		#rectangles: int = [0] * (Game.height * Game.width)
-		#characters: int = 0
 		#rectangle_width: int = 50
 		#rectangle_height: int = 50
 		screen_width: int = 1920 # x width
@@ -67,6 +65,11 @@ class Game:
 	def new_game_initilization(self):
 		self.clear_scores()
 		self.moves = 0
+		self.squares = [Square(random.choice([1, 2, 3, 4]), 0) for i in range(all.width * all.height)] # Create new empty game
+		self.squares[0 + (all.width * (all.height // 2))].owner = 1 # left player starting square owner to 1
+		self.squares[0 + (all.width * (all.height // 2)) + all.width - 1].owner = 2 # right starting player square owner to 2
+		self.which_player_starts: int = random.choice([0, 1])
+		self.which_player_turn: int = which_player_starts
 
 	# if (self.left_score or self.right_score) >= self.game_end_condition:
 	# 	self.game_running = 0
@@ -181,17 +184,17 @@ def set_game_settings(splitted_command):
 
 def start_game(splitted_command):
 	global socketio
-	global thread_lock
-	global thread
+	#global thread_lock
+	#global thread
 	global games_lock
 	global games
 	if len(splitted_command) != 1:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
-	with thread_lock:
-		if not thread:
-			socketio.emit('message', 'ERROR, background loop not running.')
-			return
+	#with thread_lock:
+	#	if not thread:
+	#		socketio.emit('message', 'ERROR, background loop not running.')
+	#		return
 	number = -1
 	with games_lock:
 		for index in range(4):
@@ -320,8 +323,6 @@ def handle_message(message):
 # 	socketio.run(app, host='0.0.0.0', port=8888, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
 # 	#socketio.run(app, host='0.0.0.0', port=8888, debug=True, allow_unsafe_werkzeug=True)
 
-
-
 # def pretty_print_game_board(squares):
 # 	for y in range(all.height):
 # 		for x in range(all.width):
@@ -412,29 +413,8 @@ def player_move(colour, all):
 	paint_with_colour(all.start_x, all.start_y, colour, all)
 
 def initialize_and_return_Game():
-	game = Game()
-
-
-	all.squares[0 + (all.width * (all.height // 2))].owner = 1 # left player starting square owner to 1
-	all.squares[0 + (all.width * (all.height // 2)) + all.width - 1].owner = 2 # right starting player square owner to 2
-
-	all.rectangles = [0] * (all.height * all.width)
-
-	for i in range(all.height * all.width):
-		colour = 'white'
-		if all.squares[i].colour == 2:
-			colour = 'black'
-		elif all.squares[i].colour == 3:
-			colour = 'green'
-		elif all.squares[i].colour == 4:
-			colour = 'red'
-		
 	all.characters = [0] * (all.height * all.width)
 	for i in range(all.height * all.width):
-	
-		mid_x = (x1 + x2) // 2
-		mid_y = (y1 + y2) // 2
-
 		character = ''
 		if all.squares[i].owner == 1:
 			character = '1'
@@ -497,4 +477,3 @@ if __name__ == '__main__':
 
 	#pretty_print_game_board(all.squares)
 	#who_won_or_draw(all)
-
