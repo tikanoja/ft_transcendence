@@ -420,7 +420,7 @@ def playGET(request):
         # render the game canvas with the active game
         # they should never be able to be active in more than one game
         logger.debug('the user has an active game going on')
-        return render(request, 'pong/3dgen.html', {})
+        return render(request, 'user/play.html', playContext(request, None, "ACTIVE GAME GOING ON, SHOULD RENDER THE GAME!"))
     else: #we render a menu in which they can choose game and send an invite to an opponent / reply to requests
         # if they are not currently playing, show game invite creation / pending invites
         # if they ARE currently listed as a part of a game, show the game canvas
@@ -428,32 +428,26 @@ def playGET(request):
 
 
 def gameResponse(request, data):
+    action = data.get('action')
+    if action == 'nuke':
+        GameInstance.objects.all().delete()
+        return render(request, 'user/play.html', playContext(request, None, "All GameInstances deleted"))
     challenger = data.get('from_user')
     challenger_user = CustomUser.objects.filter(username=challenger).first()
     if not challenger_user:
-        return render(request, 'user/play.html', playContext(request, "Error: could not find player", None))    
-    action = data.get('action')
+        return render(request, 'user/play.html', playContext(request, "Error: game cancelled / user deleted", None))    
     game_instance = GameInstance.objects.filter(p1=challenger_user, p2=request.user).first()
     if action == 'accept':
         game_instance.status = 'Active'
         game_instance.save()
         return render(request, 'user/play.html', playContext(request, None, "Game accepted! (this should redirect to game and start it)"))
-    else: # action == 'reject'
+    elif action == 'reject':
         game_instance.delete()
         return render(request, 'user/play.html', playContext(request, None, "Game rejected"))
-    # friendship = Friendship.objects.filter(Q(to_user=request.user, challenger_user) | Q(to_user=challenger_user, challenger_user=request.user)).first()
-    # if not friendship:
-    #     return render(request, 'user/friends.html', friendsContext(request, "Could not find the friendship", None))    
-    # if action == 'accept':
-    #     friendship.status = Friendship.ACCEPTED
-    #     friendship.save()
-    #     return render(request, 'user/friends.html', friendsContext(request, None, "Congratulations, you made a new friend!"))
-    # elif action == 'reject':
-    #     friendship.delete()
-    #     return render(request, 'user/friends.html', friendsContext(request, None, "Friendship REJECTED!"))
-    # elif action == 'delete':
-    #     friendship.delete()
-    #     return render(request, 'user/friends.html', friendsContext(request, None, "Friendship DELETED!"))
+    elif action == 'cancel':
+        game_instance = GameInstance.objects.filter(p1=request.user, p2=challenger_user).first()
+        game_instance.delete()
+        return render(request, 'user/play.html', playContext(request, None, "Game cancelled"))
 
 
 def playPOST(request):

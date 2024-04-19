@@ -35,7 +35,15 @@
 
 <div>
 <h2>Pending Invites</h2>
-<ul>
+<ul>	
+	{% for invite in invites_sent %}
+		<li>
+			Challenged {{ invite.p1.username }} to a game of {{ invite.game }} -
+			<button type="submit" id="gameRequestButton" data-from-user={{ invite.p2.username }} data-action="cancel" class="btn btn-danger">Cancel</button>
+		</li>
+	{% endfor %}
+</ul>
+<ul>	
 	{% for invite in invites_received %}
 		<li>
 			Challenger: {{ invite.p1.username }} - Game: {{ invite.game }} -
@@ -46,6 +54,10 @@
 		<li>No pending invites.</li>
 	{% endfor %}
 </ul>
+
+
+<h2>Nuke all game instances</h2>
+<button type="submit" id="gameRequestButton" data-from-user="nuke" data-action="nuke" class="btn btn-danger">Let's go</button>
 
 </div>
 {% endblock %}
