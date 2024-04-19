@@ -49,6 +49,9 @@ class Game:
 		right_score: int = 0
 		moves: int = 0
 
+	def which_player_turn(self):
+		return self.which_player_turn
+
 	def is_game_running(self):
 		return self.game_running
 
@@ -209,7 +212,7 @@ def start_game(splitted_command):
 			games[number].new_game_initilization()
 			games[number].set_game_slot(number)
 			games[number].set_game_running(1)
-			socketio.emit('message', 'OK,{}'.format(number))
+			socketio.emit('message', 'OK,{}'.format(number) + str(games[number].which_player_turn()))
 			return
 
 def stop_game(splitted_command):
