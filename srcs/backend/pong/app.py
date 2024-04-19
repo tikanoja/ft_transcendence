@@ -370,6 +370,7 @@ def game_loop():
 	# it needs to be started before setting up games
 	# yes it needs to be running even when games are not running
 	# so it will be ready when game start
+	print("starting game loop")
 	global background_thread_running
 	global games_lock
 	global games
@@ -428,6 +429,7 @@ def start_game(splitted_command):
 	global thread
 	global games_lock
 	global games
+	print(splitted_command)
 	if len(splitted_command) != 1:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
@@ -449,7 +451,7 @@ def start_game(splitted_command):
 			games[number].set_game_running(1)
 			games[number].new_game_initilization()
 			games[number].set_game_slot(number)
-			socketio.emit('message', 'OK, game running {}.'.format(number))
+			socketio.emit('start_game', 'OK,{}'.format(number))
 			return
 
 def stop_game(splitted_command):
@@ -571,7 +573,6 @@ def left_paddle_up_release(splitted_command):
 			return
 		else:
 			games[number].left_paddle_released_up()
-			# socketio.emit('message', 'OK, left paddle released up.')
 			return
 
 def right_paddle_up(splitted_command):
@@ -590,7 +591,6 @@ def right_paddle_up(splitted_command):
 			return
 		else:
 			games[number].right_paddle_pressed_up()
-			# socketio.emit('message', 'OK, right paddle pressed up.')
 			return
 
 def right_paddle_down(splitted_command):
@@ -609,7 +609,7 @@ def right_paddle_down(splitted_command):
 			return
 		else:
 			games[number].right_paddle_pressed_down()
-			# socketio.emit('message', 'OK, right paddle pressed down.')
+			socketio.emit('message', 'OK, right paddle pressed down.')
 			return
 
 def right_paddle_down_release(splitted_command):
@@ -628,7 +628,7 @@ def right_paddle_down_release(splitted_command):
 			return
 		else:
 			games[number].right_paddle_released_down()
-			# socketio.emit('message', 'OK, right paddle released down.')
+			socketio.emit('message', 'OK, right paddle released down.')
 			return
 
 def right_paddle_up_release(splitted_command):
@@ -646,28 +646,22 @@ def right_paddle_up_release(splitted_command):
 			socketio.emit('message', 'ERROR, game not running so no keypresses.')
 			return
 		else:
+			socketio.emit('message', 'OK, right paddle released up.')
 			games[number].right_paddle_released_up()
-			# socketio.emit('message', 'OK, right paddle released up.')
 			return
-
-#@app.route('/')
-#def index():
-#    return render_template('index.html')
 
 @socketio.on('connect')
 def handle_connect():
-	#print('Client connected')
 	global socketio
-	socketio.emit('message', 'hello client')
+	socketio.emit('message', 'client connected')
 
 @socketio.on('disconnect')
 def handle_disconnect():
-	#print('Client disconnected')
 	pass
 
 @socketio.on('message')
 def handle_message(message):
-	#print('Message:', message)
+	print('Message:', message)
 	global socketio
 	# socketio.emit('message', 'Server received your message: ' + message)
 	splitted_command = message.split(",")
@@ -675,7 +669,7 @@ def handle_message(message):
 		match splitted_command[0]:
 			case 'set_game_settings':
 				set_game_settings(splitted_command)
-			case 'start_game':
+			case 'get_game':
 				start_game(splitted_command)
 			case 'stop_game':
 				stop_game(splitted_command)

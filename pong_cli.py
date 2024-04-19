@@ -45,7 +45,6 @@ def print_help():
     help_message = header + "\n\n" + usage + available_commands + options
     print(help_message)
 
-# Define event handlers
 def on_connect():
     print('Connected to server')
 
@@ -67,7 +66,6 @@ game_over = False
 def watch_game(game_number):
     global game_over
     sio.on('state_cli', lambda data: print_state(data))
-	sio.on('game_over', game_over=True) #this may not work
     print(colors.HEADER + colors.BOLD + "Watching game: " + game_number + colors.ENDC)
     while True:
         if sys.stdin in select.select([sys.stdin], [], [], 0)[0] or game_over == True:
@@ -92,10 +90,6 @@ def print_state(data):
     print(colors.HEADER + colors.BOLD + "Longest Rally:   " + colors.ENDC)
     print(valuesArray[10])
 
-def get_score(game_number):
-	sio.on('state_cli', lambda data: print_state(data))
-	sio.emit('message', 'get_state_cli' + game_number)
-
 
 def on_disconnect():
     print('Disconnected from server')
@@ -109,10 +103,12 @@ def on_disconnect():
 
 def run_command(argv):
     if argv[1] == "games_running":
-        sio.emit('message', argv[1])
-	if argv[1] == "get_score":
-		game_number = input("Enter a game number: ")
-		get_score(game_number)
+        sio .emit('message', 'games_running')
+        sio.wait()
+        sio.on('games_running_response', on_games_running_response)
+    elif argv[1] == "watch_game":
+        game_number = input("Enter a game number: ")
+        watch_game(game_number)
     elif argv[1] == "sabotage-1 L":
         sio.emit('message', "left_paddle_up,0")
         time.sleep(0.2)
@@ -121,7 +117,7 @@ def run_command(argv):
         sio.emit('message', "left_paddle_down,0")
         time.sleep(0.2)
         sio.emit('message', "left_paddle_release,0")
-	elif argv[1] == "sabotage-1 R":
+    elif argv[1] == "sabotage-1 R":
         sio.emit('message', "right_paddle_up,0")
         time.sleep(0.2)
         sio.emit('message', "right_paddle_up_release,0")
@@ -149,9 +145,7 @@ if __name__ == "__main__":
     server_url = 'wss://localhost:8888'  # Your server URL
     sio.connect(server_url)
 
-    # Register event handlers
     sio.on('connect', on_connect)
-    # sio.on('message', on_message)
     sio.on('games_running_response', on_games_running_response)
     sio.on('disconnect', on_disconnect)
 
