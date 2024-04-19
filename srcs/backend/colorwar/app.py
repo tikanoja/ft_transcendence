@@ -261,8 +261,6 @@ def get_state(splitted_command):
 			socketio.emit('state', games[number].return_game_state())
 			return
 
-
-
 def	games_running(splitted_command):
 	global games
 	global games_lock
@@ -274,8 +272,32 @@ def	games_running(splitted_command):
 		for index in range(4):
 			if games[index].is_game_running() == 1:
 				games_running[index] = '1'
-	socketio.emit('message', 'OK, {}'.format(str(','.join(games_running))))
+	socketio.emit('message', 'OK,{}'.format(str(','.join(games_running))))
 	return
+
+def make_move(splitted_command):
+	global games
+	global games_lock
+	if len(splitted_command) != 3:
+		socketio.emit('message', 'ERROR, string not in right format.')
+		return
+	number = int(splitted_command[1])
+	if number < 0 or number > 3:
+		socketio.emit('message', 'ERROR, allowed game numbers are 0 to 3.')
+		return
+	colour = int(splitted_command[2])
+	if colour < 1 or colour > 4:
+		socketio.emit('message', 'ERROR, allowed game colours are 1 to 4.')
+		return
+	if games[number].which_player_turn() == 0:
+		games[number].start_x = 0
+		#original_colour = squares[0 + (width * (height // 2))].colour
+	else:
+		games[number].start_x = all.width - 1
+		#original_colour = squares[0 + (width * (height // 2)) + width - 1].colour
+	for i in range(len(games[number].squares)):
+		games[number].squares[i].used = False
+	paint_with_colour(games[number].start_x, games[number].start_y, colour, games[number])
 
 # #@app.route('/')
 # #def index():
@@ -313,6 +335,8 @@ def handle_message(message):
 				get_state(splitted_command)
 			case 'games_running':
 				games_running(splitted_command)
+			case 'make_move':
+				make_move(splitted_command)
 			case _:
 				socketio.emit('message', 'ERROR, command not recognised: ' + message)
 	else:
@@ -359,60 +383,47 @@ def check_game_running_conditions(squares):
 			return True
 	return False
 
-def return_owner(x, y, all):
-	return all.squares[x + (y * all.width)].owner
+def return_owner(x, y, game):
+	return game.squares[x + (y * game.width)].owner
 
-def return_colour(x, y, all):
-	return  all.squares[x + (y * all.width)].colour
+def return_colour(x, y, game):
+	return  game.squares[x + (y * game.width)].colour
 
-def set_colour(x, y, colour, all):
-	all.squares[x + (y * all.width)].colour = colour
+def set_colour(x, y, colour, game):
+	all.squares[x + (y * game.width)].colour = colour
 
-def return_used(x, y, all):
-	return all.squares[x + (y * all.width)].used
+def return_used(x, y, game):
+	return game.squares[x + (y * game.width)].used
 
-def set_used(x, y, all):
-	all.squares[x + (y * all.width)].used = True
+def set_used(x, y, game):
+	game.squares[x + (y * game.width)].used = True
 
-def paint_with_colour(x, y, colour, all):
-	if x < 0 or x >= all.width: # out of bounds
+def paint_with_colour(x, y, colour, game):
+	if x < 0 or x >= game.width: # out of bounds
 		return
-	if y < 0 or y >= all.height: # out of bounds
+	if y < 0 or y >= game.height: # out of bounds
 		return
-	if return_used(x, y, all) == True:
+	if return_used(x, y, game) == True:
 		return
-	if return_owner(x, y, all) == all.which_player_turn + 1: # is the owner, print with new colour
-		set_colour(x, y, colour, all)
-		set_used(x, y, all)
+	if return_owner(x, y, game) == game.which_player_turn + 1: # is the owner, print with new colour
+		set_colour(x, y, colour, game)
+		set_used(x, y, game)
 		#print("owner")
 		#print(return_colour(x, y, all))
-		paint_with_colour(x + 1, y, colour, all)
-		paint_with_colour(x - 1, y, colour, all)
-		paint_with_colour(x, y + 1, colour, all)
-		paint_with_colour(x, y - 1, colour, all)
+		paint_with_colour(x + 1, y, colour, game)
+		paint_with_colour(x - 1, y, colour, game)
+		paint_with_colour(x, y + 1, colour, game)
+		paint_with_colour(x, y - 1, colour, game)
 		return
-	if return_owner(x, y, all) == 0 and return_colour(x, y, all) == colour: # no one owns and the colour matches
-		all.squares[x + (y * all.width)].owner = all.which_player_turn + 1
-		set_used(x, y, all)
-		paint_with_colour(x + 1, y, colour, all)
-		paint_with_colour(x - 1, y, colour, all)
-		paint_with_colour(x, y + 1, colour, all)
-		paint_with_colour(x, y - 1, colour, all)
- 
-def player_move(colour, all):
-	if all.which_player_turn == 0:
-		all.start_x = 0
-		#print("player 1")
-		#original_colour = squares[0 + (width * (height // 2))].colour
-	else:
-		#print("player 2")
-		all.start_x = all.width - 1
-		#original_colour = squares[0 + (width * (height // 2)) + width - 1].colour
-	for i in range(len(all.squares)):
-		all.squares[i].used = False
-	#print("x and y")
-	#print(all.start_x, all.start_y)
-	paint_with_colour(all.start_x, all.start_y, colour, all)
+	if return_owner(x, y, game) == 0 and return_colour(x, y, game) == colour: # no one owns and the colour matches
+		game.squares[x + (y * all.width)].owner = game.which_player_turn + 1
+		set_used(x, y, game)
+		paint_with_colour(x + 1, y, colour, game)
+		paint_with_colour(x - 1, y, colour, game)
+		paint_with_colour(x, y + 1, colour, game)
+		paint_with_colour(x, y - 1, colour, game)
+
+
 
 def initialize_and_return_Game():
 	all.characters = [0] * (all.height * all.width)
