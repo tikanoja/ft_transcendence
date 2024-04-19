@@ -101,6 +101,8 @@ function updateEventListeners() {
 	var playButton = document.getElementById('playButton');
     var addFriendForm = document.getElementById('addFriendForm');
     var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
+    var blockUserButton = document.getElementById('blockUserForm');
+    var unblockButtons = document.querySelectorAll('[id^="unblockButton"]');
     
     var playButton = document.getElementById('playButton');
     var deleteForm = document.getElementById('delete-account-form');
@@ -141,6 +143,9 @@ function updateEventListeners() {
             button.removeEventListener('click', friendRequestHandler);
         })
     }
+    if (blockUserButton) {
+        blockUserButton.removeEventListener('submit', blockUserHandler)
+    }
     
     if (loginForm) {
         loginForm.addEventListener('submit', loginFormHandler);
@@ -173,6 +178,9 @@ function updateEventListeners() {
     }
     if (passwordChangeForm) {
         passwordChangeForm.addEventListener('submit', manageAccountHandler);
+    }
+    if (blockUserButton) {
+        blockUserButton.addEventListener('submit', blockUserHandler);
     }
 }
 
@@ -241,6 +249,24 @@ const loginFormHandler = async (event) => {
         updateContent(html, "Login | Pong", "Login form");
 	} else {
 		console.log("Response status in loginFormHandler(): ", response.status)
+	}
+}
+
+const blockUserHandler = async (event) => {
+    console.log('In blockUserHandler()');
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const querystring = window.location.search;
+    var endpoint = '/app/block_user/' + querystring;
+    const response = await sendPostRequest(endpoint, formData);
+    if (response.redirected) {
+        let redirect_location = response.url;
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        const html = await response.text();
+        updateContent(html, "Friends | Pong", "Add friend form");
+	} else {
+		console.log("Response status in addFriendHandler(): ", response.status)
 	}
 }
 

@@ -118,11 +118,10 @@ class AddFriendForm(forms.Form):
 			raise ValidationError("Empty username")
 		
 		if not CustomUser.objects.filter(username=self.cleaned_data["username"]).exists():
-			logger.debug('trying to add a nonexisting user')
 			raise ValidationError("No such user")
-
-		
+	
 		return True
+
 
 class UpdateNameForm(forms.Form):
 	first_name = forms.CharField(label='First Name', widget=forms.TextInput(attrs={'placeholder': 'Enter given name'}), max_length=256, required=True)
