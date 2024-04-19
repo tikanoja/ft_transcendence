@@ -103,10 +103,10 @@ with games_lock:
 	games[2] = Game()
 	games[3] = Game()
 
-thread = None
-thread_lock = threading.Lock()
-with thread_lock:
-	background_thread_running = 0
+#thread = None
+#thread_lock = threading.Lock()
+#with thread_lock:
+#	background_thread_running = 0
 # def game_loop:
 # 	# yes it needs to be running even when games are not running
 # 	# so it will be ready when game start
@@ -261,8 +261,7 @@ def get_state(splitted_command):
 			socketio.emit('state', games[number].return_game_state())
 			return
 
-def is_game_running(self):
-	return self.game_running
+
 
 def	games_running(splitted_command):
 	global games
