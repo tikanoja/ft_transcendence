@@ -75,7 +75,7 @@ class Game:
 	def new_game_initilization(self):
 		self.clear_scores()
 		self.create_ball_paddles_scoreboard()
-		self.game_running = 1
+		# self.game_running = 1
 		self.w_pressed = 0
 		self.s_pressed = 0
 		self.up_pressed = 0
@@ -287,7 +287,8 @@ class Game:
 			self.winner = self.left_player_id
 			if self.right_score > self.left_score:
 				self.winner = self.right_player_id
-			socketio.emit('state', games[game].return_game_state())
+			# socketio.emit('endstate', games[game].return_game_state())
+			self.game_slot = -1
 			self.ball_bounces = 0
 
 	def is_game_running(self):
@@ -448,9 +449,9 @@ def start_game(splitted_command):
 			socketio.emit('message', 'ERROR, game already running cannot create new.')
 			return
 		else:
-			games[number].set_game_running(1)
 			games[number].new_game_initilization()
 			games[number].set_game_slot(number)
+			games[number].set_game_running(1)
 			socketio.emit('start_game', 'OK,{}'.format(number))
 			return
 
@@ -663,7 +664,7 @@ def handle_disconnect():
 def handle_message(message):
 	print('Message:', message)
 	global socketio
-	# socketio.emit('message', 'Server received your message: ' + message)
+
 	splitted_command = message.split(",")
 	if splitted_command:
 		match splitted_command[0]:
