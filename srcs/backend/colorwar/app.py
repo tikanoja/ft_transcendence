@@ -99,65 +99,6 @@ with games_lock:
 	games[2] = Game()
 	games[3] = Game()
 
-#thread = None
-#thread_lock = threading.Lock()
-#with thread_lock:
-#	background_thread_running = 0
-# def game_loop:
-# 	# yes it needs to be running even when games are not running
-# 	# so it will be ready when game start
-# 	global background_thread_running
-# 	global games_lock
-# 	global games
-# 	global socketio
-# 	while True:
-# 		if background_thread_running == 0:
-# 			return
-# 		with games_lock:
-# 			for game in range(4):
-# 				if games[game].is_game_running() == 1:
-# 					games[game].move_paddles()
-# 					games[game].move_ball()
-# 					socketio.emit('state', games[game].return_game_state())
-# 		time.sleep(0.02)
-
-# def start_background_loop(splitted_command):
-# 	global thread
-# 	global thread_lock
-# 	global socketio
-# 	global background_thread_running
-# 	if len(splitted_command) != 1:
-# 		socketio.emit('message', 'ERROR, string not in right format.')
-# 		return
-# 	with thread_lock:
-# 		if thread:
-# 			socketio.emit('message', 'ERROR, background loop already running.')
-# 			return
-# 		else:
-# 			background_thread_running = 1
-# 			thread = threading.Thread(target=game_loop)
-# 			thread.start()
-# 			socketio.emit('message', 'OK: background loop started.')
-# 			return
-
-# def stop_background_loop(splitted_command):
-# 	global thread
-# 	global thread_lock
-# 	global background_thread_running
-# 	global socketio
-# 	if len(splitted_command) != 1:
-# 		socketio.emit('message', 'ERROR, string not in right format.')
-# 		return
-# 	with thread_lock:
-# 		if background_thread_running == 0:
-# 			socketio.emit('message', 'ERROR, game loop already stopped.')
-# 			return
-# 		else:
-# 			background_thread_running = 0
-# 			thread = None
-# 			socketio.emit('message', 'OK, gameloop stopped.')
-# 			return
-
 # string format is set_game_settings,game_number(0,1,2,3),left_player_id(any string)
 # set_game_settings,0,player1,player2,127.0.0.1,80,127.0.0.1,80 
 def set_game_settings(splitted_command):
@@ -183,8 +124,6 @@ def set_game_settings(splitted_command):
 
 def start_game(splitted_command):
 	global socketio
-	#global thread_lock
-	#global thread
 	global games_lock
 	global games
 	if len(splitted_command) != 1:
@@ -286,19 +225,18 @@ def make_move(splitted_command):
 		return
 	if games[number].which_player_turn() == 0:
 		games[number].start_x = 0
-		#original_colour = squares[0 + (width * (height // 2))].colour
 	else:
 		games[number].start_x = all.width - 1
-		#original_colour = squares[0 + (width * (height // 2)) + width - 1].colour
 	for i in range(len(games[number].squares)):
 		games[number].squares[i].used = False
 	paint_with_colour(games[number].start_x, games[number].start_y, colour, games[number])
-	games[game].which_player_turn +=1
+	games[game].which_player_turn += 1
 	games[game].which_player_turn %= 2
 	if check_game_running_conditions(games[number].squares)
 		socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
 	else
 		games[game].set_game_running(0)
+		games[number].set_game_slot(-1)
 		socketio.emit('endstate', 'OK,{}'.format(games[number].return_game_state()))
 
 #while(check_game_running_conditions(all.squares)):
