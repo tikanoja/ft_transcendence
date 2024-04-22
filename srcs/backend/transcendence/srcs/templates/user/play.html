@@ -1,10 +1,63 @@
-<h2>Play</h2>
+{% extends "user/form_base.html" %}
+{% block form %}
+{% if error %}
+<p style="color: red">Error: {{error}}</p>
+{% endif %}
+{% if success %}
+<p style="color: green">Success: {{success}}</p>
+{% endif %}
+
+<h2>Quick play</h2>
+<p>[Pong]    [Color]</p>
+<p>This should match two players who are in queue to play</p>
+
+<br>
+
+<h2>Tournament</h2>
+<p>[Pong]    [Color]</p>
+<p>Join or set up a tournament</p>
+
+<br>
+
+<h2>Custom game</h2>
+<form id="gameRequestForm" >
+	{% csrf_token %}
+	{% for field in form %}
+	<div class="form-group">
+	<p style="color: red">{{ field.errors }}<p>
+	{{ field.label_tag }} {{ field }}
+	</div>
+	{% endfor %}
+	<input type="submit" value="Send request">
+</form>
+
+</br>
+
 <div>
-    <p>┌───────────────────┐</p>
-    <p>│                   │</p>
-    <p>│                 | │</p>
-    <p>│        o          │</p>
-    <p>│ |                 │</p>
-    <p>│                   │</p>
-    <p>└───────────────────┘</p>
+<h2>Pending Invites</h2>
+<ul>	
+	{% for invite in invites_sent %}
+		<li>
+			Challenged {{ invite.p1.username }} to a game of {{ invite.game }} -
+			<button type="submit" id="gameRequestButton" data-from-user={{ invite.p2.username }} data-action="cancel" class="btn btn-danger">Cancel</button>
+		</li>
+	{% endfor %}
+</ul>
+<ul>	
+	{% for invite in invites_received %}
+		<li>
+			Challenger: {{ invite.p1.username }} - Game: {{ invite.game }} -
+			<button type="submit" id="gameRequestButton" data-from-user={{ invite.p1.username }} data-action="accept" class="btn btn-primary">✓</button> or
+			<button type="submit" id="gameRequestButton" data-from-user={{ invite.p1.username }} data-action="reject" class="btn btn-danger">✗</button>
+		</li>
+	{% empty %}
+		<li>No pending invites.</li>
+	{% endfor %}
+</ul>
+
+
+<h2>Nuke all game instances</h2>
+<button type="submit" id="gameRequestButton" data-from-user="nuke" data-action="nuke" class="btn btn-danger">Let's go</button>
+
 </div>
+{% endblock %}

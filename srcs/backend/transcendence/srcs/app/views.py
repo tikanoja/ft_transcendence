@@ -10,6 +10,7 @@ from django.contrib.auth import authenticate #, login, logout
 from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm
 from . import user
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +101,7 @@ def settings(request):
 def play(request):
 	logger.debug('In play()')
 	if request.method == 'GET':
-		return render(request, 'user/play.html', {})
+		response = user.playGET(request)
 	elif request.method == 'POST':
 		response = user.playPOST(request)
 	else:
