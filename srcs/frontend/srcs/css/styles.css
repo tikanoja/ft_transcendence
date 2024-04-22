@@ -106,3 +106,14 @@ textarea {
     right: 0;
     bottom: 0;
 }
+
+.chat-log {
+    font-family: sans-serif;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.chat-message {
+    word-wrap: break-word;
+    white-space: post-wrap;
+}

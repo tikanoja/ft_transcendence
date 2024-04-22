@@ -1,17 +1,20 @@
 const socket = new WebSocket('wss://' + window.location.host + '/ws/app/');
 
-let contentField = document.getElementById("chat-content");
-let inputField = document.getElementById("chat-input");
+const log = document.getElementById("chat-log");
+const input = document.getElementById("chat-input");
 
 const submitButton = document.getElementById("chat-submit");
 
-const appendMessage = (rootElement, source, message) => {
+
+function appendMessage(rootElement, source, message) {
     if ([...message].length == 0) {return;}
 
-    const messageParagraph = document.createElement("p");
-    messageParagraph.innerHTML = "[" + source + "] " + message + "\n";
+    const element = document.createElement("div");
 
-    rootElement.append(messageParagraph);
+    element.classList.add("chat-message")
+    element.innerHTML = "[" + source + "] " + message;
+
+    rootElement.append(element);
 }
 
 socket.onerror = (error) => {
@@ -29,53 +32,74 @@ socket.onclose = (event) => {
 socket.onmessage = (event) => {
     const content = JSON.parse(event.data);
 
+    console.log(content)
+
     switch (content.type) {
-        case "chat.message":
-            appendMessage(contentField, content.source, content.message);
-            break;
-        case "chat.error":
-            appendMessage(contentField, "System", content.message);
-            break;
+        case "chat.whisper": appendMessage(log, content.sender, content.message); break;
+        case "chat.error"  : appendMessage(log, "System", content.message); break;
     }
 };
 
-inputField.onkeydown = (event) => {
-    if (document.activeElement == inputField && event.key == "Enter") {
+input.onkeydown = (event) => {
+    if (document.activeElement == input && event.key == "Enter") {
         submitButton.onclick();
     }
 };
 
 submitButton.onclick = () => {
-    if (!inputField.value || socket.readyState != WebSocket.OPEN) {
+    if (!input.value || socket.readyState != WebSocket.OPEN) {
         return;
     }
 
-    let packet = { "type" : "chat.message" };
-    if (inputField.value.startsWith("/")){
-        const regex_expression = /^\/(\w)\s+(\w+)\s+(.*)$/;
-        const parts = inputField.value.match(regex_expression);
+    let event;
 
-        if (!parts)
+    if (input.value.startsWith("/")){
+        const parts = input.value.match(/^\/(\w)\s+(\w+)\s+(.*)$/);
+
+        if (!parts) {
             return // TODO should print error..
+        }
 
-        let [_, command, argument, message] = parts;
+        const [_, command, ...args] = parts;
+
+        console.log(command, args);
 
         switch (command) {
             case "w":
-                packet["receiver"] = argument;
-                packet["message"] = message;
+            case "whisper":
+                if (args.length < 2) {
+                    appendMessage(log, "System", "Invalid command arguments")
+                    return;
+                }
+                event = {
+                    type: "chat.whisper",
+                    receiver: args[0],
+                    message: args[1]
+                };
                 break;
+
+            case "h":
+            case "help":
             default:
-                console.log("unknown chat command");
+                appendMessage(log, "System",
+                    '\n \
+                    /h(elp)                         - Display chat commands.\n \
+                    /w(hisper) [username] [message] - Send a direct message.\n'
+                )
                 return;
         };
-
     } else {
-        packet["receiver"] = "Global"; // TODO Should be current room of chat client
-        packet["message"] = inputField.value;
+        event = {
+            type : "chat.broadcast",
+            message : input.value
+        };
     }
 
-    console.log("Sending: ", packet);
-    socket.send(JSON.stringify(packet));
-    inputField.value = '';
+    try {
+        socket.send(JSON.stringify(event));
+    } catch {
+        console.log("Chat socket not open for sending");
+    }
+
+    input.value = '';
 };
