@@ -52,15 +52,14 @@ export const startScreen = async () => {
 				
 				is3DGraphics = styleCheckbox.checked;
 				socket.emit('message', 'games_running');
-                socket.on('games_running_response', (data) => {
-                    const gameStates = data.split(',').slice(1);
-                    const areAllZero = gameStates.every(state => state.trim() === '0');
-                    if (areAllZero == true)
-                        socket.emit('message', 'start_background_loop');
-                });
-				socket.emit('message', 'start_game,0'); //TODO: need to check how this will decide what number??
-				let gameNumber = 0
-				renderPongGame(is3DGraphics, gameNumber);
+				
+				socket.emit('message', 'get_game');
+				socket.on('start_game', (data) => {
+					console.log(data)
+					const valuesArray = data.split(',')
+					let gameNumber = valuesArray[1]
+					renderPongGame(is3DGraphics, gameNumber);
+				});
         });
     } catch (error) {
         console.error('Error loading script:', error);
@@ -131,9 +130,9 @@ function setup2DScene(scene) {
     const p1_paddle = create2DPaddle(0x808080); // Old-school TV Pong grey
     const p2_paddle = create2DPaddle(0x808080);
 
-    // Calculate ball radius based on screen width
-    const sizeFactor = 0.5; // Adjust this value to make the ball slightly smaller while keeping the ratio
-    const ballRadiusScreen = 25 * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
+
+    const sizeFactor = 0.2;
+    const ballRadiusScreen = (25 * 2) * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
     const ball = new THREE.Mesh(new THREE.PlaneGeometry(ballRadiusScreen * 2, ballRadiusScreen * 2), new THREE.MeshStandardMaterial({ color: 0x808080 }));
     
     scene.add(p1_paddle);
@@ -162,17 +161,15 @@ function setup3DScene(scene) {
 
 function create2DPaddle(color) {
     // Adjust the dimensions of the paddle geometry based on the ratios
-    let widthRatio = 20 / 1920
-    let heightRatio = 90 / 1080
+    let widthRatio = (20 * 2) / 1920
+    let heightRatio = (90 * 2) / 1080
 	let screenWidth = window.innerWidth;
     let screenHeight = window.innerHeight;
-	
+	const sizeFactor = 0.7;
 
-    const ballRadiusScreen = 25 * (Math.min( window.innerWidth / 1920, screenHeight / 1080));
 
-    
-    let paddleWidth = screenWidth * widthRatio;
-    let paddleHeight = screenHeight * heightRatio;
+    let paddleWidth = (screenWidth * widthRatio) * sizeFactor;
+    let paddleHeight = (screenHeight * heightRatio) * sizeFactor;
 
     const geometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, 0);
     const material = new THREE.MeshStandardMaterial({ color });
@@ -187,6 +184,7 @@ function create3DPaddle(color) {
 }
 
 export const renderPongGame = (is3DGraphics, gameNumber) => {
+	console.log("GAME IS RENDERING")
     const scene = new THREE.Scene();
     let camera;
 
@@ -195,7 +193,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     renderer.setPixelRatio(pixelRatio);
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
-    let p1_paddle, p2_paddle, ball; //TODO: take into account the paddle width and height?
+    let p1_paddle, p2_paddle, ball;
     if (is3DGraphics) {
         camera = setup3DScene(scene);
     } else {
@@ -221,33 +219,46 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
 
     function updateGameState(data) {
         const valuesArray = data.split(',');
-        // let game_state_number = valuesArray[0];
-        console.log(valuesArray)
-        ball_x = parseFloat(valuesArray[1]);
-        ball_y = parseFloat(valuesArray[2]);
-        p2_paddle_x = parseFloat(valuesArray[3]);
-        p2_paddle_y = parseFloat(valuesArray[4]);
-        p1_paddle_x = parseFloat(valuesArray[5]);
-        p1_paddle_y = parseFloat(valuesArray[6]);
-        p2_score = parseInt(valuesArray[7]);
-        p1_score = parseInt(valuesArray[8]);
 
-        ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
-        ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);
-        p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[3]);
-        p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[4]);
-        p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[5]);
-        p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[6]);
-        p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
-        p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
-        ball.position.set(ball_x,  ball_y, 0);
+		if (valuesArray[0] == gameNumber){
+			console.log(valuesArray[9])
+				ball_x = parseFloat(valuesArray[1]);
+				ball_y = parseFloat(valuesArray[2]);
+				p2_paddle_x = parseFloat(valuesArray[3]);
+				p2_paddle_y = parseFloat(valuesArray[4]);
+				p1_paddle_x = parseFloat(valuesArray[5]);
+				p1_paddle_y = parseFloat(valuesArray[6]);
+				p2_score = parseInt(valuesArray[7]);
+				p1_score = parseInt(valuesArray[8]);
 
-        updateScoreboard(p1_score, p2_score);
-    }
+				ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
+				ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);
+				p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[3]);
+				p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[4]);
+				p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[5]);
+				p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[6]);
+				p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
+				p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
+				ball.position.set(ball_x,  ball_y, 0);
+				updateScoreboard(p1_score, p2_score);
+			}
+		}
 
     socket.on('state', (data) => {
         updateGameState(data)
+    });
 
+	function exit_game(data)
+	{
+		
+		console.log("GAME OVER")
+		stopAnimation()
+		//flash gameover, score etc to screen
+
+	}
+
+	socket.on('game_over', (data) => {
+        exit_game(data)
     });
 
     function animate() {
@@ -258,19 +269,31 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
             stopAnimation();
         }
     }
+
     //THESE ARE INVERTED DUE TO COORD DIFFERENCE
 	document.addEventListener('keydown', (event) => {
 		event.preventDefault();
 		if (event.key == 'ArrowUp')
+		{
 			socket.emit('message', 'right_paddle_down,' + gameNumber);
+		}
         if (event.key  == 'ArrowDown')
+		{
 			socket.emit('message', 'right_paddle_up,' + gameNumber);
+		}
         if (event.key  == 'w')
+		{
 			socket.emit('message', 'left_paddle_down,' + gameNumber);
+		}
         if (event.key  == 's')
+		{
 			socket.emit('message', 'left_paddle_up,' + gameNumber);
-		if (event.key == 'c')
+		}
+			if (event.key == 'c')
+		{
+			socket.emit('message', 'stop_game,' + gameNumber);
 			render = false;
+		}
     });
 
     document.addEventListener('keyup', (event) => {
@@ -289,26 +312,21 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     let animationId;
 
     function startAnimation() {
+		console.log("in start animation")
+		socket.on('message', (data) => {
+			console.log('start animation', data);
+		});
+		socket.on('state	', (data) => {
+			console.log('start animation', data);
+		});
         animationId = requestAnimationFrame(animate);
         animate();}
 
 		function stopAnimation() {
 		socket.emit('message', 'stop_game,' + gameNumber);
-        socket.emit('message', 'games_running');
-        socket.on('games_running_response', (data) => {
-            const gameStates = data.split(',').slice(1);
-            const areAllZero = gameStates.every(state => state.trim() === '0');
-            console.log('Games still running?', data);
-            
-            if (areAllZero == true)
-            console.log('stopping loop');
-                socket.emit('message', 'stop_background_loop');
-            
-                socket.on('disconnect', () => {
-                console.log('Disconnected from server');
-            });
-        });
-
+		socket.on('disconnect', () => {
+			console.log('Disconnected from server');
+		});
         cancelAnimationFrame(animationId);
         render = true
     }

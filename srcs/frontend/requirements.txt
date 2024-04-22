@@ -2,3 +2,4 @@ websockets
 eventlet
 requests
 python-socketio==5.0.4
+socketio
