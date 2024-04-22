@@ -70,13 +70,6 @@ class Game:
 		self.which_player_starts: int = random.choice([0, 1])
 		self.which_player_turn: int = which_player_starts
 
-	# if (self.left_score or self.right_score) >= self.game_end_condition:
-	# 	self.game_running = 0
-	# 	self.ball_bounces = 0
-	# 	self.winner = "left player"
-	# 	if self.right_score > self.left_score:
-	# 		self.winner = "right player"
-
 	def return_game_state(self):
 		# self.screen_width: int = 1920 # x
 		# self.screen_height: int = 1080 # y
