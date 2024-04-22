@@ -148,10 +148,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#std-setting-MEDIA_ROOT:~:text=BrokenLinkEmailsMiddleware%20is%20enabled.-,MEDIA_ROOT,-%C2%B6
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
-# MEDIA_ROOT = '/transcendence/media'
+MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'media_files')
 
 # URL that handles the media served from
-# MEDIA_URL = 'https://localhost/media/'
+MEDIA_URL = '/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
