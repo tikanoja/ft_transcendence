@@ -38,7 +38,7 @@
 		<li>
 			{{ invite.from_user.username }} - 
 			<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="accept" class="btn btn-primary">Accept</button> or
-			<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="reject" class="btn btn-primary">Reject</button>
+			<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="reject" class="btn btn-danger">Reject</button>
 		</li>
 	{% empty %}
 		<li>No pending invites.</li>
@@ -52,7 +52,7 @@
 	{% for blocked in blocked_users %}
 		<li>
 			{{ blocked.username }} - 
-			<button type="submit" id="friendRequestButton" data-from-user={{ blocked.username }} data-action="unblock" class="btn btn-primary">Unblock</button>
+			<button type="submit" id="friendRequestButton" data-from-user={{ blocked.username }} data-action="unblock" class="btn btn-outline-danger">Unblock</button>
 		</li>
 	{% empty %}
 		<li>No blocked users.</li>
@@ -76,7 +76,7 @@
 				{% else %}
 					<span style="color:grey;">Offline</span>
 				{% endif %}
-				<button type="submit" id="friendRequestButton" data-from-user={{ friendship.from_user.username }} data-action="delete" class="btn btn-primary">Delete</button>
+				<button type="submit" id="friendRequestButton" data-from-user={{ friendship.from_user.username }} data-action="delete" class="btn btn-danger">Delete</button>
 			</li>
 		{% else %}
 			<li>
@@ -86,7 +86,7 @@
 				{% else %}
 					<span style="color:grey;">Offline</span>
 				{% endif %} 
-				<button type="submit" id="friendRequestButton" data-from-user={{ friendship.to_user.username }} data-action="delete" class="btn btn-primary">Delete</button>
+				<button type="submit" id="friendRequestButton" data-from-user={{ friendship.to_user.username }} data-action="delete" class="btn btn-danger">Delete</button>
 			</li>
 		{% endif %}
 	{% empty %}
