@@ -257,10 +257,6 @@ def handle_message(message):
 	splitted_command = message.split(",")
 	if splitted_command:
 		match splitted_command[0]:
-			#case 'start_background_loop':
-			#	start_background_loop(splitted_command)
-			#case 'stop_background_loop':
-			#	stop_background_loop(splitted_command)
 			case 'set_game_settings':
 				set_game_settings(splitted_command)
 			case 'start_game':
