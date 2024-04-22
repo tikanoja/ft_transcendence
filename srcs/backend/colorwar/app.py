@@ -293,7 +293,16 @@ def make_move(splitted_command):
 	for i in range(len(games[number].squares)):
 		games[number].squares[i].used = False
 	paint_with_colour(games[number].start_x, games[number].start_y, colour, games[number])
-	socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
+	games[game].which_player_turn +=1
+	games[game].which_player_turn %= 2
+	if check_game_running_conditions(games[number].squares)
+		socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
+	else
+		games[game].set_game_running(0)
+		socketio.emit('endstate', 'OK,{}'.format(games[number].return_game_state()))
+
+#while(check_game_running_conditions(all.squares)):
+#		pretty_print_game_board(all.squares)
 
 # #@app.route('/')
 # #def index():
@@ -446,28 +455,7 @@ def who_won_or_draw(all):
 		return
 	
 if __name__ == '__main__':
-	while(check_game_running_conditions(all.squares)):
-		pretty_print_game_board(all.squares)
-		if all.which_player_turn == 0:
-			try:
-				num_input = int(input_text)
-			except:
-				num_input = -1
-		else:
-			try:
-				num_input = int(input_text)
-			except:
-				num_input = -1
-
-		if num_input not in all.allowed_colours:
-			continue
-		else:
-			if all.which_player_turn == 0:
-				player_move(num_input, all)
-			else:
-				player_move(num_input, all)
-		all.which_player_turn +=1
-		all.which_player_turn %= 2
+	
 
 	#pretty_print_game_board(all.squares)
 	#who_won_or_draw(all)
