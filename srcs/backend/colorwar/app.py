@@ -355,7 +355,7 @@ def paint_with_colour(x, y, colour, game):
 		paint_with_colour(x, y + 1, colour, game)
 		paint_with_colour(x, y - 1, colour, game)
 
-def who_won_or_draw(all):
+def who_won_or_draw(game):
 	total_squares = all.width * all.height
 	half_squares = int(total_squares / 2)
 
@@ -365,8 +365,7 @@ def who_won_or_draw(all):
 		if i.owner == 1:
 			total_player_squares1 += 1
 	if total_player_squares1 > half_squares:
-		print("Player 1 wins")
-		return
+		return 1 # player 1
 
 	# player 2 squares
 	total_player_squares2 = int(0)
@@ -374,15 +373,11 @@ def who_won_or_draw(all):
 		if i.owner == 2:
 			total_player_squares2 += 1
 	if total_player_squares2 > half_squares:
-		print("Player 2 wins")
-		return
+		return 2 # player 2
 
 	if total_player_squares1 == total_player_squares2:
-		print("Draw")
-		return
+		return 0 # draw
 	
 if __name__ == '__main__':
-	
-
 	#pretty_print_game_board(all.squares)
 	#who_won_or_draw(all)
