@@ -15,6 +15,7 @@ def get_game_state(request):
     try:
         if request.method == 'POST':
             logger.debug(request.POST)
+            logger.debug(request.POST['test'])
             return JsonResponse({'message': 'Hi from Django POST!'})
         elif request.method == 'GET':
             return JsonResponse({'message': 'Hi from Django GET!'})

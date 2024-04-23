@@ -659,7 +659,7 @@ def right_paddle_up_release(splitted_command):
 @socketio.on('connect')
 def handle_connect():
     global socketio
-    send_request()
+    send_game_over_data()#
     socketio.emit('message', 'client connected')
 
 @socketio.on('disconnect')
@@ -708,7 +708,7 @@ def handle_message(message):
         socketio.emit('message', 'ERROR, nothing was sent.')
 
 
-@app.route('/send_game_over_data', methods=['POST'])
+# @app.route('/send_game_over_data', methods=['POST'])
 def send_game_over_data():
     data_to_send = {"test": "the things"} #this is where the
 
