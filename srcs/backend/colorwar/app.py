@@ -267,13 +267,6 @@ def handle_message(message):
 	else:
 		socketio.emit('message', 'ERROR, nothing was sent.')
 
-# if __name__ == '__main__':
-# 	# Use SSL/TLS encryption for WSS
-# 	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-# 	ssl_context.load_cert_chain('/server.crt', '/server.key')
-# 	socketio.run(app, host='0.0.0.0', port=8888, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
-# 	#socketio.run(app, host='0.0.0.0', port=8888, debug=True, allow_unsafe_werkzeug=True)
-
 # def pretty_print_game_board(squares):
 # 	for y in range(all.height):
 # 		for x in range(all.width):
@@ -333,8 +326,6 @@ def paint_with_colour(x, y, colour, game):
 	if return_owner(x, y, game) == game.which_player_turn + 1: # is the owner, print with new colour
 		set_colour(x, y, colour, game)
 		set_used(x, y, game)
-		#print("owner")
-		#print(return_colour(x, y, all))
 		paint_with_colour(x + 1, y, colour, game)
 		paint_with_colour(x - 1, y, colour, game)
 		paint_with_colour(x, y + 1, colour, game)
@@ -372,5 +363,8 @@ def who_won_or_draw(game):
 		return 0 # draw
 	
 if __name__ == '__main__':
-	#pretty_print_game_board(all.squares)
-	#who_won_or_draw(all)
+	# Use SSL/TLS encryption for WSS
+	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+	ssl_context.load_cert_chain('/server.crt', '/server.key')
+	socketio.run(app, host='0.0.0.0', port=8889, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
+	#socketio.run(app, host='0.0.0.0', port=8889, debug=True, allow_unsafe_werkzeug=True)
