@@ -9,21 +9,23 @@ from django.views.decorators.csrf import csrf_exempt
 logger = logging.getLogger(__name__)
 
 
-# api.add_resource(GetState, '/game_state/<int:number>')
 @csrf_exempt
 def get_game_state(request):
+    logger.debug("in get_game_state")
     try:
-        response = requests.get('http://pong:8080/game_state/0')
-        print(response.text)
-        return Response(response.json())
+        if request.method == 'POST':
+            logger.debug(request.POST)
+            return JsonResponse({'message': 'Hi from Django POST!'})
+        elif request.method == 'GET':
+            return JsonResponse({'message': 'Hi from Django GET!'})
     except Exception as e:
         print(f"Error: {e}")
         return Response({"error": "An error occurred"}, status=500)
 
 def get_canvas(request):
-	logger.debug('In get_canvas()')
-	if request.method == 'GET':
-		logger.debug('about to render!')
-		return render(request, "pong/3dgen.html", {})
-		
+    logger.debug('In get_canvas()')
+    if request.method == 'GET':
+        logger.debug('about to render!')
+        return render(request, "pong/3dgen.html", {})
+        
 
