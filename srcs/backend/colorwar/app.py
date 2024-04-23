@@ -82,11 +82,12 @@ class Game:
 		state += str(self.game_running)
 		state += ','
 		state += str(self.moves)
-		for square in range(self.width * self.height):
-			state += ','
-			state += str(self.squares[square].colour) # 1,2,3,4 # white,black,green,red
-			state += ','
-			state += str(self.squares[square].owner) # 1,2,0 # left,right,no one owns
+		for y in range(all.height):
+			for x in range(all.width):
+				state += ','
+				state += str(self.squares[x + (y * self.width)].colour) # 1,2,3,4 # white,black,green,red
+				state += ','
+				state += str(self.squares[x + (y * self.width)].owner) # 1,2,0 # left,right,no one owns
 		return state
 
 games_lock = threading.Lock()
@@ -268,15 +269,7 @@ def handle_message(message):
 	else:
 		socketio.emit('message', 'ERROR, nothing was sent.')
 
-# def pretty_print_game_board(squares):
-# 	for y in range(all.height):
-# 		for x in range(all.width):
-# 			print('(', end='')
-# 			print(squares[x + (y * all.width)].colour, end='')
-# 			print(',', end='')
-# 			print(squares[x + (y * all.width)].owner, end='')
-# 			print(')', end='')
-# 		print('')
+
 
 def check_game_running_conditions(squares):
 	total_squares = all.width * all.height
