@@ -127,10 +127,6 @@ def start_game(splitted_command):
 	if len(splitted_command) != 1:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
-	#with thread_lock:
-	#	if not thread:
-	#		socketio.emit('message', 'ERROR, background loop not running.')
-	#		return
 	number = -1
 	with games_lock:
 		for index in range(4):
