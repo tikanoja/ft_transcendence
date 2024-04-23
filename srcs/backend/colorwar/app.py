@@ -232,13 +232,6 @@ def make_move(splitted_command):
 		games[number].set_game_slot(-1)
 		socketio.emit('endstate', 'OK,{}'.format(games[number].return_game_state()))
 
-#while(check_game_running_conditions(all.squares)):
-#		pretty_print_game_board(all.squares)
-
-# #@app.route('/')
-# #def index():
-# #    return render_template('index.html')
-
 @socketio.on('connect')
 def handle_connect():
 	#print('Client connected')
