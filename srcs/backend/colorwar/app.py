@@ -82,6 +82,11 @@ class Game:
 		state += str(self.game_running)
 		state += ','
 		state += str(self.moves)
+		for square in range(self.width * self.height):
+			state += ','
+			state += str(self.squares[square].colour) # 1,2,3,4 # white,black,green,red
+			state += ','
+			state += str(self.squares[square].owner) # 1,2,0 # left,right,no one owns
 		return state
 
 games_lock = threading.Lock()
