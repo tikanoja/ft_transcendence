@@ -70,6 +70,9 @@ class Game:
 		self.which_player_starts: int = random.choice([0, 1])
 		self.which_player_turn: int = which_player_starts
 
+	#def compute_scores(self):
+
+
 	def return_game_state(self):
 		# self.screen_width: int = 1920 # x
 		# self.screen_height: int = 1080 # y
@@ -225,8 +228,8 @@ def make_move(splitted_command):
 	for i in range(len(games[number].squares)):
 		games[number].squares[i].used = False
 	paint_with_colour(games[number].start_x, games[number].start_y, colour, games[number])
-	games[game].which_player_turn += 1
-	games[game].which_player_turn %= 2
+	games[number].which_player_turn += 1
+	games[number].which_player_turn %= 2
 	if check_game_running_conditions(games[number].squares)
 		socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
 	else
@@ -268,8 +271,6 @@ def handle_message(message):
 				socketio.emit('message', 'ERROR, command not recognised: ' + message)
 	else:
 		socketio.emit('message', 'ERROR, nothing was sent.')
-
-
 
 def check_game_running_conditions(squares):
 	total_squares = all.width * all.height
@@ -336,23 +337,21 @@ def paint_with_colour(x, y, colour, game):
 def who_won_or_draw(game):
 	total_squares = all.width * all.height
 	half_squares = int(total_squares / 2)
-
 	# player 1 squares
 	total_player_squares1 = int(0)
-	for i in all.squares:
+	for i in game.squares:
 		if i.owner == 1:
 			total_player_squares1 += 1
 	if total_player_squares1 > half_squares:
 		return 1 # player 1
-
 	# player 2 squares
 	total_player_squares2 = int(0)
-	for i in all.squares:
+	for i in game.squares:
 		if i.owner == 2:
 			total_player_squares2 += 1
 	if total_player_squares2 > half_squares:
 		return 2 # player 2
-
+	# Draw
 	if total_player_squares1 == total_player_squares2:
 		return 0 # draw
 	
