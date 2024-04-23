@@ -2,6 +2,7 @@ import time
 import threading
 import ssl
 import random
+import requests
 from typing import Optional
 from dataclasses import dataclass
 from flask import Flask #, render_template
@@ -702,12 +703,33 @@ def handle_message(message):
 		socketio.emit('message', 'ERROR, nothing was sent.')
 
 if __name__ == '__main__':
-	# Use SSL/TLS encryption for WSS
-	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-	ssl_context.load_cert_chain('/server.crt', '/server.key')
-	with thread_lock:
-		background_thread_running = 1
-		thread = threading.Thread(target=game_loop)
-		thread.start()
-	socketio.run(app, host='0.0.0.0', port=8888, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
-	#socketio.run(app, host='0.0.0.0', port=8888, debug=True, allow_unsafe_werkzeug=True)
+
+    # send_game_data(Resource)
+    client = requests.session()
+    client.get('http://transcendence:8000/app/login/')
+    if 'csrftoken' in client.cookies:
+        # Django 1.6 and up
+        csrftoken = client.cookies['csrftoken']
+    else:
+        # older versions
+        csrftoken = client.cookies['csrf']
+
+    print('CLIENT:  ', client)
+    print('TOKEN:   ', csrftoken)
+
+    toSend = {'message': 'this is from pong_c'}
+    # data = {'csrfmiddlewaretoken': csrftoken}
+    headers = {
+    'X-CSRFToken': csrftoken,
+    'Content-Type': 'application/json'
+    # 'Referer': 'http://your-django-server.com/', # The URL of the page that set the CSRF token
+    }
+    res = client.post('http://transcendence:8000/pong/send_game_data/', json=toSend, headers=headers)
+
+    # Use SSL/TLS encryption for WSS
+    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    ssl_context.load_cert_chain('/server.crt', '/server.key')
+    print('response from server:' + res.text)
+    
+    socketio.run(app, host='0.0.0.0', port=8888, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
+    #socketio.run(app, host='0.0.0.0', port=8888, debug=True, allow_unsafe_werkzeug=True)
