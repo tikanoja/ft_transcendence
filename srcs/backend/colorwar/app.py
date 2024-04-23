@@ -70,6 +70,9 @@ class Game:
 		self.which_player_starts: int = random.choice([0, 1])
 		self.which_player_turn: int = which_player_starts
 
+	#def compute_scores(self):
+
+
 	def return_game_state(self):
 		# self.screen_width: int = 1920 # x
 		# self.screen_height: int = 1080 # y
@@ -82,6 +85,12 @@ class Game:
 		state += str(self.game_running)
 		state += ','
 		state += str(self.moves)
+		for y in range(all.height):
+			for x in range(all.width):
+				state += ','
+				state += str(self.squares[x + (y * self.width)].colour) # 1,2,3,4 # white,black,green,red
+				state += ','
+				state += str(self.squares[x + (y * self.width)].owner) # 1,2,0 # left,right,no one owns
 		return state
 
 games_lock = threading.Lock()
@@ -122,10 +131,6 @@ def start_game(splitted_command):
 	if len(splitted_command) != 1:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
-	#with thread_lock:
-	#	if not thread:
-	#		socketio.emit('message', 'ERROR, background loop not running.')
-	#		return
 	number = -1
 	with games_lock:
 		for index in range(4):
@@ -223,21 +228,14 @@ def make_move(splitted_command):
 	for i in range(len(games[number].squares)):
 		games[number].squares[i].used = False
 	paint_with_colour(games[number].start_x, games[number].start_y, colour, games[number])
-	games[game].which_player_turn += 1
-	games[game].which_player_turn %= 2
+	games[number].which_player_turn += 1
+	games[number].which_player_turn %= 2
 	if check_game_running_conditions(games[number].squares)
 		socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
 	else
 		games[game].set_game_running(0)
 		games[number].set_game_slot(-1)
 		socketio.emit('endstate', 'OK,{}'.format(games[number].return_game_state()))
-
-#while(check_game_running_conditions(all.squares)):
-#		pretty_print_game_board(all.squares)
-
-# #@app.route('/')
-# #def index():
-# #    return render_template('index.html')
 
 @socketio.on('connect')
 def handle_connect():
@@ -273,23 +271,6 @@ def handle_message(message):
 				socketio.emit('message', 'ERROR, command not recognised: ' + message)
 	else:
 		socketio.emit('message', 'ERROR, nothing was sent.')
-
-# if __name__ == '__main__':
-# 	# Use SSL/TLS encryption for WSS
-# 	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-# 	ssl_context.load_cert_chain('/server.crt', '/server.key')
-# 	socketio.run(app, host='0.0.0.0', port=8888, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
-# 	#socketio.run(app, host='0.0.0.0', port=8888, debug=True, allow_unsafe_werkzeug=True)
-
-# def pretty_print_game_board(squares):
-# 	for y in range(all.height):
-# 		for x in range(all.width):
-# 			print('(', end='')
-# 			print(squares[x + (y * all.width)].colour, end='')
-# 			print(',', end='')
-# 			print(squares[x + (y * all.width)].owner, end='')
-# 			print(')', end='')
-# 		print('')
 
 def check_game_running_conditions(squares):
 	total_squares = all.width * all.height
@@ -340,8 +321,6 @@ def paint_with_colour(x, y, colour, game):
 	if return_owner(x, y, game) == game.which_player_turn + 1: # is the owner, print with new colour
 		set_colour(x, y, colour, game)
 		set_used(x, y, game)
-		#print("owner")
-		#print(return_colour(x, y, all))
 		paint_with_colour(x + 1, y, colour, game)
 		paint_with_colour(x - 1, y, colour, game)
 		paint_with_colour(x, y + 1, colour, game)
@@ -358,26 +337,27 @@ def paint_with_colour(x, y, colour, game):
 def who_won_or_draw(game):
 	total_squares = all.width * all.height
 	half_squares = int(total_squares / 2)
-
 	# player 1 squares
 	total_player_squares1 = int(0)
-	for i in all.squares:
+	for i in game.squares:
 		if i.owner == 1:
 			total_player_squares1 += 1
 	if total_player_squares1 > half_squares:
 		return 1 # player 1
-
 	# player 2 squares
 	total_player_squares2 = int(0)
-	for i in all.squares:
+	for i in game.squares:
 		if i.owner == 2:
 			total_player_squares2 += 1
 	if total_player_squares2 > half_squares:
 		return 2 # player 2
-
+	# Draw
 	if total_player_squares1 == total_player_squares2:
 		return 0 # draw
 	
 if __name__ == '__main__':
-	#pretty_print_game_board(all.squares)
-	#who_won_or_draw(all)
+	# Use SSL/TLS encryption for WSS
+	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+	ssl_context.load_cert_chain('/server.crt', '/server.key')
+	socketio.run(app, host='0.0.0.0', port=8889, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
+	#socketio.run(app, host='0.0.0.0', port=8889, debug=True, allow_unsafe_werkzeug=True)
