@@ -59,6 +59,7 @@ class UserConsumer(AsyncWebsocketConsumer):
 
                 if not event["receiver"] in self.channel_layer.groups:
                     await self.error_response("No such user")
+                    return
 
                 event["sender"] = self.scope["user"].username
 

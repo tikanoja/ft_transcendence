@@ -109,7 +109,8 @@ textarea {
 
 .chat-log {
     font-family: sans-serif;
-    min-height: 12px;
+    font-size: 14px;
+    min-height: 32px;
     max-height: 256px;
     overflow-x: hidden;
     overflow-y: auto;
