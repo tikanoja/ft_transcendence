@@ -1,4 +1,4 @@
-from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm, AddFriendForm
+from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm, AddFriendForm, UploadProfilePictureForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
 from .models import CustomUser, CustomUserManager, GameInstance, Friendship
@@ -190,6 +190,18 @@ def manage_accountPOST(request):
             context["email_form"] = form 
     elif "delete-account-form" == request.POST['form_id']:
         return delete_accountPOST(request, context)
+    elif "profile_picture_upload" == request.POST['form_id']:
+        form = UploadProfilePictureForm(request.POST)
+        try:
+            if not form.is_valid():
+                raise ValidationError("Form filled incorrectly")
+            picture = form.save(commit=False)
+            picture.owner = request.user
+            picture.save()
+            context['profile_picture_upload_message'] = 'new image uploaded!'
+        except Exception as e:
+            context["error"] = e
+            context["email_form"] = form 
     else:
         context["error"] = 'Invalid form submitted'
     context["details"] = get_profile_details(request.user.username, True)
@@ -198,20 +210,6 @@ def manage_accountPOST(request):
 
 # hardcode a dict of friends for now
 # does self matter for this one?
-def get_friends_dict(username:str) -> dict:
-    user = CustomUser.objects.filter(username=username)
-    # will get friends list from the user
-    friends = [
-        {
-            "username": "hen",
-            "picture_link": "picture_link"
-        },
-        {
-            "username": "ben",
-            "picture_link": "picture_link"
-        }
-    ]
-    return friends
 
 
 def get_game_result(self_score: int, opponent_score: int) -> str:

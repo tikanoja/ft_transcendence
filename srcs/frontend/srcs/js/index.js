@@ -107,8 +107,11 @@ function updateEventListeners() {
     var nameChangeForm = document.getElementById('name-change-form');
     var emailChangeForm = document.getElementById('email-change-form');
     var passwordChangeForm = document.getElementById('password-change-form');
+    let profilePictureForm = document.getElementById('profile_picture_upload');
 
     // remove listeners
+    if (profilePictureForm)
+        profilePictureForm.removeEventListener('submit', manageAccountHandler);
     if (deleteForm) {
         deleteForm.removeEventListener('submit', manageAccountHandler);
     }
@@ -148,6 +151,8 @@ function updateEventListeners() {
         })
     }
     // begin add listeners if currently present
+    if (profilePictureForm)
+        profilePictureForm.addEventListener('submit', manageAccountHandler);
     if (loginForm) {
         loginForm.addEventListener('submit', loginFormHandler);
     }
@@ -358,6 +363,7 @@ const profileLinkHandler = async (event) => {
 		// some 400 or 500 code probably, show the error that was sent?
 	}
 }
+
 
 const start_game_loop = async () => {
     const responseData = await sendGetRequest('pong/start_background_loop').then((response) => response.text());

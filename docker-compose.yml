@@ -13,6 +13,7 @@ services:
     restart: always
     volumes:
       - ./srcs/frontend/srcs/:/var/html/www:ro
+      - ./srcs/frontend/temp_files:/var/lib/nginx/tmp/client_body:rw
     depends_on:
       - transcendence
 

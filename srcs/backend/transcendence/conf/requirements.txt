@@ -7,3 +7,4 @@ djangorestframework
 environs
 django-cors-headers
 requests
+Pillow

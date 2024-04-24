@@ -4,10 +4,10 @@ from django.http import JsonResponse
 import logging
 # from django.http import HttpResponse
 # from django.core.exceptions import ValidationError
-from .models import CustomUser
+from .models import CustomUser, ProfilePicture
 # from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate #, login, logout
-from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm
+from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm, UploadProfilePictureForm
 from . import user
 from django.contrib.auth.decorators import login_required
 
@@ -150,16 +150,21 @@ def profile(request, username):
 	if request.user.username == username:
 		self = True
 	if request.method == "GET":
-		friends = user.get_friends_dict(username)
+		# friends = user.get_friends_dict(username)
 		logger.debug(friends)
 		details = user.get_profile_details(username, self)
 		context = {}
-		context["friends"] = friends
+		# context["friends"] = friends #TODO get the friends context from Tuukka's friend stuff
 		context["details"] = details
 		context["name_form"] = UpdateNameForm()
 		context["email_form"] = UpdateEmailForm()
 		context["password_form"] = UpdatePasswordForm()
 		context["delete_account_form"] = DeleteAccountForm()
+		context["upload_image_form"] = UploadProfilePictureForm()
+		# picture = ProfilePicture.objects.get(owner=request.user).first()
+		# if picture:
+		# 	context["profile_picture"] = picture
+		context["upload_image_form"] = UploadProfilePictureForm()
 		# need to add in the game stats and history here too
 		if self:
 			return render(request, 'user/profile_self.html', context)

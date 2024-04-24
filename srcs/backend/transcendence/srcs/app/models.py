@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.db.models.functions import Now
+# from django.db.models.functions import Now
 from django.core.exceptions import ValidationError
 
 class CustomUserManager(BaseUserManager):
@@ -64,8 +64,8 @@ class Friendship(models.Model):
 	status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=PENDING)
 
 class ProfilePicture(models.Model):
-	image = models.ImageField(upload_to="profile_pictures")
-	user = models.ForeignKey("CustomUser", related_name="username", on_delete=models.CASCADE, null=False)
+	image = models.ImageField() #upload_to="profile_pictures"
+	owner = models.ForeignKey("CustomUser", related_name="owner", on_delete=models.CASCADE, null=False)
 
 """
 GameInstance {
@@ -90,19 +90,19 @@ GameInstance {
 """
 
 class GameInstance(models.Model):
-	date = models.DateField(default=Now())
+# 	# date = models.DateField(default=Now())
 	game = models.CharField(max_length=50)
-	longest_rally_time = models.IntegerField(default=0)
-	longest_rally_hits = models.IntegerField(default=0)
-	total_game_time = models.DurationField()
+# 	longest_rally_time = models.IntegerField(default=0)
+# 	longest_rally_hits = models.IntegerField(default=0)
+# 	total_game_time = models.DurationField()
 	p1_user = models.ForeignKey("CustomUser", related_name="player_one", on_delete=models.SET_NULL, null=True)
 	p2_user = models.ForeignKey("CustomUser", related_name="player_two", on_delete=models.SET_NULL, null=True)
-	p1_hits = models.IntegerField(default=0)
-	p2_hits = models.IntegerField(default=0)
-	p1_misses = models.IntegerField(default=0)
-	p2_misses = models.IntegerField(default=0)
-	p1_score = models.IntegerField(default=0)
-	p2_score = models.IntegerField(default=0)
+# 	p1_hits = models.IntegerField(default=0)
+# 	p2_hits = models.IntegerField(default=0)
+# 	p1_misses = models.IntegerField(default=0)
+# 	p2_misses = models.IntegerField(default=0)
+# 	p1_score = models.IntegerField(default=0)
+# 	p2_score = models.IntegerField(default=0)
 
 	# def __str__(self):
 
