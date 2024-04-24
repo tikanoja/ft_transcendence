@@ -113,6 +113,8 @@ def delete_accountPOST(request):
             # check if this should cascade delete the profile etc. remove from friend lists...
             Friendship.objects.filter(from_user=username).delete()
             Friendship.objects.filter(to_user=username).delete()
+            GameInstance.objects.filter(p1=username, status='Pending').delete()
+            GameInstance.objects.filter(p2=username, status='Pending').delete()
             CustomUser.objects.filter(username=username).delete()
             # delete account, return a success page with a 'link' to go to homepage
             return JsonResponse({'message': 'Your account has been deleted'})
@@ -483,9 +485,5 @@ def playPOST(request):
 
     new_game_instance = GameInstance(p1=current_user, p2=challenged_user, game=sent_form.cleaned_data['game_type'], status='Pending')
     new_game_instance.save()
-    logger.debug('new gameInstance created at %s', new_game_instance.created_at)
-    logger.debug('new gameInstance modified at %s', new_game_instance.updated_at)
-    logger.debug('game mode: %s', new_game_instance.game)
-    logger.debug('p1: ' + new_game_instance.p1.username + ' p2: ' + new_game_instance.p2.username)
     return render(request, 'user/play.html', playContext(request, None, "Game invite sent! Should we be redirected to game here?")) 
     

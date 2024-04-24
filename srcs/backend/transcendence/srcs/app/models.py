@@ -52,6 +52,7 @@ class CustomUser(AbstractBaseUser):
 
     objects = CustomUserManager()
 
+
 class Friendship(models.Model):
     PENDING = 'Pending'
     ACCEPTED = 'Accepted'
@@ -115,7 +116,6 @@ class ColorGameInstance(GameInstance):
     p1_biggest_takeover = models.IntegerField(default=0)
     p2_biggest_takeover = models.IntegerField(default=0)
     pass
-
 
 
 # user profile model
