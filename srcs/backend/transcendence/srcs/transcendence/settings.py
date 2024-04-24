@@ -25,8 +25,8 @@ SECRET_KEY = 'django-insecure-*9#ubcwnam1fwt8y$$*l3)+u-cpsh+ms)w%pglfthdiwgza*8u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'http://localhost', 'https://localhost', 'transcendence']
-CSRF_TRUSTED_ORIGINS = ['https://localhost']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'http://localhost', 'https://localhost', 'transcendence', 'pong']
+CSRF_TRUSTED_ORIGINS = ['https://localhost', 'http://pong']
 # Application definition
 INSTALLED_APPS = [
     'channels',
