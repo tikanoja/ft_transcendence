@@ -70,6 +70,14 @@ class UserConsumer(AsyncWebsocketConsumer):
 
 
     async def chat_broadcast(self, event : dict):
+        receiver : CustomUser = self.scope["user"]
+        sender_name : str = event["sender"]
+
+        if await receiver.blocked_users.filter(username=sender_name).aexists():
+            return
+
+        await self.send(text_data = json.dumps(event))
+
 
     async def chat_whisper(self, event : dict):
         receiver : CustomUser = self.scope["user"]
