@@ -70,12 +70,8 @@ class Game:
 		self.which_player_starts: int = random.choice([0, 1])
 		self.which_player_turn: int = which_player_starts
 
-	# if (self.left_score or self.right_score) >= self.game_end_condition:
-	# 	self.game_running = 0
-	# 	self.ball_bounces = 0
-	# 	self.winner = "left player"
-	# 	if self.right_score > self.left_score:
-	# 		self.winner = "right player"
+	#def compute_scores(self):
+
 
 	def return_game_state(self):
 		# self.screen_width: int = 1920 # x
@@ -89,6 +85,12 @@ class Game:
 		state += str(self.game_running)
 		state += ','
 		state += str(self.moves)
+		for y in range(all.height):
+			for x in range(all.width):
+				state += ','
+				state += str(self.squares[x + (y * self.width)].colour) # 1,2,3,4 # white,black,green,red
+				state += ','
+				state += str(self.squares[x + (y * self.width)].owner) # 1,2,0 # left,right,no one owns
 		return state
 
 games_lock = threading.Lock()
@@ -98,65 +100,6 @@ with games_lock:
 	games[1] = Game()
 	games[2] = Game()
 	games[3] = Game()
-
-#thread = None
-#thread_lock = threading.Lock()
-#with thread_lock:
-#	background_thread_running = 0
-# def game_loop:
-# 	# yes it needs to be running even when games are not running
-# 	# so it will be ready when game start
-# 	global background_thread_running
-# 	global games_lock
-# 	global games
-# 	global socketio
-# 	while True:
-# 		if background_thread_running == 0:
-# 			return
-# 		with games_lock:
-# 			for game in range(4):
-# 				if games[game].is_game_running() == 1:
-# 					games[game].move_paddles()
-# 					games[game].move_ball()
-# 					socketio.emit('state', games[game].return_game_state())
-# 		time.sleep(0.02)
-
-# def start_background_loop(splitted_command):
-# 	global thread
-# 	global thread_lock
-# 	global socketio
-# 	global background_thread_running
-# 	if len(splitted_command) != 1:
-# 		socketio.emit('message', 'ERROR, string not in right format.')
-# 		return
-# 	with thread_lock:
-# 		if thread:
-# 			socketio.emit('message', 'ERROR, background loop already running.')
-# 			return
-# 		else:
-# 			background_thread_running = 1
-# 			thread = threading.Thread(target=game_loop)
-# 			thread.start()
-# 			socketio.emit('message', 'OK: background loop started.')
-# 			return
-
-# def stop_background_loop(splitted_command):
-# 	global thread
-# 	global thread_lock
-# 	global background_thread_running
-# 	global socketio
-# 	if len(splitted_command) != 1:
-# 		socketio.emit('message', 'ERROR, string not in right format.')
-# 		return
-# 	with thread_lock:
-# 		if background_thread_running == 0:
-# 			socketio.emit('message', 'ERROR, game loop already stopped.')
-# 			return
-# 		else:
-# 			background_thread_running = 0
-# 			thread = None
-# 			socketio.emit('message', 'OK, gameloop stopped.')
-# 			return
 
 # string format is set_game_settings,game_number(0,1,2,3),left_player_id(any string)
 # set_game_settings,0,player1,player2,127.0.0.1,80,127.0.0.1,80 
@@ -183,17 +126,11 @@ def set_game_settings(splitted_command):
 
 def start_game(splitted_command):
 	global socketio
-	#global thread_lock
-	#global thread
 	global games_lock
 	global games
 	if len(splitted_command) != 1:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
-	#with thread_lock:
-	#	if not thread:
-	#		socketio.emit('message', 'ERROR, background loop not running.')
-	#		return
 	number = -1
 	with games_lock:
 		for index in range(4):
@@ -286,18 +223,19 @@ def make_move(splitted_command):
 		return
 	if games[number].which_player_turn() == 0:
 		games[number].start_x = 0
-		#original_colour = squares[0 + (width * (height // 2))].colour
 	else:
 		games[number].start_x = all.width - 1
-		#original_colour = squares[0 + (width * (height // 2)) + width - 1].colour
 	for i in range(len(games[number].squares)):
 		games[number].squares[i].used = False
 	paint_with_colour(games[number].start_x, games[number].start_y, colour, games[number])
-	socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
-
-# #@app.route('/')
-# #def index():
-# #    return render_template('index.html')
+	games[number].which_player_turn += 1
+	games[number].which_player_turn %= 2
+	if check_game_running_conditions(games[number].squares)
+		socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
+	else
+		games[game].set_game_running(0)
+		games[number].set_game_slot(-1)
+		socketio.emit('endstate', 'OK,{}'.format(games[number].return_game_state()))
 
 @socketio.on('connect')
 def handle_connect():
@@ -317,10 +255,6 @@ def handle_message(message):
 	splitted_command = message.split(",")
 	if splitted_command:
 		match splitted_command[0]:
-			#case 'start_background_loop':
-			#	start_background_loop(splitted_command)
-			#case 'stop_background_loop':
-			#	stop_background_loop(splitted_command)
 			case 'set_game_settings':
 				set_game_settings(splitted_command)
 			case 'start_game':
@@ -337,23 +271,6 @@ def handle_message(message):
 				socketio.emit('message', 'ERROR, command not recognised: ' + message)
 	else:
 		socketio.emit('message', 'ERROR, nothing was sent.')
-
-# if __name__ == '__main__':
-# 	# Use SSL/TLS encryption for WSS
-# 	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-# 	ssl_context.load_cert_chain('/server.crt', '/server.key')
-# 	socketio.run(app, host='0.0.0.0', port=8888, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
-# 	#socketio.run(app, host='0.0.0.0', port=8888, debug=True, allow_unsafe_werkzeug=True)
-
-# def pretty_print_game_board(squares):
-# 	for y in range(all.height):
-# 		for x in range(all.width):
-# 			print('(', end='')
-# 			print(squares[x + (y * all.width)].colour, end='')
-# 			print(',', end='')
-# 			print(squares[x + (y * all.width)].owner, end='')
-# 			print(')', end='')
-# 		print('')
 
 def check_game_running_conditions(squares):
 	total_squares = all.width * all.height
@@ -404,8 +321,6 @@ def paint_with_colour(x, y, colour, game):
 	if return_owner(x, y, game) == game.which_player_turn + 1: # is the owner, print with new colour
 		set_colour(x, y, colour, game)
 		set_used(x, y, game)
-		#print("owner")
-		#print(return_colour(x, y, all))
 		paint_with_colour(x + 1, y, colour, game)
 		paint_with_colour(x - 1, y, colour, game)
 		paint_with_colour(x, y + 1, colour, game)
@@ -419,55 +334,30 @@ def paint_with_colour(x, y, colour, game):
 		paint_with_colour(x, y + 1, colour, game)
 		paint_with_colour(x, y - 1, colour, game)
 
-def who_won_or_draw(all):
+def who_won_or_draw(game):
 	total_squares = all.width * all.height
 	half_squares = int(total_squares / 2)
-
 	# player 1 squares
 	total_player_squares1 = int(0)
-	for i in all.squares:
+	for i in game.squares:
 		if i.owner == 1:
 			total_player_squares1 += 1
 	if total_player_squares1 > half_squares:
-		print("Player 1 wins")
-		return
-
+		return 1 # player 1
 	# player 2 squares
 	total_player_squares2 = int(0)
-	for i in all.squares:
+	for i in game.squares:
 		if i.owner == 2:
 			total_player_squares2 += 1
 	if total_player_squares2 > half_squares:
-		print("Player 2 wins")
-		return
-
+		return 2 # player 2
+	# Draw
 	if total_player_squares1 == total_player_squares2:
-		print("Draw")
-		return
+		return 0 # draw
 	
 if __name__ == '__main__':
-	while(check_game_running_conditions(all.squares)):
-		pretty_print_game_board(all.squares)
-		if all.which_player_turn == 0:
-			try:
-				num_input = int(input_text)
-			except:
-				num_input = -1
-		else:
-			try:
-				num_input = int(input_text)
-			except:
-				num_input = -1
-
-		if num_input not in all.allowed_colours:
-			continue
-		else:
-			if all.which_player_turn == 0:
-				player_move(num_input, all)
-			else:
-				player_move(num_input, all)
-		all.which_player_turn +=1
-		all.which_player_turn %= 2
-
-	#pretty_print_game_board(all.squares)
-	#who_won_or_draw(all)
+	# Use SSL/TLS encryption for WSS
+	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+	ssl_context.load_cert_chain('/server.crt', '/server.key')
+	socketio.run(app, host='0.0.0.0', port=8889, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
+	#socketio.run(app, host='0.0.0.0', port=8889, debug=True, allow_unsafe_werkzeug=True)

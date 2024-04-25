@@ -21,5 +21,6 @@ from . import views
 
 
 urlpatterns = [
-	path('get_canvas/', views.get_canvas, name='get_canvas'),
+   	path('send_game_data/', views.get_game_state, name='send_game_data'),
+	path('get_canvas/', views.get_canvas, name='get_canvas')
 ]

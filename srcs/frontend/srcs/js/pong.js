@@ -227,7 +227,6 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
         const valuesArray = data.split(',');
 
 		if (valuesArray[0] == gameNumber){
-			console.log(valuesArray[9])
 				ball_x = parseFloat(valuesArray[1]);
 				ball_y = parseFloat(valuesArray[2]);
 				p2_paddle_x = parseFloat(valuesArray[3]);
@@ -259,7 +258,6 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
 		
 		console.log("GAME OVER")
 		stopAnimation()
-		//flash gameover, score etc to screen
 
 	}
 
@@ -275,6 +273,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
             stopAnimation();
         }
     }
+	
 
     //THESE ARE INVERTED DUE TO COORD DIFFERENCE
 	document.addEventListener('keydown', (event) => {
@@ -318,13 +317,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     let animationId;
 
     function startAnimation() {
-		console.log("in start animation")
-		socket.on('message', (data) => {
-			console.log('start animation', data);
-		});
-		socket.on('state	', (data) => {
-			console.log('start animation', data);
-		});
+
         animationId = requestAnimationFrame(animate);
         animate();}
 
