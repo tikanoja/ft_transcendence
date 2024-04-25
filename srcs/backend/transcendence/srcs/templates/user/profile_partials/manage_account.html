@@ -4,6 +4,21 @@
 	{% if error %}
 	<p class="color: red;"> {{error}} </p>
 	{% endif %}
+
+	<div id="profile-picture">
+		{% if profile_picture %}
+		<img src="{{ profile_picture.image.url }}" alt="profile picture for user {{ details.username }}"></img>
+		{% endif %}
+		{% if profile_picture_upload_message %}
+		<p>{{ profile_picture_upload_message }}</p>
+		{% else %}
+		<form id='profile_picture_upload' enctype='multipart/form-data'>
+		{{upload_image_form}}
+		<button type="submit" id="profile_image_upload_btn" class="btn btn-primary">Upload</button>
+		</form>
+		{% endif %}
+	</div>
+
 	<p>Username: {{details.username}}</h3>
 
 	<p>Name: {{details.first_name}} {{details.last_name}}</p>

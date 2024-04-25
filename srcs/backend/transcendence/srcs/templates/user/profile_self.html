@@ -2,25 +2,11 @@
 	{% comment %} <table>
 		<tr> {% endcomment %}
 
-			<div id="profile-picture">
-				{% if profile_picture %}
-				<img src="{{ profile_picture.image.url }}" alt="profile picture for user {{ details.username }}"></img>
-				{% endif %}
-				{% if profile_picture_upload_message %}
-				<p>{{ profile_picture_upload_message }}</p>
-				{% else %}
-				<form id='profile_picture_upload' enctype='multipart/form-data'>
-				{{upload_image_form}}
-				<button type="submit" id="profile_image_upload_btn" class="btn btn-primary">Upload</button>
-				</form>
-				{% endif %}
-			</div>
-
 		{% comment %} </tr>
 		<tr>
 			<td> {% endcomment %}
 			<div id="manage-account">
-				{% include './profile_partials/manage_account.html' with details=details email_form=email_form password_form=password_form name_form=name_form %}
+				{% include './profile_partials/manage_account.html' with details=details email_form=email_form password_form=password_form name_form=name_form profile_picture=profile_picture profile_picture_upload_message=profile_picture_upload_message upload_image_form=upload_image_form %}
 			</div>
 			{% comment %} </td>
 			<td> {% endcomment %}

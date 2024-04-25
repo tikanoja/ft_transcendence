@@ -148,6 +148,7 @@ def create_manage_account_context(username: str) -> dict:
     context["email_form"] = UpdateEmailForm()
     context["password_form"] = UpdatePasswordForm()
     context["delete_account_form"] = DeleteAccountForm()
+    context["upload_image_form"] = UploadProfilePictureForm()
     return context
 
 # return dictionary for context with the resulting vars that can be rendered into the profile
@@ -191,13 +192,15 @@ def manage_accountPOST(request):
     elif "delete-account-form" == request.POST['form_id']:
         return delete_accountPOST(request, context)
     elif "profile_picture_upload" == request.POST['form_id']:
-        form = UploadProfilePictureForm(request.POST)
+        form = UploadProfilePictureForm(request.POST, request.FILES)
         try:
             if not form.is_valid():
-                raise ValidationError("Form filled incorrectly")
+                raise ValidationError("Form filled incorrectly for profile picture")
             picture = form.save(commit=False)
+            logger.debug('picture saved, no commit')
             picture.owner = request.user
             picture.save()
+            logger.debug('picture saved, should be commited')
             context['profile_picture_upload_message'] = 'new image uploaded!'
         except Exception as e:
             context["error"] = e
