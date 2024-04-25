@@ -12,13 +12,10 @@ from flask_cors import CORS
 from flask_restful import Resource, Api
 
 app = Flask(__name__)
-#CORS(app, resources={r"*": {"origins": "*"}}, supports_credentials=True) # works https://piehost.com/socketio-tester
-#CORS(app,resources={r"/*":{"origins":"*"}}) # works https://piehost.com/socketio-tester
-CORS(app) # works https://piehost.com/socketio-tester
-#cors = CORS(app,resources={r"/*":{"origins":"*"}})
+
+CORS(app)
 api = Api(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
-#socketio = SocketIO(app)
 
 app.debug = True
 app.host = '0.0.0.0'
@@ -33,8 +30,8 @@ class GameObject:
 class Game:
     def __init__(self):
         self.game_slot: int = -1
-        self.ball_coordinates: Optional[GAmeObject.GameObject] = None # x,y,width,height
-        self.ball_initial_coordinates: Optional[Gameobject.GameObject] = None # x,y,width,height
+        self.ball_coordinates: Optional[GameObject.GameObject] = None # x,y,width,height
+        self.ball_initial_coordinates: Optional[GameObject.GameObject] = None # x,y,width,height
         self.left_paddle_coordinates: Optional[GameObject.GameObject] = None # x,y,width,height
         self.left_paddle_initial_coordinates: Optional[GameObject.GameObject] = None # x,y,width,height
         self.right_paddle_coordinates: Optional[GameObject.GameObject] = None # x,y,width,height
@@ -58,7 +55,7 @@ class Game:
         self.down_pressed: bool = False # right down
         self.left_score: int = 0 # actual score not tkinter object
         self.right_score: int = 0 # actual score not tkinter object
-        self.game_end_condition: int = 3 # how many points till end
+        self.game_end_condition: int = 1 # how many points till end
         self.game_running: int = 0 # 1 running, 0 end
         self.winner: str = 'nobody'
         self.left_player_id: str = 'left_player'
@@ -291,7 +288,7 @@ class Game:
             if self.right_score > self.left_score:
                 self.winner = self.right_player_id
             # socketio.emit('endstate', games[game].return_game_state())
-            send_game_over_data(games[self.game_slot].return_game_state())
+            send_game_over_data(self.right_score, self.left_score, self.ball_bounces)
             self.game_slot = -1
             self.ball_bounces = 0
 
@@ -664,6 +661,25 @@ def handle_connect():
 def handle_disconnect():
     pass
 
+def get_state_cli(splitted_command):
+    global socketio
+    global games_lock
+    global games
+    if len(splitted_command) != 2:
+        socketio.emit('message', 'ERROR, string not in right format.')
+        return
+    number = int(splitted_command[1])
+    if number < 0 or number > 3:
+        socketio.emit('message', 'ERROR, allowed game numbers are 0 to 3.')
+        return
+    with games_lock:
+        if games[number].is_game_running() == 0:
+            socketio.emit('message', 'ERROR, game not running so no state.')
+            return
+        else:
+            socketio.emit('state_cli', games[number].return_game_state())
+            return
+
 @socketio.on('message')
 def handle_message(message):
     print('Message:', message)
@@ -706,19 +722,22 @@ def handle_message(message):
 
 
 # @app.route('/send_game_over_data', methods=['POST'])
-def send_game_over_data(game_data):
+def send_game_over_data(p1_score, p2_score, rally):
     print("in send_game_over_data")
-    # data_to_send = game_data #fix the double handling
-    data_to_send = {"test": "oh hello"} #fix the double handling
+    # print(data_to_send)
+    data_to_send = {"test" : "rally",
+        "p1_username": "placeholder",
+        "p1_score": f"{p1_score}",
+        "p2_username": "placeholder2",
+        "p2_score": f"{p2_score}",
+        "longest_rally": f"{rally}"
+    }
 
     with app.app_context():
         django_url = "http://transcendence:8000/pong/send_game_data/"
 
         try:
-            # Send the POST request to Django
-            print("try")
             response = requests.post(django_url, data=data_to_send)
-            # Check if the request was successful
             if response.status_code == 200:
                 return jsonify({"message": "Request sent successfully"})
             else:
@@ -726,6 +745,7 @@ def send_game_over_data(game_data):
         except Exception as e:
             print("threw except", str(e))
             return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     # Use SSL/TLS encryption for WSS
