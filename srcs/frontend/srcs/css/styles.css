@@ -100,3 +100,17 @@ body {
     right: 0;
     bottom: 0;
 }
+
+.chat-log {
+    font-family: sans-serif;
+    font-size: 14px;
+    min-height: 32px;
+    max-height: 256px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.chat-message {
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
