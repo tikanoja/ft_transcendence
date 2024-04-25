@@ -217,7 +217,7 @@ class Game:
             self.ball_coordinates.y += self.ball_speed[1]
 
     def check_and_set_if_ball_over_speed_limit(self):
-        # x
+        # 
         if self.ball_speed[0] > self.ball_speed_limit:
             self.ball_speed[0] = self.ball_speed_limit
         if self.ball_speed[0] < -self.ball_speed_limit:
