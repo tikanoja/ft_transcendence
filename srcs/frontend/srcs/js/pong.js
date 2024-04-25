@@ -1,4 +1,4 @@
-// // Import required modules
+                                                                                                                                                                            // // Import required modules
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.module.js';
 
 // //TODO:the size of paddles, ball and their positioning MUST BE DYNAMIC!
@@ -44,27 +44,21 @@ export const startScreen = async () => {
 			const playButton = document.getElementById('playButton');
 			const canvasContainer = document.getElementById('canvasContainer');
 			const styleCheckbox = document.getElementById('styleCheckbox');
-			const readyCheckbox = document.getElementById('readyCheckbox');
 			let is3DGraphics = false;
-			let isReady = false;
-			const p1Username = document.getElementById('player1');
-			const p2Username = document.getElementById('player2');
+
 			playButton.addEventListener('click', () => {
 				startScreen.style.display = 'none';
 				canvasContainer.style.display = 'block';
 				
 				is3DGraphics = styleCheckbox.checked;
-				isReady = styleCheckbox.checked;
-				//when player are both marked ready run this
+				socket.emit('message', 'games_running');
+				
 				socket.emit('message', 'get_game');
-				// socket.emit('message', 'get_game,' + p1Username + ',' + p2Username); //THIS IS FOR WHEN THE USERDB works
 				socket.on('start_game', (data) => {
-					if (isReady == true)
-					{
-						const valuesArray = data.split(',')
-						let gameNumber = valuesArray[1]
-						renderPongGame(is3DGraphics, gameNumber);
-					}
+					console.log(data)
+					const valuesArray = data.split(',')
+					let gameNumber = valuesArray[1]
+					renderPongGame(is3DGraphics, gameNumber);
 				});
         });
     } catch (error) {
