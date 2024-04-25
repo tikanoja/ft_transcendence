@@ -51,6 +51,7 @@ class CustomUser(AbstractBaseUser):
 
     objects = CustomUserManager()
 
+
 class Friendship(models.Model):
     PENDING = 'Pending'
     ACCEPTED = 'Accepted'
@@ -106,16 +107,13 @@ class PongGameInstance(GameInstance):
     p2_misses = models.IntegerField(default=0)
     p1_score = models.IntegerField(default=0)
     p2_score = models.IntegerField(default=0)
-    pass
-
+    
 
 class ColorGameInstance(GameInstance):
     turns = models.IntegerField(default=0)
     p1_biggest_takeover = models.IntegerField(default=0)
     p2_biggest_takeover = models.IntegerField(default=0)
-    pass
-
-
+    
 
 # user profile model
 #  language -> maybe add to CustomUser model?

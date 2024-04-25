@@ -40,6 +40,16 @@
 		<div class="bg-light main-content">
 			<!-- The content of this div is displayed dynamically using URL-based routing -->
 			<div id="content"></div>
+
+            <div class="border rounded mx-2 p-2">
+                <div id="chat-log" class="chat-log border rounded p-2 mb-2"> </div>
+                <div class="d-flex flex-wrap">
+                    <textarea id="chat-input" class="col-8 px-2 py-1" placeholder="Message..." rows=1></textarea>
+                    <button id="chat-submit" class="col-4">Submit</button>
+                </div>
+                <script type="module" src="./js/chat.js"></script>
+            </div>
+
 		</div>
 	</div>
 </body>
