@@ -405,7 +405,7 @@ def playContext(request, error, success):
         'form': form,
         'all_games': all_games,
         'invites_sent': invites_sent,
-        'invites_received': invites_received,
+        'invites_received': invites_received
     }
 
     if error:
@@ -442,7 +442,11 @@ def gameResponse(request, data):
     if action == 'accept':
         game_instance.status = 'Active'
         game_instance.save()
-        return render(request, 'user/play.html', playContext(request, None, "Game accepted! (this should redirect to game and start it)"))
+        context =  playContext(request, None, "Game accepted! (this should redirect to game and start it)")
+        context['p1_username'] = game_instance.p1.username
+        context['p2_username'] = game_instance.p2.username
+        return render(request, 'pong/pong.html', context)
+        # return render(request, 'user/play.html', playContext(request, None, "Game accepted! (this should redirect to game and start it)"))
     elif action == 'reject':
         game_instance.delete()
         return render(request, 'user/play.html', playContext(request, None, "Game rejected"))
