@@ -64,7 +64,7 @@ class Friendship(models.Model):
 	status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=PENDING)
 
 class ProfilePicture(models.Model):
-	image = models.ImageField(upload_to='images/') #upload_to="profile_pictures"
+	image = models.ImageField(upload_to='profile_pictures/') #upload_to="profile_pictures"
 	owner = models.ForeignKey("CustomUser", related_name="owner", on_delete=models.CASCADE, null=False)
 
 """

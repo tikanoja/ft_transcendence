@@ -130,7 +130,6 @@ class UpdateNameForm(forms.Form):
 
 
 class UploadProfilePictureForm(forms.ModelForm):
-     
     class Meta:
         model = ProfilePicture
         fields = ["image"]

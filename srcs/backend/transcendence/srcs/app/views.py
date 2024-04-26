@@ -161,9 +161,12 @@ def profile(request, username):
 		context["password_form"] = UpdatePasswordForm()
 		context["delete_account_form"] = DeleteAccountForm()
 		context["upload_image_form"] = UploadProfilePictureForm()
-		# picture = ProfilePicture.objects.get(owner=request.user).first()
-		# if picture:
-		# 	context["profile_picture"] = picture
+		try:
+			picture = ProfilePicture.objects.filter(owner=request.user).first()
+			if picture:
+				context["profile_picture"] = picture
+		except Exception as e:
+			logger.debug('unable to search image')
 		context["upload_image_form"] = UploadProfilePictureForm()
 		# need to add in the game stats and history here too
 		if self:
@@ -173,4 +176,3 @@ def profile(request, username):
 	else:
 		return JsonResponse({"message": "method not allowed, try GET"})
 
-	
