@@ -141,6 +141,7 @@ def run_command(argv):
     else:
         print(colors.WARNING + "not a valid command use -h for help" + colors.ENDC)
     sio.disconnect()
+    
 if __name__ == "__main__":
 
     interactive_mode = False
