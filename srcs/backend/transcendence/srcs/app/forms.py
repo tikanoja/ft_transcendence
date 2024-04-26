@@ -1,5 +1,5 @@
 from django import forms
-from .models import CustomUser, ProfilePicture
+from .models import CustomUser
 from django.core.exceptions import ValidationError
 import re
 import logging
@@ -129,8 +129,8 @@ class UpdateNameForm(forms.Form):
     last_name = forms.CharField(label='Last Name', widget=forms.TextInput(attrs={'placeholder': 'Enter family name'}), max_length=256, required=True)
 
 
-class UploadProfilePictureForm(forms.ModelForm):
+class UploadImageForm(forms.ModelForm):
     class Meta:
-        model = ProfilePicture
-        fields = ["image"]
+        model = CustomUser
+        fields = ["profile_picture"]
 

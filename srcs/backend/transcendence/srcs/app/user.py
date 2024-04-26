@@ -1,4 +1,4 @@
-from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm, AddFriendForm, UploadProfilePictureForm
+from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm, AddFriendForm, UploadImageForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
 from .models import CustomUser, CustomUserManager, GameInstance, Friendship
@@ -10,6 +10,8 @@ from django.http import HttpResponseRedirect
 from django.db.models import Q
 import json
 from django.utils import timezone
+import os
+from transcendence import settings
 
 logger = logging.getLogger(__name__)
 
@@ -148,7 +150,7 @@ def create_manage_account_context(username: str) -> dict:
     context["email_form"] = UpdateEmailForm()
     context["password_form"] = UpdatePasswordForm()
     context["delete_account_form"] = DeleteAccountForm()
-    context["upload_image_form"] = UploadProfilePictureForm()
+    context["upload_image_form"] = UploadImageForm()
     return context
 
 # return dictionary for context with the resulting vars that can be rendered into the profile
@@ -192,19 +194,21 @@ def manage_accountPOST(request):
     elif "delete-account-form" == request.POST['form_id']:
         return delete_accountPOST(request, context)
     elif "profile_picture_upload" == request.POST['form_id']:
-        form = UploadProfilePictureForm(request.POST, request.FILES)
+        form = UploadImageForm(request.POST, request.FILES)
         try:
+            current_user = CustomUser.objects.get(username=request.user.username)
+            new_image = request.FILES['profile_picture']
+            old_image = current_user.profile_picture
             if not form.is_valid():
                 raise ValidationError("Form filled incorrectly for profile picture")
-            picture = form.save(commit=False)
-            logger.debug('picture saved, no commit')
-            picture.owner = request.user
-            picture.save()
-            logger.debug('picture saved, should be commited')
+            if old_image.url != '/media/default.png':
+                os.remove(os.path.join(settings.MEDIA_ROOT, old_image.path))
+            current_user.profile_picture = new_image
+            current_user.save()
             context['profile_picture_upload_message'] = 'new image uploaded!'
         except Exception as e:
             context["error"] = e
-            context["email_form"] = form 
+            context["profile_picture_upload"] = form 
     else:
         context["error"] = 'Invalid form submitted'
     context["details"] = get_profile_details(request.user.username, True)

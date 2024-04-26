@@ -44,6 +44,7 @@ class CustomUser(AbstractBaseUser):
 	email = models.EmailField(max_length = 320, blank=True, null=True)
 	is_online = models.BooleanField(default=False)
 	last_seen = models.DateTimeField(auto_now=True)
+	profile_picture = models.ImageField(upload_to='profile_pictures/', default='default.png')
 
 	USERNAME_FIELD = 'username'
 	REQUIRED_FIELDS = []
@@ -62,10 +63,6 @@ class Friendship(models.Model):
 	from_user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='friend_request_from')
 	to_user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='friend_request_to')
 	status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=PENDING)
-
-class ProfilePicture(models.Model):
-	image = models.ImageField(upload_to='profile_pictures/') #upload_to="profile_pictures"
-	owner = models.ForeignKey("CustomUser", related_name="owner", on_delete=models.CASCADE, null=False)
 
 """
 GameInstance {

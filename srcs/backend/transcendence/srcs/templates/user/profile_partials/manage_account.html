@@ -7,7 +7,7 @@
 
 	<div id="profile-picture">
 		{% if profile_picture %}
-		<img src="{{ profile_picture.image.url }}" alt="profile picture for user {{ details.username }}"></img>
+		<img src="{{ profile_picture.url }}" alt="profile picture for user {{ details.username }}"></img>
 		{% endif %}
 		{% if profile_picture_upload_message %}
 		<p>{{ profile_picture_upload_message }}</p>

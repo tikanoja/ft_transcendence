@@ -4,10 +4,10 @@ from django.http import JsonResponse
 import logging
 # from django.http import HttpResponse
 # from django.core.exceptions import ValidationError
-from .models import CustomUser, ProfilePicture
+from .models import CustomUser
 # from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate #, login, logout
-from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm, UploadProfilePictureForm
+from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm, UploadImageForm
 from . import user
 from django.contrib.auth.decorators import login_required
 
@@ -160,14 +160,14 @@ def profile(request, username):
 		context["email_form"] = UpdateEmailForm()
 		context["password_form"] = UpdatePasswordForm()
 		context["delete_account_form"] = DeleteAccountForm()
-		context["upload_image_form"] = UploadProfilePictureForm()
+		context["upload_image_form"] = UploadImageForm()
 		try:
-			picture = ProfilePicture.objects.filter(owner=request.user).first()
-			if picture:
-				context["profile_picture"] = picture
+			current_user = CustomUser.objects.filter(username=username).first()
+			if current_user:
+				context["profile_picture"] = current_user.profile_picture
 		except Exception as e:
+			logger.debug('error: ', e)
 			logger.debug('unable to search image')
-		context["upload_image_form"] = UploadProfilePictureForm()
 		# need to add in the game stats and history here too
 		if self:
 			return render(request, 'user/profile_self.html', context)
