@@ -45,7 +45,7 @@ def print_competitor(comp):
 def random_gen_competitors():
     # Generate competitors (dummy data for starting)
     competitors = []
-    for i in range(1, 7):
+    for i in range(1, 6):
         comp = Competitor()
         comp.games_played = random.randint(1,200)
         comp.win_percent = random.randint(0,100)
@@ -54,47 +54,33 @@ def random_gen_competitors():
         competitors.append(comp)
     return competitors
 
-def sort_initial_ranking(competitors):
-    if len(competitors) < 2:
-        return competitors
-
-    low, same, high, ranking = [], [], [], []
-
-    pivot = competitors[random.randint(0, len(competitors) - 1)].games_played
-
-    for item in competitors:
-        if not item.knocked_out:
-            if item.games_played < pivot:
-                low.append(item)
-            elif item.games_played == pivot:
-                same.append(item)
-            elif item.games_played > pivot:
-                high.append(item)
-    ranking = sort_initial_ranking(high) + same + sort_initial_ranking(low)
-    for i, competitor in enumerate(ranking, 1):
-        competitor.ranking = i
-    return ranking
-
 def create_matches(competitors):
+    # Sort competitors based on their rank (assuming rank is stored as an attribute)
+    competitors.sort(key=lambda x: x.ranking, reverse=True)
+    
     matches = []
-    i = len(competitors)
-    if i % 2 == 0:  # Even number of players
-        while i > 0:
+    num_players = len(competitors)
+    if num_players % 2 == 0:  # Even number of players
+        for i in range(0, num_players, 2):
             match = Match()
-            match.player_1 = competitors[i - 1]
-            match.player_2 = competitors[i - 2]
+            match.player_1 = competitors[i]
+            match.player_2 = competitors[i + 1]
             matches.append(match)
-            i -= 2
-    else:
-        highest_ranked = max(competitors, key=lambda x: x.ranking)
-        for competitor in competitors:
-            if competitor != highest_ranked:
-                match = Match()
-                match.player_1 = highest_ranked
-                match.player_2 = competitor
-                matches.append(match)
-        i -= 1
+    else:  # Odd number of players
+        # First, create matches for all but the last player
+        for i in range(0, num_players - 1, 2):
+            match = Match()
+            match.player_1 = competitors[i]
+            match.player_2 = competitors[i + 1]
+            matches.append(match)
+        # Then, pair the last player with the lowest-ranked player for the additional match
+        match = Match()
+        match.player_1 = competitors[-1]
+        match.player_2 = competitors[-2] if num_players > 1 else None
+        matches.append(match)
     return matches
+
+
 
 def print_competitor_array(competitors):
     for i, competitor in enumerate(competitors):
@@ -112,18 +98,21 @@ def print_matches(matches):
         print()
 
 def set_games_to_in_progress(matches):
-    print_color(colors.OKGREEN, "setting matches it in_progress")
     for match in matches:
         match.status = "in_progress"
         print()
 
 def set_losers_game_over(matches):
-    print_color(colors.OKGREEN, "setting matches it in_progress")
     for match in matches:
         match.status = "done"
         match.winner = match.player_1
+        match.player_1.knocked_out = False
         match.player_2.knocked_out = True
         match.player_2.ranking = 0
+
+def remove_knocked_out_competitors(competitors):
+    return [comp for comp in competitors if not comp.knocked_out]
+
 
 
 if __name__ == "__main__":
@@ -131,11 +120,8 @@ if __name__ == "__main__":
     
     #TODO: get competitors from API    
     competitors = random_gen_competitors()
-    ranking = sort_initial_ranking(competitors)
-    print_competitor_array(ranking)
-    print("-----------after----------")
-    matches = create_matches(ranking)
-    # print_matches(matches)
+
+    matches = create_matches(competitors)
 
     #TODO: send matches and wait for responses on wins and losses
     set_games_to_in_progress(matches)
@@ -143,7 +129,7 @@ if __name__ == "__main__":
 
     set_losers_game_over(matches)
     print_matches(matches)
+    competitors = remove_knocked_out_competitors(competitors)
+    # print_matches(matches)
 
-    ranking = sort_initial_ranking(ranking)
-    # print_competitor_array(ranking)
     print_competitor_array(competitors)
