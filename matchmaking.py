@@ -79,6 +79,36 @@ def create_matches(competitors):
         matches.append(match)
     return matches
 
+#TODO: impliment the bye aspect? or have the lowest ranked player play twice ?
+
+#def create_matches(competitors):
+    # competitors.sort(key=lambda x: x.ranking, reverse=True)
+    # matches = []
+
+    # num_players = len(competitors)
+
+    # if num_players % 2 == 0:  # Even number of players
+    #     for i in range(0, num_players, 2):
+    #         match = Match()
+    #         match.player_1 = competitors[i]
+    #         match.player_2 = competitors[i + 1]
+    #         matches.append(match)
+    # else:  # Odd number of players
+    #     bye_player = competitors.pop(0)
+    #     for i in range(0, num_players - 1, 2):
+    #         match = Match()
+    #         match.player_1 = competitors[i]
+    #         match.player_2 = competitors[i + 1]
+    #         matches.append(match)
+
+    #     match = Match()
+    #     match.player_1 = bye_player
+    #     match.player_2 = None
+    #     matches.append(match)
+
+    # return matches
+
+
 
 def print_competitor_array(competitors):
     for i, competitor in enumerate(competitors):
@@ -118,18 +148,20 @@ if __name__ == "__main__":
     #TODO: Do we want a leaderboard for the overall tournemant?
     #TODO: get competitors from API    
     competitors = random_gen_competitors()
-
-    matches = create_matches(competitors)
-
-    #TODO: send matches and wait for responses on wins and losses
-    set_games_to_in_progress(matches)
-    #TODO: wait for all the games to be done.
     
-    set_losers_game_over(matches)
-    print_matches(matches)
-    competitors = remove_knocked_out_competitors(competitors)
-    # print_matches(matches)
-    print_competitor_array(competitors)
+    round = 0
+    while len(competitors) != 1:
+        print_competitor_array(competitors)
+        matches = create_matches(competitors)
+        round += 1
+        print_color(colors.OKGREEN, f"Round {round}:")
+        #TODO: send matches and wait for responses on wins and losses
+        print_matches(matches)
+        set_games_to_in_progress(matches)
+        #TODO: wait for all the games to be done.
+        set_losers_game_over(matches)
+        competitors = remove_knocked_out_competitors(competitors)
+    
     matches = create_matches(competitors)
     print_matches(matches)
 
