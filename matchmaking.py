@@ -55,7 +55,7 @@ def random_gen_competitors():
     return competitors
 
 def create_matches(competitors):
-    # Sort competitors based on their rank (assuming rank is stored as an attribute)
+
     competitors.sort(key=lambda x: x.ranking, reverse=True)
     
     matches = []
@@ -67,19 +67,17 @@ def create_matches(competitors):
             match.player_2 = competitors[i + 1]
             matches.append(match)
     else:  # Odd number of players
-        # First, create matches for all but the last player
         for i in range(0, num_players - 1, 2):
             match = Match()
             match.player_1 = competitors[i]
             match.player_2 = competitors[i + 1]
             matches.append(match)
-        # Then, pair the last player with the lowest-ranked player for the additional match
+
         match = Match()
         match.player_1 = competitors[-1]
         match.player_2 = competitors[-2] if num_players > 1 else None
         matches.append(match)
     return matches
-
 
 
 def print_competitor_array(competitors):
@@ -117,7 +115,7 @@ def remove_knocked_out_competitors(competitors):
 
 if __name__ == "__main__":
     #TODO: needs to get the users information and load it into the classes and then as it is in progress update the pairing
-    
+    #TODO: Do we want a leaderboard for the overall tournemant?
     #TODO: get competitors from API    
     competitors = random_gen_competitors()
 
@@ -126,10 +124,23 @@ if __name__ == "__main__":
     #TODO: send matches and wait for responses on wins and losses
     set_games_to_in_progress(matches)
     #TODO: wait for all the games to be done.
-
+    
     set_losers_game_over(matches)
     print_matches(matches)
     competitors = remove_knocked_out_competitors(competitors)
     # print_matches(matches)
-
     print_competitor_array(competitors)
+    matches = create_matches(competitors)
+    print_matches(matches)
+
+    set_games_to_in_progress(matches)
+    
+    set_losers_game_over(matches)
+    competitors = remove_knocked_out_competitors(competitors)
+    
+    print_competitor_array(competitors)
+    matches = create_matches(competitors)
+
+    print_matches(matches)
+
+
