@@ -11,7 +11,9 @@ from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswor
 from . import user
 from django.contrib.auth.decorators import login_required
 
+
 logger = logging.getLogger(__name__)
+
 
 def register_user(request):
 	if request.method == 'POST':
@@ -139,10 +141,6 @@ def notfound(request):
 	else:
 		return JsonResponse({'error': "method not allowed. please use GET"})
 
-""" 
-on account delete, how to handle other recodrs tied to that username? if the username isn't purged from all,
-if another user uses it they will then be linked to the other records...
-"""
 
 def profile(request, username):
 	logger.debug('getting profile')
@@ -150,29 +148,27 @@ def profile(request, username):
 	if request.user.username == username:
 		self = True
 	if request.method == "GET":
-		# friends = user.get_friends_dict(username)
+		friends = user.friendsContext(username, None, None)
 		logger.debug(friends)
 		details = user.get_profile_details(username, self)
 		context = {}
-		# context["friends"] = friends #TODO get the friends context from Tuukka's friend stuff
+		context["friends"] = friends #TODO get the friends context from Tuukka's friend stuff
 		context["details"] = details
 		context["name_form"] = UpdateNameForm()
 		context["email_form"] = UpdateEmailForm()
 		context["password_form"] = UpdatePasswordForm()
 		context["delete_account_form"] = DeleteAccountForm()
 		context["upload_image_form"] = UploadImageForm()
+		context["self_profile"] = self
 		try:
-			current_user = CustomUser.objects.filter(username=username).first()
-			if current_user:
-				context["profile_picture"] = current_user.profile_picture
+			profile_user = CustomUser.objects.filter(username=username).first()
+			if profile_user:
+				context["profile_picture"] = profile_user.profile_picture
 		except Exception as e:
 			logger.debug('error: ', e)
 			logger.debug('unable to search image')
 		# need to add in the game stats and history here too
-		if self:
-			return render(request, 'user/profile_self.html', context)
-		else:
-			return render(request, 'user/profile_other.html', {})
+		return render(request, 'user/profile.html', context)
 	else:
 		return JsonResponse({"message": "method not allowed, try GET"})
 

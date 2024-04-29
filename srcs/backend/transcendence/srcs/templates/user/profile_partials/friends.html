@@ -1,17 +1,18 @@
 {% extends "user/form_base.html" %}
 {% block form %}
-{% if error %}
-<p style="color: red">Error: {{error}}</p>
+{% if friends.error %}
+<p style="color: red">Error: {{friends.error}}</p>
 {% endif %}
 {% if success %}
-<p style="color: green">Success: {{success}}</p>
+<p style="color: green">Success: {{friends.success}}</p>
 {% endif %}
+{% comment %} don't show for others or make it an add this profile user as a friend if not a friend {% endcomment %}
 <form id="addFriendForm" >
 	{% csrf_token %}
-	{% for field in form %}
+	{% for field in friends.form %}
 	<div class="form-group">
-	<p style="color: red">{{ field.errors }}<p>
-	{{ field.label_tag }} {{ field }}
+	<p style="color: red">{{ friends.field.errors }}<p>
+	{{ friends.field.label_tag }} {{ friends.field }}
 	</div>
 	{% endfor %}
 	<input type="submit" value="Add friend">
@@ -20,9 +21,10 @@
 </br>
 
 <div>
+{% if self_profile %}
 <h2>Pending Invites</h2>
 <ul>
-	{% for invite in in_invites %}
+	{% for invite in friends.in_invites %}
 		<li>
 			{{ invite.from_user.username }} - 
 			<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="accept" class="btn btn-primary">Accept</button> or
@@ -34,15 +36,17 @@
 </ul>
 
 <br>
-
+{% endif %}
 <h2>List of friends</h2>
 <ul>
-	{% for invite in out_invites %}
+	{% if self_profile %}
+	{% for invite in friends.out_invites %}
 		<li>{{ invite.to_user.username }} - Friend request pending...</li>
 	{% endfor %}
+	{% endif %}
 
-	{% for friendship in friendships %}
-		{% if current_user == friendship.to_user %}
+	{% for friendship in friends.friendships %}
+		{% if friends.current_user == friendship.to_user %}
 			<li>
 				<a id="profileLinkTag" href="/profile/{{friendship.from_user.username}}" >{{ friendship.from_user.username }}</a> - 
 				{% if friendship.from_user.is_online %}
@@ -54,7 +58,7 @@
 			</li>
 		{% else %}
 			<li>
-				{{ friendship.to_user.username }} - 
+				<a id="profileLinkTag" href="/profile/{{friendship.to_user.username}}" >{{ friendship.to_user.username }}</a> - 
 				{% if friendship.to_user.is_online %}
 					<span style="color:green;">Online</span>
 				{% else %}

@@ -256,11 +256,12 @@ def get_dashboard_stats(username:str) -> dict:
     pass
 
 
-def friendsContext(request, error, success):
+def friendsContext(username, error, success):
     logger.debug('in friendsContext')
     form = AddFriendForm()
     title = "Manage friends"
-    current_user = request.user
+    # current_user = request.user
+    current_user = CustomUser.objects.filter(username=username).first()
 
     all_friendships = Friendship.objects.filter(Q(from_user=current_user) | Q(to_user=current_user))
 
@@ -286,29 +287,29 @@ def friendsContext(request, error, success):
 
 
 def friendsGET(request):
-    return render(request, 'user/profile_partials/friends.html', friendsContext(request, None, None))	
+    return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, None, None))	
 
 
 def friendResponse(request, data):
     from_username = data.get('from_user')
     from_user = CustomUser.objects.filter(username=from_username).first()
     if not from_user:
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request, "Could not find the friend candidate", None))    
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, "Could not find the friend candidate", None))    
     action = data.get('action')
     friendship = Friendship.objects.filter(Q(to_user=request.user, from_user=from_user) | Q(to_user=from_user, from_user=request.user)).first()
     if not friendship:
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request, "Could not find the friendship", None))    
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, "Could not find the friendship", None))    
 
     if action == 'accept':
         friendship.status = Friendship.ACCEPTED
         friendship.save()
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request, None, "Congratulations, you made a new friend!"))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, None, "Congratulations, you made a new friend!"))
     elif action == 'reject':
         friendship.delete()
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request, None, "Friendship REJECTED!"))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, None, "Friendship REJECTED!"))
     elif action == 'delete':
         friendship.delete()
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request, None, "Friendship DELETED!"))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, None, "Friendship DELETED!"))
 
 
 def friendsPOST(request):
