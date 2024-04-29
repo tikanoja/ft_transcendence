@@ -64,11 +64,11 @@ class Game:
 	def new_game_initilization(self):
 		self.clear_scores()
 		self.moves = 0
-		self.squares = [Square(random.choice([1, 2, 3, 4]), 0) for i in range(all.width * all.height)] # Create new empty game
-		self.squares[0 + (all.width * (all.height // 2))].owner = 1 # left player starting square owner to 1
-		self.squares[0 + (all.width * (all.height // 2)) + all.width - 1].owner = 2 # right starting player square owner to 2
+		self.squares = [Square(random.choice([1, 2, 3, 4]), 0) for i in range(self.width * self.height)] # Create new empty game
+		self.squares[0 + (self.width * (self.height // 2))].owner = 1 # left player starting square owner to 1
+		self.squares[0 + (self.width * (self.height // 2)) + self.width - 1].owner = 2 # right starting player square owner to 2
 		self.which_player_starts: int = random.choice([0, 1])
-		self.which_player_turn: int = which_player_starts
+		self.which_player_turn: int = self.which_player_starts
 
 	#def compute_scores(self):
 
@@ -85,13 +85,37 @@ class Game:
 		state += str(self.game_running)
 		state += ','
 		state += str(self.moves)
-		for y in range(all.height):
-			for x in range(all.width):
+		for y in range(self.height):
+			for x in range(self.width):
 				state += ','
 				state += str(self.squares[x + (y * self.width)].colour) # 1,2,3,4 # white,black,green,red
 				state += ','
 				state += str(self.squares[x + (y * self.width)].owner) # 1,2,0 # left,right,no one owns
 		return state
+
+	def check_game_running_conditions(self):
+		total_squares = self.width * self.height
+		half_squares = int(total_squares / 2)
+		# player 1 squares
+		total_player_squares = int(0)
+		for i in self.squares:
+			if i.owner == 1:
+				total_player_squares += 1
+		if total_player_squares > half_squares:
+			return False
+		# player 2 squares
+		total_player_squares = int(0)
+		for i in self.squares:
+			if i.owner == 2:
+				total_player_squares += 1
+		if total_player_squares > half_squares:
+			return False
+		# if no player has more than 50 percent of squares
+		# then check if there are are still unclaimed squares
+		for i in self.squares:
+			if i.owner == 0:
+				return True
+		return False
 
 games_lock = threading.Lock()
 with games_lock:
@@ -272,29 +296,7 @@ def handle_message(message):
 	else:
 		socketio.emit('message', 'ERROR, nothing was sent.')
 
-def check_game_running_conditions(squares):
-	total_squares = all.width * all.height
-	half_squares = int(total_squares / 2)
-	# player 1 squares
-	total_player_squares = int(0)
-	for i in all.squares:
-		if i.owner == 1:
-			total_player_squares += 1
-	if total_player_squares > half_squares:
-		return False
-	# player 2 squares
-	total_player_squares = int(0)
-	for i in all.squares:
-		if i.owner == 2:
-			total_player_squares += 1
-	if total_player_squares > half_squares:
-		return False
-	# if no player has more than 50 percent of squares
-	# then check if there are are still unclaimed squares
-	for i in all.squares:
-		if i.owner == 0:
-			return True
-	return False
+
 
 def return_owner(x, y, game):
 	return game.squares[x + (y * game.width)].owner
