@@ -117,8 +117,11 @@ class Game:
 				return True
 		return False
 
-	def return_owner(x, y):
+	def return_owner(self, x, y):
 		return self.squares[x + (y * self.width)].owner
+
+	def return_colour(self, x, y):
+		return  self.squares[x + (y * self.width)].colour
 
 games_lock = threading.Lock()
 with games_lock:
@@ -303,8 +306,7 @@ def handle_message(message):
 
 
 
-def return_colour(self, x, y):
-	return  self.squares[x + (y * self.width)].colour
+
 
 def set_colour(x, y, colour, game):
 	all.squares[x + (y * game.width)].colour = colour
