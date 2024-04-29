@@ -1,79 +1,100 @@
-{% extends "user/form_base.html" %}
-{% block form %}
-{% if friends.error %}
-<p style="color: red">Error: {{friends.error}}</p>
-{% endif %}
-{% if success %}
-<p style="color: green">Success: {{friends.success}}</p>
-{% endif %}
-{% comment %} don't show for others or make it an add this profile user as a friend if not a friend {% endcomment %}
-<form id="addFriendForm" >
-	{% csrf_token %}
-	{% for field in friends.form %}
-	<div class="form-group">
-	<p style="color: red">{{ friends.field.errors }}<p>
-	{{ friends.field.label_tag }} {{ friends.field }}
-	</div>
-	{% endfor %}
-	<input type="submit" value="Add friend">
-</form>
-
-</br>
-
-<div>
-{% if self_profile %}
-<h2>Pending Invites</h2>
-<ul>
-	{% for invite in friends.in_invites %}
-		<li>
-			{{ invite.from_user.username }} - 
-			<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="accept" class="btn btn-primary">Accept</button> or
-			<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="reject" class="btn btn-primary">Reject</button>
-		</li>
-	{% empty %}
-		<li>No pending invites.</li>
-	{% endfor %}
-</ul>
-
-<br>
-{% endif %}
-<h2>List of friends</h2>
-<ul>
-	{% if self_profile %}
-	{% for invite in friends.out_invites %}
-		<li>{{ invite.to_user.username }} - Friend request pending...</li>
-	{% endfor %}
+<div class="container">
+	{% if friends.error %}
+	<p style="color: red">Error: {{friends.error}}</p>
 	{% endif %}
+	{% if success %}
+	<p style="color: green">Success: {{friends.success}}</p>
+	{% endif %}
+	<form id="addFriendForm" >
+		{% csrf_token %}
+		{% for field in friends.form %}
+		<div class="form-group">
+		<p style="color: red">{{ friends.field.errors }}<p>
+		{{ friends.field.label_tag }} {{ friends.field }}
+		</div>
+		{% endfor %}
+		<input type="submit" value="Add friend">
+	</form>
 
-	{% for friendship in friends.friendships %}
-		{% if friends.current_user == friendship.to_user %}
+	<form id="blockUserForm" >
+		{% csrf_token %}
+		{% for field in friends.form %}
+		<div class="form-group">
+		<p style="color: red">{{ field.errors }}<p>
+		{{ field.label_tag }} {{ field }}
+		</div>
+		{% endfor %}
+		<input type="submit" value="Block user">
+	</form>
+
+	</br>
+
+	<div>
+	{% if self_profile %}
+	<h2>Pending Invites</h2>
+	<ul>
+		{% for invite in friends.in_invites %}
 			<li>
-				<a id="profileLinkTag" href="/profile/{{friendship.from_user.username}}" >{{ friendship.from_user.username }}</a> - 
-				{% if friendship.from_user.is_online %}
-					<span style="color:green;">Online</span>
-				{% else %}
-					<span style="color:grey;">Offline</span>
-				{% endif %}
-				<button type="submit" id="friendRequestButton" data-from-user={{ friendship.from_user.username }} data-action="delete" class="btn btn-primary">Delete</button>
+				{{ invite.from_user.username }} - 
+				<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="accept" class="btn btn-primary">Accept</button> or
+				<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="reject" class="btn btn-primary">Reject</button>
 			</li>
-		{% else %}
+		{% empty %}
+			<li>No pending invites.</li>
+		{% endfor %}
+	</ul>
+
+	{% endif %}
+	<br>
+	<h2>Blocked Users</h2>
+	<ul>
+		{% for blocked in friends.blocked_users %}
 			<li>
-				<a id="profileLinkTag" href="/profile/{{friendship.to_user.username}}" >{{ friendship.to_user.username }}</a> - 
-				{% if friendship.to_user.is_online %}
-					<span style="color:green;">Online</span>
-				{% else %}
-					<span style="color:grey;">Offline</span>
-				{% endif %} 
-				<button type="submit" id="friendRequestButton" data-from-user={{ friendship.to_user.username }} data-action="delete" class="btn btn-primary">Delete</button>
+				{{ blocked.username }} - 
+				<button type="submit" id="friendRequestButton" data-from-user={{ blocked.username }} data-action="unblock" class="btn btn-outline-danger">Unblock</button>
 			</li>
+		{% empty %}
+			<li>No blocked users.</li>
+		{% endfor %}
+	</ul>
+	<br>
+
+	<h2>List of friends</h2>
+	<ul>
+		{% if self_profile %}
+		{% for invite in friends.out_invites %}
+			<li>{{ invite.to_user.username }} - Friend request pending...</li>
+		{% endfor %}
 		{% endif %}
-	{% empty %}
-		<li>No friends.</li>
-	{% endfor %}
-</ul>
 
+		{% for friendship in friends.friendships %}
+			{% if friends.current_user == friendship.to_user %}
+				<li>
+					<a id="profileLinkTag" href="/profile/{{friendship.from_user.username}}" >{{ friendship.from_user.username }}</a> - 
+					{% if friendship.from_user.is_online %}
+						<span style="color:green;">Online</span>
+					{% else %}
+						<span style="color:grey;">Offline</span>
+					{% endif %}
+					<button type="submit" id="friendRequestButton" data-from-user={{ friendship.from_user.username }} data-action="delete" class="btn btn-primary">Delete</button>
+				</li>
+			{% else %}
+				<li>
+					<a id="profileLinkTag" href="/profile/{{friendship.to_user.username}}" >{{ friendship.to_user.username }}</a> - 
+					{% if friendship.to_user.is_online %}
+						<span style="color:green;">Online</span>
+					{% else %}
+						<span style="color:grey;">Offline</span>
+					{% endif %} 
+					<button type="submit" id="friendRequestButton" data-from-user={{ friendship.to_user.username }} data-action="delete" class="btn btn-primary">Delete</button>
+				</li>
+			{% endif %}
+		{% empty %}
+			<li>No friends.</li>
+		{% endfor %}
+	</ul>
+
+	</div>
 </div>
-{% endblock %}
-
 
 {% comment %} {% include {{real_html}} %} {% endcomment %}

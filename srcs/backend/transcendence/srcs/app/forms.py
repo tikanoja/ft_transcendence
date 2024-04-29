@@ -1,5 +1,5 @@
 from django import forms
-from .models import CustomUser
+from .models import CustomUser, GameInstance
 from django.core.exceptions import ValidationError
 import re
 import logging
@@ -64,6 +64,7 @@ class DeleteAccountForm(forms.Form):
             del self.cleaned_data['confirm_password']
             return True
 
+
 class UpdatePasswordForm(forms.Form):
     password = forms.CharField(label="Password", widget=forms.PasswordInput)
     confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
@@ -118,7 +119,6 @@ class AddFriendForm(forms.Form):
             raise ValidationError("Empty username")
         
         if not CustomUser.objects.filter(username=self.cleaned_data["username"]).exists():
-            logger.debug('trying to add a nonexisting user')
             raise ValidationError("No such user")
     
         return True
@@ -134,3 +134,23 @@ class UploadImageForm(forms.ModelForm):
         model = CustomUser
         fields = ["profile_picture"]
 
+
+
+class GameRequestForm(forms.Form):
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
+    GAME_TYPE_CHOICES = [
+        (GameInstance.PONG, 'Pong'),
+        (GameInstance.COLOR, 'Color'),
+    ]
+    game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
+
+    def is_valid(self):
+        valid = super().is_valid()
+        if not valid:
+            return False
+        username = self.cleaned_data.get('username')
+        if not username or username.isspace():
+            raise ValidationError("Empty username")
+        if not CustomUser.objects.filter(username=self.cleaned_data["username"]).exists():
+            raise ValidationError("No such user")
+        return True 

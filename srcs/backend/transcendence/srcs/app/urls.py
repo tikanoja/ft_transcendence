@@ -1,5 +1,6 @@
 from django.urls import path
 from  . import views
+from . import user
 
 urlpatterns = [
 	path('register/', views.register_user, name="register_user"),
@@ -14,5 +15,6 @@ urlpatterns = [
 	path('home/', views.home, name="home"),
 	path('notfound/', views.notfound, name="notfound"),
 	path('manage_account/', views.manage_account, name="manage_account"),
+	path('block_user/', user.block_user, name="block_user"),
 ]
 

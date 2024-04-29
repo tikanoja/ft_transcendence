@@ -18,22 +18,9 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 
+
+
 urlpatterns = [
-    path('increase_number/', views.increase_number, name='increase_number'),
-    path('decrease_number/', views.decrease_number, name='decrease_number'),
-    path('get_number/', views.get_number, name='get_number'),
-    path('get_game_state/', views.get_game_state, name='get_game_state'),
-    path('start_background_loop/', views.start_background_loop, name='start_background_loop'),
-    path('stop_background_loop/', views.stop_background_loop, name='stop_background_loop'),
-    path('game_start/', views.game_start, name='game_start'), #TODO: needs to work with different numbered games
-    path('game_stop/', views.game_stop, name='game_stop'), #TODO: needs to work with different numbered games
-    path('left_paddle_up/', views.left_paddle_up, name='left_paddle_up'), #TODO: needs to work with different numbered games
-    path('left_paddle_up_release/', views.left_paddle_up_release, name='left_paddle_up_release'), #TODO: needs to work with different numbered games
-    path('left_paddle_down/', views.left_paddle_down, name='left_paddle_down'), #TODO: needs to work with different numbered games
-    path('left_paddle_down_release/', views.left_paddle_down_release, name='left_paddle_down_release'), #TODO: needs to work with different numbered games
-    path('right_paddle_up/', views.right_paddle_up, name='right_paddle_up'), #TODO: needs to work with different numbered games
-    path('right_paddle_up_release/', views.right_paddle_up_release, name='right_paddle_up_release'), #TODO: needs to work with different numbered games
-    path('right_paddle_down/', views.right_paddle_down, name='right_paddle_down'), #TODO: needs to work with different numbered games
-    path('right_paddle_down_release/', views.right_paddle_down_release, name='right_paddle_down_release'), #TODO: needs to work with different numbered games
-	path('get_canvas/', views.get_canvas, name='get_canvas'),
+   	path('send_game_data/', views.get_game_state, name='send_game_data'),
+	path('get_canvas/', views.get_canvas, name='get_canvas')
 ]

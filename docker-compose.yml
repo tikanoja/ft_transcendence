@@ -10,6 +10,7 @@ services:
     env_file: .env
     networks:
       - frontend-network
+      - backend-network  # Add frontend service to backend network
     restart: always
     volumes:
       - ./srcs/frontend/srcs/:/var/html/www:ro
@@ -44,12 +45,15 @@ services:
       dockerfile: Dockerfile
     image: pong_img:dev
     container_name: pong_c
+    hostname: pong
     ports:
       - "8080:8080"
+      - "8888:8888"
     env_file: .env
     restart: always
     networks:
-      - backend-network  
+      - frontend-network
+      - backend-network  # Add frontend service to backend network
 
   database:
     build:

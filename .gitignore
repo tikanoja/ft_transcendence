@@ -10,3 +10,4 @@ __pycache__
 migrations/
 
 srcs/backend/transcendence/srcs/media_files/profile_pictures/profile-default.png
+venv/

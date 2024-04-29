@@ -26,6 +26,8 @@ RUN mkdir -p /var/lib/nginx/tmp/client_body/ &&\
 COPY conf/nginx.conf /etc/nginx/nginx.conf
 RUN chmod 644 /etc/nginx/nginx.conf
 
+# RUN openssl req -new -x509 -key ca-key.pem -out ca-cert.pem -days 365
+
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 

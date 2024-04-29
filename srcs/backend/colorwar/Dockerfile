@@ -23,7 +23,7 @@ RUN chmod +r /server.key
 RUN chmod +r /server.crt
 
 # Expose the port your application runs on
-EXPOSE 8888
+EXPOSE 8889
 
 RUN pip install --no-cache-dir --upgrade pip -r requirements.txt
 

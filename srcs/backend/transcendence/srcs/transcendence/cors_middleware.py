@@ -12,7 +12,7 @@ class CorsMiddleware:
         return response
 
     def process_response(self, request, response):
-        response["Access-Control-Allow-Origin"] = "https://localhost"
+        response["Access-Control-Allow-Origin"] = "https://localhost, http://pong"
         response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS, DELETE, PUT"
         response["Access-Control-Allow-Headers"] = "Content-Type, Accept, X-CSRFToken, Location, Transfer-Encoding"
         response["Access-Control-Expose-Headers"] = "Location"
@@ -34,5 +34,5 @@ class UpdateLastSeenMiddleware:
                 user.save()
             except User.DoesNotExist:
                 return response
-
         return response
+    
