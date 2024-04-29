@@ -29,21 +29,21 @@ class Square:
 
 class Game:
 	def __init__(self):
-		screen_width: int = 1920 # x width
-		screen_height: int = 1080 # y height
-		width: int = 36 # x squares
-		height: int = 19 # y squares
-		squares = [Square(random.choice([1, 2, 3, 4]), 0) for i in range(all.width * all.height)]
-		which_player_starts: int = random.choice([0, 1])
-		which_player_turn: int = which_player_starts
-		allowed_colours = [1, 2, 3, 4] # white, black, green, red
-		start_x: int = 0
-		start_y: int = height // 2
-		game_running: int = 0
-		game_slot: int = -1
-		left_score: int = 0
-		right_score: int = 0
-		moves: int = 0
+		self.screen_width: int = 1920 # x width
+		self.screen_height: int = 1080 # y height
+		self.width: int = 36 # x squares
+		self.height: int = 19 # y squares
+		self.squares = [Square(random.choice([1, 2, 3, 4]), 0) for i in range(self.width * self.height)]
+		self.which_player_starts: int = random.choice([0, 1])
+		self.which_player_turn: int = self.which_player_starts
+		self.allowed_colours = [1, 2, 3, 4] # white, black, green, red
+		self.start_x: int = 0
+		self.start_y: int = self.height // 2
+		self.game_running: int = 0
+		self.game_slot: int = -1
+		self.left_score: int = 0
+		self.right_score: int = 0
+		self.moves: int = 0
 
 	def which_player_turn(self):
 		return self.which_player_turn
@@ -134,7 +134,7 @@ def start_game(splitted_command):
 	number = -1
 	with games_lock:
 		for index in range(4):
-			if games[index].is_game_running == 0
+			if games[index].is_game_running == 0:
 				number = index
 				break
 	with games_lock:
@@ -149,8 +149,8 @@ def start_game(splitted_command):
 
 def stop_game(splitted_command):
 	global socketio
-	global thread_lock
-	global thread
+	#	global thread_lock
+	#global thread
 	global games_lock
 	global games
 	if len(splitted_command) != 2:
@@ -230,9 +230,9 @@ def make_move(splitted_command):
 	paint_with_colour(games[number].start_x, games[number].start_y, colour, games[number])
 	games[number].which_player_turn += 1
 	games[number].which_player_turn %= 2
-	if check_game_running_conditions(games[number].squares)
+	if check_game_running_conditions(games[number].squares):
 		socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
-	else
+	else:
 		games[game].set_game_running(0)
 		games[number].set_game_slot(-1)
 		socketio.emit('endstate', 'OK,{}'.format(games[number].return_game_state()))
