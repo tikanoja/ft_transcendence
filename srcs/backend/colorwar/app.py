@@ -69,9 +69,17 @@ class Game:
 		self.which_player_starts: int = random.choice([0, 1])
 		self.which_player_turn: int = self.which_player_starts
 
-	#def compute_scores(self):
-
-
+	def compute_scores(self):
+		total_player_squares = int(0)
+		for i in self.squares:
+			if i.owner == 1:
+				total_player_squares += 1		
+		self.left_score = total_player_squares
+		total_player_squares = int(0)
+		for i in self.squares:
+			if i.owner == 2:
+				total_player_squares += 1	
+		self.right_score = total_player_squares
 
 	def return_game_state(self):
 		# self.screen_width: int = 1920 # x
@@ -311,6 +319,7 @@ def make_move(splitted_command):
 	games[number].paint_with_colour(games[number].start_x, games[number].start_y, colour)
 	games[number].which_player_turn += 1
 	games[number].which_player_turn %= 2
+	games[number].compute_scores()
 	if games[number].check_game_running_conditions():
 		socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
 	else:
