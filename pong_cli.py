@@ -34,7 +34,7 @@ def print_banner():
 def print_commands():
     header = colors.HEADER + colors.BOLD + "\n\t\t" + colors.UNDERLINE + "Available Commands" + colors.HEADER + colors.ENDC
     games_running = colors.HEADER + "\n\ngames_running:" + colors.ENDC + "\tshows all currently running games"
-    watch_game = colors.HEADER + "\n\nwatch_game,<game number>:" + colors.ENDC + "\tshows the current score of the chosen game"
+    watch_game = colors.HEADER + "\n\nwatch_game:" + colors.ENDC + "\tshows the current score of the chosen game"
     print(header + games_running + "\n" + watch_game + "\n\n")
 
 def print_help():
@@ -56,33 +56,46 @@ def on_games_running_response(data):
     while index != 4:
         index += 1
         if valuesArray[index] != '0' and valuesArray[index] != ' 0':
-            print(index)
             print_color(str(index - 1), colors.HEADER)
     if interactive_mode == False:
         sio.disconnect()
 
 game_over = False
 
+def end_game(data):
+    global game_over
+    print_state(data)
+    game_over = True
+
 def watch_game(game_number):
     global game_over
+    clear_banner()
     sio.on('state_cli', lambda data: print_state(data))
-    print(colors.HEADER + colors.BOLD + "Watching game: " + game_number + colors.ENDC)
-    while True:
-        if sys.stdin in select.select([sys.stdin], [], [], 0)[0] or game_over == True:
-            game_over = False
-            print(colors.WARNING + "Exiting watch_game......" + colors.ENDC)
-            _ = sys.stdin.readline()
-        sio.emit('message', 'get_state_cli,' + game_number)
-        time.sleep(5)
+    sio.on('endstate', lambda data: end_game(data))
+    try:
+        while True:
+            if sys.stdin in select.select([sys.stdin], [], [], 0)[0] or game_over:
+                if(game_over):
+                    print_color("game over", colors.OKGREEN)
+                game_over = False
+                print(colors.WARNING + "Exiting watch_game......" + colors.ENDC)
+                _ = sys.stdin.readline()
+                break
+            sio.emit('message', 'get_state_cli,' + game_number)
+            time.sleep(5)
+    except KeyboardInterrupt:
+        print(colors.WARNING + "Keyboard interrupt detected. Exiting watch_game......" + colors.ENDC)
 
 def print_state(data):
     valuesArray = data.split(',')
     global game_over
-
+    clear_banner()
     index = 0
-    while index != 6:
+    while index <= 8:
         print(LINE_UP, end=LINE_CLEAR)
         index += 1
+    print_banner()
+    print(colors.HEADER + colors.BOLD + "\nWatching game: " + game_number + " Press enter to exit.\n\n" + colors.ENDC)
     print(colors.HEADER + colors.BOLD + "P1 score:   " + colors.ENDC)
     print(valuesArray[7])
     print(colors.HEADER + colors.BOLD + "P2 score:   " + colors.ENDC)
@@ -90,17 +103,17 @@ def print_state(data):
     print(colors.HEADER + colors.BOLD + "Longest Rally:   " + colors.ENDC)
     print(valuesArray[10])
 
+def clear_banner():
+    index = 0
+    while index <= 10:
+        print(LINE_UP, end=LINE_CLEAR)
+        index += 1
 
 def on_disconnect():
     print('Disconnected from server')
 
-# def on_message(data):
-#     print('Message from server:', data)
-#     if interactive_mode == False:
-#         sio.disconnect()
 
 #TODO: sabotage MUST be password protected some how
-
 def run_command(argv):
     if argv[1] == "games_running":
         sio .emit('message', 'games_running')
@@ -128,7 +141,6 @@ def run_command(argv):
     else:
         print(colors.WARNING + "not a valid command use -h for help" + colors.ENDC)
     sio.disconnect()
-
 if __name__ == "__main__":
 
     interactive_mode = False
@@ -142,11 +154,10 @@ if __name__ == "__main__":
         interactive_mode = True
 
     sio = socketio.Client(ssl_verify=False)
-    server_url = 'wss://localhost:8888'  # Your server URL
+    server_url = 'wss://localhost:8888'
     sio.connect(server_url)
 
     sio.on('connect', on_connect)
-    sio.on('games_running_response', on_games_running_response)
     sio.on('disconnect', on_disconnect)
 
     if interactive_mode == False:
@@ -156,14 +167,14 @@ if __name__ == "__main__":
         print_banner()
         print_commands()
         while True:
-            try:
-                command = input("Enter command (type 'exit' to quit): ")
-                if command.lower() == 'exit':
-                    break
-                if command == 'watch_game':
-                    game_number = input("Enter a game number: ")
-                    watch_game(game_number)
-                sio.emit('message', command)
-            except KeyboardInterrupt:
+            command = input("Enter command (type 'exit' to quit): ")
+            if command.lower() == 'exit':
                 break
+            if command == 'watch_game':
+                game_number = input("Enter a game number: ")
+                watch_game(game_number)
+            else:
+                sio.emit('message', command)
+                sio.on('games_running_response', on_games_running_response)
+            print()
     sio.disconnect()

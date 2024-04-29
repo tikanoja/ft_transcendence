@@ -1,10 +1,9 @@
-// // Import required modules
+                                                                                                                                                                            // // Import required modules
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.module.js';
 
 // //TODO:the size of paddles, ball and their positioning MUST BE DYNAMIC!
 // //TODO: A better looking start screen the also shows user name, and opponent name
 // //TODO: Make lighting better
-// //TODO: boundrys working, potentially a canvas boarder
 
 export const loadScript = () => {
     return new Promise((resolve, reject) => {
@@ -66,6 +65,29 @@ export const startScreen = async () => {
     }
 };
 
+// Define the gameOverScreen function within the same scope
+function loadGameOverScreen(data) {
+    const winnerInfo = document.getElementById('winnerInfo');
+    const gameOverScreen = document.getElementById('gameOverScreen');
+    
+    const valuesArray = data.split(',');
+    const p1Score = parseInt(valuesArray[8]);
+    const p2Score = parseInt(valuesArray[7]);
+
+    let winnerText;
+    if (p1Score > p2Score) {
+        winnerText = "Player 1 wins!";
+    } else if (p1Score < p2Score) {
+        winnerText = "Player 2 wins!";
+    } else {
+        winnerText = "It's a tie!";
+    }
+
+    winnerInfo.textContent = winnerText;
+    gameOverScreen.style.display = 'block';
+    canvasContainer.style.display = 'none';
+}
+
 let previousP1Score = null;
 let previousP2Score = null;
 
@@ -87,24 +109,6 @@ export const updateScoreboard = (p1Score, p2Score) => {
         console.error('Scoreboard elements not found.');
     }
 };
-
-
-
-window.addEventListener('resize', function() {
-    var canvasContainer = document.getElementById('canvasContainer');
-    var scoreboard = document.getElementById('scoreboard');
-    
-    var canvasWidth = canvasContainer.offsetWidth;
-    var scoreboardWidth = scoreboard.offsetWidth;
-    
-    if (canvasWidth < scoreboardWidth) {
-        scoreboard.style.flexDirection = 'column'; // Stack elements vertically
-        scoreboard.style.alignItems = 'center'; // Center elements vertically
-    } else {
-        scoreboard.style.flexDirection = 'row'; // Reset to default row layout
-        scoreboard.style.alignItems = 'initial'; // Reset alignment
-    }
-});
 
 function addLighting(scene) {
     let color = 0xFFFFFF;
@@ -249,13 +253,13 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
 
 	function exit_game(data)
 	{
-		
-		console.log("GAME OVER")
+        updateGameState(data)
+        loadGameOverScreen(data)
 		stopAnimation()
 
 	}
 
-	socket.on('game_over', (data) => {
+	socket.on('endstate', (data) => {
         exit_game(data)
     });
 

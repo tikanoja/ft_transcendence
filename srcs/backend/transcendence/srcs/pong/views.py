@@ -29,6 +29,6 @@ def get_canvas(request):
 	logger.debug('In get_canvas()')
 	if request.method == 'GET':
 		logger.debug('about to render!')
-		return render(request, "pong/3dgen.html", {})
+		return render(request, "pong/pong.html", {})
 		
 

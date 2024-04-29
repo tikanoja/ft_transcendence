@@ -213,7 +213,7 @@ class Game:
             self.ball_coordinates.y += self.ball_speed[1]
 
     def check_and_set_if_ball_over_speed_limit(self):
-        # x
+        # 
         if self.ball_speed[0] > self.ball_speed_limit:
             self.ball_speed[0] = self.ball_speed_limit
         if self.ball_speed[0] < -self.ball_speed_limit:
@@ -283,7 +283,7 @@ class Game:
             self.winner = self.left_player_id
             if self.right_score > self.left_score:
                 self.winner = self.right_player_id
-            # socketio.emit('endstate', games[game].return_game_state())
+            socketio.emit('endstate', games[self.game_slot].return_game_state())
             send_game_over_data(self.right_score, self.left_score, self.ball_bounces)
             self.game_slot = -1
             self.ball_bounces = 0

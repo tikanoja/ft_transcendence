@@ -38,7 +38,7 @@
 <ul>	
 	{% for invite in invites_sent %}
 		<li>
-			Challenged {{ invite.p1.username }} to a game of {{ invite.game }} -
+			Challenged {{ invite.p2.username }} to a game of {{ invite.game }} -
 			<button type="submit" id="gameRequestButton" data-from-user={{ invite.p2.username }} data-action="cancel" class="btn btn-danger">Cancel</button>
 		</li>
 	{% endfor %}
