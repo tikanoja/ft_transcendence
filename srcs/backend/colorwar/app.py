@@ -129,8 +129,31 @@ class Game:
 	def return_used(self, x, y):
 		return self.squares[x + (y * self.width)].used
 
-	def set_used(self,x, y):
+	def set_used(self, x, y):
 		self.squares[x + (y * self.width)].used = True
+
+	def paint_with_colour(self, x, y, colour):
+		if x < 0 or x >= self.width: # out of bounds
+			return
+		if y < 0 or y >= self.height: # out of bounds
+			return
+		if self.return_used(self, x, y) == True:
+			return
+		if self.return_owner(self, x, y) == self.which_player_turn + 1: # is the owner, print with new colour
+			self.set_colour(self, x, y, colour)
+			self.set_used(self, x, y)
+			self.paint_with_colour(self, x + 1, y, colour)
+			self.paint_with_colour(self, x - 1, y, colour)
+			self.paint_with_colour(self, x, y + 1, colour)
+			self.paint_with_colour(self. x, y - 1, colour)
+			return
+		if self.return_owner(self, x, y) == 0 and self.return_colour(self, x, y) == colour: # no one owns and the colour matches
+			self.squares[x + (y * self.width)].owner = self.which_player_turn + 1
+			self.set_used(self, x, y)
+			self.paint_with_colour(self, x + 1, y, colour)
+			self.paint_with_colour(self, x - 1, y, colour)
+			self.paint_with_colour(self, x, y + 1, colour)
+			self.paint_with_colour(self, x, y - 1, colour)
 
 games_lock = threading.Lock()
 with games_lock:
@@ -323,28 +346,7 @@ def handle_message(message):
 
 
 
-def paint_with_colour(self, x, y, colour):
-	if x < 0 or x >= game.width: # out of bounds
-		return
-	if y < 0 or y >= game.height: # out of bounds
-		return
-	if return_used(x, y, game) == True:
-		return
-	if self.return_owner(x, y, game) == game.which_player_turn + 1: # is the owner, print with new colour
-		set_colour(x, y, colour, game)
-		set_used(x, y, game)
-		paint_with_colour(x + 1, y, colour, game)
-		paint_with_colour(x - 1, y, colour, game)
-		paint_with_colour(x, y + 1, colour, game)
-		paint_with_colour(x, y - 1, colour, game)
-		return
-	if self.return_owner(x, y, game) == 0 and return_colour(x, y, game) == colour: # no one owns and the colour matches
-		game.squares[x + (y * all.width)].owner = game.which_player_turn + 1
-		set_used(x, y, game)
-		paint_with_colour(x + 1, y, colour, game)
-		paint_with_colour(x - 1, y, colour, game)
-		paint_with_colour(x, y + 1, colour, game)
-		paint_with_colour(x, y - 1, colour, game)
+
 
 def who_won_or_draw(game):
 	total_squares = all.width * all.height
