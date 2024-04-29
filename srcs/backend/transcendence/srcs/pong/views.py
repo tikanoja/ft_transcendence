@@ -24,6 +24,7 @@ def get_game_state(request):
         logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
 
+
 def get_canvas(request):
 	logger.debug('In get_canvas()')
 	if request.method == 'GET':

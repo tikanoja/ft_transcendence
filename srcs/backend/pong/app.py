@@ -5,7 +5,6 @@ import random
 import requests
 from typing import Optional
 from dataclasses import dataclass
-# from flask import Flask #, render_template
 from flask import Flask, request, jsonify, __version__, current_app
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
@@ -157,7 +156,6 @@ class Game:
                 self.ball_speed[1] = ((relative_position - 0.5) * 2) * abs(self.ball_speed[0]) # y speed
             else:
                 # right wins point
-                # print("RIGHT POINT")
                 self.even_odd_ball_direction += 1
                 self.even_odd_ball_direction = self.even_odd_ball_direction % 2
                 self.right_score += 1
@@ -176,8 +174,6 @@ class Game:
                 relative_position = (self.ball_coordinates.y - (self.right_paddle_coordinates.y - self.paddle_height)) / (self.paddle_height * 2)
                 self.ball_speed[1] = ((relative_position - 0.5) * 2) * abs(self.ball_speed[0]) # y speed
             else:
-                # left wins point
-                # print("LEFT POINT")
                 self.even_odd_ball_direction += 1
                 self.even_odd_ball_direction = self.even_odd_ball_direction % 2
                 self.left_score += 1
@@ -431,7 +427,6 @@ def start_game(splitted_command):
     global thread
     global games_lock
     global games
-    print(splitted_command)
     if len(splitted_command) != 1:
         socketio.emit('message', 'ERROR, string not in right format.')
         return
@@ -682,7 +677,6 @@ def get_state_cli(splitted_command):
 
 @socketio.on('message')
 def handle_message(message):
-    print('Message:', message)
     global socketio
     splitted_command = message.split(",")
     if splitted_command:
@@ -723,8 +717,6 @@ def handle_message(message):
 
 # @app.route('/send_game_over_data', methods=['POST'])
 def send_game_over_data(p1_score, p2_score, rally):
-    print("in send_game_over_data")
-    # print(data_to_send)
     data_to_send = {"test" : "rally",
         "p1_username": "placeholder",
         "p1_score": f"{p1_score}",
@@ -747,6 +739,15 @@ def send_game_over_data(p1_score, p2_score, rally):
             return jsonify({"error": str(e)}), 500
 
 
+class init_usernames(Resource):
+	def get(self):
+		print("init_usernames")
+		return jsonify({'from init usernames': 'ok'})
+
+
+api.add_resource(init_usernames, '/init_usernames')
+
+
 if __name__ == '__main__':
     # Use SSL/TLS encryption for WSS
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
@@ -756,4 +757,3 @@ if __name__ == '__main__':
         thread = threading.Thread(target=game_loop)
         thread.start()
     socketio.run(app, host='0.0.0.0', port=8888, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
-    #socketio.run(app, host='0.0.0.0', port=8888, debug=True, allow_unsafe_werkzeug=True)
