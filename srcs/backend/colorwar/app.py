@@ -155,6 +155,27 @@ class Game:
 			self.paint_with_colour(self, x, y + 1, colour)
 			self.paint_with_colour(self, x, y - 1, colour)
 
+	def who_won_or_draw(self):	
+		total_squares = self.width * self.height
+		half_squares = int(total_squares / 2)
+		# player 1 squares
+		total_player_squares1 = int(0)
+		for i in self.squares:
+			if i.owner == 1:
+				total_player_squares1 += 1
+		if total_player_squares1 > half_squares:
+			return 1 # player 1
+		# player 2 squares
+		total_player_squares2 = int(0)
+		for i in self.squares:
+			if i.owner == 2:
+				total_player_squares2 += 1
+		if total_player_squares2 > half_squares:
+			return 2 # player 2
+		# Draw
+		if total_player_squares1 == total_player_squares2:
+			return 0 # draw
+
 games_lock = threading.Lock()
 with games_lock:
 	games = [0,1,2,3]
@@ -333,41 +354,6 @@ def handle_message(message):
 				socketio.emit('message', 'ERROR, command not recognised: ' + message)
 	else:
 		socketio.emit('message', 'ERROR, nothing was sent.')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def who_won_or_draw(game):
-	total_squares = all.width * all.height
-	half_squares = int(total_squares / 2)
-	# player 1 squares
-	total_player_squares1 = int(0)
-	for i in game.squares:
-		if i.owner == 1:
-			total_player_squares1 += 1
-	if total_player_squares1 > half_squares:
-		return 1 # player 1
-	# player 2 squares
-	total_player_squares2 = int(0)
-	for i in game.squares:
-		if i.owner == 2:
-			total_player_squares2 += 1
-	if total_player_squares2 > half_squares:
-		return 2 # player 2
-	# Draw
-	if total_player_squares1 == total_player_squares2:
-		return 0 # draw
 	
 if __name__ == '__main__':
 	# Use SSL/TLS encryption for WSS
