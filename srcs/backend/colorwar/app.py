@@ -129,6 +129,9 @@ class Game:
 	def return_used(self, x, y):
 		return self.squares[x + (y * self.width)].used
 
+	def set_used(self,x, y):
+		self.squares[x + (y * self.width)].used = True
+
 games_lock = threading.Lock()
 with games_lock:
 	games = [0,1,2,3]
@@ -318,8 +321,7 @@ def handle_message(message):
 
 
 
-def set_used(x, y, game):
-	game.squares[x + (y * game.width)].used = True
+
 
 def paint_with_colour(self, x, y, colour):
 	if x < 0 or x >= game.width: # out of bounds
