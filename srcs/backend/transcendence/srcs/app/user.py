@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect
 from django.db.models import Q
 import json
 from django.utils import timezone
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -429,6 +430,21 @@ def playGET(request):
         return render(request, 'user/play.html', playContext(request, None, None))
 
 
+def init_game(user1:str, user2:str, url):
+    logger.debug("in init game")
+    data_to_send = {
+        "p1_username": user1,
+        "p2_username": user2,
+    }
+    try:
+        response = requests.post(url, json=data_to_send)
+        if response.status_code == 200:
+            pass
+    except Exception as e:
+            print("threw except", str(e))
+    pass
+
+
 def gameResponse(request, data):
     action = data.get('action')
     if action == 'nuke':
@@ -445,6 +461,8 @@ def gameResponse(request, data):
         context =  playContext(request, None, "Game accepted! (this should redirect to game and start it)")
         context['p1_username'] = game_instance.p1.username
         context['p2_username'] = game_instance.p2.username
+        # activate game in pong_c
+        init_game(context['p1_username'], context['p2_username'], "http://pong:8888/init_usernames/")
         return render(request, 'pong/pong.html', context)
         # return render(request, 'user/play.html', playContext(request, None, "Game accepted! (this should redirect to game and start it)"))
     elif action == 'reject':
