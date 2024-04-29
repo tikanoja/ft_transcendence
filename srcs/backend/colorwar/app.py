@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from flask import Flask
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
-#import sys
 
 app = Flask(__name__)
 #CORS(app, resources={r"*": {"origins": "*"}}, supports_credentials=True) # works https://piehost.com/socketio-tester
@@ -71,6 +70,7 @@ class Game:
 		self.which_player_turn: int = self.which_player_starts
 
 	#def compute_scores(self):
+
 
 
 	def return_game_state(self):
@@ -232,8 +232,6 @@ def start_game(splitted_command):
 
 def stop_game(splitted_command):
 	global socketio
-	#	global thread_lock
-	#global thread
 	global games_lock
 	global games
 	if len(splitted_command) != 2:
@@ -310,10 +308,10 @@ def make_move(splitted_command):
 		games[number].start_x = all.width - 1
 	for i in range(len(games[number].squares)):
 		games[number].squares[i].used = False
-	paint_with_colour(games[number].start_x, games[number].start_y, colour, games[number])
+	games[number].paint_with_colour(games[number].start_x, games[number].start_y, colour)
 	games[number].which_player_turn += 1
 	games[number].which_player_turn %= 2
-	if games[number].check_game_running_conditions(games[number].squares):
+	if games[number].check_game_running_conditions():
 		socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
 	else:
 		games[game].set_game_running(0)
