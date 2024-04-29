@@ -199,6 +199,11 @@ function updateContent(html, title, description) {
     updateEventListeners();
 }
 
+function updateElementContent(html, elementId) {
+    document.getElementById(elementId).innerHTML = html;
+    updateEventListeners();
+}
+
 // ***** USER SERVICE HANDLERS ***** //
 
 async function logoutButtonClickHandler(event) {
@@ -273,7 +278,8 @@ const addFriendHandler = async (event) => {
         routeRedirect(redirect_location);
     } else if (response.ok) {
         const html = await response.text();
-        updateContent(html, "Friends | Pong", "Add friend form");
+        updateElementContent(html, "friends");
+        // updateContent(html, "Friends | Pong", "Add friend form");
 	} else {
 		console.log("Response status in addFriendHandler(): ", response.status)
 	}
@@ -301,7 +307,8 @@ const friendRequestHandler = async (event) => {
         routeRedirect(redirect_location);
     } else if (response.ok) {
         const html = await response.text();
-        updateContent(html, "Friends | Pong", "Add friend form");
+        updateElementContent(html, "friends");
+        // updateContent(html, "Friends | Pong", "Add friend form");
 	} else {
 		console.log("Response status in addFriendHandler(): ", response.status)
 	}
@@ -325,9 +332,7 @@ const manageAccountHandler = async (event) => {
         console.log('response,ok triggered');
 		// stay on this page, display the content only for the manage-content div
         const html = await response.text();
-        let to_update = document.getElementById("manage-account");
-        to_update.innerHTML = html;
-        updateEventListeners();
+        updateElementContent(html, "manage-account");
 	}
 	else {
 		console.log("Response status: ", response.status)
