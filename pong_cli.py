@@ -141,6 +141,7 @@ def run_command(argv):
     else:
         print(colors.WARNING + "not a valid command use -h for help" + colors.ENDC)
     sio.disconnect()
+	
 if __name__ == "__main__":
 
     interactive_mode = False
@@ -154,7 +155,7 @@ if __name__ == "__main__":
         interactive_mode = True
 
     sio = socketio.Client(ssl_verify=False)
-    server_url = 'wss://localhost:8888'
+    server_url = 'https://pong:8888'
     sio.connect(server_url)
 
     sio.on('connect', on_connect)

@@ -738,7 +738,7 @@ def send_game_over_data(p1_score, p2_score, rally):
 			return jsonify({"error": str(e)}), 500
 
 
-@app.route('/init_usernames/', methods=['POST'])
+@app.route('/init_usernames', methods=['GET'])
 def init_usernames():
 	try:
 		print("inside try")
@@ -754,7 +754,6 @@ def init_usernames():
 		return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-	# Use SSL/TLS encryption for WSS
 	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 	ssl_context.load_cert_chain('/server.crt', '/server.key')
 	with thread_lock:
