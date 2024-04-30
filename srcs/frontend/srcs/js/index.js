@@ -99,10 +99,10 @@ function updateEventListeners() {
     var registerForm = document.getElementById('registerForm');
     var logoutButton = document.getElementById('logoutButton');
 	var playButton = document.getElementById('playButton');
-    var addFriendForm = document.getElementById('addFriendForm');
+    var addFriendForm = document.getElementById('addFriendButton');
     var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
     var profileLinks = document.querySelectorAll('#profileLinkTag')
-    var blockUserButton = document.getElementById('blockUserForm');
+    var blockUserButton = document.getElementById('blockUserButton');
     var gameRequestForm = document.getElementById('gameRequestForm'); 
     var playButton = document.getElementById('playButton');
     var deleteForm = document.getElementById('delete-account-form');
@@ -133,14 +133,14 @@ function updateEventListeners() {
 	if (playButton)
         playButton.removeEventListener('click', playButtonClickHandler);
     if (addFriendForm)
-        addFriendForm.removeEventListener('submit', addFriendHandler);
+        addFriendForm.removeEventListener('click', addFriendHandler);
     if (friendRequestButtons) {
         friendRequestButtons.forEach(function(button) {
             button.removeEventListener('click', friendRequestHandler);
         })
     }
     if (blockUserButton)
-        blockUserButton.removeEventListener('submit', blockUserHandler)
+        blockUserButton.removeEventListener('click', blockUserHandler)
     if (gameRequestForm)
         gameRequestForm.removeEventListener('submit', gameRequestHandler)
     if (gameRequestButtons) {
@@ -272,7 +272,8 @@ const blockUserHandler = async (event) => {
         routeRedirect(redirect_location);
     } else if (response.ok) {
         const html = await response.text();
-        updateContent(html, "Friends | Pong", "Add friend form");
+        updateElementContent(html, "friends");
+        // updateContent(html, "Friends | Pong", "Add friend form");
 	} else {
 		console.log("Response status in addFriendHandler(): ", response.status)
 	}
