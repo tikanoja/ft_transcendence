@@ -7,3 +7,6 @@ djangorestframework
 environs
 django-cors-headers
 requests
+python-socketio
+socketio
+socketio.client

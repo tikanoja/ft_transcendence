@@ -5,7 +5,8 @@ FROM python:3.12.1-slim-bookworm
 RUN apt-get update && apt-get install -y \
 	postgresql-client \
 	libpq-dev \
-	openssl
+	openssl \
+    build-essential 
 
 RUN mkdir -p /transcendence/ssl
 RUN openssl req -newkey rsa:2048 -x509 -sha256 -days 365 -nodes \
