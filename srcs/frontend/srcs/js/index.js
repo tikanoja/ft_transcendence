@@ -102,7 +102,7 @@ function updateEventListeners() {
     var addFriendButton = document.getElementById('addFriendButton');
     var blockUserButton = document.getElementById('blockUserButton');
     var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
-    var profileLinks = document.querySelectorAll('#profileLinkTag')
+    var profileLinks = document.querySelectorAll('#profileLinkTag');
     var gameInviteForm = document.getElementById('gameInviteForm'); 
     var playButton = document.getElementById('playButton');
     var deleteForm = document.getElementById('delete-account-form');
@@ -135,14 +135,14 @@ function updateEventListeners() {
     if (addFriendButton)
         addFriendButton.removeEventListener('click', addFriendHandler);
     if (blockUserButton)
-        blockUserButton.removeEventListener('click', blockUserHandler)
+        blockUserButton.removeEventListener('click', blockUserHandler);
     if (friendRequestButtons) {
         friendRequestButtons.forEach(function(button) {
             button.removeEventListener('click', friendRequestHandler);
         })
     }
     if (gameInviteForm)
-        gameInviteForm.removeEventListener('submit', gameRequestHandler)
+        gameInviteForm.removeEventListener('submit', gameRequestHandler);
     if (gameRequestButtons) {
         gameRequestButtons.forEach(function(button) {
             button.removeEventListener('click', gameResponseHandler);
@@ -183,7 +183,7 @@ function updateEventListeners() {
     if (passwordChangeForm)
         passwordChangeForm.addEventListener('submit', manageAccountHandler);
     if (gameInviteForm)
-        gameInviteForm.addEventListener('submit', gameRequestHandler)
+        gameInviteForm.addEventListener('submit', gameRequestHandler);
     if (gameRequestButtons) {
         gameRequestButtons.forEach(function(button) {
             button.addEventListener('click', gameResponseHandler);
