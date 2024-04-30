@@ -73,7 +73,6 @@ export const startScreen = async () => {
             await verifyUsername()
             console.log("after verify: ", gameNumber);
             
-
             playButton.addEventListener('click', () => {
                 console.log("in the click listener")
                 startScreen.style.display = 'none';
@@ -224,11 +223,17 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
 	console.log("GAME IS RENDERING")
     const scene = new THREE.Scene();
     let camera;
-
+    // Remove any existing canvas
+    const existingCanvas = document.getElementById('pongCanvas');
+    if (existingCanvas) {
+        existingCanvas.remove();
+    }
+    
     const renderer = new THREE.WebGLRenderer();
     const pixelRatio = window.devicePixelRatio;
     renderer.setPixelRatio(pixelRatio);
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
+    renderer.domElement.id = 'pongCanvas'; // Set an id for the new canvas
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
     let p1_paddle, p2_paddle, ball;
     if (is3DGraphics) {

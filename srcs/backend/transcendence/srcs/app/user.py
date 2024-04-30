@@ -470,8 +470,6 @@ def gameResponse(request, data):
 		context =  playContext(request, None, "Game accepted! (this should redirect to game and start it)")
 		context['p1_username'] = game_instance.p1.username
 		context['p2_username'] = game_instance.p2.username
-		# activate game in pong_c
-		# init_game(context['p1_username'], context['p2_username'], "https://pong:8888/") 
 		return render(request, 'pong/pong.html', context)
 		# return render(request, 'user/play.html', playContext(request, None, "Game accepted! (this should redirect to game and start it)"))
 	elif action == 'reject':
