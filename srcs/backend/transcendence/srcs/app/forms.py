@@ -154,6 +154,7 @@ class GameRequestForm(forms.Form):
             raise ValidationError("No such user")
         return True
 
+
 class LocalGameForm(forms.Form):
     GAME_TYPE_CHOICES = [
         (GameInstance.PONG, 'Pong'),
@@ -162,7 +163,7 @@ class LocalGameForm(forms.Form):
     game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
     username = forms.CharField(label='P2 Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
     password = forms.CharField(label='P2 Password', widget=forms.PasswordInput(attrs={'placeholder': 'Enter password'}), max_length=256, required=True)
-
+    
     def is_valid(self):
         valid = super().is_valid()
         if not valid:

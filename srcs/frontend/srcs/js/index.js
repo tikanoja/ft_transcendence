@@ -103,7 +103,7 @@ function updateEventListeners() {
     var blockUserButton = document.getElementById('blockUserButton');
     var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
     var profileLinks = document.querySelectorAll('#profileLinkTag')
-    var gameRequestForm = document.getElementById('gameRequestForm'); 
+    var gameInviteForm = document.getElementById('gameInviteForm'); 
     var playButton = document.getElementById('playButton');
     var deleteForm = document.getElementById('delete-account-form');
     var nameChangeForm = document.getElementById('name-change-form');
@@ -141,8 +141,8 @@ function updateEventListeners() {
             button.removeEventListener('click', friendRequestHandler);
         })
     }
-    if (gameRequestForm)
-        gameRequestForm.removeEventListener('submit', gameRequestHandler)
+    if (gameInviteForm)
+        gameInviteForm.removeEventListener('submit', gameRequestHandler)
     if (gameRequestButtons) {
         gameRequestButtons.forEach(function(button) {
             button.removeEventListener('click', gameResponseHandler);
@@ -182,8 +182,8 @@ function updateEventListeners() {
         emailChangeForm.addEventListener('submit', manageAccountHandler);
     if (passwordChangeForm)
         passwordChangeForm.addEventListener('submit', manageAccountHandler);
-    if (gameRequestForm)
-        gameRequestForm.addEventListener('submit', gameRequestHandler)
+    if (gameInviteForm)
+        gameInviteForm.addEventListener('submit', gameRequestHandler)
     if (gameRequestButtons) {
         gameRequestButtons.forEach(function(button) {
             button.addEventListener('click', gameResponseHandler);
@@ -367,8 +367,8 @@ const friendRequestHandler = async (event) => {
 }
 
 const gameRequestHandler = async (event) => {
-    console.log('in gameRequestHandler');
     event.preventDefault();
+    console.log('in gameRequestHandler');
     const formData = new FormData(event.target);
     const querystring = window.location.search;
 
