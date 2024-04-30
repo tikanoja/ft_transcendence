@@ -721,6 +721,26 @@ def handle_message(message):
         socketio.emit('message', 'ERROR, nothing was sent.')
 
 
+@socketio.on('username')
+def validate_username(data):
+    usernames = data.split(",")
+    data_to_send = { "p1_username": usernames[0],
+    "p2_username": usernames[1]
+    }
+    print(data_to_send)
+
+    with app.app_context():
+        django_url = "http://transcendence:8000/pong/validate_match/"
+        try:
+            response = requests.post(django_url, data=data_to_send)
+            if response.status_code == 200:
+                return jsonify({"message": "Request sent successfully"})
+            else:
+                return jsonify({"error": "Failed to send request"}), response.status_code
+        except Exception as e:
+            print("threw except", str(e))
+            return jsonify({"error": str(e)}), 500
+
 # @app.route('/send_game_over_data', methods=['POST'])
 def send_game_over_data(p1_score, p2_score, rally):
     print("in send_game_over_data")

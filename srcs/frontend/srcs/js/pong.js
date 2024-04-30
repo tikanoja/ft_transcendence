@@ -34,6 +34,17 @@ function connectWebSocket() {
     });
 }
 
+function verifyUsername()
+{
+    const username1Element = document.getElementById('player1');
+    const username2Element = document.getElementById('player2');
+    // Extract the usernames from the inner text of the elements
+    const username1 = username1Element.innerText.trim();
+    const username2 = username2Element.innerText.trim();
+    const usernameString = username1 + "," + username2
+    socket.emit("username", usernameString)
+}
+
 export const startScreen = async () => {
     try {
 			await loadScript();
@@ -44,6 +55,8 @@ export const startScreen = async () => {
 			const canvasContainer = document.getElementById('canvasContainer');
 			const styleCheckbox = document.getElementById('styleCheckbox');
 			let is3DGraphics = false;
+
+            verifyUsername()
 
 			playButton.addEventListener('click', () => {
 				startScreen.style.display = 'none';
