@@ -4,6 +4,8 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.m
 // //TODO:the size of paddles, ball and their positioning MUST BE DYNAMIC!
 // //TODO: A better looking start screen the also shows user name, and opponent name
 // //TODO: Make lighting better
+let socket;
+let gameNumber = -1;
 
 export const loadScript = () => {
     return new Promise((resolve, reject) => {
@@ -22,7 +24,6 @@ export const loadScript = () => {
     });
 }
 
-let socket;
 
 function connectWebSocket() {
     socket = io.connect('https://' + window.location.hostname);
@@ -34,16 +35,29 @@ function connectWebSocket() {
     });
 }
 
-function verifyUsername()
-{
-    const username1Element = document.getElementById('player1');
-    const username2Element = document.getElementById('player2');
-    // Extract the usernames from the inner text of the elements
-    const username1 = username1Element.innerText.trim();
-    const username2 = username2Element.innerText.trim();
-    const usernameString = username1 + "," + username2
-    socket.emit("username", usernameString)
-}
+export const verifyUsername = () => {
+    return new Promise((resolve, reject) => {
+        const username1Element = document.getElementById('player1');
+        const username2Element = document.getElementById('player2');
+        const username1 = username1Element.innerText.trim();
+        const username2 = username2Element.innerText.trim();
+        const usernameString = username1 + "," + username2;
+        
+        socket.emit("username", usernameString);
+
+        socket.on('setup_game', (data) => {
+            console.log("in setup game");
+            const valuesArray = data.split(',');
+            gameNumber = valuesArray[1];
+            console.log("after setup game: ", gameNumber);
+            resolve(gameNumber);
+        });
+
+        socket.on('error', (error) => {
+            reject('Error verifying username:', error);
+        });
+    });
+};
 
 export const startScreen = async () => {
     try {
@@ -55,24 +69,30 @@ export const startScreen = async () => {
 			const canvasContainer = document.getElementById('canvasContainer');
 			const styleCheckbox = document.getElementById('styleCheckbox');
 			let is3DGraphics = false;
+            
+            await verifyUsername()
+            console.log("after verify: ", gameNumber);
+            
 
-            verifyUsername()
+            playButton.addEventListener('click', () => {
+                console.log("in the click listener")
+                startScreen.style.display = 'none';
+                canvasContainer.style.display = 'block';
+                is3DGraphics = styleCheckbox.checked;
 
-			playButton.addEventListener('click', () => {
-				startScreen.style.display = 'none';
-				canvasContainer.style.display = 'block';
-				
-				is3DGraphics = styleCheckbox.checked;
-				socket.emit('message', 'games_running');
-				
-				socket.emit('message', 'get_game');
-				socket.on('start_game', (data) => {
-					console.log(data)
-					const valuesArray = data.split(',')
-					let gameNumber = valuesArray[1]
-					renderPongGame(is3DGraphics, gameNumber);
-				});
-        });
+                // # DONT FORGET to maybe insert to here to get permission from django to start the game
+                socket.emit('message', 'start_game,' + gameNumber);
+
+                socket.on('start_game', (data) => {
+                    console.log("start game was called")
+                    startScreen.style.display = 'none';
+                    canvasContainer.style.display = 'block';
+                    console.log(data)
+                    const valuesArray = data.split(',')
+                    gameNumber = valuesArray[1]
+                    renderPongGame(is3DGraphics, gameNumber);
+                });
+            });
     } catch (error) {
         console.error('Error loading script:', error);
     }
