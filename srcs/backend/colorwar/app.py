@@ -1,13 +1,12 @@
-import time
+#import time
 import threading
 import ssl
 import random
 from typing import Optional
 from dataclasses import dataclass
-from flask import Flask #, render_template
+from flask import Flask
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
-#import sys
 
 app = Flask(__name__)
 #CORS(app, resources={r"*": {"origins": "*"}}, supports_credentials=True) # works https://piehost.com/socketio-tester
@@ -29,21 +28,21 @@ class Square:
 
 class Game:
 	def __init__(self):
-		screen_width: int = 1920 # x width
-		screen_height: int = 1080 # y height
-		width: int = 36 # x squares
-		height: int = 19 # y squares
-		squares = [Square(random.choice([1, 2, 3, 4]), 0) for i in range(all.width * all.height)]
-		which_player_starts: int = random.choice([0, 1])
-		which_player_turn: int = which_player_starts
-		allowed_colours = [1, 2, 3, 4] # white, black, green, red
-		start_x: int = 0
-		start_y: int = height // 2
-		game_running: int = 0
-		game_slot: int = -1
-		left_score: int = 0
-		right_score: int = 0
-		moves: int = 0
+		self.screen_width: int = 1920 # x width
+		self.screen_height: int = 1080 # y height
+		self.width: int = 36 # x squares
+		self.height: int = 19 # y squares
+		self.squares = [Square(random.choice([1, 2, 3, 4]), 0) for i in range(self.width * self.height)]
+		self.which_player_starts: int = random.choice([0, 1])
+		self.which_player_turn: int = self.which_player_starts
+		self.allowed_colours = [1, 2, 3, 4] # white, black, green, red
+		self.start_x: int = 0
+		self.start_y: int = self.height // 2
+		self.game_running: int = 0
+		self.game_slot: int = -1
+		self.left_score: int = 0
+		self.right_score: int = 0
+		self.moves: int = 0
 
 	def which_player_turn(self):
 		return self.which_player_turn
@@ -64,14 +63,23 @@ class Game:
 	def new_game_initilization(self):
 		self.clear_scores()
 		self.moves = 0
-		self.squares = [Square(random.choice([1, 2, 3, 4]), 0) for i in range(all.width * all.height)] # Create new empty game
-		self.squares[0 + (all.width * (all.height // 2))].owner = 1 # left player starting square owner to 1
-		self.squares[0 + (all.width * (all.height // 2)) + all.width - 1].owner = 2 # right starting player square owner to 2
+		self.squares = [Square(random.choice([1, 2, 3, 4]), 0) for i in range(self.width * self.height)] # Create new empty game
+		self.squares[0 + (self.width * (self.height // 2))].owner = 1 # left player starting square owner to 1
+		self.squares[0 + (self.width * (self.height // 2)) + self.width - 1].owner = 2 # right starting player square owner to 2
 		self.which_player_starts: int = random.choice([0, 1])
-		self.which_player_turn: int = which_player_starts
+		self.which_player_turn: int = self.which_player_starts
 
-	#def compute_scores(self):
-
+	def compute_scores(self):
+		total_player_squares = int(0)
+		for i in self.squares:
+			if i.owner == 1:
+				total_player_squares += 1		
+		self.left_score = total_player_squares
+		total_player_squares = int(0)
+		for i in self.squares:
+			if i.owner == 2:
+				total_player_squares += 1	
+		self.right_score = total_player_squares
 
 	def return_game_state(self):
 		# self.screen_width: int = 1920 # x
@@ -85,13 +93,96 @@ class Game:
 		state += str(self.game_running)
 		state += ','
 		state += str(self.moves)
-		for y in range(all.height):
-			for x in range(all.width):
+		for y in range(self.height):
+			for x in range(self.width):
 				state += ','
 				state += str(self.squares[x + (y * self.width)].colour) # 1,2,3,4 # white,black,green,red
 				state += ','
 				state += str(self.squares[x + (y * self.width)].owner) # 1,2,0 # left,right,no one owns
 		return state
+
+	def check_game_running_conditions(self):
+		total_squares = self.width * self.height
+		half_squares = int(total_squares / 2)
+		# player 1 squares
+		total_player_squares = int(0)
+		for i in self.squares:
+			if i.owner == 1:
+				total_player_squares += 1
+		if total_player_squares > half_squares:
+			return False
+		# player 2 squares
+		total_player_squares = int(0)
+		for i in self.squares:
+			if i.owner == 2:
+				total_player_squares += 1
+		if total_player_squares > half_squares:
+			return False
+		# if no player has more than 50 percent of squares
+		# then check if there are are still unclaimed squares
+		for i in self.squares:
+			if i.owner == 0:
+				return True
+		return False
+
+	def return_owner(self, x, y):
+		return self.squares[x + (y * self.width)].owner
+
+	def return_colour(self, x, y):
+		return  self.squares[x + (y * self.width)].colour
+
+	def set_colour(self, x, y, colour):
+		self.squares[x + (y * self.width)].colour = colour
+
+	def return_used(self, x, y):
+		return self.squares[x + (y * self.width)].used
+
+	def set_used(self, x, y):
+		self.squares[x + (y * self.width)].used = True
+
+	def paint_with_colour(self, x, y, colour):
+		if x < 0 or x >= self.width: # out of bounds
+			return
+		if y < 0 or y >= self.height: # out of bounds
+			return
+		if self.return_used(self, x, y) == True:
+			return
+		if self.return_owner(self, x, y) == self.which_player_turn + 1: # is the owner, print with new colour
+			self.set_colour(self, x, y, colour)
+			self.set_used(self, x, y)
+			self.paint_with_colour(self, x + 1, y, colour)
+			self.paint_with_colour(self, x - 1, y, colour)
+			self.paint_with_colour(self, x, y + 1, colour)
+			self.paint_with_colour(self. x, y - 1, colour)
+			return
+		if self.return_owner(self, x, y) == 0 and self.return_colour(self, x, y) == colour: # no one owns and the colour matches
+			self.squares[x + (y * self.width)].owner = self.which_player_turn + 1
+			self.set_used(self, x, y)
+			self.paint_with_colour(self, x + 1, y, colour)
+			self.paint_with_colour(self, x - 1, y, colour)
+			self.paint_with_colour(self, x, y + 1, colour)
+			self.paint_with_colour(self, x, y - 1, colour)
+
+	def who_won_or_draw(self):	
+		total_squares = self.width * self.height
+		half_squares = int(total_squares / 2)
+		# player 1 squares
+		total_player_squares1 = int(0)
+		for i in self.squares:
+			if i.owner == 1:
+				total_player_squares1 += 1
+		if total_player_squares1 > half_squares:
+			return 1 # player 1
+		# player 2 squares
+		total_player_squares2 = int(0)
+		for i in self.squares:
+			if i.owner == 2:
+				total_player_squares2 += 1
+		if total_player_squares2 > half_squares:
+			return 2 # player 2
+		# Draw
+		if total_player_squares1 == total_player_squares2:
+			return 0 # draw
 
 games_lock = threading.Lock()
 with games_lock:
@@ -134,7 +225,7 @@ def start_game(splitted_command):
 	number = -1
 	with games_lock:
 		for index in range(4):
-			if games[index].is_game_running == 0
+			if games[index].is_game_running == 0:
 				number = index
 				break
 	with games_lock:
@@ -149,8 +240,6 @@ def start_game(splitted_command):
 
 def stop_game(splitted_command):
 	global socketio
-	global thread_lock
-	global thread
 	global games_lock
 	global games
 	if len(splitted_command) != 2:
@@ -227,15 +316,16 @@ def make_move(splitted_command):
 		games[number].start_x = all.width - 1
 	for i in range(len(games[number].squares)):
 		games[number].squares[i].used = False
-	paint_with_colour(games[number].start_x, games[number].start_y, colour, games[number])
+	games[number].paint_with_colour(games[number].start_x, games[number].start_y, colour)
 	games[number].which_player_turn += 1
 	games[number].which_player_turn %= 2
-	if check_game_running_conditions(games[number].squares)
+	games[number].compute_scores()
+	if games[number].check_game_running_conditions():
 		socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
-	else
+	else:
 		games[game].set_game_running(0)
-		games[number].set_game_slot(-1)
 		socketio.emit('endstate', 'OK,{}'.format(games[number].return_game_state()))
+		games[number].set_game_slot(-1)
 
 @socketio.on('connect')
 def handle_connect():
@@ -271,89 +361,6 @@ def handle_message(message):
 				socketio.emit('message', 'ERROR, command not recognised: ' + message)
 	else:
 		socketio.emit('message', 'ERROR, nothing was sent.')
-
-def check_game_running_conditions(squares):
-	total_squares = all.width * all.height
-	half_squares = int(total_squares / 2)
-	# player 1 squares
-	total_player_squares = int(0)
-	for i in all.squares:
-		if i.owner == 1:
-			total_player_squares += 1
-	if total_player_squares > half_squares:
-		return False
-	# player 2 squares
-	total_player_squares = int(0)
-	for i in all.squares:
-		if i.owner == 2:
-			total_player_squares += 1
-	if total_player_squares > half_squares:
-		return False
-	# if no player has more than 50 percent of squares
-	# then check if there are are still unclaimed squares
-	for i in all.squares:
-		if i.owner == 0:
-			return True
-	return False
-
-def return_owner(x, y, game):
-	return game.squares[x + (y * game.width)].owner
-
-def return_colour(x, y, game):
-	return  game.squares[x + (y * game.width)].colour
-
-def set_colour(x, y, colour, game):
-	all.squares[x + (y * game.width)].colour = colour
-
-def return_used(x, y, game):
-	return game.squares[x + (y * game.width)].used
-
-def set_used(x, y, game):
-	game.squares[x + (y * game.width)].used = True
-
-def paint_with_colour(x, y, colour, game):
-	if x < 0 or x >= game.width: # out of bounds
-		return
-	if y < 0 or y >= game.height: # out of bounds
-		return
-	if return_used(x, y, game) == True:
-		return
-	if return_owner(x, y, game) == game.which_player_turn + 1: # is the owner, print with new colour
-		set_colour(x, y, colour, game)
-		set_used(x, y, game)
-		paint_with_colour(x + 1, y, colour, game)
-		paint_with_colour(x - 1, y, colour, game)
-		paint_with_colour(x, y + 1, colour, game)
-		paint_with_colour(x, y - 1, colour, game)
-		return
-	if return_owner(x, y, game) == 0 and return_colour(x, y, game) == colour: # no one owns and the colour matches
-		game.squares[x + (y * all.width)].owner = game.which_player_turn + 1
-		set_used(x, y, game)
-		paint_with_colour(x + 1, y, colour, game)
-		paint_with_colour(x - 1, y, colour, game)
-		paint_with_colour(x, y + 1, colour, game)
-		paint_with_colour(x, y - 1, colour, game)
-
-def who_won_or_draw(game):
-	total_squares = all.width * all.height
-	half_squares = int(total_squares / 2)
-	# player 1 squares
-	total_player_squares1 = int(0)
-	for i in game.squares:
-		if i.owner == 1:
-			total_player_squares1 += 1
-	if total_player_squares1 > half_squares:
-		return 1 # player 1
-	# player 2 squares
-	total_player_squares2 = int(0)
-	for i in game.squares:
-		if i.owner == 2:
-			total_player_squares2 += 1
-	if total_player_squares2 > half_squares:
-		return 2 # player 2
-	# Draw
-	if total_player_squares1 == total_player_squares2:
-		return 0 # draw
 	
 if __name__ == '__main__':
 	# Use SSL/TLS encryption for WSS
