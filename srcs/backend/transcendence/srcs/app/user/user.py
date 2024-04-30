@@ -461,6 +461,8 @@ def gameResponse(request, data):
     if not challenger_user:
         return render(request, 'user/play.html', playContext(request, "Error: game cancelled / user deleted", None))    
     game_instance = GameInstance.objects.filter(p1=challenger_user, p2=request.user).first()
+    if not game_instance:
+        return render(request, 'user/play.html', playContext(request, None, "Game not found"))
     if action == 'accept':
         game_instance.status = 'Active'
         game_instance.save()
@@ -477,14 +479,14 @@ def gameResponse(request, data):
         game_instance.delete()
         return render(request, 'user/play.html', playContext(request, None, "Game cancelled"))
 
-# TODO: why does this return friends html?
+
 def playPOST(request):
     if request.content_type == 'application/json':
         data = json.loads(request.body)
         if data.get('request_type') == 'gameResponse':
             return gameResponse(request, data)
         else:
-            return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, ve, "Unknown content type"))
+            return render(request, 'user/play.html', playContext(request, None, "Unknown request type"))
 
     current_user = request.user
     sent_form = GameRequestForm(request.POST)
