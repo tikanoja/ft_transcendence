@@ -1,4 +1,4 @@
-from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm, AddFriendForm, GameRequestForm, UploadImageForm
+from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm, AddFriendForm, GameRequestForm, UploadImageForm, LocalGameForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
 from .models import CustomUser, CustomUserManager, GameInstance, Friendship
@@ -414,7 +414,8 @@ def block_user(request):
 def playContext(request, error, success):
     logger.debug('in playContext()')
     current_user = request.user
-    form = GameRequestForm()
+    inviteform = GameRequestForm()
+    playform = LocalGameForm()
     title = 'Play'
     all_games = GameInstance.objects.filter(Q(p1=current_user) | Q(p2=current_user))
     logger.debug('num of all_games(): ' + str(all_games.count()))
@@ -424,7 +425,8 @@ def playContext(request, error, success):
 
     context = {
         'current_user': current_user,
-        'form': form,
+        'inviteform': inviteform,
+        'playform': playform,
         'all_games': all_games,
         'invites_sent': invites_sent,
         'invites_received': invites_received
@@ -435,6 +437,7 @@ def playContext(request, error, success):
     elif success:
         context['success'] = success
     return context
+
 
 def playGET(request):
     current_user = request.user

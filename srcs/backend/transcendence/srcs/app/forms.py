@@ -136,12 +136,12 @@ class UploadImageForm(forms.ModelForm):
 
 
 class GameRequestForm(forms.Form):
-    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
     GAME_TYPE_CHOICES = [
         (GameInstance.PONG, 'Pong'),
         (GameInstance.COLOR, 'Color'),
     ]
     game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
 
     def is_valid(self):
         valid = super().is_valid()
@@ -154,8 +154,14 @@ class GameRequestForm(forms.Form):
             raise ValidationError("No such user")
         return True
 
-class LocalGameForm(GameRequestForm):
-    password = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'placeholder': 'Enter password'}), max_length=256, required=True)
+class LocalGameForm(forms.Form):
+    GAME_TYPE_CHOICES = [
+        (GameInstance.PONG, 'Pong'),
+        (GameInstance.COLOR, 'Color'),
+    ]
+    game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
+    username = forms.CharField(label='P2 Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
+    password = forms.CharField(label='P2 Password', widget=forms.PasswordInput(attrs={'placeholder': 'Enter password'}), max_length=256, required=True)
 
     def is_valid(self):
         valid = super().is_valid()

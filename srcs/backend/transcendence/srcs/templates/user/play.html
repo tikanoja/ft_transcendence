@@ -8,8 +8,16 @@
 {% endif %}
 
 <h2>Quick play</h2>
-<p>[Pong]    [Color]</p>
-<p>This should match two players who are in queue to play</p>
+<form id="gameRequestForm" >
+	{% csrf_token %}
+	{% for field in playform %}
+	<div class="form-group">
+	<p style="color: red">{{ field.errors }}<p>
+	{{ field.label_tag }} {{ field }}
+	</div>
+	{% endfor %}
+	<input type="submit" value="Start game">
+</form>
 
 <br>
 
@@ -22,7 +30,7 @@
 <h2>Custom invite</h2>
 <form id="gameRequestForm" >
 	{% csrf_token %}
-	{% for field in form %}
+	{% for field in inviteform %}
 	<div class="form-group">
 	<p style="color: red">{{ field.errors }}<p>
 	{{ field.label_tag }} {{ field }}
