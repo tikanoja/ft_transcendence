@@ -287,7 +287,7 @@ def friendsContext(username, error, success):
         context = {'current_user': current_user, 'form': form, 'title': title, 'in_invites': in_invites, 'out_invites': out_invites, 'friendships': friendships, 'blocked_users': blocked_users, 'success': success}
     return context
 
-
+# can get rid of this?
 def friendsGET(request):
     return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, None, None))	
 
@@ -296,28 +296,28 @@ def friendResponse(request, data):
     from_username = data.get('from_user')
     from_user = CustomUser.objects.filter(username=from_username).first()
     if not from_user:
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, "Could not find the friend candidate", None))    
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, "Could not find the friend candidate", None), "self_profile": True})    
     action = data.get('action')
 
     if action == 'unblock':
         request.user.blocked_users.remove(from_user)
         request.user.save()
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, None, "Unblocked " + from_user.username))
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, None, "Unblocked " + from_user.username), "self_profile": True})
 
     friendship = Friendship.objects.filter(Q(to_user=request.user, from_user=from_user) | Q(to_user=from_user, from_user=request.user)).first()
     if not friendship:
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, "Could not find the friendship", None))    
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, "Could not find the friendship", None), "self_profile": True})    
 
     if action == 'accept':
         friendship.status = Friendship.ACCEPTED
         friendship.save()
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, None, "Congratulations, you made a new friend!"))
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, None, "Congratulations, you made a new friend!"), "self_profile": True})
     elif action == 'reject':
         friendship.delete()
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, None, "Friendship REJECTED!"))
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, None, "Friendship REJECTED!"), "self_profile": True})
     elif action == 'delete':
         friendship.delete()
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, None, "Friendship DELETED!"))
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, None, "Friendship DELETED!"), "self_profile": True})
 
 
 def friendsPOST(request):
@@ -327,23 +327,23 @@ def friendsPOST(request):
         if data.get('request_type') == 'friendResponse':
             return friendResponse(request, data)
         else:
-            return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, ve, "Unknown content type"))
+            return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, ve, "Unknown content type"), "self_profile": True})
 
     sent_form = AddFriendForm(request.POST)
     try:
         if not sent_form.is_valid():
             raise ValidationError("Form filled incorrectly")
     except ValidationError as ve:
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, ve, None))
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, ve, None), "self_profile": True})
     friend_username = sent_form.cleaned_data['username']
     current_user = request.user
     friend_user = CustomUser.objects.filter(username=friend_username).first()
     if friend_user in current_user.blocked_users.all() or current_user in friend_user.blocked_users.all():
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, "You cannot add or request friendship with a blocked user", None))
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, "You cannot add or request friendship with a blocked user", None), "self_profile": True})
 
     # check if they are trying to add themselves
     if request.user.username == friend_username:
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, "Please do not add yourself", None))
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, "Please do not add yourself", None), "self_profile": True})
 
     # all friendships where current_user is: no matter the status
     all_friendships = Friendship.objects.filter(Q(from_user=current_user) | Q(to_user=current_user))
@@ -356,23 +356,23 @@ def friendsPOST(request):
 
     # check if they are already friends
     if friendships.filter(Q(from_user=friend_user) | Q(to_user=friend_user)):
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, "You are already friends", None))
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, "You are already friends", None), "self_profile": True})
 
     # check if friend_user matches an incoming invite, and if yes, update the status of that Friendship to ACCEPTED
     incoming_invite = in_invites.filter(from_user=friend_user)
     if incoming_invite.exists():
         incoming_invite.update(status=Friendship.ACCEPTED)
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, None, "Congratulations, you made a new friend!"))
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, None, "Congratulations, you made a new friend!"), "self_profile": True})
 
     # check if they have already sent a request to the user in question
     if out_invites.filter(to_user=friend_user):
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, "You have already sent a request to this user", None))
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, "You have already sent a request to this user", None), "self_profile": True})
 
     # add to friends
     new_friendship = Friendship(from_user=current_user, to_user=friend_user, status=Friendship.PENDING)
     new_friendship.save()
 
-    return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, None, "Friend request sent"))
+    return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, None, "Friend request sent"), "self_profile": True})
 
 
 def block_user(request):
@@ -383,7 +383,7 @@ def block_user(request):
         if not sent_form.is_valid():
             raise ValidationError("Form filled incorrectly")
     except ValidationError as ve:
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, ve, None))
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, ve, None), "self_profile": True})
 
     blocked_username = sent_form.cleaned_data['username']
     blocked_user = CustomUser.objects.get(username=blocked_username)
@@ -391,10 +391,10 @@ def block_user(request):
     logger.debug('tryna block: ' + blocked_username)
 
     if request.user.username == blocked_username:
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, "Please do not block yourself", None))
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, "Please do not block yourself", None), "self_profile": True})
 
     if blocked_user in current_user.blocked_users.all():
-        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, "You have already blocked " + blocked_username + "!", None))
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, "You have already blocked " + blocked_username + "!", None), "self_profile": True})
 
     # Delete possible friendship between them
     friendships_to_delete = Friendship.objects.filter(Q(from_user=current_user, to_user=blocked_user) | Q(from_user=blocked_user, to_user=current_user))
@@ -408,7 +408,7 @@ def block_user(request):
     current_user.blocked_users.add(blocked_user)
     current_user.save()
 
-    return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, None, "Blocked " + blocked_username + "!"))
+    return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, None, "Blocked " + blocked_username + "!"), "self_profile": True})
 
 
 def playContext(request, error, success):
@@ -477,7 +477,7 @@ def gameResponse(request, data):
         game_instance.delete()
         return render(request, 'user/play.html', playContext(request, None, "Game cancelled"))
 
-
+# TODO: why does this return friends html?
 def playPOST(request):
     if request.content_type == 'application/json':
         data = json.loads(request.body)
