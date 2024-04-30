@@ -99,10 +99,10 @@ function updateEventListeners() {
     var registerForm = document.getElementById('registerForm');
     var logoutButton = document.getElementById('logoutButton');
 	var playButton = document.getElementById('playButton');
-    var addFriendForm = document.getElementById('addFriendButton');
+    var addFriendButton = document.getElementById('addFriendButton');
+    var blockUserButton = document.getElementById('blockUserButton');
     var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
     var profileLinks = document.querySelectorAll('#profileLinkTag')
-    var blockUserButton = document.getElementById('blockUserButton');
     var gameRequestForm = document.getElementById('gameRequestForm'); 
     var playButton = document.getElementById('playButton');
     var deleteForm = document.getElementById('delete-account-form');
@@ -132,15 +132,15 @@ function updateEventListeners() {
         logoutButton.removeEventListener('click', logoutButtonClickHandler);
 	if (playButton)
         playButton.removeEventListener('click', playButtonClickHandler);
-    if (addFriendForm)
-        addFriendForm.removeEventListener('click', addFriendHandler);
+    if (addFriendButton)
+        addFriendButton.removeEventListener('click', addFriendHandler);
+    if (blockUserButton)
+        blockUserButton.removeEventListener('click', blockUserHandler)
     if (friendRequestButtons) {
         friendRequestButtons.forEach(function(button) {
             button.removeEventListener('click', friendRequestHandler);
         })
     }
-    if (blockUserButton)
-        blockUserButton.removeEventListener('click', blockUserHandler)
     if (gameRequestForm)
         gameRequestForm.removeEventListener('submit', gameRequestHandler)
     if (gameRequestButtons) {
@@ -148,7 +148,7 @@ function updateEventListeners() {
             button.removeEventListener('click', gameResponseHandler);
         })
     }
-if (profileLinks) {
+    if (profileLinks) {
         profileLinks.forEach(function(link) {
             link.removeEventListener('click', profileLinkHandler);
         })
@@ -165,8 +165,10 @@ if (profileLinks) {
         logoutButton.addEventListener('click', logoutButtonClickHandler);
     if (playButton)
         playButton.addEventListener('click', playButtonClickHandler);
-    if (addFriendForm)
-        addFriendForm.addEventListener('submit', addFriendHandler);
+    if (addFriendButton)
+        addFriendButton.addEventListener('click', addFriendHandler);
+    if (blockUserButton)
+        blockUserButton.addEventListener('click', blockUserHandler);
     if (friendRequestButtons) {
         friendRequestButtons.forEach(function(button) {
             button.addEventListener('click', friendRequestHandler);
@@ -263,7 +265,8 @@ const loginFormHandler = async (event) => {
 const blockUserHandler = async (event) => {
     console.log('In blockUserHandler()');
     event.preventDefault();
-    const formData = new FormData(event.target);
+    let form = document.getElementById("addFriendForm")
+    const formData = new FormData(form);
     const querystring = window.location.search;
     var endpoint = '/app/block_user/' + querystring;
     const response = await sendPostRequest(endpoint, formData);
@@ -282,7 +285,8 @@ const blockUserHandler = async (event) => {
 const addFriendHandler = async (event) => {
     console.log('In addFriendHandler()');
     event.preventDefault();
-    const formData = new FormData(event.target);
+    let form = document.getElementById("addFriendForm")
+    const formData = new FormData(form);
     const querystring = window.location.search;
     var endpoint = '/app/friends/' + querystring;
     const response = await sendPostRequest(endpoint, formData);
@@ -293,9 +297,9 @@ const addFriendHandler = async (event) => {
         const html = await response.text();
         updateElementContent(html, "friends");
         // updateContent(html, "Friends | Pong", "Add friend form");
-	} else {
-		console.log("Response status in addFriendHandler(): ", response.status)
-	}
+    } else {
+        console.log("Response status in addFriendHandler(): ", response.status)
+    }
 }
 
 const gameResponseHandler = async (event) => {
@@ -351,7 +355,7 @@ const friendRequestHandler = async (event) => {
         updateElementContent(html, "friends");
         // updateContent(html, "Friends | Pong", "Add friend form");
 	} else {
-		console.log("Response status in addFriendHandler(): ", response.status)
+		console.log("Response status in friendRequestHandler(): ", response.status)
 	}
 }
 
@@ -409,7 +413,7 @@ const profileLinkHandler = async (event) => {
     let profilePath = profileUrl.pathname;
     console.log("profile path " + profilePath);
     let profileUsername = event.target.textContent;
-    let response = await sendGetRequest('app' + profilePath);
+    let response = await sendGetRequest('/app' + profilePath);
     if (response.redirected) {
         console.log('redirect status found');
         let redirect_location = response.url;

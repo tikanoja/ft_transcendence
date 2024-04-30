@@ -302,7 +302,7 @@ def friendResponse(request, data):
     if action == 'unblock':
         request.user.blocked_users.remove(from_user)
         request.user.save()
-        return render(request, 'user/friends.html', friendsContext(request, None, "Unblocked " + from_user.username))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, None, "Unblocked " + from_user.username))
 
     friendship = Friendship.objects.filter(Q(to_user=request.user, from_user=from_user) | Q(to_user=from_user, from_user=request.user)).first()
     if not friendship:
@@ -339,7 +339,7 @@ def friendsPOST(request):
     current_user = request.user
     friend_user = CustomUser.objects.filter(username=friend_username).first()
     if friend_user in current_user.blocked_users.all() or current_user in friend_user.blocked_users.all():
-        return render(request, 'user/friends.html', friendsContext(request.user.username, "You cannot add or request friendship with a blocked user", None))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, "You cannot add or request friendship with a blocked user", None))
 
     # check if they are trying to add themselves
     if request.user.username == friend_username:
@@ -383,7 +383,7 @@ def block_user(request):
         if not sent_form.is_valid():
             raise ValidationError("Form filled incorrectly")
     except ValidationError as ve:
-        return render(request, 'user/friends.html', friendsContext(request.user.username, ve, None))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, ve, None))
 
     blocked_username = sent_form.cleaned_data['username']
     blocked_user = CustomUser.objects.get(username=blocked_username)
@@ -391,10 +391,10 @@ def block_user(request):
     logger.debug('tryna block: ' + blocked_username)
 
     if request.user.username == blocked_username:
-        return render(request, 'user/friends.html', friendsContext(request.user.username, "Please do not block yourself", None))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, "Please do not block yourself", None))
 
     if blocked_user in current_user.blocked_users.all():
-        return render(request, 'user/friends.html', friendsContext(request.user.username, "You have already blocked " + blocked_username + "!", None))
+        return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, "You have already blocked " + blocked_username + "!", None))
 
     # Delete possible friendship between them
     friendships_to_delete = Friendship.objects.filter(Q(from_user=current_user, to_user=blocked_user) | Q(from_user=blocked_user, to_user=current_user))
@@ -408,7 +408,7 @@ def block_user(request):
     current_user.blocked_users.add(blocked_user)
     current_user.save()
 
-    return render(request, 'user/friends.html', friendsContext(request.user.username, None, "Blocked " + blocked_username + "!"))
+    return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, None, "Blocked " + blocked_username + "!"))
 
 
 def playContext(request, error, success):
@@ -484,7 +484,7 @@ def playPOST(request):
         if data.get('request_type') == 'gameResponse':
             return gameResponse(request, data)
         else:
-            return render(request, 'user/friends.html', friendsContext(request.user.username, ve, "Unknown content type"))
+            return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, ve, "Unknown content type"))
 
     current_user = request.user
     sent_form = GameRequestForm(request.POST)
