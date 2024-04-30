@@ -135,7 +135,6 @@ class UploadImageForm(forms.ModelForm):
         fields = ["profile_picture"]
 
 
-
 class GameRequestForm(forms.Form):
     username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
     GAME_TYPE_CHOICES = [
@@ -153,4 +152,24 @@ class GameRequestForm(forms.Form):
             raise ValidationError("Empty username")
         if not CustomUser.objects.filter(username=self.cleaned_data["username"]).exists():
             raise ValidationError("No such user")
-        return True 
+        return True
+
+class LocalGameForm(GameRequestForm):
+    password = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'placeholder': 'Enter password'}), max_length=256, required=True)
+
+    def is_valid(self):
+        valid = super().is_valid()
+        if not valid:
+            return False
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+        if not username or username.isspace():
+            raise forms.ValidationError("Empty username")
+        if not password or password.isspace():
+            raise forms.ValidationError("Empty password")
+        user = CustomUser.objects.filter(username=username).first()
+        if not user:
+            raise forms.ValidationError("No such user")
+        if not user.check_password(password):
+            raise forms.ValidationError("Incorrect password")
+        return True
