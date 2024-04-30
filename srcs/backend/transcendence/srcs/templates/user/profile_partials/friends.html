@@ -5,18 +5,21 @@
 	{% if success %}
 	<p style="color: green">Success: {{friends.success}}</p>
 	{% endif %}
+
+	{% if self_profile %}
 	<form id="addFriendForm" >
 		{% csrf_token %}
 		{% for field in friends.form %}
 		<div class="form-group">
-		<p style="color: red">{{ friends.field.errors }}<p>
-		{{ friends.field.label_tag }} {{ friends.field }}
+		<p style="color: red">{{ field.errors }}<p>
+		{{ field.label_tag }} {{ field }}
 		</div>
 		{% endfor %}
-		<input type="submit" value="Add friend">
+		<input type="submit" value="Add friend" id="addFriendButton">
+		<input type="submit" value="Block user" id="blockUserButton">
 	</form>
 
-	<form id="blockUserForm" >
+	{% comment %} <form id="blockUserForm" >
 		{% csrf_token %}
 		{% for field in friends.form %}
 		<div class="form-group">
@@ -25,8 +28,8 @@
 		</div>
 		{% endfor %}
 		<input type="submit" value="Block user">
-	</form>
-
+	</form> {% endcomment %}
+	{% endif %}
 	</br>
 
 	<div>
