@@ -99,30 +99,29 @@ class GameInstance(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
  
+    def __str__(self):
+        return f'({self.game} instance:  p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'
 
 class PongGameInstance(GameInstance):
-    longest_rally_time = models.IntegerField(default=0)
     longest_rally_hits = models.IntegerField(default=0)
-    total_game_time = models.DurationField()
-    p1_hits = models.IntegerField(default=0)
-    p2_hits = models.IntegerField(default=0)
-    p1_misses = models.IntegerField(default=0)
-    p2_misses = models.IntegerField(default=0)
     p1_score = models.IntegerField(default=0)
     p2_score = models.IntegerField(default=0)
     
+    def __str__(self):
+        return f'({self.game} instance:  p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'
 
 class ColorGameInstance(GameInstance):
     turns = models.IntegerField(default=0)
     p1_biggest_takeover = models.IntegerField(default=0)
     p2_biggest_takeover = models.IntegerField(default=0)
     
+    def __str__(self):
+        return f'({self.game} instance:  p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'
 
 # user profile model
 #  language -> maybe add to CustomUser model?
 #  picture
 #  custom setting for paddle?
-
 
 # stats model -  individual game stats that linked to the user
 #  define what about a game to save

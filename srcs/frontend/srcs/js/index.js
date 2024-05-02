@@ -182,6 +182,13 @@ function updateEventListeners() {
         emailChangeForm.addEventListener('submit', manageAccountHandler);
     if (passwordChangeForm)
         passwordChangeForm.addEventListener('submit', manageAccountHandler);
+    if (gameRequestForm)
+        gameRequestForm.addEventListener('submit', gameRequestHandler)
+    if (gameRequestButtons) {
+        gameRequestButtons.forEach(function(button) {
+            button.addEventListener('click', gameResponseHandler);
+        })
+    }
     if (profileLinks) {
         profileLinks.forEach(function(link) {
             link.addEventListener('click', profileLinkHandler);

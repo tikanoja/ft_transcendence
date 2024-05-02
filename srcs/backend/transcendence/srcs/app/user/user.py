@@ -1,5 +1,5 @@
 from app.forms import  GameRequestForm
-from app.models import CustomUser, GameInstance
+from app.models import CustomUser, GameInstance, PongGameInstance
 from django.core.exceptions import ValidationError
 import logging
 from django.shortcuts import render
@@ -117,7 +117,8 @@ def playPOST(request):
     if prior_request is not None:
         return render(request, 'user/play.html', playContext(request, "You have already sent a game request to this user", None)) 
 
-    new_game_instance = GameInstance(p1=current_user, p2=challenged_user, game=sent_form.cleaned_data['game_type'], status='Pending')
+    # changed to PongGameInstance for now, #TODO: need to diferentiate between what game is requests and the object made
+    new_game_instance = PongGameInstance(p1=current_user, p2=challenged_user, game=sent_form.cleaned_data['game_type'], status='Pending')
     new_game_instance.save()
     return render(request, 'user/play.html', playContext(request, None, "Game invite sent! Should we be redirected to game here?")) 
     
