@@ -111,6 +111,8 @@ function updateEventListeners() {
     var passwordChangeForm = document.getElementById('password-change-form');
     let profilePictureForm = document.getElementById('profile_picture_upload');
     var gameRequestButtons = document.querySelectorAll('[id^="gameRequestButton"]');
+    var gameRenderButton = document.getElementById('gameRenderButton');
+    var playerAuthForms = document.querySelectorAll('[id^="playerAuthForm"]');
 
     // remove listeners
     if (profilePictureForm)
@@ -153,6 +155,13 @@ function updateEventListeners() {
             link.removeEventListener('click', profileLinkHandler);
         })
     }
+    if (gameRenderButton)
+        gameRenderButton.removeEventListener('click', gameRenderButtonHandler);
+    if (playerAuthForms) {
+        playerAuthForms.forEach(function(button) {
+            button.removeEventListener('submit', playerAuthHandler);
+        })
+    }
     // begin add listeners if currently present
     if (profilePictureForm)
         profilePictureForm.addEventListener('submit', manageAccountHandler);
@@ -192,6 +201,13 @@ function updateEventListeners() {
     if (profileLinks) {
         profileLinks.forEach(function(link) {
             link.addEventListener('click', profileLinkHandler);
+        })
+    }
+    if (gameRenderButton)
+        gameRenderButton.addEventListener('click', gameRenderButtonHandler);
+    if (playerAuthForms) {
+        playerAuthForms.forEach(function(button) {
+            button.addEventListener('submit', playerAuthHandler);
         })
     }
 }
@@ -440,6 +456,66 @@ const profileLinkHandler = async (event) => {
 	}
 }
 
+const gameRenderButtonHandler = async (event) => {
+    event.preventDefault();
+    var gameType = event.target.dataset.game;
+    var p1 = event.target.dataset.p1;
+    var p2 = event.target.dataset.p2;
+    var endpoint;
+
+    var data = {
+        'p1': p1,
+        'p2': p2,
+        'game': gameType
+    }
+    if (gameType === 'Pong') {
+        console.log("Rendering pong game");
+        endpoint = '/pong/post_pong_canvas/';
+    } else {
+        console.log("Rendering CW game");
+        endpoint = '/pong/post_cw_canvas/';
+    }
+    let response = await sendPostRequest(endpoint, data, true);
+    if (response.redirected) {
+        console.log('redirect status found');
+        let redirect_location = response.url;
+        console.log("redir to: ", redirect_location);
+        routeRedirect(redirect_location);
+    }
+	else if (response.ok) {
+        console.log('response,ok triggered');
+		// stay on this page, display the content again
+        const html = await response.text();
+        // window.history.pushState("", "", profilePath);
+        updateContent(html, "Playing " + gameType, "Playing " + gameType);
+	}
+	else {
+		console.log("Response status: ", response.status)
+		// some 400 or 500 code probably, show the error that was sent?
+	}
+}
+
+const playerAuthHandler = async (event) => {
+    console.log('In playerAuthHandler()');
+    event.preventDefault();
+    const formData = new FormData(event.target);
+
+    const querystring = window.location.search;
+    var endpoint = '/pong/authenticate_player/' + querystring;
+    const response = await sendPostRequest(endpoint, formData);
+    if (response.redirected) {
+        let redirect_location = response.url;
+        console.log("redir to: ", redirect_location);
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        // handling normal content update
+        const html = await response.text();
+        updateContent(html, "Registration | Pong", "Description");
+    } else {
+        // something is not quite right...
+        console.log('submitRegistrationHandler(): response status: ' + response.status);
+    }
+}
 
 const start_game_loop = async () => {
     const responseData = await sendGetRequest('pong/start_background_loop').then((response) => response.text());

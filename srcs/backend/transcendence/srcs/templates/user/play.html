@@ -7,6 +7,13 @@
 <p style="color: green">Success: {{success}}</p>
 {% endif %}
 
+{% if active_game %}
+<h2 style="color: green">You have an active game of {{ active_game.game }} with {% if active_game.p1.username == current_user.username %}{{ active_game.p2.username }}{% else %}{{ active_game.p1.username }}{% endif %}.</h2>
+<button type="submit" id="gameRenderButton" data-game={{ active_game.game }} data-p1={{ active_game.p1.username }} data-p2={{ active_game.p2.username }} data-action="render_game" class="btn btn-success">Render game</button>
+{% endif %}
+
+<br>
+
 <h2>Quick play</h2>
 <form id="gameRequestForm" >
 	{% csrf_token %}

@@ -72,6 +72,7 @@ class Friendship(models.Model):
 class GameInstance(models.Model):
     PENDING = 'Pending'
     ACTIVE = 'Active'
+    ACCEPTED = 'Accepted'
     ERROR = 'Error'
     FINISHED = 'Finished'
     SURRENDER = 'Surrender'
@@ -79,6 +80,7 @@ class GameInstance(models.Model):
     STATUS_CHOICES = [
         (PENDING, 'Pending'),
         (ACTIVE, 'Active'),
+        (ACCEPTED, 'Accepted'),
         (ERROR, 'Error'),
         (FINISHED, 'Finished'),
         (SURRENDER, 'Surrender')
@@ -93,6 +95,8 @@ class GameInstance(models.Model):
 
     p1 = models.ForeignKey("CustomUser", related_name="player_one", on_delete=models.SET_NULL, null=True)
     p2 = models.ForeignKey("CustomUser", related_name="player_two", on_delete=models.SET_NULL, null=True)
+    p1auth = models.BooleanField(default=False)
+    p2auth = models.BooleanField(default=False)
     status = models.CharField(max_length=9, choices=STATUS_CHOICES, default=PENDING)
     game = models.CharField(max_length=5, choices=GAME_CHOICES, default=PONG)
     winner = models.ForeignKey("CustomUser", related_name="winner", on_delete=models.SET_NULL, null=True) 

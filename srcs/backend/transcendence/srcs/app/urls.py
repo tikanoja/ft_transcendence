@@ -15,7 +15,7 @@ urlpatterns = [
 	path('home/', views.home, name="home"),
 	path('notfound/', views.notfound, name="notfound"),
 	path('manage_account/', views.manage_account, name="manage_account"),
-	path('block_user/', relations.block_user, name="block_user"),
+	path('block_user/', relations.block_user, name="block_user")
 ]
 
 # TODO block user need divverent view definition.

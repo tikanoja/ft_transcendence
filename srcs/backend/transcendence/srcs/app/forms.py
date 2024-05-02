@@ -48,6 +48,15 @@ class LoginForm(forms.Form):
     password = forms.CharField(label="Password", widget=forms.PasswordInput)
 
 
+class PlayerAuthForm(forms.Form):
+    password = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'placeholder': 'Enter password'}))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'username' in kwargs:
+            self.fields['username'] = forms.CharField(widget=forms.HiddenInput(), initial=kwargs['username'])
+        if 'game_id' in kwargs:
+            self.fields['game_id'] = forms.IntegerField(widget=forms.HiddenInput(), initial=kwargs['game_id'])
+
 class DeleteAccountForm(forms.Form):
     # username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
     password = forms.CharField(label="Password", widget=forms.PasswordInput)

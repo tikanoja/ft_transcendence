@@ -8,11 +8,11 @@ from .models import CustomUser
 # from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate #, login, logout
 from .forms import DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm, UploadImageForm
-from app.user import session, account, dashboard, relations, user
+from app.user import session, account, dashboard, relations
 from app.user import profile as user_profile
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-
+from .play import playGET, playPOST
 
 logger = logging.getLogger(__name__)
 
@@ -104,9 +104,9 @@ def settings(request):
 def play(request):
 	logger.debug('In play()')
 	if request.method == 'GET':
-		response = user.playGET(request)
+		response = playGET(request)
 	elif request.method == 'POST':
-		response = user.playPOST(request)
+		response = playPOST(request)
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 	return response
