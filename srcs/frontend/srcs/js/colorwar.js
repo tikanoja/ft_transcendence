@@ -25,13 +25,15 @@ export const loadScript = () => {
 }
 
 
-function connectWebSocket() {
-    console.log("inn pongs connect web socket")
+function connectWebSocketColorwar() {
+    console.log("in color war connect websocket")
+    // socket = io.connect('https://' + window.location.hostname);
+    socket = io.connect(':8889');
     socket = io.connect('https://' + window.location.hostname);
-    // socket = io.connect('https://' + window.location.hostname + '/pong/');
-    socket.on('connect', () => {
-        console.log("connect recieved: pong")
 
+	console.log(window.location.hostname)
+    socket.on('connect', () => {
+        console.log("Connect in colorwar")
     });
     socket.on('error', (error) => {
         console.error('WebSocket error:', error);
@@ -62,14 +64,15 @@ export const verifyUsername = () => {
     });
 };
 
-export const startScreen = async () => {
+export const startScreenColorwar = async () => {
     try {
+            console.log("in start screen color war!!")
 			await loadScript();
-			connectWebSocket();
-            
+			connectWebSocketColorwar();
+            console.log("This is the colourwar start screen")
 			const startScreen = document.getElementById('startScreen');
-			const playButton = document.getElementById('playButton');
-			const canvasContainer = document.getElementById('canvasContainer');
+			const playButton = document.getElementById('ColorwarPlayButton');
+			const canvasContainer = document.getElementById('canvasColorWar');
 			const styleCheckbox = document.getElementById('styleCheckbox');
 			let is3DGraphics = false;
             
@@ -86,7 +89,7 @@ export const startScreen = async () => {
                 socket.emit('message', 'start_game,' + gameNumber);
 
                 socket.on('start_game', (data) => {
-                    console.log("start game was called")
+                    console.log("start game was called from color war")
                     startScreen.style.display = 'none';
                     canvasContainer.style.display = 'block';
                     console.log(data)
@@ -227,7 +230,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     const scene = new THREE.Scene();
     let camera;
     // Remove any existing canvas
-    const existingCanvas = document.getElementById('pongCanvas');
+    const existingCanvas = document.getElementById('canvasColorWar');
     if (existingCanvas) {
         existingCanvas.remove();
     }
@@ -236,8 +239,8 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     const pixelRatio = window.devicePixelRatio;
     renderer.setPixelRatio(pixelRatio);
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
-    renderer.domElement.id = 'pongCanvas'; // Set an id for the new canvas
-    document.getElementById('canvasContainer').appendChild(renderer.domElement);
+    renderer.domElement.id = 'canvasColorWar'; // Set an id for the new canvas
+    document.getElementById('canvasColorWar').appendChild(renderer.domElement);
     let p1_paddle, p2_paddle, ball;
     if (is3DGraphics) {
         camera = setup3DScene(scene);

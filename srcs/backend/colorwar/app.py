@@ -329,9 +329,9 @@ def make_move(splitted_command):
 
 @socketio.on('connect')
 def handle_connect():
-	#print('Client connected')
+	print('Client connected to color war')
 	global socketio
-	socketio.emit('message', 'hello client')
+	socketio.emit('message', 'hello client from colorwar')
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -366,5 +366,6 @@ if __name__ == '__main__':
 	# Use SSL/TLS encryption for WSS
 	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 	ssl_context.load_cert_chain('/server.crt', '/server.key')
+	print("color war is now running, server is open")
 	socketio.run(app, host='0.0.0.0', port=8889, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
 	#socketio.run(app, host='0.0.0.0', port=8889, debug=True, allow_unsafe_werkzeug=True)

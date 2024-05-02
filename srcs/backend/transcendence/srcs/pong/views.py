@@ -45,5 +45,11 @@ def get_canvas(request):
 	if request.method == 'GET':
 		logger.debug('about to render!')
 		return render(request, "pong/pong.html", {})
+
+def get_canvas_colorwar(request):
+	logger.debug('In get_canvas_color()')
+	if request.method == 'GET':
+		logger.debug('about to render!')
+		return render(request, "pong/colorwar.html", {})
 		
 

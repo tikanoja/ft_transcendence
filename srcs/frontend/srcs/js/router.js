@@ -65,7 +65,7 @@ const routes = {
 		description: "Login"
 	},
 	"/test" : { //TODO: fix this
-		view: "/pong/get_canvas/",
+		view: "/pong/get_canvas_colorwar/",
 		title: "testing | " +  pageTitle,
 		description: "Amazing 3D"
 	},

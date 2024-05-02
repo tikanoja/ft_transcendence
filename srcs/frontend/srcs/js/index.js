@@ -1,5 +1,6 @@
 import { routeRedirect } from './router.js'
 import { startScreen} from './pong.js'
+import { startScreenColorwar} from './colorwar.js'
 
 document.addEventListener("DOMContentLoaded", function () {
 	// Get the current URL path
@@ -99,6 +100,7 @@ function updateEventListeners() {
     var registerForm = document.getElementById('registerForm');
     var logoutButton = document.getElementById('logoutButton');
 	var playButton = document.getElementById('playButton');
+	var playButtoncolorwar = document.getElementById('ColorwarPlayButton');
     var addFriendForm = document.getElementById('addFriendForm');
     var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
     var blockUserButton = document.getElementById('blockUserForm');
@@ -127,6 +129,8 @@ function updateEventListeners() {
         logoutButton.removeEventListener('click', logoutButtonClickHandler);
 	if (playButton)
         playButton.removeEventListener('click', playButtonClickHandler);
+    if (playButtoncolorwar)
+        playButtoncolorwar.removeEventListener('click', playButtoncolorwarClickHandler);
     if (addFriendForm)
         addFriendForm.removeEventListener('submit', addFriendHandler);
     if (friendRequestButtons) {
@@ -153,6 +157,8 @@ function updateEventListeners() {
         logoutButton.addEventListener('click', logoutButtonClickHandler);
     if (playButton)
         playButton.addEventListener('click', playButtonClickHandler);
+    if (playButtoncolorwar)
+        playButtoncolorwar.addEventListener('click', playButtoncolorwarClickHandler);
     if (addFriendForm)
         addFriendForm.addEventListener('submit', addFriendHandler);
     if (friendRequestButtons) {
@@ -227,6 +233,12 @@ const submitRegistrationHandler = async (event) => {
 
 const playButtonClickHandler = async (event) => {	
     startScreen();
+}
+
+const playButtoncolorwarClickHandler = async (event) => {
+    event.preventDefault();
+    console.log("in color war click handler");
+    startScreenColorwar();
 }
 
 const loginFormHandler = async (event) => {
