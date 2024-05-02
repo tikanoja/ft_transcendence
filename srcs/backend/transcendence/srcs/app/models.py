@@ -110,10 +110,11 @@ class PongGameInstance(GameInstance):
     def __str__(self):
         return f'({self.game} instance:  p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'
 
+# changed for current tracking in game
 class ColorGameInstance(GameInstance):
-    turns = models.IntegerField(default=0)
-    p1_biggest_takeover = models.IntegerField(default=0)
-    p2_biggest_takeover = models.IntegerField(default=0)
+    turns_to_win = models.IntegerField(default=0)
+    # p1_biggest_takeover = models.IntegerField(default=0)
+    # p2_biggest_takeover = models.IntegerField(default=0)
     
     def __str__(self):
         return f'({self.game} instance:  p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'

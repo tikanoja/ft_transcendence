@@ -48,7 +48,7 @@ def logout_user(request):
 		response = JsonResponse({'error': "method not allowed. please use POST"})
 	return response
 
-
+# TODO: this needs to return the correct status code based on the situation
 def get_current_username(request):
 	logger.debug('In get_current_username()')
 	if request.method == 'GET':
@@ -73,7 +73,7 @@ def manage_account(request):
 	if request.method =='POST':
 		response = account.manage_accountPOST(request)
 	else:
-		response = JsonResponse({'error': "method not allowed. please use POST"})
+		response = JsonResponse({'error': "method not allowed. Please use POST"}, status=405)
 	return response
 
 # only allow interaction if user has session
@@ -96,7 +96,7 @@ def settings(request):
 	# elif request.method == 'POST':
 	# 	response = usettingsPOST(request)
 	else:
-		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+		response = JsonResponse({'error': "method not allowed. please use POST or GET"}, status=405)
 	return response
 
 
@@ -108,7 +108,7 @@ def play(request):
 	elif request.method == 'POST':
 		response = user.playPOST(request)
 	else:
-		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+		response = JsonResponse({'error': "method not allowed. please use POST or GET"}, status=405)
 	return response
 
 
@@ -150,26 +150,7 @@ def profile(request, username):
 	if request.user.username == username:
 		self = True
 	if request.method == "GET":
-		friends = relations.friendsContext(username, None, None)
-		logger.debug(friends)
-		details = user_profile.get_profile_details(username, self)
-		context = {}
-		context["friends"] = friends #TODO get the friends context from Tuukka's friend stuff
-		context["details"] = details
-		context["name_form"] = UpdateNameForm()
-		context["email_form"] = UpdateEmailForm()
-		context["password_form"] = UpdatePasswordForm()
-		context["delete_account_form"] = DeleteAccountForm()
-		context["upload_image_form"] = UploadImageForm()
-		context["self_profile"] = self
-		try:
-			profile_user = CustomUser.objects.filter(username=username).first()
-			if profile_user:
-				context["profile_picture"] = profile_user.profile_picture
-		except Exception as e:
-			logger.debug('error: ', e)
-			logger.debug('unable to search image')
-		# need to add in the game stats and history here too
+		context = user_profile.profileContext(username, self)
 		return render(request, 'user/profile.html', context)
 	else:
 		return JsonResponse({"message": "method not allowed, try GET"})
