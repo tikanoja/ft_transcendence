@@ -27,9 +27,9 @@ export const loadScript = () => {
 
 function connectWebSocketColorwar() {
     console.log("in color war connect websocket")
-    // socket = io.connect('https://' + window.location.hostname);
-    socket = io.connect(':8889');
-    socket = io.connect('https://' + window.location.hostname);
+    io.ssl = false;
+    socket = io.connect('https://' + window.location.hostname, {path: "/colorwar/socket.io"});
+    console.log('http://' + window.location.hostname)
 
 	console.log(window.location.hostname)
     socket.on('connect', () => {
