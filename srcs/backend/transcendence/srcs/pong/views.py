@@ -99,18 +99,18 @@ def post_pong_canvas(request):
 
 
 def tournament_lobbyPOST(request):
-    pass
+    return render(request, "pong/tournament.html", {})
 
 
 def tournament_lobbyGET(request):
-    pass
+    return render(request, "pong/tournament.html", {})
 
 
 def tournament_lobby(request):
     logger.debug('In tournament_lobby()')
     # data = json.loads(request.body)
     if request.method == 'GET':
-        return render(request, "pong/tournament.html", {})
+        return tournament_lobbyGET(request)
     if request.method == 'POST':
-        return render(request, "pong/tournament.html", {})
+        return tournament_lobbyPOST(request)
     pass

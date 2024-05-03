@@ -121,11 +121,19 @@ class ColorGameInstance(GameInstance):
     p1_biggest_takeover = models.IntegerField(default=0)
     p2_biggest_takeover = models.IntegerField(default=0)
     
-class Round(models.Model):
+
+class Match(models.Model):
     # associated tournament
     # player1
     # player2
     pass
+
+
+class Participant(models.Model):
+    # user
+    # alias
+    pass
+
 
 class Tournament(models.Model):
     PONG = 'Pong'
