@@ -99,20 +99,25 @@ function updateEventListeners() {
     var registerForm = document.getElementById('registerForm');
     var logoutButton = document.getElementById('logoutButton');
 	var playButton = document.getElementById('playButton');
-    var addFriendForm = document.getElementById('addFriendForm');
+    var addFriendButton = document.getElementById('addFriendButton');
+    var blockUserButton = document.getElementById('blockUserButton');
     var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
-    var blockUserButton = document.getElementById('blockUserForm');
+    var profileLinks = document.querySelectorAll('#profileLinkTag')
     var gameRequestForm = document.getElementById('gameRequestForm'); 
     var playButton = document.getElementById('playButton');
     var deleteForm = document.getElementById('delete-account-form');
     var nameChangeForm = document.getElementById('name-change-form');
     var emailChangeForm = document.getElementById('email-change-form');
     var passwordChangeForm = document.getElementById('password-change-form');
+    let profilePictureForm = document.getElementById('profile_picture_upload');
     var gameRequestButtons = document.querySelectorAll('[id^="gameRequestButton"]');
 
+    // remove listeners
+    if (profilePictureForm)
+        profilePictureForm.removeEventListener('submit', manageAccountHandler);
     // REMOVE
     if (deleteForm)
-        deleteForm.removeEventListener('submit', deleteFormHandler);
+        deleteForm.removeEventListener('submit', manageAccountHandler);
     if (nameChangeForm)
         nameChangeForm.removeEventListener('submit', manageAccountHandler);
     if (emailChangeForm)
@@ -127,15 +132,15 @@ function updateEventListeners() {
         logoutButton.removeEventListener('click', logoutButtonClickHandler);
 	if (playButton)
         playButton.removeEventListener('click', playButtonClickHandler);
-    if (addFriendForm)
-        addFriendForm.removeEventListener('submit', addFriendHandler);
+    if (addFriendButton)
+        addFriendButton.removeEventListener('click', addFriendHandler);
+    if (blockUserButton)
+        blockUserButton.removeEventListener('click', blockUserHandler)
     if (friendRequestButtons) {
         friendRequestButtons.forEach(function(button) {
             button.removeEventListener('click', friendRequestHandler);
         })
     }
-    if (blockUserButton)
-        blockUserButton.removeEventListener('submit', blockUserHandler)
     if (gameRequestForm)
         gameRequestForm.removeEventListener('submit', gameRequestHandler)
     if (gameRequestButtons) {
@@ -143,7 +148,14 @@ function updateEventListeners() {
             button.removeEventListener('click', gameResponseHandler);
         })
     }
-
+    if (profileLinks) {
+        profileLinks.forEach(function(link) {
+            link.removeEventListener('click', profileLinkHandler);
+        })
+    }
+    // begin add listeners if currently present
+    if (profilePictureForm)
+        profilePictureForm.addEventListener('submit', manageAccountHandler);
     // ADD
     if (loginForm)
         loginForm.addEventListener('submit', loginFormHandler);
@@ -153,28 +165,33 @@ function updateEventListeners() {
         logoutButton.addEventListener('click', logoutButtonClickHandler);
     if (playButton)
         playButton.addEventListener('click', playButtonClickHandler);
-    if (addFriendForm)
-        addFriendForm.addEventListener('submit', addFriendHandler);
+    if (addFriendButton)
+        addFriendButton.addEventListener('click', addFriendHandler);
+    if (blockUserButton)
+        blockUserButton.addEventListener('click', blockUserHandler);
     if (friendRequestButtons) {
         friendRequestButtons.forEach(function(button) {
             button.addEventListener('click', friendRequestHandler);
         })
     }
     if (deleteForm)
-        deleteForm.addEventListener('submit', deleteFormHandler);
+        deleteForm.addEventListener('submit', manageAccountHandler);
     if (nameChangeForm)
         nameChangeForm.addEventListener('submit', manageAccountHandler);
     if (emailChangeForm)
         emailChangeForm.addEventListener('submit', manageAccountHandler);
     if (passwordChangeForm)
         passwordChangeForm.addEventListener('submit', manageAccountHandler);
-    if (blockUserButton)
-        blockUserButton.addEventListener('submit', blockUserHandler);
     if (gameRequestForm)
         gameRequestForm.addEventListener('submit', gameRequestHandler)
     if (gameRequestButtons) {
         gameRequestButtons.forEach(function(button) {
             button.addEventListener('click', gameResponseHandler);
+        })
+    }
+    if (profileLinks) {
+        profileLinks.forEach(function(link) {
+            link.addEventListener('click', profileLinkHandler);
         })
     }
 }
@@ -183,6 +200,11 @@ function updateContent(html, title, description) {
     document.getElementById("content").innerHTML = html;
 	document.title = title;
 	document.querySelector('meta[name="description"]').setAttribute("content", description);
+    updateEventListeners();
+}
+
+function updateElementContent(html, elementId) {
+    document.getElementById(elementId).innerHTML = html;
     updateEventListeners();
 }
 
@@ -250,7 +272,8 @@ const loginFormHandler = async (event) => {
 const blockUserHandler = async (event) => {
     console.log('In blockUserHandler()');
     event.preventDefault();
-    const formData = new FormData(event.target);
+    let form = document.getElementById("addFriendForm")
+    const formData = new FormData(form);
     const querystring = window.location.search;
     var endpoint = '/app/block_user/' + querystring;
     const response = await sendPostRequest(endpoint, formData);
@@ -259,7 +282,8 @@ const blockUserHandler = async (event) => {
         routeRedirect(redirect_location);
     } else if (response.ok) {
         const html = await response.text();
-        updateContent(html, "Friends | Pong", "Add friend form");
+        updateElementContent(html, "friends");
+        // updateContent(html, "Friends | Pong", "Add friend form");
 	} else {
 		console.log("Response status in addFriendHandler(): ", response.status)
 	}
@@ -268,7 +292,8 @@ const blockUserHandler = async (event) => {
 const addFriendHandler = async (event) => {
     console.log('In addFriendHandler()');
     event.preventDefault();
-    const formData = new FormData(event.target);
+    let form = document.getElementById("addFriendForm")
+    const formData = new FormData(form);
     const querystring = window.location.search;
     var endpoint = '/app/friends/' + querystring;
     const response = await sendPostRequest(endpoint, formData);
@@ -277,10 +302,11 @@ const addFriendHandler = async (event) => {
         routeRedirect(redirect_location);
     } else if (response.ok) {
         const html = await response.text();
-        updateContent(html, "Friends | Pong", "Add friend form");
-	} else {
-		console.log("Response status in addFriendHandler(): ", response.status)
-	}
+        updateElementContent(html, "friends");
+        // updateContent(html, "Friends | Pong", "Add friend form");
+    } else {
+        console.log("Response status in addFriendHandler(): ", response.status)
+    }
 }
 
 const gameResponseHandler = async (event) => {
@@ -333,9 +359,10 @@ const friendRequestHandler = async (event) => {
         routeRedirect(redirect_location);
     } else if (response.ok) {
         const html = await response.text();
-        updateContent(html, "Friends | Pong", "Add friend form");
+        updateElementContent(html, "friends");
+        // updateContent(html, "Friends | Pong", "Add friend form");
 	} else {
-		console.log("Response status in addFriendHandler(): ", response.status)
+		console.log("Response status in friendRequestHandler(): ", response.status)
 	}
 }
 
@@ -374,9 +401,9 @@ const manageAccountHandler = async (event) => {
     }
 	else if (response.ok) {
         console.log('response,ok triggered');
-		// stay on this page, display the content again
+		// stay on this page, display the content only for the manage-content div
         const html = await response.text();
-        updateContent(html, "Manage Account | Pong", "Manage Account");
+        updateElementContent(html, "manage-account");
 	}
 	else {
 		console.log("Response status: ", response.status)
@@ -384,36 +411,36 @@ const manageAccountHandler = async (event) => {
 	}
 }
 
-
-const deleteFormHandler= async (event) => {
+const profileLinkHandler = async (event) => {
     event.preventDefault();
-    console.log("in deleteFormHandler")
+    console.log("in profileLinkHandler");
 
-    const formData = new FormData(event.target);
-
-	let response = await sendPostRequest('/app/delete_account/', formData);
-	
-    console.log("Response status: ", response.status, "Redirect: ", response.redirected)
+    let profileUrl = new URL(event.target.href);
+    console.log("profile url " + profileUrl);
+    let profilePath = profileUrl.pathname;
+    console.log("profile path " + profilePath);
+    let profileUsername = event.target.textContent;
+    let response = await sendGetRequest('/app' + profilePath);
     if (response.redirected) {
         console.log('redirect status found');
-      
-        routeRedirect('/login');
+        let redirect_location = response.url;
+        console.log("redir to: ", redirect_location);
+        routeRedirect(redirect_location);
     }
 	else if (response.ok) {
         console.log('response,ok triggered');
 		// stay on this page, display the content again
-        response.text().then(function (text) {
-            document.getElementById("content").innerHTML = text;
-            document.title = "Delete Account | Pong";
-            document.querySelector('meta[name="description"]').setAttribute("content", "Delete Account");
-            updateEventListeners();
-        })
+        const html = await response.text();
+        window.history.pushState("", "", profilePath);
+        updateContent(html, "Profile | " + profileUsername, "Personal Profile");
 	}
 	else {
 		console.log("Response status: ", response.status)
 		// some 400 or 500 code probably, show the error that was sent?
 	}
 }
+
+
 const start_game_loop = async () => {
     const responseData = await sendGetRequest('pong/start_background_loop').then((response) => response.text());
     console.log('start game loop:	', responseData);
@@ -493,6 +520,7 @@ const get_game_state = async () => {
     console.log('from timo pong game_state:	', responseData);
     return (responseData);
 }
+
 
 export { checkLogin, updateContent, start_game_loop, stop_game_loop, start_game, stop_game, get_game_state, left_paddle_up, left_paddle_up_release , left_paddle_down, left_paddle_down_release , right_paddle_up, right_paddle_up_release , right_paddle_down, right_paddle_down_release, updateEventListeners, setActive }
 

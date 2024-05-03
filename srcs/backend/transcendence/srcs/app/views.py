@@ -1,26 +1,23 @@
-from django.shortcuts import render # redirect
+from django.shortcuts import render
 from django.http import JsonResponse
-# from django.views.decorators.csrf import csrf_exempt
 import logging
-# from django.http import HttpResponse
-# from django.core.exceptions import ValidationError
-from .models import CustomUser
-# from django.contrib.auth import get_user_model
-from django.contrib.auth import authenticate #, login, logout
-from .forms import RegistrationForm, LoginForm, DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm
-from . import user
+# from django.contrib.auth import authenticate
+from app.user import session, account, relations, user
+from app.user import profile as user_profile
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+
+
 
 logger = logging.getLogger(__name__)
+
 
 def register_user(request):
 	if request.method == 'POST':
 		logger.debug('In register user POST')
-		response = user.registerPOST(request)
+		response = account.registerPOST(request)
 	elif request.method == 'GET':
 		logger.debug('In register user GET')
-		response = user.registerGET(request)
+		response = account.registerGET(request)
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 	return response
@@ -29,9 +26,9 @@ def register_user(request):
 def login_user(request):
 	logger.debug('In login_user()')
 	if request.method == 'POST':
-		response = user.loginPOST(request)
+		response = session.loginPOST(request)
 	elif request.method == 'GET':
-		response = user.loginGET(request)
+		response = session.loginGET(request)
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST"})
 	return response
@@ -40,25 +37,25 @@ def login_user(request):
 def logout_user(request):
 	if request.method == 'POST':
 		logger.debug('In logout user')
-		response = user.logoutPOST(request)
+		response = session.logoutPOST(request)
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST"})
 	return response
 
-
+# TODO: this needs to return the correct status code based on the situation
 def get_current_username(request):
 	logger.debug('In get_current_username()')
-	if request.method == 'POST':
-		username = user.get_current_usernamePOST(request)
+	if request.method == 'GET':
+		username = session.get_current_usernameGET(request)
 	else:
-		username = 'only POST allowed'
+		username = 'only GET allowed'
 	response = JsonResponse({'message': username})
 	return response
 
 
 def check_login(request):
 	logger.debug('In check_login()')
-	if request.user.is_authenticated:
+	if request.is_authenticated:
 		return JsonResponse({'status': 'authenticated'})
 	else:
 		return JsonResponse({'status': 'not authenticated'})
@@ -68,32 +65,32 @@ def check_login(request):
 def manage_account(request):
 	logger.debug('In manage_account()')
 	if request.method =='POST':
-		response = user.manage_accountPOST(request)
+		response = account.manage_accountPOST(request)
 	else:
-		response = JsonResponse({'error': "method not allowed. please use POST"})
+		response = JsonResponse({'error': "method not allowed. Please use POST"}, status=405)
 	return response
 
 # only allow interaction if user has session
-def delete_account(request):
-	logger.debug('In delete_account()')
-	if request.method == 'GET':
-		response = user.delete_accountGET(request)
-	elif request.method == 'POST':
-		response = user.delete_accountPOST(request)
-	else:
-		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
-	return response
+# def delete_account(request):
+# 	logger.debug('In delete_account()')
+# 	if request.method == 'GET':
+# 		response = delete_accountGET(request)
+# 	elif request.method == 'POST':
+# 		response = delete_accountPOST(request)
+# 	else:
+# 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+# 	return response
 
-
+# TODO: there is no settingsPOST anywhere in the project. This view is not used at all
 @login_required
 def settings(request):
 	logger.debug('In settings()')
 	if request.method == 'GET':
 		return render(request, 'user/settings.html', {})
-	elif request.method == 'POST':
-		response = user.settingsPOST(request)
+	# elif request.method == 'POST':
+	# 	response = usettingsPOST(request)
 	else:
-		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+		response = JsonResponse({'error': "method not allowed. please use POST or GET"}, status=405)
 	return response
 
 
@@ -105,7 +102,7 @@ def play(request):
 	elif request.method == 'POST':
 		response = user.playPOST(request)
 	else:
-		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+		response = JsonResponse({'error': "method not allowed. please use POST or GET"}, status=405)
 	return response
 
 
@@ -113,9 +110,9 @@ def play(request):
 def friends(request):
 	logger.debug('In friends()')
 	if request.method == 'GET':
-		response = user.friendsGET(request)
+		response = relations.friendsGET(request)
 	elif request.method == 'POST':
-		response = user.friendsPOST(request)
+		response = relations.friendsPOST(request)
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 	return response
@@ -140,10 +137,6 @@ def notfound(request):
 	else:
 		return JsonResponse({'error': "method not allowed. please use GET"})
 
-""" 
-on account delete, how to handle other recodrs tied to that username? if the username isn't purged from all,
-if another user uses it they will then be linked to the other records...
-"""
 
 def profile(request, username):
 	logger.debug('getting profile')
@@ -151,22 +144,8 @@ def profile(request, username):
 	if request.user.username == username:
 		self = True
 	if request.method == "GET":
-		friends = user.get_friends_dict(username)
-		logger.debug(friends)
-		details = user.get_profile_details(username, self)
-		context = {}
-		context["friends"] = friends
-		context["details"] = details
-		context["name_form"] = UpdateNameForm()
-		context["email_form"] = UpdateEmailForm()
-		context["password_form"] = UpdatePasswordForm()
-		context["delete_account_form"] = DeleteAccountForm()
-		# need to add in the game stats and history here too
-		if self:
-			return render(request, 'user/profile_self.html', context)
-		else:
-			return render(request, 'user/profile_other.html', {})
+		context = user_profile.profileContext(username, self)
+		return render(request, 'user/profile.html', context)
 	else:
 		return JsonResponse({"message": "method not allowed, try GET"})
 
-	
