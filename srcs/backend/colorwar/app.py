@@ -9,13 +9,8 @@ from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 
 app = Flask(__name__)
-#CORS(app, resources={r"*": {"origins": "*"}}, supports_credentials=True) # works https://piehost.com/socketio-tester
-#CORS(app,resources={r"/*":{"origins":"*"}}) # works https://piehost.com/socketio-tester
 CORS(app) # works https://piehost.com/socketio-tester
-#cors = CORS(app,resources={r"/*":{"origins":"*"}})
-
 socketio = SocketIO(app, cors_allowed_origins="*")
-#socketio = SocketIO(app)
 
 app.debug = True
 app.host = '0.0.0.0'
@@ -68,6 +63,7 @@ class Game:
 		self.squares[0 + (self.width * (self.height // 2)) + self.width - 1].owner = 2 # right starting player square owner to 2
 		self.which_player_starts: int = random.choice([0, 1])
 		self.which_player_turn: int = self.which_player_starts
+
 
 	def compute_scores(self):
 		total_player_squares = int(0)
@@ -236,7 +232,7 @@ def start_game(splitted_command):
 			games[number].new_game_initilization()
 			games[number].set_game_slot(number)
 			games[number].set_game_running(1)
-			socketio.emit('message', 'OK,{}'.format(number) + str(games[number].which_player_turn()))
+			socketio.emit('start_game', 'OK,{}'.format(number) + str(games[number].which_player_turn()))
 
 def stop_game(splitted_command):
 	global socketio

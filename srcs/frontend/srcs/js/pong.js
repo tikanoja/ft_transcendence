@@ -26,12 +26,9 @@ export const loadScript = () => {
 
 
 function connectWebSocket() {
-    console.log("inn pongs connect web socket")
-    socket = io.connect('https://' + window.location.hostname);
-    // socket = io.connect('https://' + window.location.hostname + '/pong/');
+    socket = io.connect('https://' + window.location.hostname, {path: "/pong/socket.io"});
     socket.on('connect', () => {
         console.log("connect recieved: pong")
-
     });
     socket.on('error', (error) => {
         console.error('WebSocket error:', error);
@@ -194,7 +191,7 @@ function setup3DScene(scene) {
     p1_paddle.position.set(-100,  0, 0);
     p2_paddle.position.set(100, 0, 0);
 
-    return camera;
+    return { camera, p1_paddle, p2_paddle, ball };
 }
 
 
@@ -240,7 +237,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
     let p1_paddle, p2_paddle, ball;
     if (is3DGraphics) {
-        camera = setup3DScene(scene);
+        ({ camera, p1_paddle, p2_paddle, ball } = setup3DScene(scene));
     } else {
         ({ camera, p1_paddle, p2_paddle, ball } = setup2DScene(scene));
 
