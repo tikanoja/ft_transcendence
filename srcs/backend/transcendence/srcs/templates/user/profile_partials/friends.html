@@ -1,4 +1,5 @@
 <div class="container">
+	<h3>Friends!</h3>
 	{% if friends.error %}
 	<p style="color: red">Error: {{friends.error}}</p>
 	{% endif %}
@@ -22,7 +23,7 @@
 	</br>
 
 	<div>
-	<h2>Pending Invites</h2>
+	<h4>Pending Invites</h4>
 	<ul>
 		{% for invite in friends.in_invites %}
 			<li>
@@ -36,7 +37,7 @@
 	</ul>
 
 	<br>
-	<h2>Blocked Users</h2>
+	<h4>Blocked Users</h4>
 	<ul>
 		{% for blocked in friends.blocked_users %}
 			<li>
@@ -50,7 +51,7 @@
 	<br>
 	{% endif %}
 
-	<h2>List of friends</h2>
+	<h4>List of friends</h4>
 	{% if self_profile %}
 	<ul>
 		{% for invite in friends.out_invites %}

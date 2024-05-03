@@ -99,5 +99,7 @@ def get_game_history_and_stats(username:str) -> dict:
     # all_color_games = ColorGameInstance.objects.filter(Q(p1=user) | Q(p2=user))
     pong_history = get_pong_history(username, all_pong_games)
     pong_stats = get_pong_stats(username, all_pong_games)
-    return pong_history, pong_stats
+    stats = {'pong': pong_stats, 'color': {}}
+    history = {'pong': pong_history, 'color': {}}
+    return history, stats
 
