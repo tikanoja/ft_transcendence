@@ -121,6 +121,29 @@ class ColorGameInstance(GameInstance):
     p1_biggest_takeover = models.IntegerField(default=0)
     p2_biggest_takeover = models.IntegerField(default=0)
     
+class Round(models.Model):
+    # associated tournament
+    # player1
+    # player2
+    pass
+
+class Tournament(models.Model):
+    PONG = 'Pong'
+    COLOR = 'Color'
+    GAME_CHOICES = [
+        (PONG, 'Pong'),
+        (COLOR, 'Color'),
+    ]
+    game = models.CharField(max_length=5, choices=GAME_CHOICES, default=PONG)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # status
+    # participants
+    # results
+    # game instances
+    pass
+
 
 # user profile model
 #  language -> maybe add to CustomUser model?

@@ -113,6 +113,7 @@ function updateEventListeners() {
     var gameRequestButtons = document.querySelectorAll('[id^="gameRequestButton"]');
     var gameRenderButton = document.getElementById('gameRenderButton');
     var playerAuthForms = document.querySelectorAll('[id^="playerAuthForm"]');
+    var tournamentLobbyButton = document.getElementById('tournamentLobbyButton');
 
     // remove listeners
     if (profilePictureForm)
@@ -162,6 +163,8 @@ function updateEventListeners() {
             button.removeEventListener('submit', playerAuthHandler);
         })
     }
+    if (tournamentLobbyButton)
+        tournamentLobbyButton.removeEventListener('click', tournamentLobbyButtonHandler);
     // begin add listeners if currently present
     if (profilePictureForm)
         profilePictureForm.addEventListener('submit', manageAccountHandler);
@@ -210,6 +213,8 @@ function updateEventListeners() {
             button.addEventListener('submit', playerAuthHandler);
         })
     }
+    if (tournamentLobbyButton)
+        tournamentLobbyButton.addEventListener('click', tournamentLobbyButtonHandler);
 }
 
 function updateContent(html, title, description) {
@@ -515,6 +520,23 @@ const playerAuthHandler = async (event) => {
         // something is not quite right...
         console.log('submitRegistrationHandler(): response status: ' + response.status);
     }
+}
+
+const tournamentLobbyButtonHandler = async (event) => {
+    console.log('In tournamentLobbyButtonHandler()');
+    event.preventDefault();
+    const querystring = window.location.search;
+    var endpoint = '/pong/tournament_lobby/' + querystring;
+	const response = await sendGetRequest(endpoint);
+    if (response.redirected) {
+        let redirect_location = response.url;
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        const html = await response.text();
+        updateContent(html, "Tournament | Pong", "Create tournament");
+	} else {
+		console.log("Response status in tournamentLobbyButtonHandler(): ", response.status)
+	}
 }
 
 const start_game_loop = async () => {

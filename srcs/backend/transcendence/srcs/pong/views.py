@@ -9,6 +9,7 @@ from django.shortcuts import render
 from app.models import CustomUser, GameInstance
 from django.db.models import Q
 from app.forms import PlayerAuthForm
+from django.contrib.auth import authenticate
 
 logger = logging.getLogger(__name__)
 
@@ -45,18 +46,30 @@ def authenticate_player(request):
 
     current_game = GameInstance.objects.get(pk=game_id)
 
-    user = authenticate(request, username=username, password=password)
-    if user is not None:
-        pass
-
-    return render(request, "pong/pong.html", {
+    context = {
         'p1_username': current_game.p1.username,
         'p2_username': current_game.p2.username,
         'p1_user': current_game.p1,
         'p2_user': current_game.p2,
         'form': PlayerAuthForm,
-        'current_game': current_game 
-    })
+        'current_game': current_game
+    }
+
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        if current_game.p1 == user:
+            current_game.p1auth = True
+            current_game.save()
+        elif current_game.p2 == user:
+            current_game.p2auth = True
+            current_game.save()
+    else:
+        if username == current_game.p1.username:
+            context['p1error'] = 'Auth failed!'
+        elif username == current_game.p2.username:
+            context['p2error'] = 'Auth failed!'
+
+    return render(request, "pong/pong.html", context)
 
 
 def pong_context(request, data):
@@ -83,3 +96,21 @@ def post_pong_canvas(request):
     if request.method == 'POST':
         logger.debug('about to render!')
         return render(request, "pong/pong.html", pong_context(request, data))
+
+
+def tournament_lobbyPOST(request):
+    pass
+
+
+def tournament_lobbyGET(request):
+    pass
+
+
+def tournament_lobby(request):
+    logger.debug('In tournament_lobby()')
+    # data = json.loads(request.body)
+    if request.method == 'GET':
+        return render(request, "pong/tournament.html", {})
+    if request.method == 'POST':
+        return render(request, "pong/tournament.html", {})
+    pass

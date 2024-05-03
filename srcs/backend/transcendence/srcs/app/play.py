@@ -59,6 +59,22 @@ def playGET(request):
         return render(request, 'user/play.html', playContext(request, None, None))
 
 
+def check_player_activity(game_instance):
+    p1 = game_instance.p1
+    p2 = game_instance.p2
+
+    # check if p1 or p2 is already in a game that is accepted or active
+    if GameInstance.objects.filter(Q(p1=p1) | Q(p2=p1), status='Accepted'):
+        return False
+    elif GameInstance.objects.filter(Q(p1=p1) | Q(p2=p1), status='Active'):
+        return False
+    elif GameInstance.objects.filter(Q(p1=p2) | Q(p2=p2), status='Accepted'):
+        return False
+    elif GameInstance.objects.filter(Q(p1=p2) | Q(p2=p2), status='Active'):
+        return False
+    return True
+
+
 def gameResponse(request, data):
     action = data.get('action')
     if action == 'nuke':
@@ -70,6 +86,8 @@ def gameResponse(request, data):
         return render(request, 'user/play.html', playContext(request, "Error: game cancelled / user deleted", None))    
     game_instance = GameInstance.objects.filter(p1=challenger_user, p2=request.user).first()
     if action == 'accept':
+        if check_player_activity(game_instance) != True:
+            return render(request, 'user/play.html', playContext(request, "Busy player, try again later", None))
         game_instance.status = 'Accepted'
         game_instance.save()
         return render(request, 'user/play.html', playContext(request, None, "Game accepted!"))
@@ -114,7 +132,5 @@ def playPOST(request):
         return render(request, 'user/play.html', playContext(request, "You have already sent a game request to this user", None)) 
 
     new_game_instance = GameInstance(p1=current_user, p2=challenged_user, game=sent_form.cleaned_data['game_type'], status='Pending')
-    new_game_instance.p1auth = True
     new_game_instance.save()
     return render(request, 'user/play.html', playContext(request, None, "Game invite sent! Should we be redirected to game here?")) 
-    

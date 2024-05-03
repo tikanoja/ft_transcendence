@@ -49,7 +49,7 @@ class LoginForm(forms.Form):
 
 
 class PlayerAuthForm(forms.Form):
-    password = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'placeholder': 'Enter password'}))
+    password = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'class': 'form-control','placeholder': 'Enter password'}))
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if 'username' in kwargs:
