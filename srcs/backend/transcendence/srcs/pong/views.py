@@ -7,9 +7,29 @@ import logging
 # import requests
 from django.shortcuts import render
 from . import utils
-from app.models import PongGameInstance
+from app.models import PongGameInstance, CustomUser
+from app.user import dashboard
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
+
+
+"""
+only giving pong stat right now
+"""
+@csrf_exempt
+def cli_dashboard(request, username):
+     try:
+        if request.method == 'GET':
+            user = CustomUser.objects.filter(username=username).first()
+            pong_games = PongGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
+            resource = dashboard.get_stats_for_cli(user, pong_games)
+            return JsonResponse({'pong': resource}, status=200)
+        else:
+            return JsonResponse({"error": "method not allowed, try GET"}, status=405)
+     except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 @csrf_exempt

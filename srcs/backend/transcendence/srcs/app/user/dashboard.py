@@ -82,12 +82,46 @@ def get_pong_stats(user:CustomUser, pong_games:QuerySet) -> dict:
     return pong_stats
 
 
-def get_color_history(user:CustomUser, color_games:QuerySet) -> dict:
-    pass
+def get_color_history(username:str, color_games:QuerySet) -> dict:
+    color_history = {}
+    if not color_games:
+        return color_history
+    for iter, game in enumerate(color_games):
+        entry = {}
+        entry["game"] = game.game
+        entry["date"] = game.updated_at
+        if game.p1.username == username:
+            entry["opponent"] = game.p2
+        else:
+            entry["opponent"] = game.p1
+        entry["winner"] = game.winner.username
+        entry["turns_to_win"] = game.turns_to_win
+        color_history[iter] = entry
+    logger.debug(color_history)
+    return color_history
 
 
 def get_color_stats(user:CustomUser, color_games:QuerySet) -> dict:
-    pass
+    """
+     - calculate win rate
+     - least moves to win
+     - games played
+    """
+    color_stats = {}
+    color_stats["games_played"] = len(color_games)
+    if not color_games:
+        return color_stats
+    wins = color_games[0].turns_to_win
+    least_moves_to_win = 0
+    for game in color_games:
+        if user == game.winner:
+            wins += 1
+            if game.turns_to_win < least_moves_to_win:
+                least_moves_to_win = game.turns_to_win
+    color_stats["wins"] = wins
+    color_stats["least_moves_to_win"] = least_moves_to_win
+    logger.debug(color_stats)
+    return color_stats
 
 
 def get_game_history_and_stats(username:str) -> dict:
@@ -96,10 +130,12 @@ def get_game_history_and_stats(username:str) -> dict:
     all_pong_games = PongGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
     logger.debug('all pong games: ')
     logger.debug(all_pong_games)
-    # all_color_games = ColorGameInstance.objects.filter(Q(p1=user) | Q(p2=user))
+    all_color_games = ColorGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
     pong_history = get_pong_history(username, all_pong_games)
     pong_stats = get_pong_stats(username, all_pong_games)
-    stats = {'pong': pong_stats, 'color': {}}
-    history = {'pong': pong_history, 'color': {}}
+    color_history = get_color_history(username, all_color_games)
+    color_stats = get_color_stats(user, all_color_games)
+    stats = {'pong': pong_stats, 'color': color_stats}
+    history = {'pong': pong_history, 'color': color_history}
     return history, stats
 

@@ -13,9 +13,7 @@
 	{% if stats.color.games_played %}
 		<p>Total games: {{ stats.color.games_played }}</p>
 		<p>Total wins: {{ stats.color.wins }}</p>
-		<p>Largest win margin: {{ stats.color.largest_win_margin }}</p>
-		<p>Largest loss margin: {{ stats.color.largest_loss_margin }}</p>
-		<p>Least number of moves to win: {{ stats.color.moves_to_win }}</p>
+		<p>Least number of moves to win: {{ stats.color.least_moves_to_win }}</p>
 	{% else %}
 		<p>No ColorWar statistics to report</p>
 	{% endif %}
