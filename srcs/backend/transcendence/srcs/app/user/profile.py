@@ -37,9 +37,6 @@ def profileContext(username:str, self:bool) -> dict:
     context["upload_image_form"] = UploadImageForm()
     context["self_profile"] = self
     history, stats = get_game_history_and_stats(username)
-    logger.debug("values in profileContext: ")
-    logger.debug(history)
-    logger.debug(stats)
     context["stats"] = stats
     context["history"] = history
     try:

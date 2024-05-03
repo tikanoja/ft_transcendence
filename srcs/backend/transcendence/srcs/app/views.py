@@ -1,17 +1,11 @@
-from django.shortcuts import render # redirect
+from django.shortcuts import render
 from django.http import JsonResponse
-# from django.views.decorators.csrf import csrf_exempt
 import logging
-# from django.http import HttpResponse
-# from django.core.exceptions import ValidationError
-from .models import CustomUser
-# from django.contrib.auth import get_user_model
-from django.contrib.auth import authenticate #, login, logout
-from .forms import DeleteAccountForm, UpdatePasswordForm, UpdateEmailForm, UpdateNameForm, UploadImageForm
-from app.user import session, account, dashboard, relations, user
+# from django.contrib.auth import authenticate
+from app.user import session, account, relations, user
 from app.user import profile as user_profile
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+
 
 
 logger = logging.getLogger(__name__)

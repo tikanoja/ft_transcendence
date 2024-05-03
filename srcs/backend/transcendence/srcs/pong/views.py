@@ -1,10 +1,6 @@
 from django.http import JsonResponse
-# from rest_framework.response import Response
-# from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 import logging
-# import json
-# import requests
 from django.shortcuts import render
 from . import utils
 from app.models import PongGameInstance, CustomUser
@@ -14,9 +10,6 @@ from django.db.models import Q
 logger = logging.getLogger(__name__)
 
 
-"""
-only giving pong stat right now
-"""
 @csrf_exempt
 def cli_dashboard(request, username):
      try:
@@ -36,10 +29,7 @@ def cli_dashboard(request, username):
 def save_game_state(request):
     logger.debug('in save_game_state')
     try:
-
         logger.debug('checking all game instances for pong')
-        all_games = PongGameInstance.objects.all()
-        logger.debug(all_games)
         if request.method == 'POST':
             game_type = request.POST.get('game')
             if game_type == 'Pong':

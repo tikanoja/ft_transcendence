@@ -3,7 +3,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.exceptions import ValidationError
 import logging
-from django.db import transaction
+
+
 logger = logging.getLogger(__name__)
 
 class CustomUserManager(BaseUserManager):

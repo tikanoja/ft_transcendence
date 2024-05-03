@@ -106,6 +106,7 @@ def get_color_stats(user:CustomUser, color_games:QuerySet) -> dict:
      - calculate win rate
      - least moves to win
      - games played
+     - average moves to win
     """
     color_stats = {}
     color_stats["games_played"] = len(color_games)
@@ -113,13 +114,19 @@ def get_color_stats(user:CustomUser, color_games:QuerySet) -> dict:
         return color_stats
     wins = color_games[0].turns_to_win
     least_moves_to_win = 0
+    sum_moves_to_win = 0
     for game in color_games:
         if user == game.winner:
             wins += 1
+            sum_moves_to_win += game.turns_to_win
             if game.turns_to_win < least_moves_to_win:
                 least_moves_to_win = game.turns_to_win
     color_stats["wins"] = wins
     color_stats["least_moves_to_win"] = least_moves_to_win
+    if wins:
+        color_stats["average_move_to_win"] = sum_moves_to_win / wins
+    else:
+        color_stats["average_move_to_win"] = 0
     logger.debug(color_stats)
     return color_stats
 

@@ -1,4 +1,4 @@
-from app.models import GameInstance, CustomUser, PongGameInstance
+from app.models import CustomUser, PongGameInstance
 from django.http import JsonResponse
 import logging
 
@@ -43,6 +43,4 @@ def save_pong_game_state(request) -> JsonResponse:
 	else:
 			game_instance.winner = p2
 	game_instance.save()
-	logger.debug('saved game insttance: ')
-	logger.debug(game_instance)
 	return JsonResponse({'message': 'Game data saved successfully!'}, status=200)

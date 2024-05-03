@@ -22,5 +22,5 @@ urlpatterns = [
    	path('send_game_data/', views.save_game_state, name='send_game_data'),
     path('validate_match/', views.validate_match, name='validate_match'),
 	path('get_canvas/', views.get_canvas, name='get_canvas'),
-	path('cli_dashboard/<str:username>', views.cli_dashboard, name='cli_dashboard')
+	path('cli_dashboard/<str:username>', views.cli_dashboard, name='cli_dashboard'),
 ]
