@@ -29,9 +29,33 @@
 <br>
 
 <h2>Tournament</h2>
-<p>[Pong] [Color]</p>
-<p>Join or set up a tournament</p>
-<button type="submit" id=tournamentLobbyButton class="btn btn-primary">Start tournament</button>
+{% if hosting_tournament is False %}
+<form id="startTournamentForm" >
+	{% csrf_token %}
+	<input type="hidden" name="formname" value="startTournamentForm">
+	{% for field in tournamentform %}
+	<div class="form-group">
+	<p style="color: red">{{ field.errors }}<p>
+	{{ field.label_tag }} {{ field }}
+	</div>
+	{% endfor %}
+	<input type="submit" class="btn btn-primary" value="Start tournament">
+</form>
+{% else %}
+<button type="submit" id="tournamentButton" data-tournament-id={{ my_tournament.id }} data-action="nuke" class="btn btn-outline-danger">Cancel tournament</button>
+<p>Add players to your {{ my_tournament.game }} tournament</p>
+<form id="tournamentInviteForm" >
+	{% csrf_token %}
+	<input type="hidden" name="formname" value="tournamentInviteForm">
+	{% for field in tournamentinviteform %}
+	<div class="form-group">
+	<p style="color: red">{{ field.errors }}<p>
+	{{ field.label_tag }} {{ field }}
+	</div>
+	{% endfor %}
+	<input type="submit" class="btn btn-primary" value="Send invite">
+</form>
+{% endif %}
 
 <br>
 

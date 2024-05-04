@@ -142,9 +142,22 @@ class Tournament(models.Model):
         (PONG, 'Pong'),
         (COLOR, 'Color'),
     ]
-    game = models.CharField(max_length=5, choices=GAME_CHOICES, default=PONG)
+    PENDING = 'Pending'
+    ACTIVE = 'Active'
+    ERROR = 'Error'
+    FINISHED = 'Finished'
+    STATUS_CHOICES = [
+        (PENDING, 'Pending'),
+        (ACTIVE, 'Active'),
+        (ERROR, 'Error'),
+        (FINISHED, 'Finished'),
+    ]
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    game = models.CharField(max_length=5, choices=GAME_CHOICES, default=PONG)
+    status = models.CharField(max_length=8, choices=STATUS_CHOICES, default=PENDING)
+    creator = models.ForeignKey("CustomUser", related_name="creator", on_delete=models.SET_NULL, null=True)
+
 
     # status
     # participants

@@ -189,3 +189,35 @@ class LocalGameForm(forms.Form):
         if not user.check_password(password):
             raise forms.ValidationError("Incorrect password")
         return True
+
+class StartTournamentForm(forms.Form):
+    GAME_TYPE_CHOICES = [
+        (GameInstance.PONG, 'Pong'),
+        (GameInstance.COLOR, 'Color'),
+    ]
+    game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'formname' in kwargs:
+            self.fields['formname'] = forms.CharField(widget=forms.HiddenInput(), initial=kwargs['formname'])
+
+
+class TournamentInviteForm(forms.Form):
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
+
+    def is_valid(self):
+        valid = super().is_valid()
+        if not valid:
+            return False
+        username = self.cleaned_data.get('username')
+        if not username or username.isspace():
+            raise ValidationError("Empty username")
+        if not CustomUser.objects.filter(username=self.cleaned_data["username"]).exists():
+            raise ValidationError("No such user")
+        return True
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'formname' in kwargs:
+            self.fields['formname'] = forms.CharField(widget=forms.HiddenInput(), initial=kwargs['formname'])

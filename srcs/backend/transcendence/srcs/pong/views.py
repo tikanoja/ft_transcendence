@@ -96,21 +96,3 @@ def post_pong_canvas(request):
     if request.method == 'POST':
         logger.debug('about to render!')
         return render(request, "pong/pong.html", pong_context(request, data))
-
-
-def tournament_lobbyPOST(request):
-    return render(request, "pong/tournament.html", {})
-
-
-def tournament_lobbyGET(request):
-    return render(request, "pong/tournament.html", {})
-
-
-def tournament_lobby(request):
-    logger.debug('In tournament_lobby()')
-    # data = json.loads(request.body)
-    if request.method == 'GET':
-        return tournament_lobbyGET(request)
-    if request.method == 'POST':
-        return tournament_lobbyPOST(request)
-    pass

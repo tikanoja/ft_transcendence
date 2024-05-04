@@ -1,5 +1,5 @@
 from django.urls import path
-from  . import views
+from  . import views, play
 from .user import relations
 
 urlpatterns = [
@@ -15,7 +15,9 @@ urlpatterns = [
 	path('home/', views.home, name="home"),
 	path('notfound/', views.notfound, name="notfound"),
 	path('manage_account/', views.manage_account, name="manage_account"),
-	path('block_user/', relations.block_user, name="block_user")
+	path('block_user/', relations.block_user, name="block_user"),
+	path('tournament_forms/', play.tournament_forms, name='tournament_forms'),
+	path('tournament_buttons/', play.tournament_buttons, name='tournament_buttons'),
 ]
 
 # TODO block user need divverent view definition.

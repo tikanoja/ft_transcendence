@@ -113,7 +113,9 @@ function updateEventListeners() {
     var gameRequestButtons = document.querySelectorAll('[id^="gameRequestButton"]');
     var gameRenderButton = document.getElementById('gameRenderButton');
     var playerAuthForms = document.querySelectorAll('[id^="playerAuthForm"]');
-    var tournamentLobbyButton = document.getElementById('tournamentLobbyButton');
+    var startTournamentForm = document.getElementById('startTournamentForm');
+    var tournamentInviteForm = document.getElementById('tournamentInviteForm');
+    var tournamentButtons = document.querySelectorAll('[id^="tournamentButton"]');
 
     // remove listeners
     if (profilePictureForm)
@@ -163,8 +165,15 @@ function updateEventListeners() {
             button.removeEventListener('submit', playerAuthHandler);
         })
     }
-    if (tournamentLobbyButton)
-        tournamentLobbyButton.removeEventListener('click', tournamentLobbyButtonHandler);
+    if (startTournamentForm)
+        startTournamentForm.removeEventListener('submit', tournamentFormHandler);
+    if (tournamentInviteForm)
+        tournamentInviteForm.removeEventListener('submit', tournamentFormHandler);
+    if (tournamentButtons) {
+        tournamentButtons.forEach(function(button) {
+            button.removeEventListener('click', tournamentButtonHandler);
+        })
+    }
     // begin add listeners if currently present
     if (profilePictureForm)
         profilePictureForm.addEventListener('submit', manageAccountHandler);
@@ -213,8 +222,15 @@ function updateEventListeners() {
             button.addEventListener('submit', playerAuthHandler);
         })
     }
-    if (tournamentLobbyButton)
-        tournamentLobbyButton.addEventListener('click', tournamentLobbyButtonHandler);
+    if (startTournamentForm)
+        startTournamentForm.addEventListener('submit', tournamentFormHandler);
+    if (tournamentInviteForm)
+        tournamentInviteForm.addEventListener('submit', tournamentFormHandler);
+    if (tournamentButtons) {
+        tournamentButtons.forEach(function(button) {
+            button.addEventListener('click', tournamentButtonHandler);
+        })
+    }
 }
 
 function updateContent(html, title, description) {
@@ -522,20 +538,49 @@ const playerAuthHandler = async (event) => {
     }
 }
 
-const tournamentLobbyButtonHandler = async (event) => {
-    console.log('In tournamentLobbyButtonHandler()');
+const tournamentFormHandler = async (event) => {
     event.preventDefault();
+    console.log('in tournamentFormHandler');
+    const formData = new FormData(event.target);
     const querystring = window.location.search;
-    var endpoint = '/pong/tournament_lobby/' + querystring;
-	const response = await sendGetRequest(endpoint);
+
+    var endpoint = '/app/tournament_forms/' + querystring;
+    const response = await sendPostRequest(endpoint, formData);
     if (response.redirected) {
         let redirect_location = response.url;
         routeRedirect(redirect_location);
     } else if (response.ok) {
         const html = await response.text();
-        updateContent(html, "Tournament | Pong", "Create tournament");
+        updateContent(html, "Play | Pong", "Play games");
 	} else {
-		console.log("Response status in tournamentLobbyButtonHandler(): ", response.status)
+		console.log("Response status in tournamentFormHandler(): ", response.status)
+	}
+}
+
+const tournamentButtonHandler = async (event) => {
+    console.log('in tournamentButtonHandler');
+    event.preventDefault();
+
+    var action = event.target.getAttribute('data-action');
+
+    var data = {
+        'action': action,
+    }
+
+    if (action == 'nuke')
+        data['tournament-id'] = event.target.getAttribute('data-tournament-id');
+
+    const querystring = window.location.search;
+    var endpoint = '/app/tournament_buttons/' + querystring;
+    const response = await sendPostRequest(endpoint, data, true); //, data, true);
+    if (response.redirected) {
+        let redirect_location = response.url;
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        const html = await response.text();
+        updateContent(html, "Tournament");
+	} else {
+		console.log("Response status in tournamentButtons(): ", response.status)
 	}
 }
 

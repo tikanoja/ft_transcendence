@@ -1,7 +1,7 @@
-from .forms import GameRequestForm, LocalGameForm
+from .forms import GameRequestForm, LocalGameForm, StartTournamentForm, TournamentInviteForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import get_user_model
-from .models import CustomUser, GameInstance
+from .models import CustomUser, GameInstance, Tournament
 from django.core.exceptions import ValidationError
 import logging
 # from django.http import JsonResponse
@@ -20,11 +20,19 @@ def playContext(request, error, success):
     current_user = request.user
     inviteform = GameRequestForm()
     playform = LocalGameForm()
+    tournamentform = StartTournamentForm()
+    tournamentinviteform = TournamentInviteForm()
     title = 'Play'
     all_games = GameInstance.objects.filter(Q(p1=current_user) | Q(p2=current_user))
     invites_sent = all_games.filter(p1=current_user, status='Pending')
     invites_received = all_games.filter(p2=current_user, status='Pending')
     active_game = all_games.filter(Q(p1=current_user) | Q(p2=current_user), status='Accepted').first()
+    my_tournament = Tournament.objects.filter(creator=request.user, status='Pending').first()
+    
+    if my_tournament is not None:
+        hosting_tournament = True
+    else:
+        hosting_tournament = False
 
     context = {
         'current_user': current_user,
@@ -32,7 +40,11 @@ def playContext(request, error, success):
         'playform': playform,
         'all_games': all_games,
         'invites_sent': invites_sent,
-        'invites_received': invites_received
+        'invites_received': invites_received,
+        'tournamentform': tournamentform,
+        'hosting_tournament': hosting_tournament,
+        'my_tournament': my_tournament,
+        'tournamentinviteform': tournamentinviteform
     }
 
     if active_game is not None:
@@ -79,7 +91,8 @@ def gameResponse(request, data):
     action = data.get('action')
     if action == 'nuke':
         GameInstance.objects.all().delete()
-        return render(request, 'user/play.html', playContext(request, None, "All GameInstances deleted"))
+        Tournament.objects.all().delete()
+        return render(request, 'user/play.html', playContext(request, None, "All GameInstances & Tournaments deleted"))
     challenger = data.get('from_user')
     challenger_user = CustomUser.objects.filter(username=challenger).first()
     if not challenger_user:
@@ -134,3 +147,71 @@ def playPOST(request):
     new_game_instance = GameInstance(p1=current_user, p2=challenged_user, game=sent_form.cleaned_data['game_type'], status='Pending')
     new_game_instance.save()
     return render(request, 'user/play.html', playContext(request, None, "Game invite sent! Should we be redirected to game here?")) 
+
+
+def start_tournament(request):
+    current_user = request.user
+    sent_form = StartTournamentForm(request.POST)
+
+    try:
+        if not sent_form.is_valid():
+            raise ValidationError("Form filled incorrectly")
+    except ValidationError as ve:
+        return render(request, 'user/play.html', playContext(request, ve, None))
+    
+    game_type = sent_form.cleaned_data['game_type']
+    logger.debug('user ' + current_user.username + ' started ' + game_type + ' tournament!')
+    
+    new_tournament = Tournament(creator=current_user, game=game_type, status='Pending')
+    new_tournament.save()
+
+    return render(request, 'user/play.html', playContext(request, None, 'Tournament created!'))
+
+
+def tournament_invite(request):
+    current_user = request.user
+    sent_form = TournamentInviteForm(request.POST)
+
+    try:
+        if not sent_form.is_valid():
+            raise ValidationError("Form filled incorrectly")
+    except ValidationError as ve:
+        return render(request, 'user/play.html', playContext(request, ve, None))
+    
+    invited_username = sent_form.cleaned_data["username"]
+    invited_user = CustomUser.objects.get(username=invited_username)
+
+    if invited_user is None:
+        return render(request, 'user/play.html', playContext(request, 'User not found', None))
+    if invited_user == current_user:
+        return render(request, 'user/play.html', playContext(request, 'Please do not invite yourself', None))
+
+
+    return render(request, 'user/play.html', playContext(request, None, 'Invite sent!'))
+
+
+def delete_tournament(request, data):
+    logger.debug('In delete_tournament()')
+    Tournament.objects.get(pk=data.get('tournament-id')).delete()
+    return render(request, 'user/play.html', playContext(request, None, 'Tournament cancelled!'))
+
+
+def tournament_buttons(request):
+    logger.debug('In torunament_buttons()')
+    if request.content_type == 'application/json':
+        data = json.loads(request.body)
+        if data.get('action') == 'nuke':
+            return delete_tournament(request, data)
+        # else:
+        #     return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, ve, "Unknown content type"))
+
+    return render(request, 'user/play.html', playContext(request, 'error in tournament_buttons()???', None))
+
+
+def tournament_forms(request):
+    formname = request.POST.get('formname')
+    logger.debug('In start_tournament() received form: ' + formname)
+    if formname == 'startTournamentForm':
+        return start_tournament(request)
+    elif formname == 'tournamentInviteForm':
+        return tournament_invite(request)
