@@ -90,66 +90,95 @@ function addLighting(scene) {
 }
 
 export const renderColorwar = () => {
-    console.log("in renderer")
-
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(100, 200, 1000);
 
-    const existingCanvas = document.getElementById('colorCanvas');
-    if (existingCanvas) {
-        existingCanvas.remove();
-    }
-    const video = document.getElementById('video');
-    video.addEventListener('loadedmetadata', function() {
-        video.play();
-    });
-    const texture = new THREE.VideoTexture(video);
-    scene.background = texture;
+    const canvasContainer = document.getElementById('canvasContainer');
+    canvasContainer.innerHTML = '';
+    canvasContainer.appendChild(renderer.domElement);
+    
     const pixelRatio = window.devicePixelRatio;
     renderer.setPixelRatio(pixelRatio);
-	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
-    renderer.domElement.id = 'colorCanvas'; // Set an id for the new canvas
-    document.getElementById('canvasContainer').appendChild(renderer.domElement);
+	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4)); 
+    
+    const video = document.getElementById('video');
+    video.play();
+    const texture = new THREE.VideoTexture(video);
+    scene.background = texture;
 
-    const tileSize = 50; // Size of each tile
-    const numRows = 8; // Number of rows in the grid
-    const numCols = 8; // Number of columns in the grid
-    
-    // Initialize an array to store tile data
+    const numRows = 36;
+    const numCols = 35;
+
+    const canvasWidth = window.innerWidth - 250;
+    const canvasHeight = window.innerHeight;
+
+    const tileSizeFraction = 0.2;
+    const tileSize = Math.min(canvasWidth, canvasHeight) * tileSizeFraction;
+
+    const boardWidth = numCols * tileSize;
+    const boardHeight = numRows * tileSize;
+
+    const boardStartX = (canvasWidth - boardWidth) / 1.5;
+    const boardStartY = (canvasHeight - boardHeight)/ 1.8;
+
+    // Texture for the tiles
+    const textureLoader = new THREE.TextureLoader();
+
+    // Load the textures for each tile set
+    const tileTexture = textureLoader.load("../textures/BackTile_05.png", () => {
+        console.log("Texture 1 loaded successfully.");
+    });
+
     const tileData = [];
-    
     // Generate tile data for the grid
     for (let row = 0; row < numRows; row++) {
         for (let col = 0; col < numCols; col++) {
-            // Determine the color based on row and column index
-            const color = (row + col) % 2 === 0 ? 0xffffff : 0x000000;
-            
-            // Calculate the position of the tile
-            const x = col * tileSize;
-            const y = row * tileSize;
-            
-            // Add tile data to the array
-            tileData.push({ position: { x, y }, color });
+            const x = boardStartX + col * tileSize;
+            const y = boardStartY + row * tileSize;
+            tileData.push({ position: { x, y }, tileTexture });
         }
     }
-    
+
+    const ballMaterial = new THREE.MeshPhongMaterial({ color: 0xff00ff });
+
     // Create tiles based on the tile data
-    tileData.forEach(tileInfo => {
-        const geometry = new THREE.PlaneGeometry(tileSize, tileSize);
-        const material = new THREE.MeshBasicMaterial({ color: tileInfo.color });
-        const tile = new THREE.Mesh(geometry, material);
-        tile.position.set(tileInfo.position.x, tileInfo.position.y, 0); // Set z position to 0
-        scene.add(tile);
+    tileData.forEach((tileInfo, index) => {
+        const tileId = index;
+        const tileGeometry = new THREE.PlaneGeometry(tileSize, tileSize);
+        const tileMaterial = new THREE.MeshBasicMaterial({ map: tileInfo.tileTexture });
+        const tileMesh = new THREE.Mesh(tileGeometry, tileMaterial);
+        tileMesh.position.set(tileInfo.position.x, tileInfo.position.y, 0);
+        scene.add(tileMesh);
+
+        // Add ball on alternating tiles
+        if (index % 2 !== 0) {
+            const ballGeometry = new THREE.SphereGeometry(10, 32, 32);
+            const ball = new THREE.Mesh(ballGeometry, ballMaterial);
+            ball.position.set(tileInfo.position.x, tileInfo.position.y, 10);
+            scene.add(ball);
+        }
     });
 
-    const ball = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 32), new THREE.MeshPhongMaterial({ color: 0xff00ff }));
-    scene.add(ball);
-    addLighting(scene);
-    console.log("ball added");
+    // Set up orthographic camera
+    const camera = new THREE.PerspectiveCamera(
+        75,
+        canvasWidth / canvasHeight,
+        1,
+        10000
+    );
 
+    // Calculate distance from the board based on its size
+    const distance = Math.max(boardWidth, boardHeight) / (2 * Math.tan(Math.PI * camera.fov / 360));
+
+    // Position the camera
+    camera.position.set(0, 20, distance + 1000); // Adjust camera position to be in front of the scene
+    camera.lookAt(scene.position);
+
+    // Set up lighting
+    addLighting(scene);
+
+    // Animation loop
     function animate() {
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
