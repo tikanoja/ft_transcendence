@@ -27,19 +27,17 @@ socket.onmessage = (event) => {
 function appendMessage(source, message) {
     if ([...message].length == 0) { return; }
 
-    console.log("Appending");
-
     const userLink = document.createElement("a");
     userLink.href = "/profile/" + source;
     userLink.append(document.createTextNode(source));
     userLink.addEventListener("click", profileLinkHandler);
 
-    const userLinkBolder = document.createElement("b");
-    userLinkBolder.append(userLink);
+    const userLinkBold = document.createElement("b");
+    userLinkBold.append(userLink);
 
     const container = document.createElement("div");
     container.classList.add("chat-message");
-    container.append(userLinkBolder);
+    container.append(userLinkBold);
     container.append(document.createTextNode("  " + message));
 
     if (chatLog.childElementCount + 1 > logMessageCountMax) {
@@ -72,8 +70,6 @@ submitButton.onclick = () => {
         if (!parts) {
             return;
         }
-
-        console.log("First pass: ", parts);
 
         const [ , command, rest, ] = parts;
 
@@ -113,7 +109,7 @@ submitButton.onclick = () => {
     try {
         socket.send(JSON.stringify(event));
     } catch {
-        console.log("Chat socket not open for sending");
+        console.log("Chat socket not open");
     }
 
     inputField.value = '';
