@@ -95,20 +95,25 @@ export const renderColorwar = () => {
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    scene.background = new THREE.Color(0xabcdef)   
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(100, 200, 1000);
+
     const existingCanvas = document.getElementById('colorCanvas');
     if (existingCanvas) {
         existingCanvas.remove();
     }
+    const video = document.getElementById('video');
+    video.addEventListener('loadedmetadata', function() {
+        video.play();
+    });
+    const texture = new THREE.VideoTexture(video);
+    scene.background = texture;
     const pixelRatio = window.devicePixelRatio;
     renderer.setPixelRatio(pixelRatio);
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
     renderer.domElement.id = 'colorCanvas'; // Set an id for the new canvas
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
 
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    // const camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 1000);
-    camera.position.set(100, 200, 1000);
     const tileSize = 50; // Size of each tile
     const numRows = 8; // Number of rows in the grid
     const numCols = 8; // Number of columns in the grid
