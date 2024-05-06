@@ -114,9 +114,12 @@ body {
     bottom: 0;
 }
 
-.chat-log {
+.chat-text {
     font-family: sans-serif;
-    font-size: 14px;
+    font-size: 13px;
+}
+
+.chat-log {
     min-height: 32px;
     max-height: 256px;
     overflow-x: hidden;
@@ -126,4 +129,6 @@ body {
 .chat-message {
     word-wrap: break-word;
     white-space: pre-wrap;
+    padding-left: 2em;
+    text-indent: -2em;
 }

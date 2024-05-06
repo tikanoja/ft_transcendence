@@ -1,3 +1,5 @@
+import { profileLinkHandler } from "./index.js"
+
 const socket = new WebSocket('wss://' + window.location.host + '/ws/app/');
 const chatLog = document.getElementById("chat-log");
 const inputField = document.getElementById("chat-input");
@@ -17,24 +19,36 @@ socket.onmessage = (event) => {
             case "chat.error"    : appendMessage("System", content.message); break;
             default: console.log("Unknown chat event");
         }
-    } catch {
-        console.log("Invalid event");
+    } catch (e) {
+        console.log("Event error:", e);
     }
 };
 
 function appendMessage(source, message) {
-    if ([...message].length == 0) {return;}
+    if ([...message].length == 0) { return; }
 
-    const element = document.createElement("div");
+    console.log("Appending");
 
-    element.classList.add("chat-message");
-    element.innerHTML = "[" + source + "] " + message;
+    const userLink = document.createElement("a");
+    userLink.href = "/profile/" + source;
+    userLink.append(document.createTextNode(source));
+    userLink.addEventListener("click", profileLinkHandler);
+
+    const userLinkBolder = document.createElement("b");
+    userLinkBolder.append(userLink);
+
+    const container = document.createElement("div");
+    container.classList.add("chat-message");
+    container.append(userLinkBolder);
+    container.append(document.createTextNode("  " + message));
 
     if (chatLog.childElementCount + 1 > logMessageCountMax) {
-        chatLog.firstChild.remove();
+        const expiredMessage = chatLog.firstChild;
+        expiredMessage.removeEventListener("click", profileLinkHandler);
+        expiredMessage.remove();
     }
 
-    chatLog.append(element);
+    chatLog.append(container);
     chatLog.lastChild.scrollIntoView();
 }
 
