@@ -2,9 +2,10 @@
 import threading
 import ssl
 import random
+import requests
 from typing import Optional
 from dataclasses import dataclass
-from flask import Flask
+from flask import Flask, jsonify
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 
@@ -358,6 +359,84 @@ def handle_message(message):
 	else:
 		socketio.emit('message', 'ERROR, nothing was sent.')
 	
+
+
+@socketio.on('username')
+def validate_username(data):
+	global games
+	global games_lock
+	global socketio
+	usernames = data.split(",")
+	print(data)
+	data_to_send = { "p1_username": usernames[0],
+	"p2_username": usernames[1]
+	}
+
+	with app.app_context():
+		django_url = "http://transcendence:8000/pong/validate_match/"
+		try:
+
+			slot = -1
+			response = requests.post(django_url, data=data_to_send)
+			if response.status_code == 200:
+				with games_lock:
+					for index in range(4):
+						if games[index].is_game_running() == 0:
+							slot = index
+							break
+					if slot == -1:
+						return jsonify({"message": "ERROR, all game slots are already in use"})
+					else:
+						games[slot].left_player_id = usernames[1]
+						games[slot].right_player_id = usernames[0]
+						print("Emiting setup game")
+						socketio.emit('setup_game', 'OK,{}'.format(slot))
+						return jsonify({"message": "Usernames verified"})
+			else:
+				return jsonify({"error": "Failed to send request"}), response.status_code
+		except Exception as e:
+			print("threw except", str(e))
+			return jsonify({"error": str(e)}), 500
+
+# @app.route('/send_game_over_data', methods=['POST'])
+def send_game_over_data(p1_score, p2_score, rally):
+	data_to_send = {"test" : "rally",
+		"p1_username": "placeholder",
+		"p1_score": f"{p1_score}",
+		"p2_username": "placeholder2",
+		"p2_score": f"{p2_score}",
+		"longest_rally": f"{rally}"
+	}
+	with app.app_context():
+		django_url = "http://transcendence:8000/pong/send_game_data/"
+
+		try:
+			response = requests.post(django_url, data=data_to_send)
+			if response.status_code == 200:
+				return jsonify({"message": "Request sent successfully"})
+			else:
+				return jsonify({"error": "Failed to send request"}), response.status_code
+		except Exception as e:
+			print("threw except", str(e))
+			return jsonify({"error": str(e)}), 500
+
+
+@app.route('/init_usernames', methods=['GET'])
+def init_usernames():
+	try:
+		print("inside try")
+		# Assuming the request body contains JSON data with 'p1_username' and 'p2_username'
+		data = request.get_json()
+		p1_username = data['p1_username']
+		p2_username = data['p2_username']
+		# Process the data as needed
+		# For example, you can return a response indicating success
+		return jsonify({'message': 'Usernames initialized successfully', 'p1_username': p1_username, 'p2_username': p2_username}), 200
+	except Exception as e:
+		# Handle any errors
+		return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
 	# Use SSL/TLS encryption for WSS
 	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)

@@ -32,30 +32,29 @@ function connectWebSocket() {
     });
 }
 
-// export const verifyUsername = () => {
-//     return new Promise((resolve, reject) => {
-//         const username1Element = document.getElementById('player1');
-//         const username2Element = document.getElementById('player2');
-//         const username1 = username1Element.innerText.trim();
-//         const username2 = username2Element.innerText.trim();
-//         const usernameString = username1 + "," + username2;
+export const verifyUsername = () => {
+    return new Promise((resolve, reject) => {
+        const username1Element = document.getElementById('player1');
+        const username2Element = document.getElementById('player2');
+        const username1 = username1Element.innerText.trim();
+        const username2 = username2Element.innerText.trim();
+        const usernameString = username1 + "," + username2;
         
-//         socket.emit("username", usernameString);
+        socket.emit("username", usernameString);
 
-//         socket.on('setup_game', (data) => {
-//             console.log("in setup game");
-//             const valuesArray = data.split(',');
-//             gameNumber = valuesArray[1];
-//             console.log("after setup game: ", gameNumber);
-//             resolve(gameNumber);
-//         });
+        socket.on('setup_game', (data) => {
+            console.log("in setup game", gameNumber);
+            const valuesArray = data.split(',');
+            gameNumber = valuesArray[1];
+            console.log("after setup game: ", gameNumber);
+            resolve(gameNumber);
+        });
 
-//         socket.on('error', (error) => {
-//             reject('Error verifying username:', error);
-//         });
-//     });
-// };
-
+        socket.on('error', (error) => {
+            reject('Error verifying username:', error);
+        });
+    });
+};
 export const startScreenColorwar = async () => {
     try {
         await loadScript();
@@ -65,8 +64,12 @@ export const startScreenColorwar = async () => {
         const playButton = document.getElementById('ColorwarPlayButton');
         const canvasContainer = document.getElementById('canvasContainer');
 
-        // await verifyUsername();
-        
+        await verifyUsername();
+        socket.emit("message", "start_game")
+
+        socket.on('message', (data) => {
+            console.log(data)
+        });
         playButton.addEventListener('click', () => {
             startScreen.style.display = 'none';
             canvasContainer.style.display = 'block';
@@ -125,39 +128,50 @@ export const renderColorwar = () => {
     // Texture for the tiles
     const textureLoader = new THREE.TextureLoader();
 
-    // Load the textures for each tile set
-    const tileTexture = textureLoader.load("../textures/BackTile_05.png", () => {
-        console.log("Texture 1 loaded successfully.");
+    const baseTileTexture = textureLoader.load("../textures/BackTile_05.png", () => {
+        console.log("Base tile loaded successfully.");
     });
 
-    const tileData = [];
-    // Generate tile data for the grid
-    for (let row = 0; row < numRows; row++) {
-        for (let col = 0; col < numCols; col++) {
-            const x = boardStartX + col * tileSize;
-            const y = boardStartY + row * tileSize;
-            tileData.push({ position: { x, y }, tileTexture });
+    const colorOneTexture = textureLoader.load("../textures/tileBlue_01.png", () => {
+        console.log("Color 1 loaded successfully.");
+    });
+
+    const colorTwoTexture = textureLoader.load("../textures/tileGreen_01.png", () => {
+        console.log("Color 2 loaded successfully.");
+    });
+
+    const colourThreeTexture = textureLoader.load("../textures/tilePink_01.png", () => {
+        console.log("Color 3 loaded successfully.");
+    });
+
+    function updateGameState(data)
+    {
+        console.log(data)
+        const tileData = [];
+        // Generate tile data for the grid
+        for (let row = 0; row < numRows; row++) {
+            for (let col = 0; col < numCols; col++) {
+                const x = boardStartX + col * tileSize;
+                const y = boardStartY + row * tileSize;
+                tileData.push({ position: { x, y }, baseTileTexture });
+            }
         }
+    
+        const ballMaterial = new THREE.MeshPhongMaterial({ color: 0xff00ff });
+    
+        tileData.forEach((tileInfo, index) => {
+            const tileId = index;
+            const tileGeometry = new THREE.PlaneGeometry(tileSize, tileSize);
+            const tileMaterial = new THREE.MeshBasicMaterial({ map: tileInfo.tileTexture });
+            const tileMesh = new THREE.Mesh(tileGeometry, tileMaterial);
+            tileMesh.position.set(tileInfo.position.x, tileInfo.position.y, 0);
+            scene.add(tileMesh);
+        });
+
+
     }
-
-    const ballMaterial = new THREE.MeshPhongMaterial({ color: 0xff00ff });
-
-    // Create tiles based on the tile data
-    tileData.forEach((tileInfo, index) => {
-        const tileId = index;
-        const tileGeometry = new THREE.PlaneGeometry(tileSize, tileSize);
-        const tileMaterial = new THREE.MeshBasicMaterial({ map: tileInfo.tileTexture });
-        const tileMesh = new THREE.Mesh(tileGeometry, tileMaterial);
-        tileMesh.position.set(tileInfo.position.x, tileInfo.position.y, 0);
-        scene.add(tileMesh);
-
-        // Add ball on alternating tiles
-        if (index % 2 !== 0) {
-            const ballGeometry = new THREE.SphereGeometry(10, 32, 32);
-            const ball = new THREE.Mesh(ballGeometry, ballMaterial);
-            ball.position.set(tileInfo.position.x, tileInfo.position.y, 10);
-            scene.add(ball);
-        }
+    socket.on('state', (data) => {
+        updateGameState(data)
     });
 
     // Set up orthographic camera
