@@ -1,4 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.module.js';
+import { updateEventListeners } from "./index.js";
 
 let socket;
 let gameNumber = -1;
@@ -43,10 +44,8 @@ export const verifyUsername = () => {
         socket.emit("username", usernameString);
 
         socket.on('setup_game', (data) => {
-            console.log("in setup game", gameNumber);
             const valuesArray = data.split(',');
             gameNumber = valuesArray[1];
-            console.log("after setup game: ", gameNumber);
             resolve(gameNumber);
         });
 
@@ -55,25 +54,34 @@ export const verifyUsername = () => {
         });
     });
 };
+
 export const startScreenColorwar = async () => {
     try {
-        await loadScript();
-        connectWebSocket();
+            await loadScript();
+            connectWebSocket();
 
-        const startScreen = document.getElementById('startScreen');
-        const playButton = document.getElementById('ColorwarPlayButton');
-        const canvasContainer = document.getElementById('canvasContainer');
+            const startScreen = document.getElementById('startScreen');
+            const canvasContainer = document.getElementById('canvasContainer');
 
-        await verifyUsername();
-        socket.emit("message", "start_game")
+            await verifyUsername();
+            console.log(gameNumber)
+            console.log("after verify: ", gameNumber);
+            
 
-        socket.on('message', (data) => {
-            console.log(data)
-        });
-        playButton.addEventListener('click', () => {
             startScreen.style.display = 'none';
             canvasContainer.style.display = 'block';
-            renderColorwar()
+            
+            // # DONT FORGET to maybe insert to here to get permission from django to start the game
+            socket.emit("message", "start_game," + gameNumber)
+            
+            socket.on('state', (data) => {
+                console.log("start game was called")
+                startScreen.style.display = 'none';
+                canvasContainer.style.display = 'block';
+                console.log("data from start_game server message ",data)
+                const valuesArray = data.split(',')
+                gameNumber = valuesArray[1]
+                renderColorwar(gameNumber, data);
         });
     } catch (error) {
         console.error('Error loading script:', error);
@@ -92,7 +100,7 @@ function addLighting(scene) {
     scene.add(amb_light);
 }
 
-export const renderColorwar = () => {
+export const renderColorwar = (gameNumber, data) => {
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer();
     let render = true;
@@ -145,29 +153,35 @@ export const renderColorwar = () => {
         console.log("Color 3 loaded successfully.");
     });
 
+    console.log("printing values array", data)
+    updateGameState(data);
     function updateGameState(data)
     {
-        console.log(data)
-        const tileData = [];
-        // Generate tile data for the grid
-        for (let row = 0; row < numRows; row++) {
-            for (let col = 0; col < numCols; col++) {
-                const x = boardStartX + col * tileSize;
-                const y = boardStartY + row * tileSize;
-                tileData.push({ position: { x, y }, baseTileTexture });
+        const valuesArray = data.split(',')
+        console.log("printing VA: ", valuesArray)
+        if (gameNumber == valuesArray[1])
+        {
+            const tileData = [];
+            // Generate tile data for the grid
+            for (let row = 0; row < numRows; row++) {
+                for (let col = 0; col < numCols; col++) {
+                    const x = boardStartX + col * tileSize;
+                    const y = boardStartY + row * tileSize;
+                    tileData.push({ position: { x, y }, baseTileTexture });
+                }
             }
+        
+            const ballMaterial = new THREE.MeshPhongMaterial({ color: 0xff00ff });
+        
+            tileData.forEach((tileInfo, index) => {
+                const tileId = index;
+                const tileGeometry = new THREE.PlaneGeometry(tileSize, tileSize);
+                const tileMaterial = new THREE.MeshBasicMaterial({ map: tileInfo.baseTileTexture });
+                const tileMesh = new THREE.Mesh(tileGeometry, tileMaterial);
+                tileMesh.position.set(tileInfo.position.x, tileInfo.position.y, 0);
+                scene.add(tileMesh);
+            });
         }
-    
-        const ballMaterial = new THREE.MeshPhongMaterial({ color: 0xff00ff });
-    
-        tileData.forEach((tileInfo, index) => {
-            const tileId = index;
-            const tileGeometry = new THREE.PlaneGeometry(tileSize, tileSize);
-            const tileMaterial = new THREE.MeshBasicMaterial({ map: tileInfo.tileTexture });
-            const tileMesh = new THREE.Mesh(tileGeometry, tileMaterial);
-            tileMesh.position.set(tileInfo.position.x, tileInfo.position.y, 0);
-            scene.add(tileMesh);
-        });
     }
     // Set up orthographic camera
     const camera = new THREE.PerspectiveCamera(
@@ -195,6 +209,7 @@ export const renderColorwar = () => {
 			render = false;
 		}
     });
+    
     socket.on('state', (data) => {
         updateGameState(data)
     });
@@ -220,11 +235,11 @@ export const renderColorwar = () => {
     }
 
     let animationId;
-
     function startAnimation() {
 
         animationId = requestAnimationFrame(animate);
-        animate();}
+        animate();
+    }
 
 		function stopAnimation() {
 		socket.emit('message', 'stop_game,' + gameNumber);
@@ -234,6 +249,7 @@ export const renderColorwar = () => {
         cancelAnimationFrame(animationId);
         render = true
     }
+
     if (render)
     {
         startAnimation();

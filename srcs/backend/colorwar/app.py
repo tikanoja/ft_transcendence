@@ -1,6 +1,6 @@
 #import time
-import threading
 import ssl
+import threading
 import random
 import requests
 from typing import Optional
@@ -216,15 +216,14 @@ def start_game(splitted_command):
 	global socketio
 	global games_lock
 	global games
-	if len(splitted_command) != 1:
+	if len(splitted_command) != 2:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
 	number = -1
+	index = int(splitted_command[1])
 	with games_lock:
-		for index in range(4):
-			if games[index].is_game_running == 0:
-				number = index
-				break
+		if games[index].is_game_running() == 0:
+			number = index
 	with games_lock:
 		if number == -1:
 			socketio.emit('message', 'ERROR, game already running cannot create new.')
@@ -233,7 +232,7 @@ def start_game(splitted_command):
 			games[number].new_game_initilization()
 			games[number].set_game_slot(number)
 			games[number].set_game_running(1)
-			socketio.emit('start_game', 'OK,{}'.format(number) + str(games[number].which_player_turn()))
+			socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
 
 def stop_game(splitted_command):
 	global socketio
@@ -242,10 +241,6 @@ def stop_game(splitted_command):
 	if len(splitted_command) != 2:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
-	with thread_lock:
-		if not thread:
-			socketio.emit('message', 'ERROR, background loop not running.')
-			return
 	number = int(splitted_command[1])
 	if number < 0 or number > 3:
 		socketio.emit('message', 'ERROR: allowed game numbers are 0 to 3')

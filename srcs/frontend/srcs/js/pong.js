@@ -73,7 +73,6 @@ export const startScreen = async () => {
             await verifyUsername()
             console.log("after verify: ", gameNumber);
             
-            playButton.addEventListener('click', () => {
                 console.log("in the click listener")
                 startScreen.style.display = 'none';
                 canvasContainer.style.display = 'block';
@@ -91,7 +90,6 @@ export const startScreen = async () => {
                     gameNumber = valuesArray[1]
                     renderPongGame(is3DGraphics, gameNumber);
                 });
-            });
     } catch (error) {
         console.error('Error loading script:', error);
     }
