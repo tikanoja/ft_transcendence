@@ -95,6 +95,7 @@ function addLighting(scene) {
 export const renderColorwar = () => {
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer();
+    let render = true;
     renderer.setSize(window.innerWidth, window.innerHeight);
 
     const canvasContainer = document.getElementById('canvasContainer');
@@ -167,13 +168,7 @@ export const renderColorwar = () => {
             tileMesh.position.set(tileInfo.position.x, tileInfo.position.y, 0);
             scene.add(tileMesh);
         });
-
-
     }
-    socket.on('state', (data) => {
-        updateGameState(data)
-    });
-
     // Set up orthographic camera
     const camera = new THREE.PerspectiveCamera(
         75,
@@ -189,14 +184,59 @@ export const renderColorwar = () => {
     camera.position.set(0, 20, distance + 1000); // Adjust camera position to be in front of the scene
     camera.lookAt(scene.position);
 
-    // Set up lighting
     addLighting(scene);
 
-    // Animation loop
+
+    document.addEventListener('keydown', (event) => {
+		event.preventDefault();
+			if (event.key == 'c')
+		{
+			socket.emit('message', 'stop_game,' + gameNumber);
+			render = false;
+		}
+    });
+    socket.on('state', (data) => {
+        updateGameState(data)
+    });
+
+    function exit_game(data)
+	{
+        updateGameState(data)
+        loadGameOverScreen(data)
+		stopAnimation()
+	}
+
+	socket.on('endstate', (data) => {
+        exit_game(data)
+    });
+
     function animate() {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
+        if (render) {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        } else {
+            stopAnimation();
+        }
     }
 
-    animate();
+    let animationId;
+
+    function startAnimation() {
+
+        animationId = requestAnimationFrame(animate);
+        animate();}
+
+		function stopAnimation() {
+		socket.emit('message', 'stop_game,' + gameNumber);
+		socket.on('disconnect', () => {
+			console.log('Disconnected from server');
+		});
+        cancelAnimationFrame(animationId);
+        render = true
+    }
+    if (render)
+    {
+        startAnimation();
+    }
+
 };
