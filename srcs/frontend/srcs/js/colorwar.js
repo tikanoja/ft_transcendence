@@ -1,5 +1,4 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.module.js';
-import { updateEventListeners } from "./index.js";
 
 let socket;
 let gameNumber = -1;
@@ -75,10 +74,8 @@ export const startScreenColorwar = async () => {
             socket.emit("message", "start_game," + gameNumber)
             
             socket.on('state', (data) => {
-                console.log("start game was called")
                 startScreen.style.display = 'none';
                 canvasContainer.style.display = 'block';
-                console.log("data from start_game server message ",data)
                 const valuesArray = data.split(',')
                 gameNumber = valuesArray[1]
                 renderColorwar(gameNumber, data);
@@ -100,6 +97,28 @@ function addLighting(scene) {
     scene.add(amb_light);
 }
 
+let previousP1Score = null;
+let previousP2Score = null;
+
+export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
+    const scoreLeftElement = document.querySelector('.score-left');
+    const scoreRightElement = document.querySelector('.score-right');
+    //TODO: THIS NEEDS TO IMPLIMENT CURRENT MOVE COUNT BUT DOES NOT YET
+    if (isNaN(p1Score) || isNaN(p2Score)) {
+        return;
+    }
+    if (scoreLeftElement && scoreRightElement) {
+        if (p1Score !== previousP1Score || p2Score !== previousP2Score) {
+            scoreLeftElement.textContent = `P1 SCORE: ${p1Score}`;
+            scoreRightElement.textContent = `P2 SCORE: ${p2Score}`;
+            previousP1Score = p1Score;
+            previousP2Score = p2Score;
+        }
+    } else {
+        console.error('Scoreboard elements not found.');
+    }
+};
+
 export const renderColorwar = (gameNumber, data) => {
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer();
@@ -114,88 +133,128 @@ export const renderColorwar = (gameNumber, data) => {
     renderer.setPixelRatio(pixelRatio);
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4)); 
     
-    const video = document.getElementById('video');
-    video.play();
-    const texture = new THREE.VideoTexture(video);
-    scene.background = texture;
+    scene.background = new THREE.Color(0x332D2D);
 
-    const numRows = 36;
-    const numCols = 35;
-
+    const numRows = 19;
+    const numCols = 36;
     const canvasWidth = window.innerWidth - 250;
     const canvasHeight = window.innerHeight;
 
-    const tileSizeFraction = 0.2;
-    const tileSize = Math.min(canvasWidth, canvasHeight) * tileSizeFraction;
+    // const tileSizeFraction = 2;
+    const tileSize = Math.min(canvasWidth, canvasHeight) // * tileSizeFraction;
 
     const boardWidth = numCols * tileSize;
     const boardHeight = numRows * tileSize;
+    const boardStartX = (canvasWidth - boardWidth) / 1.9;
+    const boardStartY = (canvasHeight - boardHeight)/ 2;
 
-    const boardStartX = (canvasWidth - boardWidth) / 1.5;
-    const boardStartY = (canvasHeight - boardHeight)/ 1.8;
 
-    // Texture for the tiles
     const textureLoader = new THREE.TextureLoader();
 
-    const baseTileTexture = textureLoader.load("../textures/BackTile_05.png", () => {
+    // const baseTileTexture = textureLoader.load("../textures/tileYellow_01.png", () => {
+    //     console.log("Base tile loaded successfully.");
+    // });
+    const baseTileTexture = textureLoader.load("../textures/tilePurple_01.png", () => {
         console.log("Base tile loaded successfully.");
     });
 
-    const colorOneTexture = textureLoader.load("../textures/tileBlue_01.png", () => {
-        console.log("Color 1 loaded successfully.");
-    });
+    // const colorOneTexture = textureLoader.load("../textures/tileBlue_25.png", () => {
+    //     console.log("Color 1 loaded successfully.");
+    // });
 
-    const colorTwoTexture = textureLoader.load("../textures/tileGreen_01.png", () => {
+    const colorOneTexture = textureLoader.load("../textures/tileGreen_39.png", () => {
         console.log("Color 2 loaded successfully.");
     });
 
-    const colourThreeTexture = textureLoader.load("../textures/tilePink_01.png", () => {
+    const colorTwoTexture = textureLoader.load("../textures/tileYellow_27.png", () => {
+        console.log("Color 2 loaded successfully.");
+    });
+
+    const colourThreeTexture = textureLoader.load("../textures/tileRed_27.png", () => {
         console.log("Color 3 loaded successfully.");
     });
 
-    console.log("printing values array", data)
     updateGameState(data);
     function updateGameState(data)
     {
         const valuesArray = data.split(',')
-        console.log("printing VA: ", valuesArray)
         if (gameNumber == valuesArray[1])
         {
-            const tileData = [];
-            // Generate tile data for the grid
+            let player1score = valuesArray[2];
+            let player2score = valuesArray[3];
+            let currentMoveCount = valuesArray[5];
+            let tileLegend = [];
+            let tileData = [];
+
+            for (let i = 6; i < valuesArray.length; i += 2) {
+                const color = valuesArray[i];
+                const owner = valuesArray[i + 1];
+                const tile = { color, owner };
+                tileLegend.push(tile);
+            }
+
+            let legendIndex = 0;
             for (let row = 0; row < numRows; row++) {
                 for (let col = 0; col < numCols; col++) {
                     const x = boardStartX + col * tileSize;
                     const y = boardStartY + row * tileSize;
-                    tileData.push({ position: { x, y }, baseTileTexture });
+
+                    const color = tileLegend[legendIndex].color;
+                    const owner = tileLegend[legendIndex].owner;
+
+                    let tileTexture;
+
+                    if (color === '1')
+                    {
+                        tileTexture = colorOneTexture;
+                    }
+                    else if (color === '2') 
+                    {
+                        tileTexture = colorTwoTexture;
+                    }
+                    else if  (color === '3') 
+                    {
+                         tileTexture = colourThreeTexture;
+                    }
+                    else if (color === '4')
+                    {
+                        tileTexture = baseTileTexture;
+                    }
+                    tileData.push({ position: { x, y }, tileTexture });
+                    legendIndex++;
                 }
             }
-        
+
             const ballMaterial = new THREE.MeshPhongMaterial({ color: 0xff00ff });
-        
-            tileData.forEach((tileInfo, index) => {
-                const tileId = index;
+            // new THREE.TextGeometry( text, parameters ); maybe texts ??
+            
+            tileData.forEach((tileInfo) => {
                 const tileGeometry = new THREE.PlaneGeometry(tileSize, tileSize);
-                const tileMaterial = new THREE.MeshBasicMaterial({ map: tileInfo.baseTileTexture });
+                const tileMaterial = new THREE.MeshBasicMaterial({ map: tileInfo.tileTexture });
                 const tileMesh = new THREE.Mesh(tileGeometry, tileMaterial);
                 tileMesh.position.set(tileInfo.position.x, tileInfo.position.y, 0);
                 scene.add(tileMesh);
             });
+            
+            updateScoreboard(player1score, player2score, currentMoveCount);
+            let gameRunning =  valuesArray[4];
+            if (gameRunning != 1)
+                render = false
         }
     }
     // Set up orthographic camera
     const camera = new THREE.PerspectiveCamera(
         75,
         canvasWidth / canvasHeight,
-        1,
+        -2,
         10000
     );
 
     // Calculate distance from the board based on its size
-    const distance = Math.max(boardWidth, boardHeight) / (2 * Math.tan(Math.PI * camera.fov / 360));
+    const distance = Math.max(boardWidth, boardHeight) / (2 * Math.tan(Math.PI * camera.fov / 290));//360
 
     // Position the camera
-    camera.position.set(0, 20, distance + 1000); // Adjust camera position to be in front of the scene
+    camera.position.set(0, 20, distance); // Adjust camera position to be in front of the scene
     camera.lookAt(scene.position);
 
     addLighting(scene);
