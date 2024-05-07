@@ -1,11 +1,21 @@
                                                                                                                                                                             // // Import required modules
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.module.js';
 
+//import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.137.5/examples/jsm/controls/OrbitControls.js';
+
+
 // //TODO:the size of paddles, ball and their positioning MUST BE DYNAMIC!
 // //TODO: A better looking start screen the also shows user name, and opponent name
 // //TODO: Make lighting better
 let socket;
 let gameNumber = -1;
+
+let camera;
+
+let p1_paddle;
+let p2_paddle;
+
+let ball;
 
 export const loadScript = () => {
     return new Promise((resolve, reject) => {
@@ -23,7 +33,6 @@ export const loadScript = () => {
         };
     });
 }
-
 
 function connectWebSocket() {
     socket = io.connect('https://' + window.location.hostname);
@@ -155,7 +164,7 @@ function addLighting(scene) {
 }
 
 function setup2DScene(scene) {
-    const camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 1000);
+    camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 1000);
     // scene.add(camera);
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
@@ -163,13 +172,12 @@ function setup2DScene(scene) {
     directionalLight.position.set(0, 0, 1);
     scene.add(directionalLight);
 
-    const p1_paddle = create2DPaddle(0x808080); // Old-school TV Pong grey
-    const p2_paddle = create2DPaddle(0x808080);
-
+    p1_paddle = create2DPaddle(0x808080); // Old-school TV Pong grey
+    p2_paddle = create2DPaddle(0x808080);
 
     const sizeFactor = 0.2;
     const ballRadiusScreen = (25 * 2) * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
-    const ball = new THREE.Mesh(new THREE.PlaneGeometry(ballRadiusScreen * 2, ballRadiusScreen * 2), new THREE.MeshStandardMaterial({ color: 0x808080 }));
+    ball = new THREE.Mesh(new THREE.PlaneGeometry(ballRadiusScreen * 2, ballRadiusScreen * 2), new THREE.MeshStandardMaterial({ color: 0x808080 }));
     
     scene.add(p1_paddle);
     scene.add(p2_paddle);
@@ -179,21 +187,31 @@ function setup2DScene(scene) {
 }
 
 function setup3DScene(scene) {
-    let p1_paddle, p2_paddle, ball;
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    let ball2, ball3;
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+
     addLighting(scene);
     p1_paddle = create3DPaddle(0xEF85A8);
     p2_paddle = create3DPaddle(0xC2C9C9);
-    ball = new THREE.Mesh(new THREE.SphereGeometry(5, 10, 6), new THREE.MeshPhongMaterial({color: 0xff00ff}))
+    const sizeFactor = 0.2;
+    const ballRadiusScreen = (25 * 2) * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
+    ball = new THREE.Mesh(new THREE.SphereGeometry(ballRadiusScreen * 2, 10, 10), new THREE.MeshPhongMaterial({color: 0xff00ff}))
+    ball2 = new THREE.Mesh(new THREE.SphereGeometry(ballRadiusScreen * 2, 10, 10), new THREE.MeshPhongMaterial({color: 0xff000}))
+    ball3 = new THREE.Mesh(new THREE.SphereGeometry(ballRadiusScreen * 2, 10, 10), new THREE.MeshPhongMaterial({color: 0x0000ff}))
+
     scene.add(p1_paddle);
     scene.add(p2_paddle);
     scene.add(ball);
+    scene.add(ball2);
+    scene.add(ball3);
+
     p1_paddle.position.set(-100,  0, 0);
     p2_paddle.position.set(100, 0, 0);
+    ball2.position.set(0, 0, 0);
+    ball3.position.set(-100, -100, 0);
 
-    return camera;
+    return { camera, p1_paddle, p2_paddle, ball, ball2, ball3 };
 }
-
 
 function create2DPaddle(color) {
     // Adjust the dimensions of the paddle geometry based on the ratios
@@ -202,7 +220,6 @@ function create2DPaddle(color) {
 	let screenWidth = window.innerWidth;
     let screenHeight = window.innerHeight;
 	const sizeFactor = 0.7;
-
 
     let paddleWidth = (screenWidth * widthRatio) * sizeFactor;
     let paddleHeight = (screenHeight * heightRatio) * sizeFactor;
@@ -214,7 +231,17 @@ function create2DPaddle(color) {
 
 // Function to create a 3D paddle
 function create3DPaddle(color) {
-    const geometry = new THREE.BoxGeometry(5, 20, 5);
+    let widthRatio = (20 * 2) / 1920
+    let heightRatio = (90 * 2) / 1080
+	let screenWidth = window.innerWidth;
+    let screenHeight = window.innerHeight;
+	const sizeFactor = 0.7;
+
+    let paddleWidth = (screenWidth * widthRatio) * sizeFactor;
+    let paddleHeight = (screenHeight * heightRatio) * sizeFactor;
+    let paddleZed = (0.30 * paddleHeight) * sizeFactor;
+
+    const geometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleZed);
     const material = new THREE.MeshPhongMaterial({ color });
     return new THREE.Mesh(geometry, material);
 }
@@ -222,150 +249,239 @@ function create3DPaddle(color) {
 export const renderPongGame = (is3DGraphics, gameNumber) => {
 	console.log("GAME IS RENDERING")
     const scene = new THREE.Scene();
-    let camera;
     // Remove any existing canvas
     const existingCanvas = document.getElementById('pongCanvas');
     if (existingCanvas) {
         existingCanvas.remove();
     }
-    
     const renderer = new THREE.WebGLRenderer();
     const pixelRatio = window.devicePixelRatio;
     renderer.setPixelRatio(pixelRatio);
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
     renderer.domElement.id = 'pongCanvas'; // Set an id for the new canvas
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
-    let p1_paddle, p2_paddle, ball;
+    //let p1_paddle, p2_paddle, ball, ball2, ball3;
     if (is3DGraphics) {
-        camera = setup3DScene(scene);
+        //({ camera, p1_paddle, p2_paddle, ball, ball2, ball3 } = setup3DScene(scene));
+        const sceneSetup = setup3DScene(scene);
+        //camera.position.set(-1, -3700, 400);
+        camera.position.set(0, 0, 2000); // Adjust x, y, z as needed
+
+        //camera.lookAt(0, 0, 0);
+        //camera.rotation.set(0, 0, )
+        camera.up.set(0, 0, 1);
+
+        //const controls = new OrbitControls(camera, renderer.domElement);
+
+
+        sceneSetup.ball2.position.set(0, 0, 0);
+        sceneSetup.ball3.position.set(-1400, -1400, 0);
+        //const angleZ = 2*Math.PI * -70/360;
+        // //camera.up.set(0, 0, 1);
+        //camera.rotateZ(angleZ);
+        
+        //const angleX = 2*Math.PI * 70/360
+        //camera.rotateX(angleX);
+        
+        //const angleY = -2*Math.PI * 45/360
+        // Rotate the camera around the y-axis
+        //camera.rotateY(angleY);
+        //camera.lookAt(-1400, -1400, 0);
+        //camera.up.set(0, 0, 1);
+
+        //camera.rotateX(Math.PI / 8);
+        //const rotationAngleX = -2*Math.PI * 90/360;
+        // Create a rotation matrix
+        //const rotationMatrixX = new THREE.Matrix4().makeRotationX(rotationAngleX);
+        // Apply the rotation to the scene
+        //scene.applyMatrix4(rotationMatrixX);
+        
+        // const rotationAngleZ = 2*Math.PI * 0/360;
+        // // Create a rotation matrix
+        // const rotationMatrixZ = new THREE.Matrix4().makeRotationZ(rotationAngleZ);
+        // // Apply the rotation to the scene
+        // scene.applyMatrix4(rotationMatrixZ);
+        
+        // const rotationAngleY = 2*Math.PI * 0/360;
+        // // Create a rotation matrix
+        // const rotationMatrixY = new THREE.Matrix4().makeRotationY(rotationAngleY);
+        // // Apply the rotation to the scene
+        // scene.applyMatrix4(rotationMatrixY);
+
+
     } else {
-        ({ camera, p1_paddle, p2_paddle, ball } = setup2DScene(scene));
-
-    }
-    let render = true
-	let min_visible_x, max_visible_x, min_visible_y, max_visible_y;
-	calculateVisibleArea();
-
-    function calculateVisibleArea() {  //TODO: potentially needs to be calculated differently for perspective, currently functions with 
-        const half_width = window.innerWidth / 2;
-        const half_height = window.innerHeight / 2;
-        min_visible_x = camera.position.x - half_width;
-        max_visible_x = camera.position.x + half_width;
-        min_visible_y = camera.position.y - half_height;
-        max_visible_y = camera.position.y + half_height;
+        const sceneSetup = setup2DScene(scene);
+        camera.position.set(0, 0, 100);
     }
 
+let render = true
+let min_visible_x, max_visible_x, min_visible_y, max_visible_y;
+calculateVisibleArea();
 
-    camera.position.set(0, 0, 100);
-    let p1_paddle_y, p1_paddle_x, p2_paddle_y, p2_paddle_x, ball_x, ball_y, p1_score, p2_score;
+function calculateVisibleArea() {  //TODO: potentially needs to be calculated differently for perspective, currently functions with 
+    const half_width = window.innerWidth / 2;
+    const half_height = window.innerHeight / 2;
+    min_visible_x = camera.position.x - half_width;
+    max_visible_x = camera.position.x + half_width;
+    min_visible_y = camera.position.y - half_height;
+    max_visible_y = camera.position.y + half_height;
+}
 
-    function updateGameState(data) {
-        const valuesArray = data.split(',');
+let p1_paddle_y, p1_paddle_x, p2_paddle_y, p2_paddle_x, ball_x, ball_y, p1_score, p2_score;
 
-		if (valuesArray[0] == gameNumber){
-				ball_x = parseFloat(valuesArray[1]);
-				ball_y = parseFloat(valuesArray[2]);
-				p2_paddle_x = parseFloat(valuesArray[3]);
-				p2_paddle_y = parseFloat(valuesArray[4]);
-				p1_paddle_x = parseFloat(valuesArray[5]);
-				p1_paddle_y = parseFloat(valuesArray[6]);
-				p2_score = parseInt(valuesArray[7]);
-				p1_score = parseInt(valuesArray[8]);
+function updateGameState(data) {
+    const valuesArray = data.split(',');
 
-				ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
-				ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);
-				p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[3]);
-				p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[4]);
-				p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[5]);
-				p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[6]);
-				p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
-				p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
-				ball.position.set(ball_x,  ball_y, 0);
-				updateScoreboard(p1_score, p2_score);
-			}
-		}
+	if (valuesArray[0] == gameNumber){
+	    ball_x = parseFloat(valuesArray[1]);
+		ball_y = parseFloat(valuesArray[2]);
+		p2_paddle_x = parseFloat(valuesArray[3]);
+		p2_paddle_y = parseFloat(valuesArray[4]);
+		p1_paddle_x = parseFloat(valuesArray[5]);
+		p1_paddle_y = parseFloat(valuesArray[6]);
+		p2_score = parseInt(valuesArray[7]);
+		p1_score = parseInt(valuesArray[8]);
 
-    socket.on('state', (data) => {
-        updateGameState(data)
-    });
-
-	function exit_game(data)
-	{
-        updateGameState(data)
-        loadGameOverScreen(data)
-		stopAnimation()
-
+		ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
+		ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);
+		p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[3]);
+		p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[4]);
+		p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[5]);
+		p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[6]);
+		p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
+		p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
+		ball.position.set(ball_x,  ball_y, 0);
+		updateScoreboard(p1_score, p2_score);
 	}
+}
 
-	socket.on('endstate', (data) => {
-        exit_game(data)
-    });
+socket.on('state', (data) => {
+    updateGameState(data)
+});
 
-    function animate() {
-        if (render) {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-        } else {
-            stopAnimation();
-        }
+function exit_game(data)
+{
+    updateGameState(data)
+    loadGameOverScreen(data)
+	stopAnimation()
+}
+
+socket.on('endstate', (data) => {
+    exit_game(data)
+});
+
+function animate() {
+    if (render) {
+        requestAnimationFrame(animate);
+        //controls.update();
+        renderer.render(scene, camera);
+    } else {
+        stopAnimation();
     }
+}
 	
+//THESE ARE INVERTED DUE TO COORD DIFFERENCE
+document.addEventListener('keydown', (event) => {
+    event.preventDefault();
+	if (event.key == 'ArrowUp')
+	{
+	    socket.emit('message', 'right_paddle_down,' + gameNumber);
+	}
+    if (event.key  == 'ArrowDown')
+	{
+	    socket.emit('message', 'right_paddle_up,' + gameNumber);
+	}
+    if (event.key  == 'w')
+	{
+	    socket.emit('message', 'left_paddle_down,' + gameNumber);
+	}
+    if (event.key  == 's')
+	{
+	    socket.emit('message', 'left_paddle_up,' + gameNumber);
+	}
+	if (event.key == 'c')
+	{
+	    socket.emit('message', 'stop_game,' + gameNumber);
+		render = false;
+	}
+});
 
-    //THESE ARE INVERTED DUE TO COORD DIFFERENCE
-	document.addEventListener('keydown', (event) => {
-		event.preventDefault();
-		if (event.key == 'ArrowUp')
-		{
-			socket.emit('message', 'right_paddle_down,' + gameNumber);
-		}
-        if (event.key  == 'ArrowDown')
-		{
-			socket.emit('message', 'right_paddle_up,' + gameNumber);
-		}
-        if (event.key  == 'w')
-		{
-			socket.emit('message', 'left_paddle_down,' + gameNumber);
-		}
-        if (event.key  == 's')
-		{
-			socket.emit('message', 'left_paddle_up,' + gameNumber);
-		}
-			if (event.key == 'c')
-		{
-			socket.emit('message', 'stop_game,' + gameNumber);
-			render = false;
-		}
-    });
+document.addEventListener('keyup', (event) => {
+    event.preventDefault();
+	if (event.key == 'ArrowUp')
+	    socket.emit('message', 'right_paddle_down_release,' + gameNumber);
+    if (event.key  == 'ArrowDown')
+	    socket.emit('message', 'right_paddle_up_release,' + gameNumber);
+    if (event.key  == 'w')
+	    socket.emit('message', 'left_paddle_down_release,' + gameNumber);
+    if (event.key  == 's')
+	    socket.emit('message', 'left_paddle_up_release,' + gameNumber);
+});
 
-    document.addEventListener('keyup', (event) => {
-		event.preventDefault();
-		if (event.key == 'ArrowUp')
-			socket.emit('message', 'right_paddle_down_release,' + gameNumber);
-        if (event.key  == 'ArrowDown')
-			socket.emit('message', 'right_paddle_up_release,' + gameNumber);
-        if (event.key  == 'w')
-			socket.emit('message', 'left_paddle_down_release,' + gameNumber);
-        if (event.key  == 's')
-			socket.emit('message', 'left_paddle_up_release,' + gameNumber);
-    });
-
-
-    let animationId;
-
-    function startAnimation() {
-
-        animationId = requestAnimationFrame(animate);
-        animate();}
-
-		function stopAnimation() {
-		socket.emit('message', 'stop_game,' + gameNumber);
-		socket.on('disconnect', () => {
-			console.log('Disconnected from server');
-		});
-        cancelAnimationFrame(animationId);
-        render = true
+document.addEventListener('keydown', (event) => {
+    const moveDistance = 10; // Adjust the movement distance as needed
+    const rotateAngle = Math.PI / 36;
+    switch (event.key) {
+        case 'r': // Move camera along the positive x-axis
+            camera.position.x += moveDistance;
+            break;
+        case 'f': // Move camera along the negative x-axis
+            camera.position.x -= moveDistance;
+            break;
+        case 't': // Move camera along the positive y-axis
+            camera.position.y += moveDistance;
+            break;
+        case 'g': // Move camera along the negative y-axis
+            camera.position.y -= moveDistance;
+            break;
+        case 'y': // Move camera along the positive z-axis
+            camera.position.z += moveDistance;
+            break;
+        case 'h': // Move camera along the negative z-axis
+            camera.position.z -= moveDistance;
+            break;
+        case 'u': // Rotate camera around the positive x-axis
+            camera.rotation.x += rotateAngle;
+            break;
+        case 'j': // Rotate camera around the negative x-axis
+            camera.rotation.x -= rotateAngle;
+            break;
+        case 'i': // Rotate camera around the positive y-axis
+            camera.rotation.y += rotateAngle;
+            break;
+        case 'k': // Rotate camera around the negative y-axis
+            camera.rotation.y -= rotateAngle;
+            break;
+        case 'o': // Rotate camera around the positive z-axis
+            camera.rotation.z += rotateAngle;
+            break;
+        case 'l': // Rotate camera around the negative z-axis
+            camera.rotation.z -= rotateAngle;
+            break;
+        default:
+            // Handle other key presses if needed
+            break;
     }
-    if (render)
+});
+
+let animationId;
+
+function startAnimation() {
+    animationId = requestAnimationFrame(animate);
+    animate();
+}
+
+function stopAnimation() {
+    socket.emit('message', 'stop_game,' + gameNumber);
+	socket.on('disconnect', () => {
+	console.log('Disconnected from server');
+    });
+
+    cancelAnimationFrame(animationId);
+      render = true
+}
+
+if (render)
     {
         startAnimation();
     }
