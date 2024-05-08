@@ -56,29 +56,28 @@ export const verifyUsername = () => {
 
 export const startScreenColorwar = async () => {
     try {
-            await loadScript();
-            connectWebSocket();
+        await loadScript();
+        connectWebSocket();
 
-            const startScreen = document.getElementById('startScreen');
-            const canvasContainer = document.getElementById('canvasContainer');
+        const startScreen = document.getElementById('startScreen');
+        const canvasContainer = document.getElementById('canvasContainer');
+        
 
-            await verifyUsername();
-            console.log(gameNumber)
-            console.log("after verify: ", gameNumber);
-            
-
+        await verifyUsername();
+        console.log(gameNumber);
+        console.log("after verify: ", gameNumber);
+        
+        startScreen.style.display = 'none';
+        canvasContainer.style.display = 'block';
+        // # DONT FORGET to maybe insert to here to get permission from django to start the game
+        socket.emit("message", "start_game," + gameNumber);
+        
+        socket.on('state', (data) => {
             startScreen.style.display = 'none';
             canvasContainer.style.display = 'block';
-            
-            // # DONT FORGET to maybe insert to here to get permission from django to start the game
-            socket.emit("message", "start_game," + gameNumber)
-            
-            socket.on('state', (data) => {
-                startScreen.style.display = 'none';
-                canvasContainer.style.display = 'block';
-                const valuesArray = data.split(',')
-                gameNumber = valuesArray[1]
-                renderColorwar(gameNumber, data);
+            const valuesArray = data.split(',');
+            gameNumber = valuesArray[1];
+            renderColorwar(gameNumber, data);
         });
     } catch (error) {
         console.error('Error loading script:', error);
@@ -103,14 +102,16 @@ let previousP2Score = null;
 export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
     const scoreLeftElement = document.querySelector('.score-left');
     const scoreRightElement = document.querySelector('.score-right');
-    //TODO: THIS NEEDS TO IMPLIMENT CURRENT MOVE COUNT BUT DOES NOT YET
+    const moveCountElement = document.querySelector('.move-count');
+
     if (isNaN(p1Score) || isNaN(p2Score)) {
         return;
     }
     if (scoreLeftElement && scoreRightElement) {
         if (p1Score !== previousP1Score || p2Score !== previousP2Score) {
-            scoreLeftElement.textContent = `P1 SCORE: ${p1Score}`;
-            scoreRightElement.textContent = `P2 SCORE: ${p2Score}`;
+            scoreLeftElement.textContent = `P1 Score: ${p1Score}`;
+            scoreRightElement.textContent = `P2 Score: ${p2Score}`;
+            moveCountElement.textContent = `Moves: ${currentMoveCount}`;
             previousP1Score = p1Score;
             previousP2Score = p2Score;
         }
@@ -150,48 +151,90 @@ export const renderColorwar = (gameNumber, data) => {
     
     const textureLoader = new THREE.TextureLoader();
     let colourOneSrc = "../textures/purple_square.png";
-    let colourTwoSrc = "../textures/red_square.png";
-    let colourThreeSrc = "../textures/yellow_square.png";
-    let colourFourSrc = "../textures/blue_square.png";
+    let colourOneSrc_1 = "../textures/purple_1_sm.png";
+    let colourOneSrc_2 = "../textures/purple_2_sm.png";
 
+    let colourTwoSrc = "../textures/red_square.png";
+    let colourTwoSrc_1 = "../textures/red_1_sm.png";
+    let colourTwoSrc_2 = "../textures/red_2_sm.png";
+
+    let colourThreeSrc = "../textures/green_square.png";
+    let colourThreeSrc_1 = "../textures/green_1_sm.png";
+    let colourThreeSrc_2 = "../textures/green_2_sm.png";
+
+    let colourFourSrc = "../textures/blue_square.png";
+    let colourFourSrc_1 = "../textures/blue_1_sm.png";
+    let colourFourSrc_2 = "../textures/blue_2_sm.png";
+
+    const buttons = document.querySelectorAll('#GameControls button img');
     const button1 = document.querySelector('button[type="Colour 1"] img');
     const button2 = document.querySelector('button[type="Colour 2"] img');
     const button3 = document.querySelector('button[type="Colour 3"] img');
     const button4 = document.querySelector('button[type="Colour 4"] img');
+   
+    const colorTextures = {
+        colorOne: {
+            0: {
+                texture: textureLoader.load(colourOneSrc, (texture) => {
+                    button1.src = texture.image.src;
+                })
+            },
+            1: {
+                texture: textureLoader.load(colourOneSrc_1, () => {})
+            },
+            2: {
+                texture: textureLoader.load(colourOneSrc_2, () => {})
+            }
+        },
+        colorTwo: {
+            0: {
+                texture: textureLoader.load(colourTwoSrc, (texture) => {
+                    button2.src = texture.image.src;
+                })
+            },
+            1: {
+                texture: textureLoader.load(colourTwoSrc_1, () => {})
+            },
+            2: {
+                texture: textureLoader.load(colourTwoSrc_2, () => {})
+            }
+        },
+        colorThree: {
+            0: {
+                texture: textureLoader.load(colourThreeSrc, (texture) => {
+                    button3.src = texture.image.src;
+                })
+            },
+            1: {
+                texture: textureLoader.load(colourThreeSrc_1, () => {})
+            },
+            2: {
+                texture: textureLoader.load(colourThreeSrc_2, () => {})
+            }
+        },
+        colorFour: {
+            0: {
+                texture: textureLoader.load(colourFourSrc, (texture) => {
+                    button4.src = texture.image.src;
+                })
+            },
+            1: {
+                texture: textureLoader.load(colourFourSrc_1, () => {})
+            },
+            2: {
+                texture: textureLoader.load(colourFourSrc_2, () => {})
+            }
+        }
+    };
 
-
-    textureLoader.load(colourOneSrc, (texture) => {
-        button1.src = texture.image.src;
-    });
-
-    textureLoader.load(colourTwoSrc, (texture) => {
-        button2.src = texture.image.src;
-    });
-
-    textureLoader.load(colourThreeSrc, (texture) => {
-        button3.src = texture.image.src;
-    });
-
-    textureLoader.load(colourFourSrc, (texture) => {
-        button4.src = texture.image.src;
-    });
-
-    const colorOneTexture = textureLoader.load(colourOneSrc, () => {
-        console.log("Color 2 loaded successfully.");
-    });
-    
-    const colorTwoTexture = textureLoader.load(colourTwoSrc, () => {
-        console.log("Color 2 loaded successfully.");
-    });
-    
-    const colourThreeTexture = textureLoader.load(colourThreeSrc, () => {
-        console.log("Color 3 loaded successfully.");
-    });
-    const colourFourTexture = textureLoader.load(colourFourSrc, () => {
-        console.log("Color 3 loaded successfully.");
+    const controls = document.getElementById('GameControls');
+    controls.style.display = 'flex';
+    buttons.forEach(button => {
+        button.style.display = 'flex';
     });
 
     updateGameState(data);
+    ///////////////////////////////////////////
     function updateGameState(data)
     {
         const valuesArray = data.split(',')
@@ -202,47 +245,40 @@ export const renderColorwar = (gameNumber, data) => {
             let currentMoveCount = valuesArray[5];
             let tileLegend = [];
             let tileData = [];
-
             for (let i = 6; i < valuesArray.length; i += 2) {
                 const color = valuesArray[i];
                 const owner = valuesArray[i + 1];
                 const tile = { color, owner };
                 tileLegend.push(tile);
             }
-
             let legendIndex = 0;
             for (let row = 0; row < numRows; row++) {
                 for (let col = 0; col < numCols; col++) {
                     const x = boardStartX + col * tileSize;
                     const y = boardStartY + row * tileSize;
 
-                    const color = tileLegend[legendIndex].color;
-                    const owner = tileLegend[legendIndex].owner;
-
                     let tileTexture;
 
-                    if (color === '1')
+                    if (tileLegend[legendIndex].color === '1')
                     {
-                        tileTexture = colorOneTexture;
+                        tileTexture = colorTextures.colorOne[tileLegend[legendIndex].owner].texture;
                     }
-                    else if (color === '2') 
+                    else if (tileLegend[legendIndex].color === '2') 
                     {
-                        tileTexture = colorTwoTexture;
+                        tileTexture = colorTextures.colorTwo[tileLegend[legendIndex].owner].texture;;
                     }
-                    else if  (color === '3') 
+                    else if  (tileLegend[legendIndex].color === '3') 
                     {
-                         tileTexture = colourThreeTexture;
+                        tileTexture = colorTextures.colorThree[tileLegend[legendIndex].owner].texture;;
                     }
-                    else if (color === '4')
+                    else if (tileLegend[legendIndex].color === '4')
                     {
-                        tileTexture = colourFourTexture;
+                        tileTexture = colorTextures.colorFour[tileLegend[legendIndex].owner].texture;;
                     }
                     tileData.push({ position: { x, y }, tileTexture });
                     legendIndex++;
                 }
             }
-            // new THREE.TextGeometry( text, parameters ); maybe texts ??
-            
             tileData.forEach((tileInfo) => {
                 const tileGeometry = new THREE.PlaneGeometry(tileSize, tileSize);
                 const tileMaterial = new THREE.MeshBasicMaterial({ map: tileInfo.tileTexture });
