@@ -21,7 +21,7 @@
 					</div>
 					{% endif %}
 				
-					<form id="loginForm" >
+					<form id="loginForm" enctype="multipart/form-data">
 						<div class="mb-3">
 							{% csrf_token %}
 							{% for field in form %}

@@ -2,25 +2,33 @@
 	<div>
 		{% include 'partials/navbar_empty.html' %}
 	</div>
+	<div class="container">
+		<h2 class="d-flex justify-content-center">{{title | title}}</h2>
 	
-	<h2>{{title | title}}</h2>
-
-	{% if message %}
-	<p>{{message}}</p>
-	{% endif %}
-
-	{% if error %}
-	<p style="color: red">Error: {{error}}</p>
-	{% endif %}
-	
-	<form id="registerForm" enctype="multipart/form-data">
-		{% csrf_token %}
-		{% for field in form %}
-		<div class="form-group">
-		{{ field.errors }}
-		{{ field.label_tag }} {{ field }}
+		{% if error %}
+		<div class="alert alert-warning" role="alert">
+			Error: {{error}}
 		</div>
-		{% endfor %}
-		<input type="submit" value="Register">
-	</form>
+		{% endif %}
+	
+		{% if success %}
+		<div class="alert alert-success" role="alert">
+			Success: {{success}}
+		</div>
+		{% endif %}
+		
+		<form id="registerForm" enctype="multipart/form-data">
+			<div class="mb-3 w-75 m-auto">
+				{% csrf_token %}
+				{% for field in form %}
+				<div class="form-floating">
+					{{ field }}
+					{{ field.label_tag }}
+					<p style="text-danger">{{ field.errors }}<p>
+				</div>
+				{% endfor %}
+				<button class="btn btn-primary" type="submit">Register</button>
+			</div>
+		</form>
+	</div>
 </div>

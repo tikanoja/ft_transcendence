@@ -7,12 +7,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 class RegistrationForm(forms.Form):
-    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
-    first_name = forms.CharField(label='First Name', widget=forms.TextInput(attrs={'placeholder': 'Enter given name'}), max_length=256, required=True)
-    last_name = forms.CharField(label='Last Name', widget=forms.TextInput(attrs={'placeholder': 'Enter family name'}), max_length=256, required=True)
-    email = forms.EmailField(label='Email', widget=forms.TextInput(attrs={'placeholder': 'Enter email'}), max_length=320, required=False)
-    password = forms.CharField(label="Password", widget=forms.PasswordInput)
-    confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username', "class": "form-control"}), max_length=256, required=True)
+    first_name = forms.CharField(label='First Name', widget=forms.TextInput(attrs={'placeholder': 'Enter given name', "class": "form-control"}), max_length=256, required=True)
+    last_name = forms.CharField(label='Last Name', widget=forms.TextInput(attrs={'placeholder': 'Enter family name', "class": "form-control"}), max_length=256, required=True)
+    email = forms.EmailField(label='Email', widget=forms.TextInput(attrs={'placeholder': 'Enter email', "class": "form-control"}), max_length=320, required=False)
+    password = forms.CharField(label="Password", widget=forms.PasswordInput(attrs={'placeholder': 'Enter password', "class": "form-control"}))
+    confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput(attrs={'placeholder': 'Confirm password', "class": "form-control"}))
 
     def is_valid(self):
         valid = super().is_valid()
