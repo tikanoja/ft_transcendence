@@ -221,3 +221,6 @@ class TournamentInviteForm(forms.Form):
         super().__init__(*args, **kwargs)
         if 'formname' in kwargs:
             self.fields['formname'] = forms.CharField(widget=forms.HiddenInput(), initial=kwargs['formname'])
+
+class TournamentJoinForm(forms.Form):
+    alias = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)

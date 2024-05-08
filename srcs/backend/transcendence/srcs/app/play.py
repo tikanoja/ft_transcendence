@@ -161,8 +161,8 @@ def start_tournament(request):
     
     game_type = sent_form.cleaned_data['game_type']
     logger.debug('user ' + current_user.username + ' started ' + game_type + ' tournament!')
-    
     new_tournament = Tournament(creator=current_user, game=game_type, status='Pending')
+    Participant.objects.create(user=current_user, tournament=new_tournament, status='Accepted')
     new_tournament.save()
 
     return render(request, 'user/play.html', playContext(request, None, 'Tournament created!'))
@@ -186,7 +186,15 @@ def tournament_invite(request):
     if invited_user == current_user:
         return render(request, 'user/play.html', playContext(request, 'Please do not invite yourself', None))
 
-
+    tournament = Tournament.objects.get(creator=current_user)
+    if tournament is None:
+        return render(request, 'user/play.html', playContext(request, 'Could not find tournament', None))
+    
+    # if the invited_user is already in the tournament return error
+    if Participant.objects.filter(user=invited_user, tournament=tournament).exists():
+        return render(request, 'user/play.html', playContext(request, 'You have already invited that user', None))
+    # add the invited_user to the tournament
+    Participant.objects.create(user=invited_user, tournament=tournament, status='Pending')
     return render(request, 'user/play.html', playContext(request, None, 'Invite sent!'))
 
 

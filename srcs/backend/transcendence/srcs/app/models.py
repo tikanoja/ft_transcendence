@@ -130,9 +130,21 @@ class Match(models.Model):
 
 
 class Participant(models.Model):
-    # user
-    # alias
-    pass
+    PENDING = 'Pending'
+    ACCEPTED = 'Accepted'
+    READY = 'Ready'
+    STATUS_CHOICES = [
+        (PENDING, 'Pending'),
+        (ACCEPTED, 'Accepted'),
+        (READY, 'Ready'),
+    ]
+    user = models.ForeignKey("CustomUser", on_delete=models.CASCADE)
+    tournament = models.ForeignKey("Tournament", on_delete=models.CASCADE)
+    alias = models.CharField(max_length=255, default="alias")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
+
+    class Meta:
+        unique_together = ('user', 'tournament')
 
 
 class Tournament(models.Model):
@@ -157,13 +169,11 @@ class Tournament(models.Model):
     game = models.CharField(max_length=5, choices=GAME_CHOICES, default=PONG)
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default=PENDING)
     creator = models.ForeignKey("CustomUser", related_name="creator", on_delete=models.SET_NULL, null=True)
+    participants = models.ManyToManyField("CustomUser", through=Participant, related_name="participants")
 
-
-    # status
     # participants
     # results
     # game instances
-    pass
 
 
 # user profile model
