@@ -32,7 +32,7 @@ def playContext(request, error, success):
     my_tournament = Tournament.objects.filter(creator=request.user, status='Pending').first()
     tournament_in = Tournament.objects.filter(Q(status='Pending'), participants=current_user).first()
     tournament_in_participants = Participant.objects.filter(tournament=tournament_in)
-    my_participant = tournament_in_participants.get(user=current_user)
+    my_participant = tournament_in_participants.filter(user=current_user).first
 
     if my_tournament is not None:
         hosting_tournament = True
@@ -246,12 +246,20 @@ def delete_tournament(request, data):
     return render(request, 'user/play.html', playContext(request, None, 'Tournament cancelled!'))
 
 
+def tournament_reject(request, data):
+    logger.debug('In tournament_reject()')
+    Participant.objects.get(pk=data.get('participant_id')).delete()
+    return render(request, 'user/play.html', playContext(request, None, 'Rejected tournament invite!'))
+
+
 def tournament_buttons(request):
     logger.debug('In torunament_buttons()')
     if request.content_type == 'application/json':
         data = json.loads(request.body)
         if data.get('action') == 'nuke':
             return delete_tournament(request, data)
+        if data.get('action') == 'rejectTournamentInvite':
+            return tournament_reject(request, data)
         # else:
         #     return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, ve, "Unknown content type"))
 

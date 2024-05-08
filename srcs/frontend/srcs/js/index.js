@@ -577,6 +577,8 @@ const tournamentButtonHandler = async (event) => {
 
     if (action == 'nuke')
         data['tournament-id'] = event.target.getAttribute('data-tournament-id');
+    else if (action == 'rejectTournamentInvite')
+        data['participant_id'] = event.target.getAttribute('data-participant-id');
 
     const querystring = window.location.search;
     var endpoint = '/app/tournament_buttons/' + querystring;

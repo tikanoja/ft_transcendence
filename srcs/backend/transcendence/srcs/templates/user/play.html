@@ -12,6 +12,8 @@
 <button type="submit" id="gameRenderButton" data-game={{ active_game.game }} data-p1={{ active_game.p1.username }} data-p2={{ active_game.p2.username }} data-action="render_game" class="btn btn-success">Render game</button>
 {% endif %}
 
+
+<h3>* * * * * * * * * *</h3>
 <br>
 
 <h2>Quick play</h2>
@@ -26,6 +28,7 @@
 	<input type="submit" value="Start game">
 </form>
 
+<h3>* * * * * * * * * *</h3>
 <br>
 
 <h2>Tournament</h2>
@@ -71,9 +74,13 @@
 			{% endfor %}
 			<input type="submit" class="btn btn-primary" value="Join tournament">
 		</form>
+		<button type="submit" id="tournamentButton" data-participant-id={{ my_participant.id }} data-action="rejectTournamentInvite" class="btn btn-danger">Reject</button>
 	{% else %} {% comment %} Attendance and alias confirmed, show list of players, their statuses and the option to cancel {% endcomment %}
-		{% for participants in tournament_in_participants %}
+		<h4>{{ tournament_in.creator.username }}'s {{ tournament_in.game }} tournament</h3>
+		{% for participant in tournament_in_participants %}
 		<li>
+			{{ participant.user.username }} as {{ participant.alias }}
+	
 			{% comment %} Challenger: {{ invite.p1.username }} - Game: {{ invite.game }} -
 			<button type="submit" id="gameRequestButton" data-from-user={{ invite.p1.username }} data-action="accept" class="btn btn-primary">✓</button> or
 			<button type="submit" id="gameRequestButton" data-from-user={{ invite.p1.username }} data-action="reject" class="btn btn-danger">✗</button> {% endcomment %}
@@ -84,6 +91,7 @@
 	{% endif %}
 {% endif %}
 
+<h3>* * * * * * * * * *</h3>
 <br>
 
 <h2>Custom invite</h2>
@@ -98,6 +106,7 @@
 	<input type="submit" value="Send request">
 </form>
 
+<h3>* * * * * * * * * *</h3>
 </br>
 
 <div>
@@ -122,7 +131,8 @@
 	{% endfor %}
 </ul>
 
-
+<h3>* * * * * * * * * *</h3>
+<br>
 <h2>Nuke all game instances</h2>
 <button type="submit" id="gameRequestButton" data-from-user="nuke" data-action="nuke" class="btn btn-danger">Let's go</button>
 
