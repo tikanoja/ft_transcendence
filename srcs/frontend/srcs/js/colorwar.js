@@ -149,10 +149,10 @@ export const renderColorwar = (gameNumber, data) => {
 
     
     const textureLoader = new THREE.TextureLoader();
-    let colourOneSrc = "../textures/tilePurple_01.png";
-    let colourTwoSrc = "../textures/tileYellow_27.png";
-    let colourThreeSrc = "../textures/tileBlue_25.png";
-    let colourFourSrc = "../textures/tileRed_27.png";
+    let colourOneSrc = "../textures/purple_square.png";
+    let colourTwoSrc = "../textures/red_square.png";
+    let colourThreeSrc = "../textures/yellow_square.png";
+    let colourFourSrc = "../textures/blue_square.png";
 
     const button1 = document.querySelector('button[type="Colour 1"] img');
     const button2 = document.querySelector('button[type="Colour 2"] img');

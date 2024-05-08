@@ -39,13 +39,6 @@ def validate_match(request):
         logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
 
-
-def get_canvas(request):
-	logger.debug('In get_canvas()')
-	if request.method == 'GET':
-		logger.debug('about to render!')
-		return render(request, "pong/pong.html", {})
-
 def get_canvas_colorwar(request):
 	logger.debug('In get_canvas_color()')
 	if request.method == 'GET':
