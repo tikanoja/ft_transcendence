@@ -1,7 +1,7 @@
-from .forms import GameRequestForm, LocalGameForm, StartTournamentForm, TournamentInviteForm
+from .forms import GameRequestForm, LocalGameForm, StartTournamentForm, TournamentInviteForm, TournamentJoinForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import get_user_model
-from .models import CustomUser, GameInstance, Tournament
+from .models import CustomUser, GameInstance, Tournament, Participant
 from django.core.exceptions import ValidationError
 import logging
 # from django.http import JsonResponse
@@ -22,17 +22,27 @@ def playContext(request, error, success):
     playform = LocalGameForm()
     tournamentform = StartTournamentForm()
     tournamentinviteform = TournamentInviteForm()
+    tournamentjoinform = TournamentJoinForm()
+
     title = 'Play'
     all_games = GameInstance.objects.filter(Q(p1=current_user) | Q(p2=current_user))
     invites_sent = all_games.filter(p1=current_user, status='Pending')
     invites_received = all_games.filter(p2=current_user, status='Pending')
     active_game = all_games.filter(Q(p1=current_user) | Q(p2=current_user), status='Accepted').first()
     my_tournament = Tournament.objects.filter(creator=request.user, status='Pending').first()
-    
+    tournament_in = Tournament.objects.filter(Q(status='Pending'), participants=current_user).first()
+    tournament_in_participants = Participant.objects.filter(tournament=tournament_in)
+    my_participant = tournament_in_participants.get(user=current_user)
+
     if my_tournament is not None:
         hosting_tournament = True
     else:
         hosting_tournament = False
+
+    if tournament_in is not None:
+        participating_in_tournament = True
+    else:
+        participating_in_tournament = False
 
     context = {
         'current_user': current_user,
@@ -44,7 +54,12 @@ def playContext(request, error, success):
         'tournamentform': tournamentform,
         'hosting_tournament': hosting_tournament,
         'my_tournament': my_tournament,
-        'tournamentinviteform': tournamentinviteform
+        'tournamentinviteform': tournamentinviteform,
+        'participating_in_tournament': participating_in_tournament,
+        'tournament_in': tournament_in,
+        'tournament_in_participants': tournament_in_participants,
+        'my_participant': my_participant,
+        'tournamentjoinform': tournamentjoinform
     }
 
     if active_game is not None:
@@ -159,13 +174,40 @@ def start_tournament(request):
     except ValidationError as ve:
         return render(request, 'user/play.html', playContext(request, ve, None))
     
+    # Check if the user is a participant in a tournament with a status of 'Pending' or 'Active'
+    # if yes, show error 'Already registered to a tournament'
+
     game_type = sent_form.cleaned_data['game_type']
     logger.debug('user ' + current_user.username + ' started ' + game_type + ' tournament!')
     new_tournament = Tournament(creator=current_user, game=game_type, status='Pending')
-    Participant.objects.create(user=current_user, tournament=new_tournament, status='Accepted')
     new_tournament.save()
+    Participant.objects.create(user=current_user, tournament=new_tournament, status='Accepted')
 
     return render(request, 'user/play.html', playContext(request, None, 'Tournament created!'))
+
+
+def tournament_join(request):
+    logger.debug('in tournament_join()')
+    current_user = request.user
+    sent_form = TournamentJoinForm(request.POST)
+
+    try:
+        if not sent_form.is_valid():
+            raise ValidationError("Form filled incorrectly")
+    except ValidationError as ve:
+        return render(request, 'user/play.html', playContext(request, ve, None))
+    
+    alias = sent_form.cleaned_data["alias"]
+    participant_id = request.POST.get('participant_id')
+    participant = Participant.objects.get(pk=participant_id)
+
+    if participant is None:
+        return render(request, 'user/play.html', playContext(request, 'Participant instance not found', None))
+ 
+    # change the status of the participant instance to 'Accepted'
+    Participant.objects.filter(pk=participant_id).update(status='Accepted')
+
+    return render(request, 'user/play.html', playContext(request, None, 'Joined tournament!'))
 
 
 def tournament_invite(request):
@@ -218,8 +260,10 @@ def tournament_buttons(request):
 
 def tournament_forms(request):
     formname = request.POST.get('formname')
-    logger.debug('In start_tournament() received form: ' + formname)
+    logger.debug('In tournament_forms() received form: ' + formname)
     if formname == 'startTournamentForm':
         return start_tournament(request)
     elif formname == 'tournamentInviteForm':
         return tournament_invite(request)
+    elif formname == 'tournamentJoinForm':
+        return tournament_join(request)

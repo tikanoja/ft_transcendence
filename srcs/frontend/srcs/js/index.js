@@ -116,6 +116,7 @@ function updateEventListeners() {
     var startTournamentForm = document.getElementById('startTournamentForm');
     var tournamentInviteForm = document.getElementById('tournamentInviteForm');
     var tournamentButtons = document.querySelectorAll('[id^="tournamentButton"]');
+    var tournamentJoinForm = document.getElementById('tournamentJoinForm');
 
     // remove listeners
     if (profilePictureForm)
@@ -174,6 +175,10 @@ function updateEventListeners() {
             button.removeEventListener('click', tournamentButtonHandler);
         })
     }
+    if (tournamentJoinForm) {
+        tournamentJoinForm.removeEventListener('submit', tournamentFormHandler);
+    }
+
     // begin add listeners if currently present
     if (profilePictureForm)
         profilePictureForm.addEventListener('submit', manageAccountHandler);
@@ -230,6 +235,9 @@ function updateEventListeners() {
         tournamentButtons.forEach(function(button) {
             button.addEventListener('click', tournamentButtonHandler);
         })
+    }
+    if (tournamentJoinForm) {
+        tournamentJoinForm.addEventListener('submit', tournamentFormHandler);
     }
 }
 
