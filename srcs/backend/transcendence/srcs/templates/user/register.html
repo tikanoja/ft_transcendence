@@ -1,16 +1,26 @@
-{% extends "user/form_base.html" %}
-{% block form %}
-{% if error %}
-<p style="color: red">Error: {{error}}</p>
-{% endif %}
-<form id="registerForm" enctype="multipart/form-data">
-	{% csrf_token %}
-	{% for field in form %}
-	<div class="form-group">
-	{{ field.errors }}
-	{{ field.label_tag }} {{ field }}
+<div>
+	<div>
+		{% include 'partials/navbar_empty.html' %}
 	</div>
-	{% endfor %}
-	<input type="submit" value="Register">
-</form>
-{% endblock %}
+	
+	<h2>{{title | title}}</h2>
+
+	{% if message %}
+	<p>{{message}}</p>
+	{% endif %}
+
+	{% if error %}
+	<p style="color: red">Error: {{error}}</p>
+	{% endif %}
+	
+	<form id="registerForm" enctype="multipart/form-data">
+		{% csrf_token %}
+		{% for field in form %}
+		<div class="form-group">
+		{{ field.errors }}
+		{{ field.label_tag }} {{ field }}
+		</div>
+		{% endfor %}
+		<input type="submit" value="Register">
+	</form>
+</div>

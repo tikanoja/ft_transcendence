@@ -1,8 +1,15 @@
-{% extends "user/form_base.html" %}
-{% block form %}
+{% extends 'base.html' %}
+{% block content%}
+<h2>{{title | title}}</h2>
+
+{% if message %}
+<p>{{message}}</p>
+{% endif %}
+
 {% if error %}
 <p style="color: red">Error: {{error}}</p>
 {% endif %}
+
 {% if success %}
 <p style="color: green">Success: {{success}}</p>
 {% endif %}

@@ -75,18 +75,6 @@ body {
     display: block;
 }
 
-.sidebar {
-    width: 200px;
-    /* Fill entire viewport height */
-    height: 100vh;
-    /* Dont move on scroll */
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: #343a40; /* Change sidebar background color */
-    color: white; /* Change text color */
-}
-
 .nav-item {
     /* padding-left: 15px; */
     margin-top: 10px;

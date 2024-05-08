@@ -8,11 +8,12 @@ const pageTitle = "Pong";
 import { updateEventListeners, updateContent } from './index.js'
 
 // Listens to clicks on the entire document
+//TODO: maybe change this for only the play? everything else will be gone
 document.addEventListener("click", (e) => {
 	// Save the clicked element as target
 	const target = e.target;
 	// Check if the clicked element is a part of the nav anchors
-	if (!target.matches("nav a")) {
+	if (!target.matches("nav a") || target.id == "profileLinkTag") {
 		return ;
 	}
 	// Prevent the navigation to a new page
