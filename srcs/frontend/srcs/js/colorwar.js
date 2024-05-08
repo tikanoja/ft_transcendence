@@ -2,7 +2,8 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.m
 
 let socket;
 let gameNumber = -1;
-
+let made_listner = 0;
+let setup_done = 0;
 
 export const loadScript = () => {
     return new Promise((resolve, reject) => {
@@ -103,6 +104,7 @@ export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
     const scoreLeftElement = document.querySelector('.score-left');
     const scoreRightElement = document.querySelector('.score-right');
     const moveCountElement = document.querySelector('.move-count');
+    console.log("update", currentMoveCount)
 
     if (isNaN(p1Score) || isNaN(p2Score)) {
         return;
@@ -119,6 +121,9 @@ export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
         console.error('Scoreboard elements not found.');
     }
 };
+
+let camera;
+
 
 export const renderColorwar = (gameNumber, data) => {
     const scene = new THREE.Scene();
@@ -147,7 +152,17 @@ export const renderColorwar = (gameNumber, data) => {
     const boardHeight = numRows * tileSize;
     const boardStartX = (canvasWidth - boardWidth) / 1.9;
     const boardStartY = (canvasHeight - boardHeight)/ 2;
+   
+    camera = new THREE.PerspectiveCamera(
+        75,
+        canvasWidth / canvasHeight,
+        -2,
+        10000
+    );
 
+    const distance = Math.max(boardWidth, boardHeight) / (2 * Math.tan(Math.PI * camera.fov / 290));
+    camera.position.set(0, 20, distance);
+    camera.lookAt(scene.position);
     
     const textureLoader = new THREE.TextureLoader();
     let colourOneSrc = "../textures/purple_square.png";
@@ -233,18 +248,30 @@ export const renderColorwar = (gameNumber, data) => {
         button.style.display = 'flex';
     });
 
-    updateGameState(data);
+    // // if (setup_done == 0)
+    // // {
+    // //     setup_done = 1;
+    //    updateGameState(data);
+    // // }
+
+
+    addLighting(scene);
     ///////////////////////////////////////////
     function updateGameState(data)
     {
+        console.log(data)
         const valuesArray = data.split(',')
         if (gameNumber == valuesArray[1])
         {
+            // console.log(valuesArray);
+            let tileLegend = [];
+            let tileData = [];
+            console.log("in update and game #")
             let player1score = valuesArray[2];
             let player2score = valuesArray[3];
             let currentMoveCount = valuesArray[5];
-            let tileLegend = [];
-            let tileData = [];
+            console.log("current move count ", currentMoveCount)
+
             for (let i = 6; i < valuesArray.length; i += 2) {
                 const color = valuesArray[i];
                 const owner = valuesArray[i + 1];
@@ -258,7 +285,7 @@ export const renderColorwar = (gameNumber, data) => {
                     const y = boardStartY + row * tileSize;
 
                     let tileTexture;
-
+                    // console.log("in tile colour set")
                     if (tileLegend[legendIndex].color === '1')
                     {
                         tileTexture = colorTextures.colorOne[tileLegend[legendIndex].owner].texture;
@@ -286,25 +313,14 @@ export const renderColorwar = (gameNumber, data) => {
                 tileMesh.position.set(tileInfo.position.x, tileInfo.position.y, 0);
                 scene.add(tileMesh);
             });
-            
             updateScoreboard(player1score, player2score, currentMoveCount);
             let gameRunning =  valuesArray[4];
             if (gameRunning != 1)
                 render = false
+            console.log(render)
         }
     }
 
-    const camera = new THREE.PerspectiveCamera(
-        75,
-        canvasWidth / canvasHeight,
-        -2,
-        10000
-    );
-    const distance = Math.max(boardWidth, boardHeight) / (2 * Math.tan(Math.PI * camera.fov / 290));
-    camera.position.set(0, 20, distance);
-    camera.lookAt(scene.position);
-
-    addLighting(scene);
 
 
     document.addEventListener('keydown', (event) => {
@@ -317,6 +333,7 @@ export const renderColorwar = (gameNumber, data) => {
     });
     
     socket.on('state', (data) => {
+        console.log("SAW STATE")
         updateGameState(data)
     });
 
@@ -331,30 +348,39 @@ export const renderColorwar = (gameNumber, data) => {
         exit_game(data)
     });
 
+    function handleMouseUpButton1() {
+        console.log('Button 1 released');
+        socket.emit('message', 'make_move,' + gameNumber + ',' + "1");
+    }
+    
+    function handleMouseUpButton2() {
+        console.log('Button 2 released');
+        socket.emit('message', 'make_move,' + gameNumber + ',' + "2");
+    }
 
-    button1.addEventListener('click', function() {
-        console.log('Button 1 clicked');
-        socket.emit('message', 'make_move,' + gameNumber + ',' + "1")
-    });
-
-    button2.addEventListener('click', function() {
-        console.log('Button 2 clicked');
-        socket.emit('message', 'make_move,' + gameNumber + ',' + "2")
-    });
-
-    button3.addEventListener('click', function() {
-        console.log('Button 3 clicked');
-        socket.emit('message', 'make_move,' + gameNumber + ',' + "3")
-    });
-
-    button4.addEventListener('click', function() {
-        console.log('Button 4 clicked');
-        socket.emit('message', 'make_move,' + gameNumber + ',' + "4")
-    });
+    function handleMouseUpButton3() {
+        console.log('Button 3 released');
+        socket.emit('message', 'make_move,' + gameNumber + ',' + "3");
+    }
+    
+    function handleMouseUpButton4() {
+        console.log('Button 4 released');
+        socket.emit('message', 'make_move,' + gameNumber + ',' + "4");
+    }
+    
+    if (made_listner == 0)
+    {
+        button1.addEventListener('mouseup', handleMouseUpButton1);
+        button2.addEventListener('mouseup', handleMouseUpButton2);
+        button3.addEventListener('mouseup', handleMouseUpButton3);
+        button4.addEventListener('mouseup', handleMouseUpButton4);
+        made_listner = 1
+    }
 
     function animate() {
         if (render) {
             requestAnimationFrame(animate);
+            updateGameState(data)
             renderer.render(scene, camera);
         } else {
             stopAnimation();

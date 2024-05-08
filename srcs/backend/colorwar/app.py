@@ -142,23 +142,23 @@ class Game:
 			return
 		if y < 0 or y >= self.height: # out of bounds
 			return
-		if self.return_used(self, x, y) == True: #wants to remove self?
+		if self.return_used(x, y) == True: #wants to remove self?
 			return
-		if self.return_owner(self, x, y) == self.which_player_turn + 1: # is the owner, print with new colour
-			self.set_colour(self, x, y, colour)
-			self.set_used(self, x, y)
-			self.paint_with_colour(self, x + 1, y, colour)
-			self.paint_with_colour(self, x - 1, y, colour)
-			self.paint_with_colour(self, x, y + 1, colour)
-			self.paint_with_colour(self. x, y - 1, colour)
+		if self.return_owner(x, y) == self.which_player_turn + 1: # is the owner, print with new colour
+			self.set_colour(x, y, colour)
+			self.set_used(x, y)
+			self.paint_with_colour(x + 1, y, colour)
+			self.paint_with_colour(x - 1, y, colour)
+			self.paint_with_colour(x, y + 1, colour)
+			self.paint_with_colour(x, y - 1, colour)
 			return
-		if self.return_owner(x, y) == 0 and self.return_colour(self, x, y) == colour: # no one owns and the colour matches
+		if self.return_owner(x, y) == 0 and self.return_colour(x, y) == colour: # no one owns and the colour matches
 			self.squares[x + (y * self.width)].owner = self.which_player_turn + 1
-			self.set_used(self, x, y)
-			self.paint_with_colour(self, x + 1, y, colour)
-			self.paint_with_colour(self, x - 1, y, colour)
-			self.paint_with_colour(self, x, y + 1, colour)
-			self.paint_with_colour(self, x, y - 1, colour)
+			self.set_used(x, y)
+			self.paint_with_colour(x + 1, y, colour)
+			self.paint_with_colour(x - 1, y, colour)
+			self.paint_with_colour(x, y + 1, colour)
+			self.paint_with_colour(x, y - 1, colour)
 
 	def who_won_or_draw(self):	
 		total_squares = self.width * self.height
@@ -306,13 +306,14 @@ def make_move(splitted_command):
 	if games[number].which_player_turn == 0:
 		games[number].start_x = 0
 	else:
-		games[number].start_x = all.width - 1
+		games[number].start_x = games[number].width - 1
 	for i in range(len(games[number].squares)):
 		games[number].squares[i].used = False
 	games[number].paint_with_colour(games[number].start_x, games[number].start_y, colour)
 	games[number].which_player_turn += 1
 	games[number].which_player_turn %= 2
 	games[number].compute_scores()
+	games[number].moves += 1 
 	if games[number].check_game_running_conditions():
 		socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
 	else:
