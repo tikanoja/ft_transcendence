@@ -142,7 +142,7 @@ class Game:
 			return
 		if y < 0 or y >= self.height: # out of bounds
 			return
-		if self.return_used(self, x, y) == True:
+		if self.return_used(self, x, y) == True: #wants to remove self?
 			return
 		if self.return_owner(self, x, y) == self.which_player_turn + 1: # is the owner, print with new colour
 			self.set_colour(self, x, y, colour)
@@ -152,7 +152,7 @@ class Game:
 			self.paint_with_colour(self, x, y + 1, colour)
 			self.paint_with_colour(self. x, y - 1, colour)
 			return
-		if self.return_owner(self, x, y) == 0 and self.return_colour(self, x, y) == colour: # no one owns and the colour matches
+		if self.return_owner(x, y) == 0 and self.return_colour(self, x, y) == colour: # no one owns and the colour matches
 			self.squares[x + (y * self.width)].owner = self.which_player_turn + 1
 			self.set_used(self, x, y)
 			self.paint_with_colour(self, x + 1, y, colour)
@@ -291,6 +291,7 @@ def	games_running(splitted_command):
 def make_move(splitted_command):
 	global games
 	global games_lock
+	print(splitted_command)
 	if len(splitted_command) != 3:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
@@ -302,7 +303,7 @@ def make_move(splitted_command):
 	if colour < 1 or colour > 4:
 		socketio.emit('message', 'ERROR, allowed game colours are 1 to 4.')
 		return
-	if games[number].which_player_turn() == 0:
+	if games[number].which_player_turn == 0:
 		games[number].start_x = 0
 	else:
 		games[number].start_x = all.width - 1

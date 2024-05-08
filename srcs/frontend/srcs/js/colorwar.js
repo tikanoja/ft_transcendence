@@ -140,37 +140,54 @@ export const renderColorwar = (gameNumber, data) => {
     const canvasWidth = window.innerWidth - 250;
     const canvasHeight = window.innerHeight;
 
-    // const tileSizeFraction = 2;
-    const tileSize = Math.min(canvasWidth, canvasHeight) // * tileSizeFraction;
+    const tileSize = Math.min(canvasWidth, canvasHeight)
 
     const boardWidth = numCols * tileSize;
     const boardHeight = numRows * tileSize;
     const boardStartX = (canvasWidth - boardWidth) / 1.9;
     const boardStartY = (canvasHeight - boardHeight)/ 2;
 
-
+    
     const textureLoader = new THREE.TextureLoader();
+    let colourOneSrc = "../textures/tilePurple_01.png";
+    let colourTwoSrc = "../textures/tileYellow_27.png";
+    let colourThreeSrc = "../textures/tileBlue_25.png";
+    let colourFourSrc = "../textures/tileRed_27.png";
 
-    // const baseTileTexture = textureLoader.load("../textures/tileYellow_01.png", () => {
-    //     console.log("Base tile loaded successfully.");
-    // });
-    const baseTileTexture = textureLoader.load("../textures/tilePurple_01.png", () => {
-        console.log("Base tile loaded successfully.");
+    const button1 = document.querySelector('button[type="Colour 1"] img');
+    const button2 = document.querySelector('button[type="Colour 2"] img');
+    const button3 = document.querySelector('button[type="Colour 3"] img');
+    const button4 = document.querySelector('button[type="Colour 4"] img');
+
+
+    textureLoader.load(colourOneSrc, (texture) => {
+        button1.src = texture.image.src;
     });
 
-    // const colorOneTexture = textureLoader.load("../textures/tileBlue_25.png", () => {
-    //     console.log("Color 1 loaded successfully.");
-    // });
+    textureLoader.load(colourTwoSrc, (texture) => {
+        button2.src = texture.image.src;
+    });
 
-    const colorOneTexture = textureLoader.load("../textures/tileGreen_39.png", () => {
+    textureLoader.load(colourThreeSrc, (texture) => {
+        button3.src = texture.image.src;
+    });
+
+    textureLoader.load(colourFourSrc, (texture) => {
+        button4.src = texture.image.src;
+    });
+
+    const colorOneTexture = textureLoader.load(colourOneSrc, () => {
         console.log("Color 2 loaded successfully.");
     });
-
-    const colorTwoTexture = textureLoader.load("../textures/tileYellow_27.png", () => {
+    
+    const colorTwoTexture = textureLoader.load(colourTwoSrc, () => {
         console.log("Color 2 loaded successfully.");
     });
-
-    const colourThreeTexture = textureLoader.load("../textures/tileRed_27.png", () => {
+    
+    const colourThreeTexture = textureLoader.load(colourThreeSrc, () => {
+        console.log("Color 3 loaded successfully.");
+    });
+    const colourFourTexture = textureLoader.load(colourFourSrc, () => {
         console.log("Color 3 loaded successfully.");
     });
 
@@ -218,14 +235,12 @@ export const renderColorwar = (gameNumber, data) => {
                     }
                     else if (color === '4')
                     {
-                        tileTexture = baseTileTexture;
+                        tileTexture = colourFourTexture;
                     }
                     tileData.push({ position: { x, y }, tileTexture });
                     legendIndex++;
                 }
             }
-
-            const ballMaterial = new THREE.MeshPhongMaterial({ color: 0xff00ff });
             // new THREE.TextGeometry( text, parameters ); maybe texts ??
             
             tileData.forEach((tileInfo) => {
@@ -242,19 +257,15 @@ export const renderColorwar = (gameNumber, data) => {
                 render = false
         }
     }
-    // Set up orthographic camera
+
     const camera = new THREE.PerspectiveCamera(
         75,
         canvasWidth / canvasHeight,
         -2,
         10000
     );
-
-    // Calculate distance from the board based on its size
-    const distance = Math.max(boardWidth, boardHeight) / (2 * Math.tan(Math.PI * camera.fov / 290));//360
-
-    // Position the camera
-    camera.position.set(0, 20, distance); // Adjust camera position to be in front of the scene
+    const distance = Math.max(boardWidth, boardHeight) / (2 * Math.tan(Math.PI * camera.fov / 290));
+    camera.position.set(0, 20, distance);
     camera.lookAt(scene.position);
 
     addLighting(scene);
@@ -282,6 +293,27 @@ export const renderColorwar = (gameNumber, data) => {
 
 	socket.on('endstate', (data) => {
         exit_game(data)
+    });
+
+
+    button1.addEventListener('click', function() {
+        console.log('Button 1 clicked');
+        socket.emit('message', 'make_move,' + gameNumber + ',' + "1")
+    });
+
+    button2.addEventListener('click', function() {
+        console.log('Button 2 clicked');
+        socket.emit('message', 'make_move,' + gameNumber + ',' + "2")
+    });
+
+    button3.addEventListener('click', function() {
+        console.log('Button 3 clicked');
+        socket.emit('message', 'make_move,' + gameNumber + ',' + "3")
+    });
+
+    button4.addEventListener('click', function() {
+        console.log('Button 4 clicked');
+        socket.emit('message', 'make_move,' + gameNumber + ',' + "4")
     });
 
     function animate() {

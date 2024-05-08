@@ -4,6 +4,12 @@
     /* You may include other font formats (woff, woff2, etc.) for better cross-browser support */
 }
 
+#GameControls button img {
+    width: 100px; /* Set a specific width for the images */
+    height: 100px; /* Set a specific height for the images */
+    object-fit: cover; /* Maintain aspect ratio and cover container */
+}
+
 #scoreboard {
     display: flex;
     justify-content: space-between;
@@ -54,7 +60,11 @@ body {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Add a shadow for depth */
 }
 
-#canvasContainer {
+#canvas {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    height: 100vh; /* Set canvas height to full viewport height */
     position: relative;
     width: 10%;
     height: 10%;
