@@ -44,8 +44,8 @@ class RegistrationForm(forms.Form):
         
 
 class LoginForm(forms.Form):
-    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
-    password = forms.CharField(label="Password", widget=forms.PasswordInput)
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username', "class": "form-control"}), max_length=256, required=True)
+    password = forms.CharField(label="Password", widget=forms.PasswordInput(attrs={'placeholder': 'Enter password', "class": "form-control"}))
 
 
 class DeleteAccountForm(forms.Form):

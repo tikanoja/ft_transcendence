@@ -1,31 +1,44 @@
-<div>
+<div class="bg-dark mb-20">
 	<div>
 		{% include 'partials/navbar_empty.html' %}
 	</div>
-	<h2>{{title | title}}</h2>
-	{% if message %}
-	<p class="text-danger">{{message}}</p>
-	{% endif %}
-
-	{% if error %}
-	<p class="text-danger">Error: {{error}}</p>
-	{% endif %}
-
-	{% if success %}
-	<p style="text-success">Success: {{success}}</p>
-	{% endif %}
-
-	<form id="loginForm" >
-		{% csrf_token %}
-		{% for field in form %}
-		<div class="form-group">
-			<p style="text-danger">{{ field.errors }}<p>
-			{{ field.label_tag }} {{ field }}
+	<div class="d-flex justify-content-center align-items-center">
+		<div class="my-5">
+		{% comment %} <div class="container py-5 h-100 w-50 m-auto"> {% endcomment %}
+			<div class="card w-100 m-auto bg-secondary">
+				<div class="card-body p-5 text-center">
+					<h2 class="text-white card-title">{{title | title}}</h2>
+				
+					{% if error %}
+					<div class="alert alert-warning" role="alert">
+						Error: {{error}}
+					</div>
+					{% endif %}
+				
+					{% if success %}
+					<div class="alert alert-success" role="alert">
+						Success: {{success}}
+					</div>
+					{% endif %}
+				
+					<form id="loginForm" >
+						<div class="mb-3">
+							{% csrf_token %}
+							{% for field in form %}
+							<div class="form-floating">
+								{{ field }}
+								{{ field.label_tag }}
+								<p style="text-danger">{{ field.errors }}<p>
+							</div>
+							{% endfor %}
+							<button class="btn btn-primary" type="submit">Login</button>
+						</div>
+					</form>
+					<div class="d-inline-flex">
+						<p>Don't have an account? Make one<nav class="ps-1"><a class="nav-link" href="/register">here</a></nav></p>
+					</div>
+				</div>
+			</div>
 		</div>
-		{% endfor %}
-		<input type="submit" value="Login">
-	</form>
-	<div>
-		<p>Don't have an account? Make one <nav><a href="/register">here</a></nav> </p>
 	</div>
 </div>
