@@ -579,6 +579,10 @@ const tournamentButtonHandler = async (event) => {
         data['tournament-id'] = event.target.getAttribute('data-tournament-id');
     else if (action == 'rejectTournamentInvite')
         data['participant_id'] = event.target.getAttribute('data-participant-id');
+    else if (action == 'leaveTournament')
+        data['participant_id'] = event.target.getAttribute('data-participant-id');
+    else if (action == 'startTournament')
+        data['tournament_id'] = event.target.getAttribute('data-tournament-id');
 
     const querystring = window.location.search;
     var endpoint = '/app/tournament_buttons/' + querystring;

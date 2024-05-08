@@ -196,7 +196,8 @@ class StartTournamentForm(forms.Form):
         (GameInstance.COLOR, 'Color'),
     ]
     game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
-
+    alias = forms.CharField(label='Alias', widget=forms.TextInput(attrs={'placeholder': 'Enter alias'}), max_length=256, required=True)
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if 'formname' in kwargs:
@@ -224,9 +225,3 @@ class TournamentInviteForm(forms.Form):
 
 class TournamentJoinForm(forms.Form):
     alias = forms.CharField(label='Alias', widget=forms.TextInput(attrs={'placeholder': 'Enter alias'}), max_length=256, required=True)
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if 'participant_id' in kwargs:
-            self.fields['participant_id'] = forms.CharField(widget=forms.HiddenInput(), initial=kwargs['participant_id'])
-        if 'formname' in kwargs:
-            self.fields['formname'] = forms.CharField(widget=forms.HiddenInput(), initial=kwargs['formname'])

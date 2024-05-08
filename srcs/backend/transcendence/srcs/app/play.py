@@ -33,6 +33,10 @@ def playContext(request, error, success):
     tournament_in = Tournament.objects.filter(Q(status='Pending'), participants=current_user).first()
     tournament_in_participants = Participant.objects.filter(tournament=tournament_in)
     my_participant = tournament_in_participants.filter(user=current_user).first
+    if my_tournament is None or my_tournament.participants is None:
+        my_tournament_count = 0
+    else:
+        my_tournament_count = my_tournament.participants.filter(participant__status=Participant.ACCEPTED).count()
 
     if my_tournament is not None:
         hosting_tournament = True
@@ -59,7 +63,8 @@ def playContext(request, error, success):
         'tournament_in': tournament_in,
         'tournament_in_participants': tournament_in_participants,
         'my_participant': my_participant,
-        'tournamentjoinform': tournamentjoinform
+        'tournamentjoinform': tournamentjoinform,
+        'my_tournament_count': my_tournament_count
     }
 
     if active_game is not None:
@@ -178,10 +183,11 @@ def start_tournament(request):
     # if yes, show error 'Already registered to a tournament'
 
     game_type = sent_form.cleaned_data['game_type']
+    alias = sent_form.cleaned_data['alias']
     logger.debug('user ' + current_user.username + ' started ' + game_type + ' tournament!')
     new_tournament = Tournament(creator=current_user, game=game_type, status='Pending')
     new_tournament.save()
-    Participant.objects.create(user=current_user, tournament=new_tournament, status='Accepted')
+    Participant.objects.create(user=current_user, tournament=new_tournament, alias=alias, status='Accepted')
 
     return render(request, 'user/play.html', playContext(request, None, 'Tournament created!'))
 
@@ -206,6 +212,7 @@ def tournament_join(request):
  
     # change the status of the participant instance to 'Accepted'
     Participant.objects.filter(pk=participant_id).update(status='Accepted')
+    Participant.objects.filter(pk=participant_id).update(alias=alias)
 
     return render(request, 'user/play.html', playContext(request, None, 'Joined tournament!'))
 
@@ -251,6 +258,17 @@ def tournament_reject(request, data):
     Participant.objects.get(pk=data.get('participant_id')).delete()
     return render(request, 'user/play.html', playContext(request, None, 'Rejected tournament invite!'))
 
+def tournament_leave(request, data):
+    logger.debug('In tournament_leave()')
+    Participant.objects.get(pk=data.get('participant_id')).delete()
+    return render(request, 'user/play.html', playContext(request, None, 'Left tournament!'))
+
+def tournament_start(request, data):
+    # check that we still have 4 - 16 players accepted
+    # change tournament status
+    # generate brackets
+    # let chat know
+    return render(request, 'user/play.html', playContext(request, None, 'Tournament started!'))
 
 def tournament_buttons(request):
     logger.debug('In torunament_buttons()')
@@ -260,6 +278,10 @@ def tournament_buttons(request):
             return delete_tournament(request, data)
         if data.get('action') == 'rejectTournamentInvite':
             return tournament_reject(request, data)
+        if data.get('action') == 'leaveTournament':
+            return tournament_leave(request, data)
+        if data.get('action') == 'startTournament':
+            return tournament_start(request, data)
         # else:
         #     return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, ve, "Unknown content type"))
 

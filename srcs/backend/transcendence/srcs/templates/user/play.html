@@ -32,7 +32,7 @@
 <br>
 
 <h2>Tournament</h2>
-{% if hosting_tournament is False %}
+{% if hosting_tournament is False and my_participant.status != 'Accepted' %}
 <form id="startTournamentForm"> {% comment %} We are not hosting a tournament, show form to create one {% endcomment %}
 	{% csrf_token %}
 	<input type="hidden" name="formname" value="startTournamentForm">
@@ -44,9 +44,11 @@
 	{% endfor %}
 	<input type="submit" class="btn btn-primary" value="Start tournament">
 </form>
-{% else %} {% comment %} We ARE hosting a tournament, show form to invite users {% endcomment %}
+{% elif hosting_tournament is True %} {% comment %} We ARE hosting a tournament, show form to invite users {% endcomment %}
 <button type="submit" id="tournamentButton" data-tournament-id={{ my_tournament.id }} data-action="nuke" class="btn btn-outline-danger">Cancel tournament</button>
-<p>Add players to your {{ my_tournament.game }} tournament</p>
+	{% if my_tournament_count >= 4 and my_tournament_count <= 16 %}
+	<button type="submit" id="tournamentButton" data-tournament-id={{ my_tournament.id }} data-action="startTournament" class="btn btn-success">Start tournament!</button>
+	{% endif %}
 <form id="tournamentInviteForm" >
 	{% csrf_token %}
 	<input type="hidden" name="formname" value="tournamentInviteForm">
@@ -79,11 +81,10 @@
 		<h4>{{ tournament_in.creator.username }}'s {{ tournament_in.game }} tournament</h3>
 		{% for participant in tournament_in_participants %}
 		<li>
-			{{ participant.user.username }} as {{ participant.alias }}
-	
-			{% comment %} Challenger: {{ invite.p1.username }} - Game: {{ invite.game }} -
-			<button type="submit" id="gameRequestButton" data-from-user={{ invite.p1.username }} data-action="accept" class="btn btn-primary">✓</button> or
-			<button type="submit" id="gameRequestButton" data-from-user={{ invite.p1.username }} data-action="reject" class="btn btn-danger">✗</button> {% endcomment %}
+			{{ participant.user.username }} as {{ participant.alias }}. Status: {{ participant.status }}
+			{% if participant.user == current_user and current_user != tournament_in.creator%}
+			<button type="submit" id="tournamentButton" data-participant-id={{ participant.id }} data-action="leaveTournament" class="btn btn-danger">Cancel</button>
+			{% endif %}
 		</li>
 		{% empty %}
 		<li>No participants yet.</li>
