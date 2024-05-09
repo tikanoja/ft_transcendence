@@ -18,13 +18,12 @@
 			{% comment %} </td>
 			<td> {% endcomment %}
 				<div id="dashboard">
-					{% include './profile_partials/stats.html' %}
-					{% include './profile_partials/game_history.html' %}
+					{% include './profile_partials/stats.html' with stats=stats %}
+					{% include './profile_partials/game_history.html' with history=history %}
 				</div>
 			{% comment %} </td>
 			<td> {% endcomment %}
 				<div id="friends">
-					<h3>Friends!</h3>
 					{% include './profile_partials/friends.html' with friends=friends self_profile=self_profile%}
 				</div>
 			{% comment %} </td>

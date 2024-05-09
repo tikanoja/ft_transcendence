@@ -9,3 +9,7 @@ django-cors-headers
 requests
 Pillow
 olefile
+
+python-socketio
+socketio
+socketio.client

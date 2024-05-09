@@ -3,7 +3,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.exceptions import ValidationError
 import logging
-from django.db import transaction
+
+
 logger = logging.getLogger(__name__)
 
 class CustomUserManager(BaseUserManager):
@@ -103,24 +104,23 @@ class GameInstance(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
  
+    def __str__(self):
+        return f'({self.game} instance:  p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'
 
 class PongGameInstance(GameInstance):
-    longest_rally_time = models.IntegerField(default=0)
     longest_rally_hits = models.IntegerField(default=0)
-    total_game_time = models.DurationField()
-    p1_hits = models.IntegerField(default=0)
-    p2_hits = models.IntegerField(default=0)
-    p1_misses = models.IntegerField(default=0)
-    p2_misses = models.IntegerField(default=0)
     p1_score = models.IntegerField(default=0)
     p2_score = models.IntegerField(default=0)
     
+    def __str__(self):
+        return f'({self.game} instance:  p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'
 
+# changed for current tracking in game
 class ColorGameInstance(GameInstance):
-    turns = models.IntegerField(default=0)
-    p1_biggest_takeover = models.IntegerField(default=0)
-    p2_biggest_takeover = models.IntegerField(default=0)
+    turns_to_win = models.IntegerField(default=0)
     
+    def __str__(self):
+        return f'({self.game} instance:  p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'
 
 class Match(models.Model):
     # associated tournament
@@ -180,7 +180,6 @@ class Tournament(models.Model):
 #  language -> maybe add to CustomUser model?
 #  picture
 #  custom setting for paddle?
-
 
 # stats model -  individual game stats that linked to the user
 #  define what about a game to save

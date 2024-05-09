@@ -5,7 +5,8 @@ FROM python:3.12.1-slim-bookworm
 RUN apt-get update && apt-get install -y \
 	postgresql-client \
 	libpq-dev \
-	openssl
+	openssl \
+    build-essential 
 
 RUN mkdir -p /transcendence/ssl \
 	mkdir -p /transcendence/media

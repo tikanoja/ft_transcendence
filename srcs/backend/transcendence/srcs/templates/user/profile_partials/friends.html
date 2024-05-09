@@ -1,4 +1,5 @@
 <div class="container">
+	<h3>Friends!</h3>
 	{% if friends.error %}
 	<p style="color: red">Error: {{friends.error}}</p>
 	{% endif %}
@@ -18,24 +19,11 @@
 		<input type="submit" value="Add friend" id="addFriendButton">
 		<input type="submit" value="Block user" id="blockUserButton">
 	</form>
-
-	{% comment %} <form id="blockUserForm" >
-		{% csrf_token %}
-		{% for field in friends.form %}
-		<div class="form-group">
-		<p style="color: red">{{ field.errors }}<p>
-		{{ field.label_tag }} {{ field }}
-		</div>
-		{% endfor %}
-		<input type="submit" value="Block user">
-	</form> {% endcomment %}
 	
-	{% endif %}
 	</br>
 
 	<div>
-	{% if self_profile %}
-	<h2>Pending Invites</h2>
+	<h4>Pending Invites</h4>
 	<ul>
 		{% for invite in friends.in_invites %}
 			<li>
@@ -48,9 +36,8 @@
 		{% endfor %}
 	</ul>
 
-	{% endif %}
 	<br>
-	<h2>Blocked Users</h2>
+	<h4>Blocked Users</h4>
 	<ul>
 		{% for blocked in friends.blocked_users %}
 			<li>
@@ -62,14 +49,14 @@
 		{% endfor %}
 	</ul>
 	<br>
+	{% endif %}
 
-	<h2>List of friends</h2>
+	<h4>List of friends</h4>
+	{% if self_profile %}
 	<ul>
-		{% if self_profile %}
 		{% for invite in friends.out_invites %}
 			<li>{{ invite.to_user.username }} - Friend request pending...</li>
 		{% endfor %}
-		{% endif %}
 
 		{% for friendship in friends.friendships %}
 			{% if friends.current_user == friendship.to_user %}
@@ -97,8 +84,30 @@
 			<li>No friends.</li>
 		{% endfor %}
 	</ul>
-
+	{% else %}
+		{% for friendship in friends.friendships %}
+			{% if friends.current_user == friendship.to_user %}
+				<li>
+					<a id="profileLinkTag" href="/profile/{{friendship.from_user.username}}" >{{ friendship.from_user.username }}</a> - 
+					{% if friendship.from_user.is_online %}
+						<span style="color:green;">Online</span>
+					{% else %}
+						<span style="color:grey;">Offline</span>
+					{% endif %}
+				</li>
+			{% else %}
+				<li>
+					<a id="profileLinkTag" href="/profile/{{friendship.to_user.username}}" >{{ friendship.to_user.username }}</a> - 
+					{% if friendship.to_user.is_online %}
+						<span style="color:green;">Online</span>
+					{% else %}
+						<span style="color:grey;">Offline</span>
+					{% endif %} 
+				</li>
+			{% endif %}
+		{% empty %}
+			<li>No friends.</li>
+		{% endfor %}
+	{% endif %}
 	</div>
 </div>
-
-{% comment %} {% include {{real_html}} %} {% endcomment %}
