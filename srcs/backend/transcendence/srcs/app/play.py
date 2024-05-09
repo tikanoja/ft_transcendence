@@ -265,6 +265,7 @@ def tournament_leave(request, data):
 
 def tournament_start(request, data):
     # check that we still have 4 - 16 players accepted
+    # delete pending participants
     # change tournament status
     # generate brackets
     # let chat know
