@@ -73,7 +73,7 @@ export const startScreenColorwar = async () => {
         // # DONT FORGET to maybe insert to here to get permission from django to start the game
         socket.emit("message", "start_game," + gameNumber);
         
-        socket.on('state', (data) => {
+        socket.on('start_state', (data) => {
             startScreen.style.display = 'none';
             canvasContainer.style.display = 'block';
             const valuesArray = data.split(',');
@@ -120,7 +120,6 @@ export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
         console.error('Scoreboard elements not found.');
     }
 };
-
 
 
 export const renderColorwar = (gameNumber, data) => {
@@ -246,37 +245,7 @@ export const renderColorwar = (gameNumber, data) => {
         button.style.display = 'flex';
     });
     addLighting(scene);
-    
-    function setupGameBoard(data) {
 
-        const tileMeshes = [];
-    
-        for (let row = 0; row < numRows; row++) {
-            for (let col = 0; col < numCols; col++) {
-                const x = boardStartX + col * tileSize;
-                const y = boardStartY + row * tileSize;
-    
-                const tileGeometry = new THREE.PlaneGeometry(tileSize, tileSize);
-                // const tileMaterial = new THREE.MeshBasicMaterial({ color: defaultTileColor });
-                const tileMaterial = new THREE.MeshBasicMaterial();
-                const tileMesh = new THREE.Mesh(tileGeometry, tileMaterial);
-                tileMesh.position.set(x, y, 0);
-                scene.add(tileMesh);
-                tileMeshes.push(tileMesh);
-            }
-        }
-        updateGameState(data, tileMeshes);
-        console.log("finished board setup")
-
-        return tileMeshes;
-    }
-
-    const tileMeshes = setupGameBoard(data);
-    console.log("finished setup")
-
-
-
-    ///////////////////////////////////////////
 
     function updateGameState(data, tileMeshes) {
         const valuesArray = data.split(',');
@@ -287,7 +256,6 @@ export const renderColorwar = (gameNumber, data) => {
             let player2score = valuesArray[3];
             let currentMoveCount = valuesArray[5];
     
-            // Extract tile legend from data
             for (let i = 6; i < valuesArray.length; i += 2) {
                 const color = valuesArray[i];
                 const owner = valuesArray[i + 1];
@@ -295,7 +263,6 @@ export const renderColorwar = (gameNumber, data) => {
                 tileLegend.push(tile);
             }
     
-            // Update tile textures based on legend
             tileLegend.forEach((tileInfo, index) => {
                 let tileTexture;
                 if (tileInfo.color === '1') {
@@ -322,6 +289,32 @@ export const renderColorwar = (gameNumber, data) => {
             console.log(render);
         }
     }
+    
+    function setupGameBoard(data) {
+        
+        const tileMeshes = [];
+    
+        for (let row = 0; row < numRows; row++) {
+            for (let col = 0; col < numCols; col++) {
+                const x = boardStartX + col * tileSize;
+                const y = boardStartY + row * tileSize;
+    
+                const tileGeometry = new THREE.PlaneGeometry(tileSize, tileSize);
+                const tileMaterial = new THREE.MeshBasicMaterial();
+                const tileMesh = new THREE.Mesh(tileGeometry, tileMaterial);
+                tileMesh.position.set(x, y, 0);
+                scene.add(tileMesh);
+                tileMeshes.push(tileMesh);
+            }
+        }
+        updateGameState(data, tileMeshes);
+        return tileMeshes;
+    }
+
+    const tileMeshes = setupGameBoard(data);
+    
+    ///////////////////////////////////////////
+
 
 
     document.addEventListener('keydown', (event) => {
@@ -334,7 +327,6 @@ export const renderColorwar = (gameNumber, data) => {
     });
     
     socket.on('state', (data) => {
-        console.log("SAW STATE")
         updateGameState(data, tileMeshes)
     });
 
@@ -378,23 +370,16 @@ export const renderColorwar = (gameNumber, data) => {
         made_listner = 1
     }
 
-    const offScreenBuffer = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+  
+    let animationId;
 
     function animate() {
-        if (render) {
-            requestAnimationFrame(animate);
-            
-            renderer.setRenderTarget(offScreenBuffer);
-            renderer.render(scene, camera);
-            renderer.setRenderTarget(null);
-            renderer.render(scene, camera);
-        } else {
-            stopAnimation();
-        }
+        animationId = requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+
     }
 
 
-    let animationId;
     function startAnimation() {
 
         animationId = requestAnimationFrame(animate);
@@ -412,6 +397,10 @@ export const renderColorwar = (gameNumber, data) => {
     if (render)
     {
         startAnimation();
+    }
+    else
+    {
+        stopAnimation()
     }
 
 };

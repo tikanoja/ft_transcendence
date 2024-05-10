@@ -232,7 +232,7 @@ def start_game(splitted_command):
 			games[number].new_game_initilization()
 			games[number].set_game_slot(number)
 			games[number].set_game_running(1)
-			socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
+			socketio.emit('start_state', 'OK,{}'.format(games[number].return_game_state()))
 
 def stop_game(splitted_command):
 	global socketio
