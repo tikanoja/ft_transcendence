@@ -104,7 +104,6 @@ export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
     const scoreLeftElement = document.querySelector('.score-left');
     const scoreRightElement = document.querySelector('.score-right');
     const moveCountElement = document.querySelector('.move-count');
-    console.log("update", currentMoveCount)
 
     if (isNaN(p1Score) || isNaN(p2Score)) {
         return;
@@ -122,7 +121,6 @@ export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
     }
 };
 
-let camera;
 
 
 export const renderColorwar = (gameNumber, data) => {
@@ -153,7 +151,7 @@ export const renderColorwar = (gameNumber, data) => {
     const boardStartX = (canvasWidth - boardWidth) / 1.9;
     const boardStartY = (canvasHeight - boardHeight)/ 2;
    
-    camera = new THREE.PerspectiveCamera(
+    const camera = new THREE.PerspectiveCamera(
         75,
         canvasWidth / canvasHeight,
         -2,
@@ -247,80 +245,83 @@ export const renderColorwar = (gameNumber, data) => {
     buttons.forEach(button => {
         button.style.display = 'flex';
     });
-
-    // // if (setup_done == 0)
-    // // {
-    // //     setup_done = 1;
-    //    updateGameState(data);
-    // // }
-
-
     addLighting(scene);
+    
+    function setupGameBoard(data) {
+
+        const tileMeshes = [];
+    
+        for (let row = 0; row < numRows; row++) {
+            for (let col = 0; col < numCols; col++) {
+                const x = boardStartX + col * tileSize;
+                const y = boardStartY + row * tileSize;
+    
+                const tileGeometry = new THREE.PlaneGeometry(tileSize, tileSize);
+                // const tileMaterial = new THREE.MeshBasicMaterial({ color: defaultTileColor });
+                const tileMaterial = new THREE.MeshBasicMaterial();
+                const tileMesh = new THREE.Mesh(tileGeometry, tileMaterial);
+                tileMesh.position.set(x, y, 0);
+                scene.add(tileMesh);
+                tileMeshes.push(tileMesh);
+            }
+        }
+        updateGameState(data, tileMeshes);
+        console.log("finished board setup")
+
+        return tileMeshes;
+    }
+
+    const tileMeshes = setupGameBoard(data);
+    console.log("finished setup")
+
+
+
     ///////////////////////////////////////////
-    function updateGameState(data)
-    {
-        console.log(data)
-        const valuesArray = data.split(',')
-        if (gameNumber == valuesArray[1])
-        {
-            // console.log(valuesArray);
+
+    function updateGameState(data, tileMeshes) {
+        const valuesArray = data.split(',');
+        if (gameNumber == valuesArray[1]) {
+    
             let tileLegend = [];
-            let tileData = [];
-            console.log("in update and game #")
             let player1score = valuesArray[2];
             let player2score = valuesArray[3];
             let currentMoveCount = valuesArray[5];
-            console.log("current move count ", currentMoveCount)
-
+    
+            // Extract tile legend from data
             for (let i = 6; i < valuesArray.length; i += 2) {
                 const color = valuesArray[i];
                 const owner = valuesArray[i + 1];
                 const tile = { color, owner };
                 tileLegend.push(tile);
             }
-            let legendIndex = 0;
-            for (let row = 0; row < numRows; row++) {
-                for (let col = 0; col < numCols; col++) {
-                    const x = boardStartX + col * tileSize;
-                    const y = boardStartY + row * tileSize;
-
-                    let tileTexture;
-                    // console.log("in tile colour set")
-                    if (tileLegend[legendIndex].color === '1')
-                    {
-                        tileTexture = colorTextures.colorOne[tileLegend[legendIndex].owner].texture;
-                    }
-                    else if (tileLegend[legendIndex].color === '2') 
-                    {
-                        tileTexture = colorTextures.colorTwo[tileLegend[legendIndex].owner].texture;;
-                    }
-                    else if  (tileLegend[legendIndex].color === '3') 
-                    {
-                        tileTexture = colorTextures.colorThree[tileLegend[legendIndex].owner].texture;;
-                    }
-                    else if (tileLegend[legendIndex].color === '4')
-                    {
-                        tileTexture = colorTextures.colorFour[tileLegend[legendIndex].owner].texture;;
-                    }
-                    tileData.push({ position: { x, y }, tileTexture });
-                    legendIndex++;
+    
+            // Update tile textures based on legend
+            tileLegend.forEach((tileInfo, index) => {
+                let tileTexture;
+                if (tileInfo.color === '1') {
+                    tileTexture = colorTextures.colorOne[tileInfo.owner].texture;
+                } else if (tileInfo.color === '2') {
+                    tileTexture = colorTextures.colorTwo[tileInfo.owner].texture;
+                } else if (tileInfo.color === '3') {
+                    tileTexture = colorTextures.colorThree[tileInfo.owner].texture;
+                } else if (tileInfo.color === '4') {
+                    tileTexture = colorTextures.colorFour[tileInfo.owner].texture;
                 }
-            }
-            tileData.forEach((tileInfo) => {
-                const tileGeometry = new THREE.PlaneGeometry(tileSize, tileSize);
-                const tileMaterial = new THREE.MeshBasicMaterial({ map: tileInfo.tileTexture });
-                const tileMesh = new THREE.Mesh(tileGeometry, tileMaterial);
-                tileMesh.position.set(tileInfo.position.x, tileInfo.position.y, 0);
-                scene.add(tileMesh);
+    
+                const tileMesh = tileMeshes[index];
+                tileMesh.material.map = tileTexture;
+                tileMesh.material.needsUpdate = true;
             });
+    
             updateScoreboard(player1score, player2score, currentMoveCount);
+    
             let gameRunning =  valuesArray[4];
-            if (gameRunning != 1)
-                render = false
-            console.log(render)
+            if (gameRunning != 1) {
+                render = false;
+            }
+            console.log(render);
         }
     }
-
 
 
     document.addEventListener('keydown', (event) => {
@@ -334,12 +335,12 @@ export const renderColorwar = (gameNumber, data) => {
     
     socket.on('state', (data) => {
         console.log("SAW STATE")
-        updateGameState(data)
+        updateGameState(data, tileMeshes)
     });
 
     function exit_game(data)
 	{
-        updateGameState(data)
+        updateGameState(data, tileMeshes)
         loadGameOverScreen(data)
 		stopAnimation()
 	}
@@ -377,15 +378,21 @@ export const renderColorwar = (gameNumber, data) => {
         made_listner = 1
     }
 
+    const offScreenBuffer = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+
     function animate() {
         if (render) {
             requestAnimationFrame(animate);
-            updateGameState(data)
+            
+            renderer.setRenderTarget(offScreenBuffer);
+            renderer.render(scene, camera);
+            renderer.setRenderTarget(null);
             renderer.render(scene, camera);
         } else {
             stopAnimation();
         }
     }
+
 
     let animationId;
     function startAnimation() {
@@ -394,8 +401,7 @@ export const renderColorwar = (gameNumber, data) => {
         animate();
     }
 
-		function stopAnimation() {
-		socket.emit('message', 'stop_game,' + gameNumber);
+	function stopAnimation() {
 		socket.on('disconnect', () => {
 			console.log('Disconnected from server');
 		});
