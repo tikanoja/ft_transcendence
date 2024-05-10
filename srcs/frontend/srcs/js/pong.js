@@ -1,10 +1,8 @@
-                                                                                                                                                                            // // Import required modules
+// Import required modules
+
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.module.js';
 
-//import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.137.5/examples/jsm/controls/OrbitControls.js';
-
-
-// //TODO:the size of paddles, ball and their positioning MUST BE DYNAMIC!
+// //TODO: the size of paddles, ball and their positioning MUST BE DYNAMIC!
 // //TODO: A better looking start screen the also shows user name, and opponent name
 // //TODO: Make lighting better
 let socket;
@@ -187,7 +185,6 @@ function setup2DScene(scene) {
 }
 
 function setup3DScene(scene) {
-    let ball2, ball3;
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
 
     addLighting(scene);
@@ -196,21 +193,15 @@ function setup3DScene(scene) {
     const sizeFactor = 0.2;
     const ballRadiusScreen = (25 * 2) * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
     ball = new THREE.Mesh(new THREE.SphereGeometry(ballRadiusScreen * 2, 10, 10), new THREE.MeshPhongMaterial({color: 0xff00ff}))
-    ball2 = new THREE.Mesh(new THREE.SphereGeometry(ballRadiusScreen * 2, 10, 10), new THREE.MeshPhongMaterial({color: 0xff000}))
-    ball3 = new THREE.Mesh(new THREE.SphereGeometry(ballRadiusScreen * 2, 10, 10), new THREE.MeshPhongMaterial({color: 0x0000ff}))
 
     scene.add(p1_paddle);
     scene.add(p2_paddle);
     scene.add(ball);
-    scene.add(ball2);
-    scene.add(ball3);
 
     p1_paddle.position.set(-100,  0, 0);
     p2_paddle.position.set(100, 0, 0);
-    ball2.position.set(0, 0, 0);
-    ball3.position.set(-100, -100, 0);
 
-    return { camera, p1_paddle, p2_paddle, ball, ball2, ball3 };
+    return { camera, p1_paddle, p2_paddle, ball };
 }
 
 function create2DPaddle(color) {
@@ -247,7 +238,8 @@ function create3DPaddle(color) {
 }
 
 export const renderPongGame = (is3DGraphics, gameNumber) => {
-	console.log("GAME IS RENDERING")
+
+    console.log("GAME IS RENDERING")
     const scene = new THREE.Scene();
     // Remove any existing canvas
     const existingCanvas = document.getElementById('pongCanvas');
@@ -264,59 +256,32 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     if (is3DGraphics) {
         //({ camera, p1_paddle, p2_paddle, ball, ball2, ball3 } = setup3DScene(scene));
         const sceneSetup = setup3DScene(scene);
-        //camera.position.set(-1, -3700, 400);
-        camera.position.set(0, 0, 2000); // Adjust x, y, z as needed
+       
+        camera.position.x += -5110
+        camera.updateProjectionMatrix()
+        camera.position.y += -4590
+        camera.updateProjectionMatrix()
+        camera.position.z += 190
+        camera.updateProjectionMatrix()
+        camera.rotation.x += 1.5707963
+        camera.updateProjectionMatrix()
+        camera.rotation.y += -1.0471975511
+        camera.updateProjectionMatrix()
+        camera.rotation.z += 0
+        camera.updateProjectionMatrix()
 
+        //camera.position.set(-400, -400, 1000);
         //camera.lookAt(0, 0, 0);
-        //camera.rotation.set(0, 0, )
-        camera.up.set(0, 0, 1);
-
-        //const controls = new OrbitControls(camera, renderer.domElement);
-
-
-        sceneSetup.ball2.position.set(0, 0, 0);
-        sceneSetup.ball3.position.set(-1400, -1400, 0);
-        //const angleZ = 2*Math.PI * -70/360;
-        // //camera.up.set(0, 0, 1);
-        //camera.rotateZ(angleZ);
-        
-        //const angleX = 2*Math.PI * 70/360
-        //camera.rotateX(angleX);
-        
-        //const angleY = -2*Math.PI * 45/360
-        // Rotate the camera around the y-axis
-        //camera.rotateY(angleY);
-        //camera.lookAt(-1400, -1400, 0);
         //camera.up.set(0, 0, 1);
-
-        //camera.rotateX(Math.PI / 8);
-        //const rotationAngleX = -2*Math.PI * 90/360;
-        // Create a rotation matrix
-        //const rotationMatrixX = new THREE.Matrix4().makeRotationX(rotationAngleX);
-        // Apply the rotation to the scene
-        //scene.applyMatrix4(rotationMatrixX);
-        
-        // const rotationAngleZ = 2*Math.PI * 0/360;
-        // // Create a rotation matrix
-        // const rotationMatrixZ = new THREE.Matrix4().makeRotationZ(rotationAngleZ);
-        // // Apply the rotation to the scene
-        // scene.applyMatrix4(rotationMatrixZ);
-        
-        // const rotationAngleY = 2*Math.PI * 0/360;
-        // // Create a rotation matrix
-        // const rotationMatrixY = new THREE.Matrix4().makeRotationY(rotationAngleY);
-        // // Apply the rotation to the scene
-        // scene.applyMatrix4(rotationMatrixY);
-
 
     } else {
         const sceneSetup = setup2DScene(scene);
         camera.position.set(0, 0, 100);
     }
 
-let render = true
-let min_visible_x, max_visible_x, min_visible_y, max_visible_y;
-calculateVisibleArea();
+    let render = true
+    let min_visible_x, max_visible_x, min_visible_y, max_visible_y;
+    calculateVisibleArea();
 
 function calculateVisibleArea() {  //TODO: potentially needs to be calculated differently for perspective, currently functions with 
     const half_width = window.innerWidth / 2;
@@ -462,6 +427,13 @@ document.addEventListener('keydown', (event) => {
             // Handle other key presses if needed
             break;
     }
+
+    console.log("camera position x ", camera.position.x)
+    console.log("camera position y ", camera.position.y)
+    console.log("camera position z ", camera.position.z)
+    console.log("camera rotation x ", camera.rotation.x)
+    console.log("camera rotation y ", camera.rotation.y)
+    console.log("camera rotation z ", camera.rotation.z)
 });
 
 let animationId;
