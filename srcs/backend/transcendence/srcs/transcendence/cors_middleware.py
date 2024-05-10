@@ -12,7 +12,7 @@ class CorsMiddleware:
         return response
 
     def process_response(self, request, response):
-        response["Access-Control-Allow-Origin"] = "https://localhost, http://pong"
+        response["Access-Control-Allow-Origin"] = "https://localhost, http://pong, https://c1r5p9"
         response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS, DELETE, PUT"
         response["Access-Control-Allow-Headers"] = "Content-Type, Accept, X-CSRFToken, Location, Transfer-Encoding"
         response["Access-Control-Expose-Headers"] = "Location"

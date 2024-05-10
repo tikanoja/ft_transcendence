@@ -2,11 +2,11 @@ from django.shortcuts import render
 from django.http import JsonResponse
 import logging
 # from django.contrib.auth import authenticate
-from app.user import session, account, relations, user
+from app.user import session, account, relations
 from app.user import profile as user_profile
 from django.contrib.auth.decorators import login_required
 
-
+from .play import playGET, playPOST
 
 logger = logging.getLogger(__name__)
 
@@ -98,9 +98,9 @@ def settings(request):
 def play(request):
 	logger.debug('In play()')
 	if request.method == 'GET':
-		response = user.playGET(request)
+		response = playGET(request)
 	elif request.method == 'POST':
-		response = user.playPOST(request)
+		response = playPOST(request)
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"}, status=405)
 	return response

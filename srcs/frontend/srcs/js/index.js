@@ -102,8 +102,8 @@ function updateEventListeners() {
     var addFriendButton = document.getElementById('addFriendButton');
     var blockUserButton = document.getElementById('blockUserButton');
     var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
-    var profileLinks = document.querySelectorAll('#profileLinkTag')
-    var gameRequestForm = document.getElementById('gameRequestForm'); 
+    var profileLinks = document.querySelectorAll('#profileLinkTag');
+    var gameInviteForm = document.getElementById('gameInviteForm'); 
     var playButton = document.getElementById('playButton');
     var deleteForm = document.getElementById('delete-account-form');
     var nameChangeForm = document.getElementById('name-change-form');
@@ -111,6 +111,12 @@ function updateEventListeners() {
     var passwordChangeForm = document.getElementById('password-change-form');
     let profilePictureForm = document.getElementById('profile_picture_upload');
     var gameRequestButtons = document.querySelectorAll('[id^="gameRequestButton"]');
+    var gameRenderButton = document.getElementById('gameRenderButton');
+    var playerAuthForms = document.querySelectorAll('[id^="playerAuthForm"]');
+    var startTournamentForm = document.getElementById('startTournamentForm');
+    var tournamentInviteForm = document.getElementById('tournamentInviteForm');
+    var tournamentButtons = document.querySelectorAll('[id^="tournamentButton"]');
+    var tournamentJoinForm = document.getElementById('tournamentJoinForm');
 
     // remove listeners
     if (profilePictureForm)
@@ -135,14 +141,14 @@ function updateEventListeners() {
     if (addFriendButton)
         addFriendButton.removeEventListener('click', addFriendHandler);
     if (blockUserButton)
-        blockUserButton.removeEventListener('click', blockUserHandler)
+        blockUserButton.removeEventListener('click', blockUserHandler);
     if (friendRequestButtons) {
         friendRequestButtons.forEach(function(button) {
             button.removeEventListener('click', friendRequestHandler);
         })
     }
-    if (gameRequestForm)
-        gameRequestForm.removeEventListener('submit', gameRequestHandler)
+    if (gameInviteForm)
+        gameInviteForm.removeEventListener('submit', gameRequestHandler);
     if (gameRequestButtons) {
         gameRequestButtons.forEach(function(button) {
             button.removeEventListener('click', gameResponseHandler);
@@ -153,6 +159,26 @@ function updateEventListeners() {
             link.removeEventListener('click', profileLinkHandler);
         })
     }
+    if (gameRenderButton)
+        gameRenderButton.removeEventListener('click', gameRenderButtonHandler);
+    if (playerAuthForms) {
+        playerAuthForms.forEach(function(button) {
+            button.removeEventListener('submit', playerAuthHandler);
+        })
+    }
+    if (startTournamentForm)
+        startTournamentForm.removeEventListener('submit', tournamentFormHandler);
+    if (tournamentInviteForm)
+        tournamentInviteForm.removeEventListener('submit', tournamentFormHandler);
+    if (tournamentButtons) {
+        tournamentButtons.forEach(function(button) {
+            button.removeEventListener('click', tournamentButtonHandler);
+        })
+    }
+    if (tournamentJoinForm) {
+        tournamentJoinForm.removeEventListener('submit', tournamentFormHandler);
+    }
+
     // begin add listeners if currently present
     if (profilePictureForm)
         profilePictureForm.addEventListener('submit', manageAccountHandler);
@@ -182,8 +208,8 @@ function updateEventListeners() {
         emailChangeForm.addEventListener('submit', manageAccountHandler);
     if (passwordChangeForm)
         passwordChangeForm.addEventListener('submit', manageAccountHandler);
-    if (gameRequestForm)
-        gameRequestForm.addEventListener('submit', gameRequestHandler)
+    if (gameInviteForm)
+        gameInviteForm.addEventListener('submit', gameRequestHandler);
     if (gameRequestButtons) {
         gameRequestButtons.forEach(function(button) {
             button.addEventListener('click', gameResponseHandler);
@@ -193,6 +219,25 @@ function updateEventListeners() {
         profileLinks.forEach(function(link) {
             link.addEventListener('click', profileLinkHandler);
         })
+    }
+    if (gameRenderButton)
+        gameRenderButton.addEventListener('click', gameRenderButtonHandler);
+    if (playerAuthForms) {
+        playerAuthForms.forEach(function(button) {
+            button.addEventListener('submit', playerAuthHandler);
+        })
+    }
+    if (startTournamentForm)
+        startTournamentForm.addEventListener('submit', tournamentFormHandler);
+    if (tournamentInviteForm)
+        tournamentInviteForm.addEventListener('submit', tournamentFormHandler);
+    if (tournamentButtons) {
+        tournamentButtons.forEach(function(button) {
+            button.addEventListener('click', tournamentButtonHandler);
+        })
+    }
+    if (tournamentJoinForm) {
+        tournamentJoinForm.addEventListener('submit', tournamentFormHandler);
     }
 }
 
@@ -367,8 +412,8 @@ const friendRequestHandler = async (event) => {
 }
 
 const gameRequestHandler = async (event) => {
-    console.log('in gameRequestHandler');
     event.preventDefault();
+    console.log('in gameRequestHandler');
     const formData = new FormData(event.target);
     const querystring = window.location.search;
 
@@ -440,6 +485,118 @@ const profileLinkHandler = async (event) => {
 	}
 }
 
+const gameRenderButtonHandler = async (event) => {
+    event.preventDefault();
+    var gameType = event.target.dataset.game;
+    var p1 = event.target.dataset.p1;
+    var p2 = event.target.dataset.p2;
+    var endpoint;
+
+    var data = {
+        'p1': p1,
+        'p2': p2,
+        'game': gameType
+    }
+    if (gameType === 'Pong') {
+        console.log("Rendering pong game");
+        endpoint = '/pong/post_pong_canvas/';
+    } else {
+        console.log("Rendering CW game");
+        endpoint = '/pong/post_cw_canvas/';
+    }
+    let response = await sendPostRequest(endpoint, data, true);
+    if (response.redirected) {
+        console.log('redirect status found');
+        let redirect_location = response.url;
+        console.log("redir to: ", redirect_location);
+        routeRedirect(redirect_location);
+    }
+	else if (response.ok) {
+        console.log('response,ok triggered');
+		// stay on this page, display the content again
+        const html = await response.text();
+        // window.history.pushState("", "", profilePath);
+        updateContent(html, "Playing " + gameType, "Playing " + gameType);
+	}
+	else {
+		console.log("Response status: ", response.status)
+		// some 400 or 500 code probably, show the error that was sent?
+	}
+}
+
+const playerAuthHandler = async (event) => {
+    console.log('In playerAuthHandler()');
+    event.preventDefault();
+    const formData = new FormData(event.target);
+
+    const querystring = window.location.search;
+    var endpoint = '/pong/authenticate_player/' + querystring;
+    const response = await sendPostRequest(endpoint, formData);
+    if (response.redirected) {
+        let redirect_location = response.url;
+        console.log("redir to: ", redirect_location);
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        // handling normal content update
+        const html = await response.text();
+        updateContent(html, "Registration | Pong", "Description");
+    } else {
+        // something is not quite right...
+        console.log('submitRegistrationHandler(): response status: ' + response.status);
+    }
+}
+
+const tournamentFormHandler = async (event) => {
+    event.preventDefault();
+    console.log('in tournamentFormHandler');
+    const formData = new FormData(event.target);
+    const querystring = window.location.search;
+
+    var endpoint = '/app/tournament_forms/' + querystring;
+    const response = await sendPostRequest(endpoint, formData);
+    if (response.redirected) {
+        let redirect_location = response.url;
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        const html = await response.text();
+        updateContent(html, "Play | Pong", "Play games");
+	} else {
+		console.log("Response status in tournamentFormHandler(): ", response.status)
+	}
+}
+
+const tournamentButtonHandler = async (event) => {
+    console.log('in tournamentButtonHandler');
+    event.preventDefault();
+
+    var action = event.target.getAttribute('data-action');
+
+    var data = {
+        'action': action,
+    }
+
+    if (action == 'nuke')
+        data['tournament-id'] = event.target.getAttribute('data-tournament-id');
+    else if (action == 'rejectTournamentInvite')
+        data['participant_id'] = event.target.getAttribute('data-participant-id');
+    else if (action == 'leaveTournament')
+        data['participant_id'] = event.target.getAttribute('data-participant-id');
+    else if (action == 'startTournament')
+        data['tournament_id'] = event.target.getAttribute('data-tournament-id');
+
+    const querystring = window.location.search;
+    var endpoint = '/app/tournament_buttons/' + querystring;
+    const response = await sendPostRequest(endpoint, data, true); //, data, true);
+    if (response.redirected) {
+        let redirect_location = response.url;
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        const html = await response.text();
+        updateContent(html, "Tournament");
+	} else {
+		console.log("Response status in tournamentButtons(): ", response.status)
+	}
+}
 
 const start_game_loop = async () => {
     const responseData = await sendGetRequest('pong/start_background_loop').then((response) => response.text());

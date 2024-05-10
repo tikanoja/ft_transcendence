@@ -48,6 +48,15 @@ class LoginForm(forms.Form):
     password = forms.CharField(label="Password", widget=forms.PasswordInput)
 
 
+class PlayerAuthForm(forms.Form):
+    password = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'class': 'form-control','placeholder': 'Enter password'}))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'username' in kwargs:
+            self.fields['username'] = forms.CharField(widget=forms.HiddenInput(), initial=kwargs['username'])
+        if 'game_id' in kwargs:
+            self.fields['game_id'] = forms.IntegerField(widget=forms.HiddenInput(), initial=kwargs['game_id'])
+
 class DeleteAccountForm(forms.Form):
     # username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
     password = forms.CharField(label="Password", widget=forms.PasswordInput)
@@ -135,14 +144,13 @@ class UploadImageForm(forms.ModelForm):
         fields = ["profile_picture"]
 
 
-
 class GameRequestForm(forms.Form):
-    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
     GAME_TYPE_CHOICES = [
         (GameInstance.PONG, 'Pong'),
         (GameInstance.COLOR, 'Color'),
     ]
     game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
 
     def is_valid(self):
         valid = super().is_valid()
@@ -153,4 +161,67 @@ class GameRequestForm(forms.Form):
             raise ValidationError("Empty username")
         if not CustomUser.objects.filter(username=self.cleaned_data["username"]).exists():
             raise ValidationError("No such user")
-        return True 
+        return True
+
+
+class LocalGameForm(forms.Form):
+    GAME_TYPE_CHOICES = [
+        (GameInstance.PONG, 'Pong'),
+        (GameInstance.COLOR, 'Color'),
+    ]
+    game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
+    username = forms.CharField(label='P2 Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
+    password = forms.CharField(label='P2 Password', widget=forms.PasswordInput(attrs={'placeholder': 'Enter password'}), max_length=256, required=True)
+    
+    def is_valid(self):
+        valid = super().is_valid()
+        if not valid:
+            return False
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+        if not username or username.isspace():
+            raise forms.ValidationError("Empty username")
+        if not password or password.isspace():
+            raise forms.ValidationError("Empty password")
+        user = CustomUser.objects.filter(username=username).first()
+        if not user:
+            raise forms.ValidationError("No such user")
+        if not user.check_password(password):
+            raise forms.ValidationError("Incorrect password")
+        return True
+
+class StartTournamentForm(forms.Form):
+    GAME_TYPE_CHOICES = [
+        (GameInstance.PONG, 'Pong'),
+        (GameInstance.COLOR, 'Color'),
+    ]
+    game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
+    alias = forms.CharField(label='Alias', widget=forms.TextInput(attrs={'placeholder': 'Enter alias'}), max_length=256, required=True)
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'formname' in kwargs:
+            self.fields['formname'] = forms.CharField(widget=forms.HiddenInput(), initial=kwargs['formname'])
+
+
+class TournamentInviteForm(forms.Form):
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
+
+    def is_valid(self):
+        valid = super().is_valid()
+        if not valid:
+            return False
+        username = self.cleaned_data.get('username')
+        if not username or username.isspace():
+            raise ValidationError("Empty username")
+        if not CustomUser.objects.filter(username=self.cleaned_data["username"]).exists():
+            raise ValidationError("No such user")
+        return True
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'formname' in kwargs:
+            self.fields['formname'] = forms.CharField(widget=forms.HiddenInput(), initial=kwargs['formname'])
+
+class TournamentJoinForm(forms.Form):
+    alias = forms.CharField(label='Alias', widget=forms.TextInput(attrs={'placeholder': 'Enter alias'}), max_length=256, required=True)

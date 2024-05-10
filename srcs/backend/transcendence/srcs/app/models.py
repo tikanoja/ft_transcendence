@@ -73,6 +73,7 @@ class Friendship(models.Model):
 class GameInstance(models.Model):
     PENDING = 'Pending'
     ACTIVE = 'Active'
+    ACCEPTED = 'Accepted'
     ERROR = 'Error'
     FINISHED = 'Finished'
     SURRENDER = 'Surrender'
@@ -80,6 +81,7 @@ class GameInstance(models.Model):
     STATUS_CHOICES = [
         (PENDING, 'Pending'),
         (ACTIVE, 'Active'),
+        (ACCEPTED, 'Accepted'),
         (ERROR, 'Error'),
         (FINISHED, 'Finished'),
         (SURRENDER, 'Surrender')
@@ -94,6 +96,8 @@ class GameInstance(models.Model):
 
     p1 = models.ForeignKey("CustomUser", related_name="player_one", on_delete=models.SET_NULL, null=True)
     p2 = models.ForeignKey("CustomUser", related_name="player_two", on_delete=models.SET_NULL, null=True)
+    p1auth = models.BooleanField(default=False)
+    p2auth = models.BooleanField(default=False)
     status = models.CharField(max_length=9, choices=STATUS_CHOICES, default=PENDING)
     game = models.CharField(max_length=5, choices=GAME_CHOICES, default=PONG)
     winner = models.ForeignKey("CustomUser", related_name="winner", on_delete=models.SET_NULL, null=True) 
@@ -117,6 +121,60 @@ class ColorGameInstance(GameInstance):
     
     def __str__(self):
         return f'({self.game} instance:  p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'
+
+class Match(models.Model):
+    # associated tournament
+    # player1
+    # player2
+    pass
+
+
+class Participant(models.Model):
+    PENDING = 'Pending'
+    ACCEPTED = 'Accepted'
+    READY = 'Ready'
+    STATUS_CHOICES = [
+        (PENDING, 'Pending'),
+        (ACCEPTED, 'Accepted'),
+        (READY, 'Ready'),
+    ]
+    user = models.ForeignKey("CustomUser", on_delete=models.CASCADE)
+    tournament = models.ForeignKey("Tournament", on_delete=models.CASCADE)
+    alias = models.CharField(max_length=255, default="alias")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
+
+    class Meta:
+        unique_together = ('user', 'tournament')
+
+
+class Tournament(models.Model):
+    PONG = 'Pong'
+    COLOR = 'Color'
+    GAME_CHOICES = [
+        (PONG, 'Pong'),
+        (COLOR, 'Color'),
+    ]
+    PENDING = 'Pending'
+    ACTIVE = 'Active'
+    ERROR = 'Error'
+    FINISHED = 'Finished'
+    STATUS_CHOICES = [
+        (PENDING, 'Pending'),
+        (ACTIVE, 'Active'),
+        (ERROR, 'Error'),
+        (FINISHED, 'Finished'),
+    ]
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    game = models.CharField(max_length=5, choices=GAME_CHOICES, default=PONG)
+    status = models.CharField(max_length=8, choices=STATUS_CHOICES, default=PENDING)
+    creator = models.ForeignKey("CustomUser", related_name="creator", on_delete=models.SET_NULL, null=True)
+    participants = models.ManyToManyField("CustomUser", through=Participant, related_name="participants")
+
+    # participants
+    # results
+    # game instances
+
 
 # user profile model
 #  language -> maybe add to CustomUser model?
