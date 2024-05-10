@@ -320,7 +320,7 @@ def make_move(splitted_command):
 	if games[number].check_game_running_conditions():
 		socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
 	else:
-		games[game].set_game_running(0)
+		games[number].set_game_running(0)
 		socketio.emit('endstate', 'OK,{}'.format(games[number].return_game_state()))
 		games[number].set_game_slot(-1)
 
