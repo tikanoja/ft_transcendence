@@ -67,7 +67,7 @@ def get_canvas(request):
     logger.debug('In get_canvas()')
     if request.method == 'GET':
         logger.debug('about to render!')
-        return render(request, "pong/pong.html", {})
+        return render(request, "pong/colorwar.html", {})
 
 
 def authenticate_player(request):
