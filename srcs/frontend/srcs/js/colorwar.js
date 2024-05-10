@@ -121,6 +121,34 @@ export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
     }
 };
 
+function loadGameOverScreen(data) {
+    const winnerInfo = document.getElementById('winnerInfo');
+    const gameOverScreen = document.getElementById('gameOverScreen');
+    
+    const valuesArray = data.split(',');
+    let player1score = valuesArray[2];
+    let player2score = valuesArray[3];
+
+    const controls = document.getElementById('GameControls');
+    const buttons = document.querySelectorAll('#GameControls button img');
+    controls.style.display = 'none';
+    buttons.forEach(button => {
+        button.style.display = 'none';
+    });
+
+    let winnerText;
+    if (player1score > player2score) {
+        winnerText = "Player 1 wins!";
+    } else if (player1score < player2score) {
+        winnerText = "Player 2 wins!";
+    } else {
+        winnerText = "It's a tie!";
+    }
+
+    winnerInfo.textContent = winnerText;
+    gameOverScreen.style.display = 'block';
+    canvasContainer.style.display = 'none';
+}
 
 export const renderColorwar = (gameNumber, data) => {
     const scene = new THREE.Scene();
@@ -321,6 +349,7 @@ export const renderColorwar = (gameNumber, data) => {
 		event.preventDefault();
 			if (event.key == 'c')
 		{
+            console.log("attempting to stop game")
 			socket.emit('message', 'stop_game,' + gameNumber);
 			render = false;
 		}

@@ -252,6 +252,8 @@ def stop_game(splitted_command):
 		else:
 			games[number].set_game_running(0)
 			games[number].set_game_slot(-1)
+			print("in stop game")
+			socketio.emit('endstate', 'OK,{}'.format(games[number].return_game_state()))
 			socketio.emit('message', 'OK, game stopped {}'.format(number))
 			return
 
@@ -286,6 +288,7 @@ def	games_running(splitted_command):
 			if games[index].is_game_running() == 1:
 				games_running[index] = '1'
 	socketio.emit('message', 'OK,{}'.format(str(','.join(games_running))))
+	socketio.emit('endstate', 'OK,{}'.format(games[index].return_game_state()))
 	return
 
 def make_move(splitted_command):
