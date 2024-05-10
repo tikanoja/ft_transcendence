@@ -32,7 +32,9 @@ def playContext(request, error, success):
     my_tournament = Tournament.objects.filter(creator=request.user, status='Pending').first()
     tournament_in = Tournament.objects.filter(Q(status='Pending'), participants=current_user).first()
     tournament_in_participants = Participant.objects.filter(tournament=tournament_in)
-    my_participant = tournament_in_participants.filter(user=current_user).first
+    my_participant = tournament_in_participants.filter(user=current_user).first()
+    in_active_tournament = False
+
     if my_tournament is None or my_tournament.participants is None:
         my_tournament_count = 0
     else:
@@ -47,6 +49,9 @@ def playContext(request, error, success):
         participating_in_tournament = True
     else:
         participating_in_tournament = False
+
+    if Tournament.objects.filter(status='Active', participants=current_user).first() is not None:
+        in_active_tournament = True
 
     context = {
         'current_user': current_user,
@@ -64,7 +69,8 @@ def playContext(request, error, success):
         'tournament_in_participants': tournament_in_participants,
         'my_participant': my_participant,
         'tournamentjoinform': tournamentjoinform,
-        'my_tournament_count': my_tournament_count
+        'my_tournament_count': my_tournament_count,
+        'in_active_tournament': in_active_tournament
     }
 
     if active_game is not None:
@@ -264,12 +270,34 @@ def tournament_leave(request, data):
     return render(request, 'user/play.html', playContext(request, None, 'Left tournament!'))
 
 def tournament_start(request, data):
-    # check that we still have 4 - 16 players accepted
-    # delete pending participants
+    current_user = request.user
+    # Get tournament
+    tournament = Tournament.objects.filter(creator=current_user).first()
+    if tournament is None:
+        return render(request, 'user/play.html', playContext(request, 'Could not find tournament instance...', None))
+
+    # Get participants
+    participants = Participant.objects.filter(tournament=tournament)
+    accepted_participants = participants.filter(status='Accepted')
+
+    # Check that we still have 4 - 16 players accepted
+    if accepted_participants.count() != 4 and accepted_participants.count() != 8:
+        return render(request, 'user/play.html', playContext(request, 'Wrong amount of participants', None))
+
+    # Delete pending participants (those who did not accept the inv before the creator started the tournament)
+    pending_participants = participants.filter(status='Pending')
+    pending_participants.delete()
+
     # change tournament status
+    tournament.status = Tournament.ACTIVE
+    tournament.save()
+
     # generate brackets
+    generate_brackets()
+
     # let chat know
     return render(request, 'user/play.html', playContext(request, None, 'Tournament started!'))
+
 
 def tournament_buttons(request):
     logger.debug('In torunament_buttons()')
