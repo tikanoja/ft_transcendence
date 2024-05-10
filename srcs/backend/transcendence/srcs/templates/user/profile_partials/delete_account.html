@@ -1,6 +1,7 @@
 {% extends "user/form_base.html" %}
 {% block form %}
-<p>Submitting this form will cause the irreversiable action of deleting the account for user: {{username}}</p>
+<h3>Delete Account</h3>
+<p style="color: red;">Submitting this form will cause the irreversiable action of deleting the account for user: {{username}}</p>
 {% if error %}
 <p style="color: red">Error: {{error}}</p>
 {% endif %}

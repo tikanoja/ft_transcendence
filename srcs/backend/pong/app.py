@@ -776,10 +776,10 @@ def validate_username(data):
 
 # @app.route('/send_game_over_data', methods=['POST'])
 def send_game_over_data(p1_score, p2_score, rally):
-	data_to_send = {"test" : "rally",
-		"p1_username": "placeholder",
+	data_to_send = {"game" : "Pong",
+		"p1_username": "hen",
 		"p1_score": f"{p1_score}",
-		"p2_username": "placeholder2",
+		"p2_username": "jen",
 		"p2_score": f"{p2_score}",
 		"longest_rally": f"{rally}"
 	}
@@ -788,6 +788,7 @@ def send_game_over_data(p1_score, p2_score, rally):
 
 		try:
 			response = requests.post(django_url, data=data_to_send)
+			print('Response from sending game data: ', response)
 			if response.status_code == 200:
 				return jsonify({"message": "Request sent successfully"})
 			else:

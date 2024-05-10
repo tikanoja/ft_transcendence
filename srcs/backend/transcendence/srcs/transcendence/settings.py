@@ -25,8 +25,8 @@ SECRET_KEY = 'django-insecure-*9#ubcwnam1fwt8y$$*l3)+u-cpsh+ms)w%pglfthdiwgza*8u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'http://localhost', 'https://localhost', 'transcendence', 'pong', 'colorwar',]
-CSRF_TRUSTED_ORIGINS = ['https://localhost', 'http://pong', 'http://colorwar']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'http://localhost', 'https://localhost', 'transcendence', 'pong', 'https://c1r5p9']
+CSRF_TRUSTED_ORIGINS = ['https://localhost', 'http://pong', 'https://c1r5p9']
 # Application definition
 INSTALLED_APPS = [
     'channels',
@@ -66,6 +66,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',
             ],
         },
     },
@@ -143,6 +144,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Media storage settings for static files
+# https://docs.djangoproject.com/en/5.0/ref/settings/#std-setting-MEDIA_ROOT:~:text=BrokenLinkEmailsMiddleware%20is%20enabled.-,MEDIA_ROOT,-%C2%B6
+
+# Absolute filesystem path to the directory that will hold user-uploaded files.
+MEDIA_ROOT = BASE_DIR/'media_files'
+
+# URL that handles the media served from
+MEDIA_URL = '/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

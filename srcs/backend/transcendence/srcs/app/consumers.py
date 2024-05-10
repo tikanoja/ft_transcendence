@@ -5,7 +5,7 @@ from asgiref.sync import sync_to_async
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-from app.user import CustomUser
+from app.models import CustomUser
 
 logger = logging.getLogger(__name__)
 
