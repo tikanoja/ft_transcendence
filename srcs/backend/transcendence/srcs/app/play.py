@@ -269,6 +269,35 @@ def tournament_leave(request, data):
     Participant.objects.get(pk=data.get('participant_id')).delete()
     return render(request, 'user/play.html', playContext(request, None, 'Left tournament!'))
 
+
+def generate_brackets(tournament):
+    if tournament.status != Tournament.ACTIVE:
+        raise ValueError("Tournament must be active to generate brackets!")
+    accepted_participants = tournament.participants.filter(status='Accepted')
+    num_participants = accepted_participants.count()
+    total_games = num_participants - 1
+
+    # arrange the participants to the order or their W/L ratio for a fair & square game!!!!
+
+    # creating the first round of games
+    for i in range(0, num_participants, 2):
+        game_instance = GameInstance.objects.create(
+            p1=accepted_participants[i].user,
+            p2=accepted_participants[i+1].user,
+            status='Accepted',
+            tournament_match=true,
+            game=tournament.game,
+        )
+        match = Match.objects.create(
+            tournament=tournament,
+            game_instance=game_instance,
+            status='Scheduled',
+            level=1
+        )
+        tournament.matches.add(match)
+
+    # creating 
+
 def tournament_start(request, data):
     current_user = request.user
     # Get tournament
@@ -293,9 +322,12 @@ def tournament_start(request, data):
     tournament.save()
 
     # generate brackets
-    generate_brackets()
-
-    # let chat know
+    try:
+        generate_brackets(tournament)
+    except ValueError as e:
+        return render(request, 'user/play.html', playContext(request, str(e), None))
+    
+    # let chat know that the tournament has started
     return render(request, 'user/play.html', playContext(request, None, 'Tournament started!'))
 
 

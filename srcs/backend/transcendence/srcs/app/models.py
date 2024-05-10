@@ -103,6 +103,7 @@ class GameInstance(models.Model):
     winner = models.ForeignKey("CustomUser", related_name="winner", on_delete=models.SET_NULL, null=True) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    tournament_match = models.BooleanField(default=False)
  
     def __str__(self):
         return f'({self.game} instance:  p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'
