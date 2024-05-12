@@ -78,8 +78,7 @@ export const startScreen = async () => {
             await verifyUsername()
             console.log("after verify: ", gameNumber);
             
-            playButton.addEventListener('click', () => {
-                console.log("in the click listener")
+
                 startScreen.style.display = 'none';
                 canvasContainer.style.display = 'block';
                 is3DGraphics = styleCheckbox.checked;
@@ -95,8 +94,8 @@ export const startScreen = async () => {
                     const valuesArray = data.split(',')
                     gameNumber = valuesArray[1]
                     renderPongGame(is3DGraphics, gameNumber);
-                });
-            });
+                })
+                
     } catch (error) {
         console.error('Error loading script:', error);
     }
@@ -303,6 +302,8 @@ function exit_game(data)
     loadGameOverScreen(data)
 }
 
+
+///Main function for setting up and animating game
 export const renderPongGame = (is3DGraphics, gameNumber) => {
     const scene = new THREE.Scene();
 
@@ -350,14 +351,10 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
         updateGameState(data, min_visible_x, max_visible_x, min_visible_y, max_visible_y, p1_paddle, p2_paddle, ball)
     });
 
-
-
     socket.on('endstate', (data) => {
         exit_game(data)
         AnimationController.stopAnimation();
     });
-
-
         
     //THESE ARE INVERTED DUE TO COORD DIFFERENCE
     document.addEventListener('keydown', (event) => {
