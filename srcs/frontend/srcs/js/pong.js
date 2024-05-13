@@ -160,7 +160,7 @@ function addLighting(scene) {
 
 function setup2DScene(scene) {
     let camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 1000);
-    // scene.add(camera);
+
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -233,20 +233,12 @@ function create3DPaddle(color) {
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function calculateVisibleArea() {  //TODO: potentially needs to be calculated differently for perspective, currently functions with 
-    console.log("calculateVisibleArea")
-    const half_width = window.innerWidth / 2;
-    const half_height = window.innerHeight / 2;
-    let min_visible_x = camera.position.x - half_width;
-    let max_visible_x = camera.position.x + half_width;
-    let min_visible_y = camera.position.y - half_height;
-    let max_visible_y = camera.position.y + half_height;
-    
-    return { min_visible_x, max_visible_x, min_visible_y, max_visible_y}
-}
-
-function updateGameState(data, min_visible_x, max_visible_x, min_visible_y, max_visible_y) {
+function updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics) {
     let p1_paddle_y, p1_paddle_x, p2_paddle_y, p2_paddle_x, ball_x, ball_y, p1_score, p2_score;
+    const min_visible_x = -1010;
+    const max_visible_x = 1010;
+    const min_visible_y = -586;
+    const max_visible_y = 586;
     const valuesArray = data.split(',');
 
 	if (valuesArray[0] == gameNumber){
@@ -265,10 +257,21 @@ function updateGameState(data, min_visible_x, max_visible_x, min_visible_y, max_
 		p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[4]);
 		p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[5]);
 		p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[6]);
-
-		p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
-		p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
-		ball.position.set(ball_x,  ball_y, 0);
+        if  (is3DGraphics == true)
+        {
+            p1_paddle.position.set(p1_paddle_x, 0, p1_paddle_y); 
+            p2_paddle.position.set(p2_paddle_x, 0, p2_paddle_y); 
+            ball.position.set(ball_x, 0, ball_y);
+        }
+        else
+        {
+            p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
+            p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
+            ball.position.set(ball_x,  ball_y, 0);
+        }
+        console.log("p1: ", p1_paddle.position)
+        console.log("p2: " ,p2_paddle.position)
+        console.log("ball: ", ball.position)
 		updateScoreboard(p1_score, p2_score);
 	}
 }
@@ -320,35 +323,17 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     
     if (is3DGraphics) {
         ({ camera, p1_paddle, p2_paddle, ball} = setup3DScene(scene));
-        camera.position.x += -5110
-        camera.updateProjectionMatrix()
-        camera.position.y += -4590
-        camera.updateProjectionMatrix()
-        camera.position.z += 190
-        camera.updateProjectionMatrix()
-        camera.rotation.x += 1.5707963
-        camera.updateProjectionMatrix()
-        camera.rotation.y += -1.0471975511
-        camera.updateProjectionMatrix()
-        camera.rotation.z += 0
-        camera.updateProjectionMatrix()
-
-        //camera.position.set(-400, -400, 1000);
-        //camera.lookAt(0, 0, 0);
-        //camera.up.set(0, 0, 1);
-
+        camera.position.set(-1100, 300, 1100);
+        camera.lookAt(0, 0, 0);
     } else {
         ({ camera, p1_paddle, p2_paddle, ball} = setup2DScene(scene));
         camera.position.set(0, 0, 100);
     }
 
     let render = true
-    let min_visible_x, max_visible_x, min_visible_y, max_visible_y;
-    ({min_visible_x, max_visible_x, min_visible_y, max_visible_y }= calculateVisibleArea());
-
 
     socket.on('state', (data) => {
-        updateGameState(data, min_visible_x, max_visible_x, min_visible_y, max_visible_y, p1_paddle, p2_paddle, ball)
+        updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics)
     });
 
     socket.on('endstate', (data) => {
