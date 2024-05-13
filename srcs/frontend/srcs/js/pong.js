@@ -188,14 +188,27 @@ function setup3DScene(scene) {
     p2_paddle = create3DPaddle(0xC2C9C9);
     const sizeFactor = 0.2;
     const ballRadiusScreen = (25 * 2) * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
-    ball = new THREE.Mesh(new THREE.SphereGeometry(ballRadiusScreen * 2, 10, 10), new THREE.MeshPhongMaterial({color: 0xff00ff}))
+    const textureLoader = new THREE.TextureLoader();
+    const texture = textureLoader.load('../textures/checkers.jpg');
+    ball = new THREE.Mesh(new THREE.SphereGeometry(ballRadiusScreen * 2, 10, 10), new THREE.MeshBasicMaterial({ map: texture }));
 
+    //const textureLoader = new THREE.TextureLoader();
+    const groundTexture = textureLoader.load('../textures/football_field.jpg');
+    groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+    groundTexture.repeat.set(10, 10); // Adjust the repeat value as needed
+    
+    const groundMaterial = new THREE.MeshBasicMaterial({ map: groundTexture });
+    const groundGeometry = new THREE.PlaneGeometry(2000, 2000); // Adjust the size as needed
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2; // Rotate the ground to be horizontal
+
+    scene.add(ground);
     scene.add(p1_paddle);
     scene.add(p2_paddle);
     scene.add(ball);
     p1_paddle.position.set(-100,  0, 0);
     p2_paddle.position.set(100, 0, 0);
-
+    
     return { camera, p1_paddle, p2_paddle, ball };
 }
 
@@ -227,7 +240,7 @@ function create3DPaddle(color) {
     let paddleHeight = (screenHeight * heightRatio) * sizeFactor;
     let paddleZed = (0.30 * paddleHeight) * sizeFactor;
 
-    const geometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleZed);
+    const geometry = new THREE.BoxGeometry(paddleWidth, paddleZed, paddleHeight);
     const material = new THREE.MeshPhongMaterial({ color });
     return new THREE.Mesh(geometry, material);
 }
@@ -269,9 +282,9 @@ function updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics) {
             p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
             ball.position.set(ball_x,  ball_y, 0);
         }
-        console.log("p1: ", p1_paddle.position)
-        console.log("p2: " ,p2_paddle.position)
-        console.log("ball: ", ball.position)
+        //console.log("p1: ", p1_paddle.position)
+        //console.log("p2: " ,p2_paddle.position)
+        //console.log("ball: ", ball.position)
 		updateScoreboard(p1_score, p2_score);
 	}
 }
@@ -301,7 +314,7 @@ const AnimationController = {
 
 function exit_game(data)
 {
-    updateGameState(data)
+    //updateGameState(data) // does this need  to be called here, this gave an error? now gives winner name when disabled
     loadGameOverScreen(data)
 }
 
@@ -344,19 +357,19 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     //THESE ARE INVERTED DUE TO COORD DIFFERENCE
     document.addEventListener('keydown', (event) => {
         event.preventDefault();
-        if (event.key == 'ArrowUp')
+        if (event.key == 'ArrowDown')
         {
             socket.emit('message', 'right_paddle_down,' + gameNumber);
         }
-        if (event.key  == 'ArrowDown')
+        if (event.key  == 'ArrowUp')
         {
             socket.emit('message', 'right_paddle_up,' + gameNumber);
         }
-        if (event.key  == 'w')
+        if (event.key  == 's')
         {
             socket.emit('message', 'left_paddle_down,' + gameNumber);
         }
-        if (event.key  == 's')
+        if (event.key  == 'w')
         {
             socket.emit('message', 'left_paddle_up,' + gameNumber);
         }
@@ -369,13 +382,13 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
 
     document.addEventListener('keyup', (event) => {
         event.preventDefault();
-        if (event.key == 'ArrowUp')
+        if (event.key == 'ArrowDown')
             socket.emit('message', 'right_paddle_down_release,' + gameNumber);
-        if (event.key  == 'ArrowDown')
+        if (event.key  == 'ArrowUp')
             socket.emit('message', 'right_paddle_up_release,' + gameNumber);
-        if (event.key  == 'w')
-            socket.emit('message', 'left_paddle_down_release,' + gameNumber);
         if (event.key  == 's')
+            socket.emit('message', 'left_paddle_down_release,' + gameNumber);
+        if (event.key  == 'w')
             socket.emit('message', 'left_paddle_up_release,' + gameNumber);
     });
 
@@ -424,12 +437,12 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
                 break;
         }
 
-        // console.log("camera position x ", camera.position.x)
-        // console.log("camera position y ", camera.position.y)
-        // console.log("camera position z ", camera.position.z)
-        // console.log("camera rotation x ", camera.rotation.x)
-        // console.log("camera rotation y ", camera.rotation.y)
-        // console.log("camera rotation z ", camera.rotation.z)
+        console.log("camera position x ", camera.position.x)
+        console.log("camera position y ", camera.position.y)
+        console.log("camera position z ", camera.position.z)
+        console.log("camera rotation x ", camera.rotation.x)
+        console.log("camera rotation y ", camera.rotation.y)
+        console.log("camera rotation z ", camera.rotation.z)
     });
 
 
