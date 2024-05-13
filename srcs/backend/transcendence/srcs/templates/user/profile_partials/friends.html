@@ -1,23 +1,26 @@
 <div class="container">
 	<h3>Friends!</h3>
+
 	{% if friends.error %}
-	<p style="color: red">Error: {{friends.error}}</p>
+	<div class="alert alert-danger" role="alert">Error: {{friends.error}}</div>
 	{% endif %}
+
 	{% if success %}
-	<p style="color: green">Success: {{friends.success}}</p>
+	<div class="alert alert-success" role="alert">{{friends.success}}</div>
 	{% endif %}
 
 	{% if self_profile %}
 	<form id="addFriendForm" >
 		{% csrf_token %}
 		{% for field in friends.form %}
-		<div class="form-group">
-		<p style="color: red">{{ field.errors }}<p>
-		{{ field.label_tag }} {{ field }}
+		<div class="form-floating">
+			{{ field }}
+			{{ field.label_tag }}
+			<p style="color: red">{{ field.errors }}<p>
 		</div>
 		{% endfor %}
-		<input type="submit" value="Add friend" id="addFriendButton">
-		<input type="submit" value="Block user" id="blockUserButton">
+		<button type="submit" id="addFriendButton" class="btn btn-primary">Add friend</button>
+		<button type="submit" id="blockUserButton" class="btn btn-danger">Block user</button>
 	</form>
 	
 	</br>

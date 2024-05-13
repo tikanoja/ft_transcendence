@@ -114,7 +114,7 @@ class UpdateEmailForm(forms.Form):
 
 
 class AddFriendForm(forms.Form):
-    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
+    username = forms.CharField(label='Enter Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username', 'class':'form-control'}), max_length=256, required=True)
 
     def is_valid(self):
         valid = super().is_valid()
