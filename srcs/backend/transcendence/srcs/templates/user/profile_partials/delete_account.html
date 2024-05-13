@@ -5,14 +5,15 @@
 </div>
 
 {% if error %}
-<p style="color: red">Error: {{error}}</p>
+<div class="alert alert-warning" role="alert">Error: {{error}}</div>
 {% endif %}
-<form id="delete-account-form" >
+<form id="delete-account-form" enctype="multipart/form-data">
 	{% csrf_token %}
 	{% for field in form %}
-	<div class="form-group">
-	<p style="color: red">{{ field.errors }}<p>
-	{{ field.label_tag }} {{ field }}
+	<div class="form-floating">
+		{{ field }}
+		{{ field.label_tag }}
+		<p style="text-danger">{{ field.errors }}<p>
 	</div>
 	{% endfor %}
 	<button class="btn btn-danger" type="submit">Delete Account</button>
