@@ -284,6 +284,11 @@ def update_tournament(game_instance):
         logger.debug('could not find tournament! : (')
     else:
         logger.debug('tournament found!')
+    
+    # Check tournament levels
+    # If the last of this level finished, check if there are higher levels
+    # Add winners to the next level of games
+    # Change status of the match to scheduled
 
     
 
