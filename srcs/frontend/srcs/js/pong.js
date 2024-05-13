@@ -70,6 +70,9 @@ export const startScreen = async () => {
 			const styleCheckbox = document.getElementById('styleCheckbox');
 			let is3DGraphics = false;
             
+            const current_game_id = document.getElementById('current_game_id').value;
+            console.log('Current game id: ', current_game_id);
+
             await verifyUsername()
             console.log("after verify: ", gameNumber);
             

@@ -1,4 +1,5 @@
-from app.models import CustomUser, PongGameInstance
+from app.models import CustomUser, PongGameInstance, Match, Tournament
+from app.play import update_tournament
 from django.http import JsonResponse
 import logging
 
@@ -28,7 +29,7 @@ def save_pong_game_state(request) -> JsonResponse:
 	if not p2:
 			logger.debug('P2 not found')
 			return JsonResponse({'message': 'player 2 not found'}, status=404)
-	game_instance = PongGameInstance.objects.filter(p1=p1, p2=p2).first()
+	game_instance = PongGameInstance.objects.filter(p1=p1, p2=p2, status='Active').first()
 	if not game_instance:
 			logger.debug('Game instance not found not found')
 			return JsonResponse({'message': 'Matching game instance not found'}, status=404)
@@ -43,4 +44,7 @@ def save_pong_game_state(request) -> JsonResponse:
 	else:
 			game_instance.winner = p2
 	game_instance.save()
+	if game_instance.tournament_match is True:
+		update_tournament(game_instance)
 	return JsonResponse({'message': 'Game data saved successfully!'}, status=200)
+	
