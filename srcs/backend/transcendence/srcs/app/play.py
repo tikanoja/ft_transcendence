@@ -272,12 +272,20 @@ def tournament_leave(request, data):
 
 
 def update_tournament(game_instance):
-    match = Match.objects.filter(game_instance=game_instance)
+    logger.debug('in update_tournament')
+    match = Match.objects.filter(game_instance=game_instance).first()
     if Match is None:
         logger.debug('could not find match! :(')
+    else:
+        logger.debug('Match found!')
+
     tournament = match.tournament
     if Tournament is None:
         logger.debug('could not find tournament! : (')
+    else:
+        logger.debug('tournament found!')
+
+    
 
 
 def generate_brackets(tournament, accepted_participants):
