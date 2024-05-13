@@ -66,15 +66,15 @@ export const startScreenColorwar = async () => {
 
         await verifyUsername();
         console.log(gameNumber);
-        console.log("after verify: ", gameNumber);
         
         startScreen.style.display = 'none';
         canvasContainer.style.display = 'block';
-        // # DONT FORGET to maybe insert to here to get permission from django to start the game
+
         socket.emit("message", "start_game," + gameNumber);
         
         socket.on('start_state', (data) => {
             startScreen.style.display = 'none';
+            startScreen.remove();
             canvasContainer.style.display = 'block';
             const valuesArray = data.split(',');
             gameNumber = valuesArray[1];
@@ -149,6 +149,122 @@ function loadGameOverScreen(data) {
     gameOverScreen.style.display = 'block';
     canvasContainer.style.display = 'none';
 }
+
+function exit_game(data, tileMeshes, render)
+{
+    updateGameState(data, tileMeshes, render)
+    loadGameOverScreen(data)
+    AnimationController.stopAnimation();
+}
+
+
+function updateGameState(data, tileMeshes, render, colorTextures) {
+    const valuesArray = data.split(',');
+    if (gameNumber == valuesArray[1]) {
+        let tileLegend = [];
+        let player1score = valuesArray[2];
+        let player2score = valuesArray[3];
+        let currentMoveCount = valuesArray[5];
+
+        for (let i = 6; i < valuesArray.length; i += 2) {
+            const color = valuesArray[i];
+            const owner = valuesArray[i + 1];
+            const tile = { color, owner };
+            tileLegend.push(tile);
+        }
+
+        tileLegend.forEach((tileInfo, index) => {
+            let tileTexture;
+            if (tileInfo.color === '1') {
+                tileTexture = colorTextures.colorOne[tileInfo.owner].texture;
+            } else if (tileInfo.color === '2') {
+                tileTexture = colorTextures.colorTwo[tileInfo.owner].texture;
+            } else if (tileInfo.color === '3') {
+                tileTexture = colorTextures.colorThree[tileInfo.owner].texture;
+            } else if (tileInfo.color === '4') {
+                tileTexture = colorTextures.colorFour[tileInfo.owner].texture;
+            }
+        
+            const tileMesh = tileMeshes[index];
+            tileMesh.material.map = tileTexture;
+            tileMesh.material.needsUpdate = true;
+        });
+
+        updateScoreboard(player1score, player2score, currentMoveCount);
+
+        let gameRunning =  valuesArray[4];
+        if (gameRunning != 1) {
+            render = false;
+        }
+    }
+}
+
+function setupGameBoard(data, boardStartX, boardStartY, numRows, numCols, render, colorTextures, tileSize, scene) {
+        
+    const tileMeshes = [];
+
+    for (let row = 0; row < numRows; row++) {
+        for (let col = 0; col < numCols; col++) {
+            const x = boardStartX + col * tileSize;
+            const y = boardStartY + row * tileSize;
+
+            const tileGeometry = new THREE.PlaneGeometry(tileSize, tileSize);
+            const tileMaterial = new THREE.MeshBasicMaterial();
+            const tileMesh = new THREE.Mesh(tileGeometry, tileMaterial);
+            tileMesh.position.set(x, y, 0);
+            scene.add(tileMesh);
+            tileMeshes.push(tileMesh);
+        }
+    }
+    updateGameState(data, tileMeshes, render, colorTextures);
+    return tileMeshes;
+}
+
+
+function handleMouseUpButton1(gameNumber) {
+    console.log('Button 1 released');
+    socket.emit('message', 'make_move,' + gameNumber + ',' + "1");
+}
+
+
+function handleMouseUpButton2(gameNumber) {
+    console.log('Button 2 released');
+    socket.emit('message', 'make_move,' + gameNumber + ',' + "2");
+}
+
+function handleMouseUpButton3(gameNumber) {
+    console.log('Button 3 released');
+    socket.emit('message', 'make_move,' + gameNumber + ',' + "3");
+}
+
+function handleMouseUpButton4(gameNumber) {
+    console.log('Button 4 released');
+    socket.emit('message', 'make_move,' + gameNumber + ',' + "4");
+}
+
+
+const AnimationController = {
+    animationId: null,
+    
+    animate: function(scene, camera, renderer) {
+    
+            this.animationId = requestAnimationFrame(() => this.animate(scene, camera, renderer));
+            renderer.render(scene, camera);
+    },
+    
+    stopAnimation: function() {
+        socket.emit('message', 'stop_game,' + gameNumber);
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+        cancelAnimationFrame(this.animationId);
+    },
+    
+    startAnimation: function(scene, camera, renderer)
+    {
+        this.animate(scene, camera, renderer);
+    }
+};
 
 export const renderColorwar = (gameNumber, data) => {
     const scene = new THREE.Scene();
@@ -274,76 +390,9 @@ export const renderColorwar = (gameNumber, data) => {
     });
     addLighting(scene);
 
-
-    function updateGameState(data, tileMeshes) {
-        const valuesArray = data.split(',');
-        if (gameNumber == valuesArray[1]) {
-    
-            let tileLegend = [];
-            let player1score = valuesArray[2];
-            let player2score = valuesArray[3];
-            let currentMoveCount = valuesArray[5];
-    
-            for (let i = 6; i < valuesArray.length; i += 2) {
-                const color = valuesArray[i];
-                const owner = valuesArray[i + 1];
-                const tile = { color, owner };
-                tileLegend.push(tile);
-            }
-    
-            tileLegend.forEach((tileInfo, index) => {
-                let tileTexture;
-                if (tileInfo.color === '1') {
-                    tileTexture = colorTextures.colorOne[tileInfo.owner].texture;
-                } else if (tileInfo.color === '2') {
-                    tileTexture = colorTextures.colorTwo[tileInfo.owner].texture;
-                } else if (tileInfo.color === '3') {
-                    tileTexture = colorTextures.colorThree[tileInfo.owner].texture;
-                } else if (tileInfo.color === '4') {
-                    tileTexture = colorTextures.colorFour[tileInfo.owner].texture;
-                }
-    
-                const tileMesh = tileMeshes[index];
-                tileMesh.material.map = tileTexture;
-                tileMesh.material.needsUpdate = true;
-            });
-    
-            updateScoreboard(player1score, player2score, currentMoveCount);
-    
-            let gameRunning =  valuesArray[4];
-            if (gameRunning != 1) {
-                render = false;
-            }
-            console.log(render);
-        }
-    }
-    
-    function setupGameBoard(data) {
-        
-        const tileMeshes = [];
-    
-        for (let row = 0; row < numRows; row++) {
-            for (let col = 0; col < numCols; col++) {
-                const x = boardStartX + col * tileSize;
-                const y = boardStartY + row * tileSize;
-    
-                const tileGeometry = new THREE.PlaneGeometry(tileSize, tileSize);
-                const tileMaterial = new THREE.MeshBasicMaterial();
-                const tileMesh = new THREE.Mesh(tileGeometry, tileMaterial);
-                tileMesh.position.set(x, y, 0);
-                scene.add(tileMesh);
-                tileMeshes.push(tileMesh);
-            }
-        }
-        updateGameState(data, tileMeshes);
-        return tileMeshes;
-    }
-
-    const tileMeshes = setupGameBoard(data);
+    const tileMeshes = setupGameBoard(data, boardStartX, boardStartY, numRows, numCols, render, colorTextures, tileSize, scene);
     
     ///////////////////////////////////////////
-
-
 
     document.addEventListener('keydown', (event) => {
 		event.preventDefault();
@@ -356,80 +405,32 @@ export const renderColorwar = (gameNumber, data) => {
     });
     
     socket.on('state', (data) => {
-        updateGameState(data, tileMeshes)
+        console.log("state recieved")
+        updateGameState(data, tileMeshes,  render, colorTextures)
     });
-
-    function exit_game(data)
-	{
-        updateGameState(data, tileMeshes)
-        loadGameOverScreen(data)
-		stopAnimation()
-	}
 
 	socket.on('endstate', (data) => {
-        exit_game(data)
+        exit_game(data, tileMeshes, render)
     });
 
-    function handleMouseUpButton1() {
-        console.log('Button 1 released');
-        socket.emit('message', 'make_move,' + gameNumber + ',' + "1");
-    }
-    
-    function handleMouseUpButton2() {
-        console.log('Button 2 released');
-        socket.emit('message', 'make_move,' + gameNumber + ',' + "2");
-    }
 
-    function handleMouseUpButton3() {
-        console.log('Button 3 released');
-        socket.emit('message', 'make_move,' + gameNumber + ',' + "3");
-    }
-    
-    function handleMouseUpButton4() {
-        console.log('Button 4 released');
-        socket.emit('message', 'make_move,' + gameNumber + ',' + "4");
-    }
     
     if (made_listner == 0)
     {
-        button1.addEventListener('mouseup', handleMouseUpButton1);
-        button2.addEventListener('mouseup', handleMouseUpButton2);
-        button3.addEventListener('mouseup', handleMouseUpButton3);
-        button4.addEventListener('mouseup', handleMouseUpButton4);
+        button1.addEventListener('mouseup', () => handleMouseUpButton1(gameNumber));
+        button2.addEventListener('mouseup', () => handleMouseUpButton2(gameNumber));
+        button3.addEventListener('mouseup', () => handleMouseUpButton3(gameNumber));
+        button4.addEventListener('mouseup', () => handleMouseUpButton4(gameNumber));
         made_listner = 1
     }
 
-  
-    let animationId;
 
-    function animate() {
-        animationId = requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-
-    }
-
-
-    function startAnimation() {
-
-        animationId = requestAnimationFrame(animate);
-        animate();
-    }
-
-	function stopAnimation() {
-		socket.on('disconnect', () => {
-			console.log('Disconnected from server');
-		});
-        cancelAnimationFrame(animationId);
-        render = true
-    }
-
-    if (render)
-    {
-        startAnimation();
+    if (render) {
+        AnimationController.startAnimation(scene, camera, renderer);
     }
     else
     {
-        stopAnimation()
+        AnimationController.stopAnimation();
     }
 
 };

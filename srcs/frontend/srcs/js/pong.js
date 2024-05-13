@@ -82,8 +82,7 @@ export const startScreen = async () => {
                 socket.emit('message', 'start_game,' + gameNumber);
 
                 socket.on('start_game', (data) => {
-                    console.log("start game was called")
-                    startScreen.style.display = 'none';
+                    startScreen.remove();
                     canvasContainer.style.display = 'block';
                     console.log(data)
                     const valuesArray = data.split(',')
@@ -154,7 +153,7 @@ function addLighting(scene) {
 
 function setup2DScene(scene) {
     const camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 1000);
-    // scene.add(camera);
+
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
