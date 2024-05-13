@@ -1,6 +1,26 @@
 import { routeRedirect } from './router.js'
 import { startScreen} from './pong.js'
 
+// document.addEventListener('DOMContentLoaded', function() {
+//     const navLinks = document.querySelectorAll('#profile-navbar.nav-link');
+  
+//     navLinks.forEach(link => {
+//       link.addEventListener('click', function(event) {
+//         // Prevent the default action of the anchor tag
+//         event.preventDefault();
+  
+//         // Get the target element ID from the href attribute
+//         const targetId = this.getAttribute('href').substring(1);
+  
+//         // Find the target element
+//         const targetElement = document.getElementById(targetId);
+  
+//         // Scroll smoothly to the target element
+//         targetElement.scrollIntoView({ behavior: 'smooth' });
+//       });
+//     });
+//   });
+
 document.addEventListener("DOMContentLoaded", function () {
 	// Get the current URL path
 	var currentPath = window.location.pathname;
@@ -598,87 +618,6 @@ const tournamentButtonHandler = async (event) => {
 	}
 }
 
-const start_game_loop = async () => {
-    const responseData = await sendGetRequest('pong/start_background_loop').then((response) => response.text());
-    console.log('start game loop:	', responseData);
-    return (responseData);
-}
-
-const stop_game_loop = async () => {
-    const responseData = await sendGetRequest('pong/stop_background_loop').then((response) => response.text());
-    console.log('stop game loop:	', responseData);
-    return (responseData);
-};
-
-
-const start_game = async () => {
-    const responseData = await sendGetRequest('pong/game_start').then((response) => response.text());
-    console.log('start game:	', responseData);
-    return (responseData);
-}
-
-const stop_game = async () => {
-    const responseData = await sendGetRequest('pong/game_stop').then((response) => response.text());
-    console.log('stop game :	', responseData);
-    return (responseData);
-}
-
-
-const left_paddle_up = async () => {
-    const responseData = await sendGetRequest('pong/left_paddle_up').then((response) => response.text());
-    console.log('left paddle up:	', responseData);
-    return (responseData);
-}
-
-const left_paddle_up_release = async () => {
-    const responseData = await sendGetRequest('pong/left_paddle_up_release/').then((response) => response.text());
-    console.log('left_paddle_up_release:	', responseData);
-    return (responseData);
-}
-
-const left_paddle_down = async () => {
-    const responseData = await sendGetRequest('pong/left_paddle_down').then((response) => response.text());
-    console.log('left paddle up:	', responseData);
-    return (responseData);
-}
-
-const left_paddle_down_release = async () => {
-    const responseData = await sendGetRequest('pong/left_paddle_down_release/').then((response) => response.text());
-    console.log('left_paddle_up_release:	', responseData);
-    return (responseData);
-}
-
-const right_paddle_up = async () => {
-    const responseData = await sendGetRequest('pong/right_paddle_up').then((response) => response.text());
-    console.log('right paddle up:	', responseData);
-    return (responseData);
-}
-
-const right_paddle_up_release = async () => {
-    const responseData = await sendGetRequest('pong/right_paddle_up_release/').then((response) => response.text());
-    console.log('right_paddle_up_release:	', responseData);
-    return (responseData);
-}
-
-const right_paddle_down = async () => {
-    const responseData = await sendGetRequest('pong/right_paddle_down').then((response) => response.text());
-    console.log('right paddle up:	', responseData);
-    return (responseData);
-}
-
-const right_paddle_down_release = async () => {
-    const responseData = await sendGetRequest('pong/right_paddle_down_release/').then((response) => response.text());
-    console.log('right_paddle_up_release:	', responseData);
-    return (responseData);
-}
-
-const get_game_state = async () => {
-    const responseData = await sendGetRequest('pong/get_game_state/').then((response) => response.text());
-    console.log('from timo pong game_state:	', responseData);
-    return (responseData);
-}
-
-
-export { profileLinkHandler, checkLogin, updateContent, start_game_loop, stop_game_loop, start_game, stop_game, get_game_state, left_paddle_up, left_paddle_up_release , left_paddle_down, left_paddle_down_release , right_paddle_up, right_paddle_up_release , right_paddle_down, right_paddle_down_release, updateEventListeners, setActive }
+export { profileLinkHandler, checkLogin, updateContent, updateEventListeners, setActive }
 
 // export { updateEventListeners, setActive, checkLogin, updateContent }

@@ -13,7 +13,8 @@ document.addEventListener("click", (e) => {
 	// Save the clicked element as target
 	const target = e.target;
 	// Check if the clicked element is a part of the nav anchors
-	if (!target.matches("nav a")) {
+	console.log("target id in click listener" + target.id)
+	if (!target.matches("nav a") || target.id === "profile-nav") {
 		return ;
 	}
 	// Prevent the navigation to a new page
