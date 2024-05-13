@@ -19,10 +19,14 @@ logger = logging.getLogger(__name__)
 """
 def save_pong_game_state(request) -> JsonResponse:
 	logger.debug('in save_pong_game_state')
+	logger.debug(request.POST)
+
+	current_game = request.POST.get('game_id')
 	p1_username = request.POST.get('p1_username')
 	p2_username = request.POST.get('p2_username')
 	p1 = CustomUser.objects.filter(username=p1_username).first()
 	p2 = CustomUser.objects.filter(username=p2_username).first()
+	logger.debug('we got game id: ' + current_game)
 	if not p1:
 			logger.debug('P1 not found')
 			return JsonResponse({'message': 'player 1 not found'}, status=404)

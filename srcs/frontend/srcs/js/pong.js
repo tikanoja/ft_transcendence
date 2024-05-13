@@ -37,12 +37,12 @@ function connectWebSocket() {
 
 export const verifyUsername = () => {
     return new Promise((resolve, reject) => {
-        const username1Element = document.getElementById('player1');
-        const username2Element = document.getElementById('player2');
-        const username1 = username1Element.innerText.trim();
-        const username2 = username2Element.innerText.trim();
-        const usernameString = username1 + "," + username2;
+        const player1username = document.getElementById('player1username').value;
+        const player2username = document.getElementById('player2username').value;
+        const current_game_id = document.getElementById('current_game_id').value;
+        const usernameString = player1username + "," + player2username + "," + current_game_id;
         
+        console.log('usernameString id: ', usernameString);
         socket.emit("username", usernameString);
 
         socket.on('setup_game', (data) => {
@@ -70,8 +70,6 @@ export const startScreen = async () => {
 			const styleCheckbox = document.getElementById('styleCheckbox');
 			let is3DGraphics = false;
             
-            const current_game_id = document.getElementById('current_game_id').value;
-            console.log('Current game id: ', current_game_id);
 
             await verifyUsername()
             console.log("after verify: ", gameNumber);
@@ -231,7 +229,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     if (existingCanvas) {
         existingCanvas.remove();
     }
-    
+
     const renderer = new THREE.WebGLRenderer();
     const pixelRatio = window.devicePixelRatio;
     renderer.setPixelRatio(pixelRatio);
