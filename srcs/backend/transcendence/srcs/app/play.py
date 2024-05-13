@@ -32,7 +32,9 @@ def playContext(request, error, success):
     my_tournament = Tournament.objects.filter(creator=request.user, status='Pending').first()
     tournament_in = Tournament.objects.filter(Q(status='Pending'), participants=current_user).first()
     tournament_in_participants = Participant.objects.filter(tournament=tournament_in)
-    my_participant = tournament_in_participants.filter(user=current_user).first
+    my_participant = tournament_in_participants.filter(user=current_user).first()
+    in_active_tournament = False
+
     if my_tournament is None or my_tournament.participants is None:
         my_tournament_count = 0
     else:
@@ -47,6 +49,9 @@ def playContext(request, error, success):
         participating_in_tournament = True
     else:
         participating_in_tournament = False
+
+    if Tournament.objects.filter(status='Active', participants=current_user).first() is not None:
+        in_active_tournament = True
 
     context = {
         'current_user': current_user,
@@ -64,7 +69,8 @@ def playContext(request, error, success):
         'tournament_in_participants': tournament_in_participants,
         'my_participant': my_participant,
         'tournamentjoinform': tournamentjoinform,
-        'my_tournament_count': my_tournament_count
+        'my_tournament_count': my_tournament_count,
+        'in_active_tournament': in_active_tournament
     }
 
     if active_game is not None:
@@ -263,13 +269,67 @@ def tournament_leave(request, data):
     Participant.objects.get(pk=data.get('participant_id')).delete()
     return render(request, 'user/play.html', playContext(request, None, 'Left tournament!'))
 
+
+def generate_brackets(tournament):
+    if tournament.status != Tournament.ACTIVE:
+        raise ValueError("Tournament must be active to generate brackets!")
+    accepted_participants = tournament.participants.filter(status='Accepted')
+    num_participants = accepted_participants.count()
+    total_games = num_participants - 1
+
+    # arrange the participants to the order or their W/L ratio for a fair & square game!!!!
+
+    # creating the first round of games
+    for i in range(0, num_participants, 2):
+        game_instance = GameInstance.objects.create(
+            p1=accepted_participants[i].user,
+            p2=accepted_participants[i+1].user,
+            status='Accepted',
+            tournament_match=true,
+            game=tournament.game,
+        )
+        match = Match.objects.create(
+            tournament=tournament,
+            game_instance=game_instance,
+            status='Scheduled',
+            level=1
+        )
+        tournament.matches.add(match)
+
+    # creating 
+
 def tournament_start(request, data):
-    # check that we still have 4 - 16 players accepted
-    # delete pending participants
+    current_user = request.user
+    # Get tournament
+    tournament = Tournament.objects.filter(creator=current_user).first()
+    if tournament is None:
+        return render(request, 'user/play.html', playContext(request, 'Could not find tournament instance...', None))
+
+    # Get participants
+    participants = Participant.objects.filter(tournament=tournament)
+    accepted_participants = participants.filter(status='Accepted')
+
+    # Check that we still have 4 - 16 players accepted
+    if accepted_participants.count() != 4 and accepted_participants.count() != 8:
+        return render(request, 'user/play.html', playContext(request, 'Wrong amount of participants', None))
+
+    # Delete pending participants (those who did not accept the inv before the creator started the tournament)
+    pending_participants = participants.filter(status='Pending')
+    pending_participants.delete()
+
     # change tournament status
+    tournament.status = Tournament.ACTIVE
+    tournament.save()
+
     # generate brackets
-    # let chat know
+    try:
+        generate_brackets(tournament)
+    except ValueError as e:
+        return render(request, 'user/play.html', playContext(request, str(e), None))
+    
+    # let chat know that the tournament has started
     return render(request, 'user/play.html', playContext(request, None, 'Tournament started!'))
+
 
 def tournament_buttons(request):
     logger.debug('In torunament_buttons()')
