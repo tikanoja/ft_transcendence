@@ -103,9 +103,11 @@ class GameInstance(models.Model):
     winner = models.ForeignKey("CustomUser", related_name="winner", on_delete=models.SET_NULL, null=True) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    tournament_match = models.BooleanField(default=False)
  
     def __str__(self):
         return f'({self.game} instance:  p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'
+
 
 class PongGameInstance(GameInstance):
     longest_rally_hits = models.IntegerField(default=0)
@@ -115,6 +117,7 @@ class PongGameInstance(GameInstance):
     def __str__(self):
         return f'({self.game} instance:  p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'
 
+
 # changed for current tracking in game
 class ColorGameInstance(GameInstance):
     turns_to_win = models.IntegerField(default=0)
@@ -122,11 +125,22 @@ class ColorGameInstance(GameInstance):
     def __str__(self):
         return f'({self.game} instance:  p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'
 
+
 class Match(models.Model):
-    # associated tournament
-    # player1
-    # player2
-    pass
+    TBD = 'TBD' # We don't know the players yet
+    SCHEDULED = 'Scheduled' # We know the players
+    ACTIVE = 'Active' # The game is currently being played
+    FINISHED = 'Finished' # This match has been finished
+    STATUS_CHOICES = [
+        (TBD, 'TBD'),
+        (SCHEDULED, 'Scheduled'),
+        (ACTIVE, 'Active'),
+        (FINISHED, 'Finished'),
+    ]
+    game_instance = models.ForeignKey("GameInstance", on_delete=models.CASCADE)
+    tournament = models.ForeignKey("Tournament", on_delete=models.CASCADE)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=SCHEDULED)
+    level = models.PositiveIntegerField(default=1)
 
 
 class Participant(models.Model):
@@ -170,10 +184,8 @@ class Tournament(models.Model):
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default=PENDING)
     creator = models.ForeignKey("CustomUser", related_name="creator", on_delete=models.SET_NULL, null=True)
     participants = models.ManyToManyField("CustomUser", through=Participant, related_name="participants")
-
-    # participants
+    matches = models.ManyToManyField("GameInstance", through=Match, related_name="matches")
     # results
-    # game instances
 
 
 # user profile model
