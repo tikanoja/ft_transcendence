@@ -1,19 +1,75 @@
-<h2>This is the tests Colour War</h2>
-
 <div id="startScreen">
     <label>
-        <input type="checkbox" id="styleCheckbox"> 3D Graphics
+        <div class ="row">
+            <div class="col-md-5">
+                <div id="player1">
+                    {% comment %} <h2>Player 1</h2> {% endcomment %}
+                    <img src="{{ p1_user.profile_picture.url }}" alt="Player 1 Profile Picture">
+                    <p>{{ p1_username }}</p>
+                    {% if current_game.p1auth == False %}
+                    <form id="playerAuthForm" method="post">
+                        {% csrf_token %}
+                        {{ form.password }}
+                        <input type="hidden" name="username" value="{{ p1_username }}">
+                        <input type="hidden" name="game_id" value="{{ current_game.id }}">
+                        {% if p1error %}
+                        <p style="color: red">{{ p1error }}</p>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary">Authenticate</button>
+                    </form>
+                    {% else %}
+                    <p style="color: green">Ready!</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-2">
+                <h1>VS</h1>
+            </div>
+            <div class="col-md-5">
+                <div id="player2">
+                    {% comment %} <h2>Player 2</h2> {% endcomment %}
+                    <img src="{{ p2_user.profile_picture.url }}" alt="Player 2 Profile Picture">
+                    <p>{{ p2_username }}</p>
+                    {% if current_game.p2auth == False %}
+                    <form id="playerAuthForm" method="post">
+                        {% csrf_token %}
+                        {{ form.password }}
+                        <input type="hidden" name="username" value="{{ p2_username }}">
+                        <input type="hidden" name="game_id" value="{{ current_game.id }}">
+                        {% if p2error %}
+                        <p style="color: red">{{ p2error }}</p>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary">Authenticate</button>
+                    </form>
+                    {% else %}
+                    <p style="color: green">Ready!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class ="row">
+            <div class="col-md-6 offset-md-3">
+                {% if current_game.p1auth == True and current_game.p2auth == True %}
+                    <button id="ColorwarPlayButton" class="btn btn-success">Play</button>
+                {% else %}
+                    <p style="color: red">Both players must authenticate before playing</p>
+                {% endif %}
+            </div>
+        </div>
     </label>
-    <button id="ColorwarPlayButton">Play</button>
 </div>
 
+<div id="gameOverScreen">
+    <h1>Game Over</h1>
+    <div id="winnerInfo"></div>
+</div>
 
 <div id="scoreboard">
-    <div class="score-left"><p id='player1' >P1 placeholder</p>score: 0</div>
-    <div class="move-count"><p id='moveCount' >Moves: </p>score: 0</div>
-    <div class="score-right"><p id='player2' >P2 placeholder</p>score: 0</div> 
-</div>
+    <div class="score-left"><p id='player1' >{{ p1_username }}</p>score: 0</div>
+    <div class="score-right"><p id='player2' >{{ p2_username }}</p>score: 0</div>
+    <div class="move-count"><p id='moveCount' >Moves: </p> 0</div>
 
+</div>
 
 <div id="canvasContainer"></div>
 
@@ -30,9 +86,4 @@
     <button type="Colour 4">
         <img src="" alt="buttonpng" border="0" />
     </button>
-</div>
-
-<div id="gameOverScreen">
-    <h1>Game Over</h1>
-    <div id="winnerInfo"></div>
 </div>

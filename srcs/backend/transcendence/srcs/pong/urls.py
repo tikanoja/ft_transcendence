@@ -21,8 +21,8 @@ from . import views
 urlpatterns = [
    	path('send_game_data/', views.save_game_state, name='send_game_data'),
     path('validate_match/', views.validate_match, name='validate_match'),
-	path('get_canvas/', views.get_canvas, name='get_canvas'),
 	path('post_pong_canvas/', views.post_pong_canvas, name='post_pong_canvas'),
+	path('post_cw_canvas/', views.post_cw_canvas, name='post_cw_canvas/'),
     path('authenticate_player/', views.authenticate_player, name='authenticate_player'),
 	path('cli_dashboard/<str:username>', views.cli_dashboard, name='cli_dashboard'),
 ]
