@@ -282,9 +282,6 @@ function updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics) {
             p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
             ball.position.set(ball_x,  ball_y, 0);
         }
-        //console.log("p1: ", p1_paddle.position)
-        //console.log("p2: " ,p2_paddle.position)
-        //console.log("ball: ", ball.position)
 		updateScoreboard(p1_score, p2_score);
 	}
 }
@@ -354,24 +351,45 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
         AnimationController.stopAnimation();
     });
         
-    //THESE ARE INVERTED DUE TO COORD DIFFERENCE
     document.addEventListener('keydown', (event) => {
         event.preventDefault();
-        if (event.key == 'ArrowDown')
+        if (is3DGraphics)
         {
-            socket.emit('message', 'right_paddle_down,' + gameNumber);
+            if (event.key == 'ArrowDown')
+            {
+                socket.emit('message', 'right_paddle_down,' + gameNumber);
+            }
+            if (event.key  == 'ArrowUp')
+            {
+                socket.emit('message', 'right_paddle_up,' + gameNumber);
+            }
+            if (event.key  == 's')
+            {
+                socket.emit('message', 'left_paddle_down,' + gameNumber);
+            }
+            if (event.key  == 'w')
+            {
+                socket.emit('message', 'left_paddle_up,' + gameNumber);
+            }
         }
-        if (event.key  == 'ArrowUp')
+        else
         {
-            socket.emit('message', 'right_paddle_up,' + gameNumber);
-        }
-        if (event.key  == 's')
-        {
-            socket.emit('message', 'left_paddle_down,' + gameNumber);
-        }
-        if (event.key  == 'w')
-        {
-            socket.emit('message', 'left_paddle_up,' + gameNumber);
+            if (event.key == 'ArrowDown')
+            {
+                socket.emit('message', 'right_paddle_up,' + gameNumber);
+            }
+            if (event.key  == 'ArrowUp')
+            {
+                socket.emit('message', 'right_paddle_down,' + gameNumber);
+            }
+            if (event.key  == 's')
+            {
+                socket.emit('message', 'left_paddle_up,' + gameNumber);
+            }
+            if (event.key  == 'w')
+            {
+                socket.emit('message', 'left_paddle_down,' + gameNumber);
+            }
         }
         if (event.key == 'c')
         {
@@ -382,14 +400,28 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
 
     document.addEventListener('keyup', (event) => {
         event.preventDefault();
-        if (event.key == 'ArrowDown')
-            socket.emit('message', 'right_paddle_down_release,' + gameNumber);
-        if (event.key  == 'ArrowUp')
-            socket.emit('message', 'right_paddle_up_release,' + gameNumber);
-        if (event.key  == 's')
-            socket.emit('message', 'left_paddle_down_release,' + gameNumber);
-        if (event.key  == 'w')
-            socket.emit('message', 'left_paddle_up_release,' + gameNumber);
+        if (is3DGraphics)
+        {
+            if (event.key == 'ArrowDown')
+                socket.emit('message', 'right_paddle_down_release,' + gameNumber);
+            if (event.key  == 'ArrowUp')
+                socket.emit('message', 'right_paddle_up_release,' + gameNumber);
+            if (event.key  == 's')
+                socket.emit('message', 'left_paddle_down_release,' + gameNumber);
+            if (event.key  == 'w')
+                socket.emit('message', 'left_paddle_up_release,' + gameNumber);
+        }
+        else
+        {
+            if (event.key == 'ArrowDown')
+                socket.emit('message', 'right_paddle_up_release,' + gameNumber);
+            if (event.key  == 'ArrowUp')
+                socket.emit('message', 'right_paddle_down_release,' + gameNumber);
+            if (event.key  == 's')
+                socket.emit('message', 'left_paddle_up_release,' + gameNumber);
+            if (event.key  == 'w')
+                socket.emit('message', 'left_paddle_down_release,' + gameNumber);
+        }
     });
 
     document.addEventListener('keydown', (event) => {
