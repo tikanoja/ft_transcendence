@@ -248,9 +248,21 @@ function create3DPaddle(color) {
     let paddleHeight = (screenHeight * heightRatio) * sizeFactor;
     let paddleZed = (0.30 * paddleHeight) * sizeFactor;
 
+    const textureLoader = new THREE.TextureLoader();
+    const fireTexture = textureLoader.load('../textures/fire.jpg');
+
+    const materials = [
+        new THREE.MeshBasicMaterial({ map: fireTexture }),   // Front
+        new THREE.MeshBasicMaterial({ map: fireTexture }),    // Back
+        new THREE.MeshBasicMaterial({ map: fireTexture }),     // Top
+        new THREE.MeshBasicMaterial({ map: fireTexture }),  // Bottom
+        new THREE.MeshBasicMaterial({ map: fireTexture }),   // Right
+        new THREE.MeshBasicMaterial({ map: fireTexture })     // Left
+    ];
+
     const geometry = new THREE.BoxGeometry(paddleWidth, paddleZed, paddleHeight);
-    const material = new THREE.MeshPhongMaterial({ color });
-    return new THREE.Mesh(geometry, material);
+    //const material = new THREE.MeshPhongMaterial({ color });
+    return new THREE.Mesh(geometry, materials);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -488,12 +500,12 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
                 break;
         }
 
-        console.log("camera position x ", camera.position.x)
-        console.log("camera position y ", camera.position.y)
-        console.log("camera position z ", camera.position.z)
-        console.log("camera rotation x ", camera.rotation.x)
-        console.log("camera rotation y ", camera.rotation.y)
-        console.log("camera rotation z ", camera.rotation.z)
+        //console.log("camera position x ", camera.position.x)
+        //console.log("camera position y ", camera.position.y)
+        //console.log("camera position z ", camera.position.z)
+        //console.log("camera rotation x ", camera.rotation.x)
+        //console.log("camera rotation y ", camera.rotation.y)
+        //console.log("camera rotation z ", camera.rotation.z)
     });
 
 
