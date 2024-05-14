@@ -1,21 +1,17 @@
 #import time
-import threading
 import ssl
+import threading
 import random
+import requests
 from typing import Optional
 from dataclasses import dataclass
-from flask import Flask
+from flask import Flask, jsonify
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 
 app = Flask(__name__)
-#CORS(app, resources={r"*": {"origins": "*"}}, supports_credentials=True) # works https://piehost.com/socketio-tester
-#CORS(app,resources={r"/*":{"origins":"*"}}) # works https://piehost.com/socketio-tester
 CORS(app) # works https://piehost.com/socketio-tester
-#cors = CORS(app,resources={r"/*":{"origins":"*"}})
-
 socketio = SocketIO(app, cors_allowed_origins="*")
-#socketio = SocketIO(app)
 
 app.debug = True
 app.host = '0.0.0.0'
@@ -68,6 +64,7 @@ class Game:
 		self.squares[0 + (self.width * (self.height // 2)) + self.width - 1].owner = 2 # right starting player square owner to 2
 		self.which_player_starts: int = random.choice([0, 1])
 		self.which_player_turn: int = self.which_player_starts
+
 
 	def compute_scores(self):
 		total_player_squares = int(0)
@@ -145,23 +142,23 @@ class Game:
 			return
 		if y < 0 or y >= self.height: # out of bounds
 			return
-		if self.return_used(self, x, y) == True:
+		if self.return_used(x, y) == True: #wants to remove self?
 			return
-		if self.return_owner(self, x, y) == self.which_player_turn + 1: # is the owner, print with new colour
-			self.set_colour(self, x, y, colour)
-			self.set_used(self, x, y)
-			self.paint_with_colour(self, x + 1, y, colour)
-			self.paint_with_colour(self, x - 1, y, colour)
-			self.paint_with_colour(self, x, y + 1, colour)
-			self.paint_with_colour(self. x, y - 1, colour)
+		if self.return_owner(x, y) == self.which_player_turn + 1: # is the owner, print with new colour
+			self.set_colour(x, y, colour)
+			self.set_used(x, y)
+			self.paint_with_colour(x + 1, y, colour)
+			self.paint_with_colour(x - 1, y, colour)
+			self.paint_with_colour(x, y + 1, colour)
+			self.paint_with_colour(x, y - 1, colour)
 			return
-		if self.return_owner(self, x, y) == 0 and self.return_colour(self, x, y) == colour: # no one owns and the colour matches
+		if self.return_owner(x, y) == 0 and self.return_colour(x, y) == colour: # no one owns and the colour matches
 			self.squares[x + (y * self.width)].owner = self.which_player_turn + 1
-			self.set_used(self, x, y)
-			self.paint_with_colour(self, x + 1, y, colour)
-			self.paint_with_colour(self, x - 1, y, colour)
-			self.paint_with_colour(self, x, y + 1, colour)
-			self.paint_with_colour(self, x, y - 1, colour)
+			self.set_used(x, y)
+			self.paint_with_colour(x + 1, y, colour)
+			self.paint_with_colour(x - 1, y, colour)
+			self.paint_with_colour(x, y + 1, colour)
+			self.paint_with_colour(x, y - 1, colour)
 
 	def who_won_or_draw(self):	
 		total_squares = self.width * self.height
@@ -219,15 +216,14 @@ def start_game(splitted_command):
 	global socketio
 	global games_lock
 	global games
-	if len(splitted_command) != 1:
+	if len(splitted_command) != 2:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
 	number = -1
+	index = int(splitted_command[1])
 	with games_lock:
-		for index in range(4):
-			if games[index].is_game_running == 0:
-				number = index
-				break
+		if games[index].is_game_running() == 0:
+			number = index
 	with games_lock:
 		if number == -1:
 			socketio.emit('message', 'ERROR, game already running cannot create new.')
@@ -236,7 +232,7 @@ def start_game(splitted_command):
 			games[number].new_game_initilization()
 			games[number].set_game_slot(number)
 			games[number].set_game_running(1)
-			socketio.emit('message', 'OK,{}'.format(number) + str(games[number].which_player_turn()))
+			socketio.emit('start_state', 'OK,{}'.format(games[number].return_game_state()))
 
 def stop_game(splitted_command):
 	global socketio
@@ -245,10 +241,6 @@ def stop_game(splitted_command):
 	if len(splitted_command) != 2:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
-	with thread_lock:
-		if not thread:
-			socketio.emit('message', 'ERROR, background loop not running.')
-			return
 	number = int(splitted_command[1])
 	if number < 0 or number > 3:
 		socketio.emit('message', 'ERROR: allowed game numbers are 0 to 3')
@@ -260,6 +252,8 @@ def stop_game(splitted_command):
 		else:
 			games[number].set_game_running(0)
 			games[number].set_game_slot(-1)
+			print("in stop game")
+			socketio.emit('endstate', 'OK,{}'.format(games[number].return_game_state()))
 			socketio.emit('message', 'OK, game stopped {}'.format(number))
 			return
 
@@ -294,11 +288,13 @@ def	games_running(splitted_command):
 			if games[index].is_game_running() == 1:
 				games_running[index] = '1'
 	socketio.emit('message', 'OK,{}'.format(str(','.join(games_running))))
+	socketio.emit('endstate', 'OK,{}'.format(games[index].return_game_state()))
 	return
 
 def make_move(splitted_command):
 	global games
 	global games_lock
+	print(splitted_command)
 	if len(splitted_command) != 3:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
@@ -310,28 +306,29 @@ def make_move(splitted_command):
 	if colour < 1 or colour > 4:
 		socketio.emit('message', 'ERROR, allowed game colours are 1 to 4.')
 		return
-	if games[number].which_player_turn() == 0:
+	if games[number].which_player_turn == 0:
 		games[number].start_x = 0
 	else:
-		games[number].start_x = all.width - 1
+		games[number].start_x = games[number].width - 1
 	for i in range(len(games[number].squares)):
 		games[number].squares[i].used = False
 	games[number].paint_with_colour(games[number].start_x, games[number].start_y, colour)
 	games[number].which_player_turn += 1
 	games[number].which_player_turn %= 2
 	games[number].compute_scores()
+	games[number].moves += 1 
 	if games[number].check_game_running_conditions():
 		socketio.emit('state', 'OK,{}'.format(games[number].return_game_state()))
 	else:
-		games[game].set_game_running(0)
+		games[number].set_game_running(0)
 		socketio.emit('endstate', 'OK,{}'.format(games[number].return_game_state()))
 		games[number].set_game_slot(-1)
 
 @socketio.on('connect')
 def handle_connect():
-	#print('Client connected')
+	print('Client connected to color war')
 	global socketio
-	socketio.emit('message', 'hello client')
+	socketio.emit('message', 'hello client from colorwar')
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -362,9 +359,88 @@ def handle_message(message):
 	else:
 		socketio.emit('message', 'ERROR, nothing was sent.')
 	
+
+
+@socketio.on('username')
+def validate_username(data):
+	global games
+	global games_lock
+	global socketio
+	usernames = data.split(",")
+	print(data)
+	data_to_send = { "p1_username": usernames[0],
+	"p2_username": usernames[1]
+	}
+
+	with app.app_context():
+		django_url = "http://transcendence:8000/pong/validate_match/"
+		try:
+
+			slot = -1
+			response = requests.post(django_url, data=data_to_send)
+			if response.status_code == 200:
+				with games_lock:
+					for index in range(4):
+						if games[index].is_game_running() == 0:
+							slot = index
+							break
+					if slot == -1:
+						return jsonify({"message": "ERROR, all game slots are already in use"})
+					else:
+						games[slot].left_player_id = usernames[1]
+						games[slot].right_player_id = usernames[0]
+						print("Emiting setup game")
+						socketio.emit('setup_game', 'OK,{}'.format(slot))
+						return jsonify({"message": "Usernames verified"})
+			else:
+				return jsonify({"error": "Failed to send request"}), response.status_code
+		except Exception as e:
+			print("threw except", str(e))
+			return jsonify({"error": str(e)}), 500
+
+# @app.route('/send_game_over_data', methods=['POST'])
+def send_game_over_data(p1_score, p2_score, rally):
+	data_to_send = {"test" : "rally",
+		"p1_username": "placeholder",
+		"p1_score": f"{p1_score}",
+		"p2_username": "placeholder2",
+		"p2_score": f"{p2_score}",
+		"longest_rally": f"{rally}"
+	}
+	with app.app_context():
+		django_url = "http://transcendence:8000/pong/send_game_data/"
+
+		try:
+			response = requests.post(django_url, data=data_to_send)
+			if response.status_code == 200:
+				return jsonify({"message": "Request sent successfully"})
+			else:
+				return jsonify({"error": "Failed to send request"}), response.status_code
+		except Exception as e:
+			print("threw except", str(e))
+			return jsonify({"error": str(e)}), 500
+
+
+@app.route('/init_usernames', methods=['GET'])
+def init_usernames():
+	try:
+		print("inside try")
+		# Assuming the request body contains JSON data with 'p1_username' and 'p2_username'
+		data = request.get_json()
+		p1_username = data['p1_username']
+		p2_username = data['p2_username']
+		# Process the data as needed
+		# For example, you can return a response indicating success
+		return jsonify({'message': 'Usernames initialized successfully', 'p1_username': p1_username, 'p2_username': p2_username}), 200
+	except Exception as e:
+		# Handle any errors
+		return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
 	# Use SSL/TLS encryption for WSS
 	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 	ssl_context.load_cert_chain('/server.crt', '/server.key')
+	print("color war is now running, server is open")
 	socketio.run(app, host='0.0.0.0', port=8889, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
 	#socketio.run(app, host='0.0.0.0', port=8889, debug=True, allow_unsafe_werkzeug=True)

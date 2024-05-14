@@ -7,6 +7,7 @@ from django.shortcuts import render
 from . import utils
 from app.models import PongGameInstance, CustomUser, GameInstance
 from app.user import dashboard
+from app.play import playContext
 from django.db.models import Q
 from app.forms import PlayerAuthForm
 from django.contrib.auth import authenticate
@@ -63,13 +64,6 @@ def validate_match(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 
-def get_canvas(request):
-    logger.debug('In get_canvas()')
-    if request.method == 'GET':
-        logger.debug('about to render!')
-        return render(request, "pong/pong.html", {})
-
-
 def authenticate_player(request):
     sent_form = PlayerAuthForm(request.POST)
     sent_form.is_valid()
@@ -79,6 +73,7 @@ def authenticate_player(request):
     password = sent_form.cleaned_data['password']
 
     current_game = GameInstance.objects.get(pk=game_id)
+    game_type = current_game.game
 
     context = {
         'p1_username': current_game.p1.username,
@@ -103,7 +98,12 @@ def authenticate_player(request):
         elif username == current_game.p2.username:
             context['p2error'] = 'Auth failed!'
 
-    return render(request, "pong/pong.html", context)
+    if game_type == 'Pong':
+        return render(request, "pong/pong.html", context)
+    elif game_type == 'Color':
+        return render(request, "pong/colorwar.html", context)
+    else:
+        return render(request, "pong/play.html", playContext(request, 'Unknown game type', None))
 
 
 def pong_context(request, data):
@@ -130,3 +130,10 @@ def post_pong_canvas(request):
     if request.method == 'POST':
         logger.debug('about to render!')
         return render(request, "pong/pong.html", pong_context(request, data))
+
+def post_cw_canvas(request):
+    logger.debug('In post_cw_canvas()')
+    data = json.loads(request.body)
+    if request.method == 'POST':
+        logger.debug('about to render!')
+        return render(request, "pong/colorwar.html", pong_context(request, data))

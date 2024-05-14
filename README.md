@@ -1,4 +1,4 @@
-# ft_transcendence - A Multiplayer Pong + ColourWars Games
+# ft_transcendence - A Multiplayer Pong + colorwars Games
 
 *This project was developed as part of the School 42 curriculum at Hive Helsinki*
 
@@ -6,7 +6,7 @@
 
 ## Description
 
-This project is about creating interactive website/system for the Pong and ColourWars games.
+This project is about creating interactive website/system for the Pong and colorwars games.
 The website allows people play these games against each others in real time.
 Also chat between players is available.
 
@@ -17,7 +17,6 @@ Still work in progress! But soon ready!
 
 * [PostgreSQL](https://www.postgresql.org/) - Relational database
 * [Docker](https://www.docker.com/) - Virtualization platform
-* [Reminder] (https://reminder.toimii.fi/) - Important reminder
 
 ## System Requirements
 

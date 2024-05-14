@@ -64,11 +64,6 @@ const routes = {
 		title: "Login | " + pageTitle,
 		description: "Login"
 	},
-	"/test" : { //TODO: fix this
-		view: "/pong/get_canvas/",
-		title: "testing | " +  pageTitle,
-		description: "Amazing 3D"
-	},
 	"/profile" : {
 		view: "app/profile/",
 		title: "test_profile | " +  pageTitle,

@@ -1,5 +1,6 @@
 import { routeRedirect } from './router.js'
 import { startScreen} from './pong.js'
+import { startScreenColorwar} from './colorwar.js'
 
 document.addEventListener("DOMContentLoaded", function () {
 	// Get the current URL path
@@ -99,6 +100,7 @@ function updateEventListeners() {
     var registerForm = document.getElementById('registerForm');
     var logoutButton = document.getElementById('logoutButton');
 	var playButton = document.getElementById('playButton');
+    var playButtoncolorwar = document.getElementById('ColorwarPlayButton');
     var addFriendButton = document.getElementById('addFriendButton');
     var blockUserButton = document.getElementById('blockUserButton');
     var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
@@ -139,6 +141,8 @@ function updateEventListeners() {
         logoutButton.removeEventListener('click', logoutButtonClickHandler);
 	if (playButton)
         playButton.removeEventListener('click', playButtonClickHandler);
+    if (playButtoncolorwar)
+        playButtoncolorwar.removeEventListener('click', playButtoncolorwarClickHandler);
     if (addFriendButton)
         addFriendButton.removeEventListener('click', addFriendHandler);
     if (blockUserButton)
@@ -194,8 +198,10 @@ function updateEventListeners() {
         logoutButton.addEventListener('click', logoutButtonClickHandler);
     if (playButton)
         playButton.addEventListener('click', playButtonClickHandler);
+    if (playButtoncolorwar)
+        playButtoncolorwar.addEventListener('click', playButtoncolorwarClickHandler);
     if (addFriendButton)
-        addFriendButton.addEventListener('click', addFriendHandler);
+        addFriendButton.addEventListener('click', addFriendHandler);    
     if (blockUserButton)
         blockUserButton.addEventListener('click', blockUserHandler);
     if (friendRequestButtons) {
@@ -299,6 +305,12 @@ const submitRegistrationHandler = async (event) => {
 
 const playButtonClickHandler = async (event) => {	
     startScreen();
+}
+
+const playButtoncolorwarClickHandler = async (event) => {
+    event.preventDefault();
+    console.log("in color war click handler");
+    startScreenColorwar();
 }
 
 const loginFormHandler = async (event) => {
@@ -641,6 +653,9 @@ const automate_register = async (event) => {
         }
     }
 }
+
+
+
 
 export { profileLinkHandler, checkLogin, updateContent, updateEventListeners, setActive }
 

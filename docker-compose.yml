@@ -55,6 +55,21 @@ services:
       - frontend-network
       - backend-network  # Add frontend service to backend network
 
+  colorwar:
+    build:
+      context: ./srcs/backend/colorwar
+      dockerfile: Dockerfile
+    image: colorwar_img:dev
+    container_name: colorwar_c
+    hostname: colorwar
+    ports:
+      - "8889:8889"
+    env_file: .env
+    restart: always
+    networks:
+      - frontend-network
+      - backend-network  # Add frontend service to backend network
+
   database:
     build:
       context: ./srcs/backend/database
