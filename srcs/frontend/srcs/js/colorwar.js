@@ -22,7 +22,6 @@ export const loadScript = () => {
     });
 }
 
-
 function connectWebSocket() {
     socket = io.connect('https://' + window.location.hostname, {path: "/colorwar/socket.io"});
     socket.on('connect', () => {
@@ -63,7 +62,6 @@ export const startScreenColorwar = async () => {
         const startScreen = document.getElementById('startScreen');
         const canvasContainer = document.getElementById('canvasContainer');
         
-
         await verifyUsername();
         console.log(gameNumber);
         
@@ -150,9 +148,9 @@ function loadGameOverScreen(data) {
     canvasContainer.style.display = 'none';
 }
 
-function exit_game(data, tileMeshes, render)
+function exit_game(data, tileMeshes, render, colorTextures)
 {
-    updateGameState(data, tileMeshes, render)
+    updateGameState(data, tileMeshes, render, colorTextures)
     loadGameOverScreen(data)
     AnimationController.stopAnimation();
 }
@@ -266,6 +264,23 @@ const AnimationController = {
     }
 };
 
+function onWindowResize(camera, renderer)
+{
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight)
+
+   const originalWidth = 100; 
+   const originalHeight = 100; 
+  
+   const scaleFactor = Math.min(window.innerWidth, window.innerHeight) / 1000;
+   const buttons = document.querySelectorAll('#GameControls button img');
+   buttons.forEach(button => {
+       button.style.width = `${scaleFactor * originalWidth}px`;
+       button.style.height = `${scaleFactor * originalHeight}px`;
+   });
+}
+
 export const renderColorwar = (gameNumber, data) => {
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer();
@@ -276,8 +291,6 @@ export const renderColorwar = (gameNumber, data) => {
     canvasContainer.innerHTML = '';
     canvasContainer.appendChild(renderer.domElement);
     
-    const pixelRatio = window.devicePixelRatio;
-    renderer.setPixelRatio(pixelRatio);
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4)); 
     
     scene.background = new THREE.Color(0x332D2D);
@@ -382,6 +395,8 @@ export const renderColorwar = (gameNumber, data) => {
             }
         }
     };
+    button1.addEventListener('mouseup', () => handleMouseUpButton1(gameNumber))
+    window.addEventListener('resize',() => onWindowResize(camera, renderer));
 
     const controls = document.getElementById('GameControls');
     controls.style.display = 'flex';
@@ -410,7 +425,7 @@ export const renderColorwar = (gameNumber, data) => {
     });
 
 	socket.on('endstate', (data) => {
-        exit_game(data, tileMeshes, render)
+        exit_game(data, tileMeshes, render, colorTextures)
     });
 
 
