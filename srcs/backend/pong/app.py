@@ -797,7 +797,6 @@ def send_game_over_data(p1_score, p2_score, rally):
 			print("threw except", str(e))
 			return jsonify({"error": str(e)}), 500
 
-
 @app.route('/init_usernames', methods=['GET'])
 def init_usernames():
 	try:

@@ -26,9 +26,9 @@ export const loadScript = () => {
 
 
 function connectWebSocket() {
-    socket = io.connect('https://' + window.location.hostname);
-	console.log(window.location.hostname)
+    socket = io.connect('https://' + window.location.hostname, {path: "/pong/socket.io"});
     socket.on('connect', () => {
+        console.log("connect recieved: pong")
     });
     socket.on('error', (error) => {
         console.error('WebSocket error:', error);
@@ -73,7 +73,6 @@ export const startScreen = async () => {
             await verifyUsername()
             console.log("after verify: ", gameNumber);
             
-            playButton.addEventListener('click', () => {
                 console.log("in the click listener")
                 startScreen.style.display = 'none';
                 canvasContainer.style.display = 'block';
@@ -83,15 +82,13 @@ export const startScreen = async () => {
                 socket.emit('message', 'start_game,' + gameNumber);
 
                 socket.on('start_game', (data) => {
-                    console.log("start game was called")
-                    startScreen.style.display = 'none';
+                    startScreen.remove();
                     canvasContainer.style.display = 'block';
                     console.log(data)
                     const valuesArray = data.split(',')
                     gameNumber = valuesArray[1]
                     renderPongGame(is3DGraphics, gameNumber);
                 });
-            });
     } catch (error) {
         console.error('Error loading script:', error);
     }
@@ -156,7 +153,7 @@ function addLighting(scene) {
 
 function setup2DScene(scene) {
     const camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 1000);
-    // scene.add(camera);
+
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -191,7 +188,7 @@ function setup3DScene(scene) {
     p1_paddle.position.set(-100,  0, 0);
     p2_paddle.position.set(100, 0, 0);
 
-    return camera;
+    return { camera, p1_paddle, p2_paddle, ball };
 }
 
 
@@ -237,7 +234,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
     let p1_paddle, p2_paddle, ball;
     if (is3DGraphics) {
-        camera = setup3DScene(scene);
+        ({ camera, p1_paddle, p2_paddle, ball } = setup3DScene(scene));
     } else {
         ({ camera, p1_paddle, p2_paddle, ball } = setup2DScene(scene));
 

@@ -1,5 +1,6 @@
 import { routeRedirect } from './router.js'
 import { startScreen} from './pong.js'
+import { startScreenColorwar} from './colorwar.js'
 
 document.addEventListener("DOMContentLoaded", function () {
 	// Get the current URL path
@@ -99,6 +100,7 @@ function updateEventListeners() {
     var registerForm = document.getElementById('registerForm');
     var logoutButton = document.getElementById('logoutButton');
 	var playButton = document.getElementById('playButton');
+    var playButtoncolorwar = document.getElementById('ColorwarPlayButton');
     var addFriendButton = document.getElementById('addFriendButton');
     var blockUserButton = document.getElementById('blockUserButton');
     var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
@@ -139,6 +141,8 @@ function updateEventListeners() {
         logoutButton.removeEventListener('click', logoutButtonClickHandler);
 	if (playButton)
         playButton.removeEventListener('click', playButtonClickHandler);
+    if (playButtoncolorwar)
+        playButtoncolorwar.removeEventListener('click', playButtoncolorwarClickHandler);
     if (addFriendButton)
         addFriendButton.removeEventListener('click', addFriendHandler);
     if (blockUserButton)
@@ -194,8 +198,10 @@ function updateEventListeners() {
         logoutButton.addEventListener('click', logoutButtonClickHandler);
     if (playButton)
         playButton.addEventListener('click', playButtonClickHandler);
+    if (playButtoncolorwar)
+        playButtoncolorwar.addEventListener('click', playButtoncolorwarClickHandler);
     if (addFriendButton)
-        addFriendButton.addEventListener('click', addFriendHandler);
+        addFriendButton.addEventListener('click', addFriendHandler);    
     if (blockUserButton)
         blockUserButton.addEventListener('click', blockUserHandler);
     if (friendRequestButtons) {
@@ -299,6 +305,12 @@ const submitRegistrationHandler = async (event) => {
 
 const playButtonClickHandler = async (event) => {	
     startScreen();
+}
+
+const playButtoncolorwarClickHandler = async (event) => {
+    event.preventDefault();
+    console.log("in color war click handler");
+    startScreenColorwar();
 }
 
 const loginFormHandler = async (event) => {
@@ -642,87 +654,9 @@ const automate_register = async (event) => {
     }
 }
 
-const start_game_loop = async () => {
-    const responseData = await sendGetRequest('pong/start_background_loop').then((response) => response.text());
-    console.log('start game loop:	', responseData);
-    return (responseData);
-}
-
-const stop_game_loop = async () => {
-    const responseData = await sendGetRequest('pong/stop_background_loop').then((response) => response.text());
-    console.log('stop game loop:	', responseData);
-    return (responseData);
-};
 
 
-const start_game = async () => {
-    const responseData = await sendGetRequest('pong/game_start').then((response) => response.text());
-    console.log('start game:	', responseData);
-    return (responseData);
-}
 
-const stop_game = async () => {
-    const responseData = await sendGetRequest('pong/game_stop').then((response) => response.text());
-    console.log('stop game :	', responseData);
-    return (responseData);
-}
-
-
-const left_paddle_up = async () => {
-    const responseData = await sendGetRequest('pong/left_paddle_up').then((response) => response.text());
-    console.log('left paddle up:	', responseData);
-    return (responseData);
-}
-
-const left_paddle_up_release = async () => {
-    const responseData = await sendGetRequest('pong/left_paddle_up_release/').then((response) => response.text());
-    console.log('left_paddle_up_release:	', responseData);
-    return (responseData);
-}
-
-const left_paddle_down = async () => {
-    const responseData = await sendGetRequest('pong/left_paddle_down').then((response) => response.text());
-    console.log('left paddle up:	', responseData);
-    return (responseData);
-}
-
-const left_paddle_down_release = async () => {
-    const responseData = await sendGetRequest('pong/left_paddle_down_release/').then((response) => response.text());
-    console.log('left_paddle_up_release:	', responseData);
-    return (responseData);
-}
-
-const right_paddle_up = async () => {
-    const responseData = await sendGetRequest('pong/right_paddle_up').then((response) => response.text());
-    console.log('right paddle up:	', responseData);
-    return (responseData);
-}
-
-const right_paddle_up_release = async () => {
-    const responseData = await sendGetRequest('pong/right_paddle_up_release/').then((response) => response.text());
-    console.log('right_paddle_up_release:	', responseData);
-    return (responseData);
-}
-
-const right_paddle_down = async () => {
-    const responseData = await sendGetRequest('pong/right_paddle_down').then((response) => response.text());
-    console.log('right paddle up:	', responseData);
-    return (responseData);
-}
-
-const right_paddle_down_release = async () => {
-    const responseData = await sendGetRequest('pong/right_paddle_down_release/').then((response) => response.text());
-    console.log('right_paddle_up_release:	', responseData);
-    return (responseData);
-}
-
-const get_game_state = async () => {
-    const responseData = await sendGetRequest('pong/get_game_state/').then((response) => response.text());
-    console.log('from timo pong game_state:	', responseData);
-    return (responseData);
-}
-
-
-export { profileLinkHandler, checkLogin, updateContent, start_game_loop, stop_game_loop, start_game, stop_game, get_game_state, left_paddle_up, left_paddle_up_release , left_paddle_down, left_paddle_down_release , right_paddle_up, right_paddle_up_release , right_paddle_down, right_paddle_down_release, updateEventListeners, setActive }
+export { profileLinkHandler, checkLogin, updateContent, updateEventListeners, setActive }
 
 // export { updateEventListeners, setActive, checkLogin, updateContent }
