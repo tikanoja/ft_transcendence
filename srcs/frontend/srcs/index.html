@@ -1,55 +1,52 @@
 <!-- In bootstrap, all columns have a default size of 12 units -->
 <!-- Bootstrap nesting hierarchy: container > row > col -->
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title></title>
 	<meta name="description" content="">
+	<!-- font links -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500&family=Jersey+20&display=swap" rel="stylesheet">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500&family=Jersey+20&family=Raleway:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+	<!-- font awesome link -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> 
 	<!-- Link to Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 	<!-- Link to Bootstrap JS -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 	<!-- The breakpoint visualizer -->
-	<link rel="stylesheet" href="./css/bootstrap-breakpoint.css">
+	<link rel="stylesheet" href="/css/bootstrap-breakpoint.css">
 	<!-- The css for our SPA -->
-	<link rel="stylesheet" href="./css/styles.css">
+	<link rel="stylesheet" href="/css/styles.css">
 	<!-- The JS for index.html -->
-	<script type="module" src="./js/index.js"></script>
+	<script type="module" src="/js/index.js"></script>
 	<!-- The router logic -->
-	<script type="module" src="./js/router.js"></script>
+	<script type="module" src="/js/router.js"></script>
   </head>
-<body>
-	<div class="container-fluid" style="margin: 0; padding: 0">
-		<nav class="sidebar">
-			<!-- Init bootstrap nav component to stack vertically -->
-			<ul class="nav flex-column">
-				<!-- The items of the nav component -->
-				<li class="nav-item"> <a href="/"         class="nav-link" onclick="setActive(this)">Home</a>      </li>
-				<li class="nav-item"> <a href="/play"     class="nav-link" onclick="setActive(this)">Play</a>      </li>
-				<li class="nav-item"> <a href="/friends"  class="nav-link" onclick="setActive(this)">Friends</a>   </li>
-				<li class="nav-item"> <a href="/settings" class="nav-link" onclick="setActive(this)">Settings</a>  </li>
-				<li class="nav-item"> <a href="/login"    class="nav-link" onclick="setActive(this)">Login</a>     </li>
-				<li class="nav-item"> <a href="/profile"    class="nav-link" onclick="setActive(this)">My Profile</a>     </li>
-			</ul>
-		</nav>
-		<!-- The main content of the app -->
-		<div class="bg-light main-content">
-			<!-- The content of this div is displayed dynamically using URL-based routing -->
-			<div id="content"></div>
+	<body>
+		<div class="container-fluid m-0 p-0">
+			<!-- The main content of the app -->
+			<div class="bg-light ">
+				<!-- The content of this div is displayed dynamically using URL-based routing -->
+				<div id="content">
 
-            <div class="border rounded mx-2 p-2">
-                <div id="chat-log" class="chat-log chat-text border rounded p-2 mb-2"> </div>
-                <div class="d-flex flex-wrap">
-                    <textarea id="chat-input" class="chat-text col-7 col-md-9 px-2 py-1" placeholder="Message..." rows=1></textarea>
-                    <button id="chat-submit" class="col-5 col-md-3">Submit</button>
-                </div>
-                <script type="module" src="./js/chat.js"></script>
-            </div>
+				</div>
 
+				<div class="border rounded mx-2 p-2">
+					<div id="chat-log" class="chat-log chat-text border rounded p-2 mb-2"> </div>
+					<div class="d-flex flex-wrap">
+						<textarea id="chat-input" class="chat-text col-7 col-md-9 px-2 py-1" placeholder="Message..." rows=1></textarea>
+						<button id="chat-submit" class="col-5 col-md-3">Submit</button>
+					</div>
+					<script type="module" src="/js/chat.js"></script>
+				</div>
+			</div>
 		</div>
-	</div>
-</body>
+	</body>
 </html>

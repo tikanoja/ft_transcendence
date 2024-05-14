@@ -8,7 +8,8 @@ logger = logging.getLogger(__name__)
 
 """
 	Data format from pong_c:
-	data_to_send = {"game" : "Pong",
+	data_to_send = {
+		"game" : "Pong",
 		"p1_username": "placeholder",
 		"p1_score": f"{p1_score}",
 		"p2_username": "placeholder2",

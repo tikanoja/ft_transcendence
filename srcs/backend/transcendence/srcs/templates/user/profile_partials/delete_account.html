@@ -1,18 +1,20 @@
-{% extends "user/form_base.html" %}
-{% block form %}
 <h3>Delete Account</h3>
-<p style="color: red;">Submitting this form will cause the irreversiable action of deleting the account for user: {{username}}</p>
+
+<div class="alert alert-danger" role="alert">
+	Submitting this form will cause the irreversiable action of deleting your account
+</div>
+
 {% if error %}
-<p style="color: red">Error: {{error}}</p>
+<div class="alert alert-warning" role="alert">Error: {{error}}</div>
 {% endif %}
-<form id="delete-account-form" >
+<form id="delete-account-form" enctype="multipart/form-data">
 	{% csrf_token %}
 	{% for field in form %}
-	<div class="form-group">
-	<p style="color: red">{{ field.errors }}<p>
-	{{ field.label_tag }} {{ field }}
+	<div class="form-floating">
+		{{ field }}
+		{{ field.label_tag }}
+		<p style="text-danger">{{ field.errors }}<p>
 	</div>
 	{% endfor %}
-	<input type="submit" value="Delete Account">
+	<button class="btn btn-danger" type="submit">Delete Account</button>
 </form>
-{% endblock %}

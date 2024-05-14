@@ -1,17 +1,54 @@
-{% extends "user/form_base.html" %}
-{% block form %}
-{% if error %}
-<p style="color: red">Error: {{error}}</p>
-{% endif %}
-<form id="registerForm" enctype="multipart/form-data">
-	{% csrf_token %}
-	{% for field in form %}
-	<div class="form-group">
-	{{ field.errors }}
-	{{ field.label_tag }} {{ field }}
+<div>
+	<div>
+		{% include 'partials/navbar_empty.html' %}
 	</div>
-	{% endfor %}
-	<input type="submit" value="Register">
-</form>
-<button id="autoRegister" class="btn btn-success">Create dummy users</button>
-{% endblock %}
+	<div class="container" style="margin-top: 50px;">
+		<div class="row">
+			<div class="col">
+				<h2 class="d-flex justify-content-center mb-3">{{title | title}}</h2>
+			</div>
+		</div>
+	
+		{% if error %}
+		<div class="row">
+			<div class="col">
+				<div class="alert alert-warning" role="alert">
+					Error: {{error}}
+				</div>
+			</div>
+		</div>
+		{% endif %}
+	
+		{% if success %}
+		<div class="row">
+			<div class="col">
+				<div class="alert alert-success" role="alert">
+					Success: {{success}}
+				</div>
+			</div>
+		</div>
+		{% endif %}
+		
+		<form id="registerForm" enctype="multipart/form-data">
+			<div class="mb-3 w-50 m-auto">
+				{% csrf_token %}
+				{% for field in form %}
+				<div class="row">
+					<div class="col">
+						<div class="form-floating">
+							{{ field }}
+							{{ field.label_tag }}
+							<p style="text-danger">{{ field.errors }}<p>
+						</div>
+					</div>
+				</div>
+				{% endfor %}
+				<div class="row">
+					<div class="col text-center mt-3">
+						<button class="btn btn-primary" type="submit">Register</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>

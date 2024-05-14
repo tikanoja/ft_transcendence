@@ -2,6 +2,26 @@ import { routeRedirect } from './router.js'
 import { startScreen} from './pong.js'
 import { startScreenColorwar} from './colorwar.js'
 
+// document.addEventListener('DOMContentLoaded', function() {
+//     const navLinks = document.querySelectorAll('#profile-navbar.nav-link');
+  
+//     navLinks.forEach(link => {
+//       link.addEventListener('click', function(event) {
+//         // Prevent the default action of the anchor tag
+//         event.preventDefault();
+  
+//         // Get the target element ID from the href attribute
+//         const targetId = this.getAttribute('href').substring(1);
+  
+//         // Find the target element
+//         const targetElement = document.getElementById(targetId);
+  
+//         // Scroll smoothly to the target element
+//         targetElement.scrollIntoView({ behavior: 'smooth' });
+//       });
+//     });
+//   });
+
 document.addEventListener("DOMContentLoaded", function () {
 	// Get the current URL path
 	var currentPath = window.location.pathname;

@@ -145,6 +145,7 @@ def profile(request, username):
 		self = True
 	if request.method == "GET":
 		context = user_profile.profileContext(username, self)
+		context["current_user"] = request.user.username
 		return render(request, 'user/profile.html', context)
 	else:
 		return JsonResponse({"message": "method not allowed, try GET"})
