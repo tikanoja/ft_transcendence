@@ -286,7 +286,8 @@ export const renderColorwar = (gameNumber, data) => {
     const renderer = new THREE.WebGLRenderer();
     let render = true;
     renderer.setSize(window.innerWidth, window.innerHeight);
-
+    const scoreboard = document.getElementById('scoreboard');
+    scoreboard.display = 'block';
     const canvasContainer = document.getElementById('canvasContainer');
     canvasContainer.innerHTML = '';
     canvasContainer.appendChild(renderer.domElement);
