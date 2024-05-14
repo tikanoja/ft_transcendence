@@ -195,10 +195,10 @@ function setup3DScene(scene) {
     //const textureLoader = new THREE.TextureLoader();
     const groundTexture = textureLoader.load('../textures/football_field.jpg');
     groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
-    groundTexture.repeat.set(10, 10); // Adjust the repeat value as needed
+    groundTexture.repeat.set(1, 1); // Adjust the repeat value as needed
     
     const groundMaterial = new THREE.MeshBasicMaterial({ map: groundTexture });
-    const groundGeometry = new THREE.PlaneGeometry(2000, 2000); // Adjust the size as needed
+    const groundGeometry = new THREE.PlaneGeometry(1950, 1200); // Adjust the size as needed
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2; // Rotate the ground to be horizontal
 
