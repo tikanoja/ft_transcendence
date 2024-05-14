@@ -25,7 +25,7 @@ export const loadScript = () => {
 function connectWebSocket() {
     socket = io.connect('https://' + window.location.hostname, {path: "/colorwar/socket.io"});
     socket.on('connect', () => {
-        console.log("connect recieved: Color war")
+        console.log("connection recieved: Color war")
     });
     socket.on('error', (error) => {
         console.error('WebSocket error:', error);
@@ -63,7 +63,6 @@ export const startScreenColorwar = async () => {
         const canvasContainer = document.getElementById('canvasContainer');
         
         await verifyUsername();
-        console.log(gameNumber);
         
         startScreen.style.display = 'none';
         canvasContainer.style.display = 'block';
@@ -148,10 +147,28 @@ function loadGameOverScreen(data) {
     canvasContainer.style.display = 'none';
 }
 
-function exit_game(data, tileMeshes, render, colorTextures)
+function cleanupGameBoard(tileMeshes, scene) {
+    tileMeshes.forEach(tileMesh => {
+        scene.remove(tileMesh);
+        tileMesh.geometry.dispose();
+        tileMesh.material.dispose();
+    });
+}
+
+function exitGame(data, tileMeshes, render, colorTextures, scene)
 {
     updateGameState(data, tileMeshes, render, colorTextures)
     loadGameOverScreen(data)
+    if (made_listner == 1)
+    {   
+        button1.removeEventListener('mouseup', () => handleMouseUpButton1(gameNumber));
+        button2.removeEventListener('mouseup', () => handleMouseUpButton2(gameNumber));
+        button3.removeEventListener('mouseup', () => handleMouseUpButton3(gameNumber));
+        button4.removeEventListener('mouseup', () => handleMouseUpButton4(gameNumber));
+    }
+    cleanupGameBoard(tileMeshes, scene)
+    const canvas = document.getElementById('canvasContainer');
+    canvas.remove();
     AnimationController.stopAnimation();
 }
 
@@ -220,23 +237,19 @@ function setupGameBoard(data, boardStartX, boardStartY, numRows, numCols, render
 
 
 function handleMouseUpButton1(gameNumber) {
-    console.log('Button 1 released');
     socket.emit('message', 'make_move,' + gameNumber + ',' + "1");
 }
 
 
 function handleMouseUpButton2(gameNumber) {
-    console.log('Button 2 released');
     socket.emit('message', 'make_move,' + gameNumber + ',' + "2");
 }
 
 function handleMouseUpButton3(gameNumber) {
-    console.log('Button 3 released');
     socket.emit('message', 'make_move,' + gameNumber + ',' + "3");
 }
 
 function handleMouseUpButton4(gameNumber) {
-    console.log('Button 4 released');
     socket.emit('message', 'make_move,' + gameNumber + ',' + "4");
 }
 
@@ -408,25 +421,14 @@ export const renderColorwar = (gameNumber, data) => {
 
     const tileMeshes = setupGameBoard(data, boardStartX, boardStartY, numRows, numCols, render, colorTextures, tileSize, scene);
     
-    ///////////////////////////////////////////
 
-    document.addEventListener('keydown', (event) => {
-		event.preventDefault();
-			if (event.key == 'c')
-		{
-            console.log("attempting to stop game")
-			socket.emit('message', 'stop_game,' + gameNumber);
-			render = false;
-		}
-    });
     
     socket.on('state', (data) => {
-        console.log("state recieved")
         updateGameState(data, tileMeshes,  render, colorTextures)
     });
 
 	socket.on('endstate', (data) => {
-        exit_game(data, tileMeshes, render, colorTextures)
+        exitGame(data, tileMeshes, render, colorTextures, tileMesh, scene)
     });
 
 

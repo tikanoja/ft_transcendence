@@ -119,7 +119,8 @@ def pong_context(request, data):
         'p1_user': p1_user,
         'p2_user': p2_user,
         'form': PlayerAuthForm,
-        'current_game': current_game
+        'current_game': current_game,
+        'current_user':  current_user.username
     }
     return context
 
