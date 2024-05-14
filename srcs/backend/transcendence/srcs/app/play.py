@@ -50,8 +50,13 @@ def playContext(request, error, success):
     else:
         participating_in_tournament = False
 
-    if Tournament.objects.filter(status='Active', participants=current_user).first() is not None:
+    tournament = Tournament.objects.filter(status='Active', participants=current_user).first()
+    if tournament is not None:
         in_active_tournament = True
+        matches = Match.objects.filter(tournament=tournament)
+        levels = tournament.get_highest_level()
+    else:
+        in_active_tournament = False
 
     context = {
         'current_user': current_user,
@@ -70,12 +75,14 @@ def playContext(request, error, success):
         'my_participant': my_participant,
         'tournamentjoinform': tournamentjoinform,
         'my_tournament_count': my_tournament_count,
-        'in_active_tournament': in_active_tournament
+        'in_active_tournament': in_active_tournament,
     }
 
     if active_game is not None:
         context['active_game'] = active_game
-
+    if in_active_tournament is True:
+        context['matches'] = matches
+        context['levels'] = levels
     if error:
         context['error'] = error
     elif success:
@@ -285,14 +292,41 @@ def update_tournament(game_instance):
     else:
         logger.debug('tournament found!')
     
-    # Check tournament levels
-    # If the last of this level finished, check if there are higher levels
-    # Add winners to the next level of games
-    # Change status of the match to scheduled
+    if match.is_last_of_level() is True:
+        logger.debug('Last match of level finished, checking if more levels in tournament...')
+        if match.level < tournament.get_highest_level():
+            logger.debug('There are higher levels! Filling in TBD bracket of level ' + str(match.level + 1))
+            match.status = Match.FINISHED
+            match.save()
+            # Get the winners of matches with match.level (there will be 2 or 4)
+            winners = Match.objects.filter(tournament=tournament, level=match.level, status=Match.FINISHED).values_list('game_instance__winner', flat=True)
+            # Get the next level matches
+            next_level_matches = Match.objects.filter(tournament=tournament, level=match.level + 1, status=Match.TBD)
+            # Fill in match.level + 1 games p1 and p2 with those users (there will be 1 or 2 games to fill in)
+            # and change the status of the newly filled in games to 'Scheduled'
+            for i, next_level_match in enumerate(next_level_matches):
+                if i * 2 < len(winners):
+                    p1_user = CustomUser.objects.get(id=winners[i * 2])
+                    p2_user = CustomUser.objects.get(id=winners[i * 2 + 1])
+                    next_level_match.game_instance.p1 = p1_user
+                    next_level_match.game_instance.p2 = p2_user
+                    next_level_match.game_instance.status = 'Accepted'
+                    next_level_match.game_instance.save()
+                    next_level_match.status = Match.SCHEDULED
+                    next_level_match.save()
+                    logger.debug(f'Scheduled a game: {p1_user.username} vs {p2_user.username}!')
+        else:
+            logger.debug('No more levels in tournament, finishing tournament!')
+            match.status = Match.FINISHED
+            match.save()
+            tournament.status = Tournament.FINISHED
+            tournament.save()
+    else:
+        logger.debug('There are still matches remaining on this level of the tournament')
+        match.status = Match.FINISHED
+        match.save()
 
     
-
-
 def generate_brackets(tournament, accepted_participants):
     if tournament.status != Tournament.ACTIVE:
         raise ValueError("Tournament must be active to generate brackets!")
