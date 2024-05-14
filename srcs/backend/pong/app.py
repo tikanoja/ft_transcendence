@@ -285,7 +285,7 @@ class Game:
 			if self.right_score > self.left_score:
 				self.winner = self.right_player_id
 			socketio.emit('endstate', games[self.game_slot].return_game_state())
-			send_game_over_data(self.right_score, self.left_score, self.ball_bounces, self.game_id)
+			send_game_over_data(self.left_score, self.right_score, self.ball_bounces, self.game_id)
 			self.game_slot = -1
 			self.ball_bounces = 0
 
