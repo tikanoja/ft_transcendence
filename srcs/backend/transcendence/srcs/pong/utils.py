@@ -17,6 +17,13 @@ logger = logging.getLogger(__name__)
 		"longest_rally": f"{rally}"
 	}
 """
+
+def save_cw_game_state(request):
+	game_id = request.POST.get('game_id')
+	logger.debug('got: ' + game_id + ' yay!!!')
+	return JsonResponse({'message': 'Game data saved successfully!'}, status=200)
+
+
 def save_pong_game_state(request) -> JsonResponse:
 	logger.debug('in save_pong_game_state')
 	logger.debug(request.POST)
