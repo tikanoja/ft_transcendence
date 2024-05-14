@@ -195,12 +195,14 @@ function setup3DScene(scene) {
     //const textureLoader = new THREE.TextureLoader();
     const groundTexture = textureLoader.load('../textures/football_field.jpg');
     groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
-    groundTexture.repeat.set(1, 1); // Adjust the repeat value as needed
+    groundTexture.repeat.set(1, 1); // 1, 1 means only one texture
     
     const groundMaterial = new THREE.MeshBasicMaterial({ map: groundTexture });
-    const groundGeometry = new THREE.PlaneGeometry(1950, 1200); // Adjust the size as needed
+    const groundGeometry = new THREE.PlaneGeometry(1950, 1200); // Now good dont touch
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2; // Rotate the ground to be horizontal
+    // Adjust the position of the ground mesh to move it down
+    ground.position.y = -14; // To show whole ball the ground needs to go down a little bit
 
     scene.add(ground);
     scene.add(p1_paddle);
