@@ -13,6 +13,8 @@ let p1_paddle;
 let p2_paddle;
 let ball;
 
+let render = true
+
 export const loadScript = () => {
     return new Promise((resolve, reject) => {
         var script = document.createElement('script');
@@ -288,12 +290,26 @@ function updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics) {
 	}
 }
 
+function animateBallRotation(ball) {
+    if (!render) return;
+    // Define random rotation angles for each axis
+    const randomRotationX = Math.random() * Math.PI * 2;
+    const randomRotationY = Math.random() * Math.PI * 2;
+    const randomRotationZ = Math.random() * Math.PI * 2;
+
+    // Apply the random rotations to the ball
+    ball.rotation.x += randomRotationX;
+    ball.rotation.y += randomRotationY;
+    ball.rotation.z += randomRotationZ;
+}
+
 const AnimationController = {
     animationId: null,
     
     animate: function(scene, camera, renderer) {
     
             this.animationId = requestAnimationFrame(() => this.animate(scene, camera, renderer));
+            animateBallRotation(ball);
             renderer.render(scene, camera);
     },
     
@@ -316,7 +332,6 @@ function exit_game(data)
     //updateGameState(data) // does this need  to be called here, this gave an error? now gives winner name when disabled
     loadGameOverScreen(data)
 }
-
 
 ///Main function for setting up and animating game
 export const renderPongGame = (is3DGraphics, gameNumber) => {
@@ -341,8 +356,6 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
         ({ camera, p1_paddle, p2_paddle, ball} = setup2DScene(scene));
         camera.position.set(0, 0, 100);
     }
-
-    let render = true
 
     socket.on('state', (data) => {
         updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics)
