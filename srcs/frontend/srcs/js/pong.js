@@ -192,6 +192,7 @@ function setup3DScene(scene) {
     const ballRadiusScreen = (25 * 2) * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
     const textureLoader = new THREE.TextureLoader();
     const texture = textureLoader.load('../textures/checkers.jpg');
+    //const texture = textureLoader.load('../textures/earth.jpg');
     ball = new THREE.Mesh(new THREE.SphereGeometry(ballRadiusScreen * 2, 10, 10), new THREE.MeshBasicMaterial({ map: texture }));
 
     //const textureLoader = new THREE.TextureLoader();
@@ -205,6 +206,9 @@ function setup3DScene(scene) {
     ground.rotation.x = -Math.PI / 2; // Rotate the ground to be horizontal
     // Adjust the position of the ground mesh to move it down
     ground.position.y = -14; // To show whole ball the ground needs to go down a little bit
+
+    //Load background texture
+    textureLoader.load('../textures/space.jpg' , function(texture) { scene.background = texture;});
 
     scene.add(ground);
     scene.add(p1_paddle);
