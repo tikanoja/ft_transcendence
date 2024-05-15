@@ -343,10 +343,16 @@ const AnimationController = {
     }
 };
 
-function exit_game(data)
+function cleanUpScene(scene) {
+    scene.remove(p1_paddle);
+    scene.remove(p2_paddle);
+    scene.remove(ball);
+}
+
+function exit_game(data, scene)
 {
-    //updateGameState(data) // does this need  to be called here, this gave an error? now gives winner name when disabled
-    loadGameOverScreen(data)
+    loadGameOverScreen(data);
+    cleanUpScene(scene);
 }
 
 ///Main function for setting up and animating game
@@ -378,7 +384,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     });
 
     socket.on('endstate', (data) => {
-        exit_game(data)
+        exit_game(data, scene)
         AnimationController.stopAnimation();
     });
         

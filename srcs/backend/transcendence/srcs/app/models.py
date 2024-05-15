@@ -100,7 +100,6 @@ class GameInstance(models.Model):
 class PongGameInstance(GameInstance):
     longest_rally_time = models.IntegerField(default=0)
     longest_rally_hits = models.IntegerField(default=0)
-    total_game_time = models.DurationField()
     p1_hits = models.IntegerField(default=0)
     p2_hits = models.IntegerField(default=0)
     p1_misses = models.IntegerField(default=0)
