@@ -39,6 +39,7 @@ class Game:
 		self.left_score: int = 0
 		self.right_score: int = 0
 		self.moves: int = 0
+		self.game_id: str = "game_id"
 
 	def which_player_turn(self):
 		return self.which_player_turn
@@ -195,7 +196,8 @@ def set_game_settings(splitted_command):
 	global socketio
 	global games
 	global games_lock
-	if len(splitted_command) != 8:
+	print('do we get here? splitted: ' + splitted_command)
+	if len(splitted_command) != 5:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
 	number = int(splitted_command[1])
@@ -209,6 +211,8 @@ def set_game_settings(splitted_command):
 		else:
 			games[number].left_player_id = splitted_command[2]
 			games[number].right_player_id = splitted_command[3]
+			games[number].game_id = splitted_command[4]
+			print('hellO!!! ' + games[number].game_id)
 			socketio.emit('message', 'OK, game settings set.')
 			return
 
@@ -254,6 +258,7 @@ def stop_game(splitted_command):
 			games[number].set_game_slot(-1)
 			print("in stop game")
 			socketio.emit('endstate', 'OK,{}'.format(games[number].return_game_state()))
+			send_game_over_data(games[number].left_score, games[number].right_score, games[number].moves, games[number].game_id)
 			socketio.emit('message', 'OK, game stopped {}'.format(number))
 			return
 
@@ -369,7 +374,8 @@ def validate_username(data):
 	usernames = data.split(",")
 	print(data)
 	data_to_send = { "p1_username": usernames[0],
-	"p2_username": usernames[1]
+	"p2_username": usernames[1],
+	"game_id": usernames[2]
 	}
 
 	with app.app_context():
@@ -389,6 +395,7 @@ def validate_username(data):
 					else:
 						games[slot].left_player_id = usernames[1]
 						games[slot].right_player_id = usernames[0]
+						games[slot].game_id = usernames[2]
 						print("Emiting setup game")
 						socketio.emit('setup_game', 'OK,{}'.format(slot))
 						return jsonify({"message": "Usernames verified"})
@@ -399,13 +406,16 @@ def validate_username(data):
 			return jsonify({"error": str(e)}), 500
 
 # @app.route('/send_game_over_data', methods=['POST'])
-def send_game_over_data(p1_score, p2_score, rally):
+def send_game_over_data(p1_score, p2_score, rally, game_id):
+	print('Sending game over data!!!!!!!!!!')
 	data_to_send = {"test" : "rally",
 		"p1_username": "placeholder",
 		"p1_score": f"{p1_score}",
 		"p2_username": "placeholder2",
 		"p2_score": f"{p2_score}",
-		"longest_rally": f"{rally}"
+		"longest_rally": f"{rally}",
+		"game_id": f"{game_id}",
+		"game": "Color"
 	}
 	with app.app_context():
 		django_url = "http://transcendence:8000/pong/send_game_data/"

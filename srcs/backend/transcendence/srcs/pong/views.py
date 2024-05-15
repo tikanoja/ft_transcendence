@@ -37,8 +37,11 @@ def save_game_state(request):
         logger.debug('checking all game instances for pong')
         if request.method == 'POST':
             game_type = request.POST.get('game')
+            logger.debug('game type: ' + game_type)
             if game_type == 'Pong':
                 response = utils.save_pong_game_state(request)
+            elif game_type == 'Color':
+                response = utils.save_cw_game_state(request)
             else:
                 response = JsonResponse({'message': 'Invalid game type!'}, status=400)
         elif request.method == 'GET':
@@ -55,7 +58,8 @@ def validate_match(request):
         if request.method == 'POST':
             p1_username = request.POST.get('p1_username')
             p2_username = request.POST.get('p2_username')
-            logger.debug(f"data from validate user: {p1_username}, {p2_username}")
+            game_id = request.POST.get('game_id')
+            logger.debug(f"data from validate user: {p1_username}, {p2_username}, {game_id}")
             return JsonResponse({'message': 'Hi from Django POST!'})
         elif request.method == 'GET':
             return JsonResponse({'message': 'Hi from Django GET!'})
