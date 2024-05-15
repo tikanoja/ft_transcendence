@@ -103,9 +103,7 @@ submitButton.onclick = () => {
 
     let event;
 
-    const input = inputField.value;
-
-    if (input.startsWith("/")) {
+    if (inputField.value.startsWith("/")) {
         const parts = inputField.value.split(/^\/(\w)\S+\s+/g)
 
         if (!parts) {

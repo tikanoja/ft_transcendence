@@ -6,7 +6,6 @@ const loginEvent  = new Event("login");
 const logoutEvent = new Event("logout");
 
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("Well well well");
 	// Get the current URL path
 	var currentPath = window.location.pathname;
 
