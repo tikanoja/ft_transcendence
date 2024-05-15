@@ -179,7 +179,7 @@ def playPOST(request):
 
     new_game_instance = GameInstance(p1=current_user, p2=challenged_user, game=sent_form.cleaned_data['game_type'], status='Pending')
     new_game_instance.save()
-    return render(request, 'user/play.html', playContext(request, None, "Game invite sent! Should we be redirected to game here?")) 
+    return render(request, 'user/play.html', playContext(request, None, "Game invite sent!")) 
 
 
 def start_tournament(request):
@@ -315,14 +315,17 @@ def update_tournament(game_instance):
                     next_level_match.status = Match.SCHEDULED
                     next_level_match.save()
                     logger.debug(f'Scheduled a game: {p1_user.username} vs {p2_user.username}!')
+                    # CHAT MODULE let player know in chat that they have a new game
         else:
             logger.debug('No more levels in tournament, finishing tournament!')
+            # CHAT MODULE announce tournament winner
             match.status = Match.FINISHED
             match.save()
             tournament.status = Tournament.FINISHED
             tournament.save()
     else:
         logger.debug('There are still matches remaining on this level of the tournament')
+        # CHAT MODULE let player know that we are waiting for games to finish
         match.status = Match.FINISHED
         match.save()
 
@@ -431,8 +434,7 @@ def tournament_start(request, data):
         generate_brackets(tournament, accepted_participants)
     except ValueError as e:
         return render(request, 'user/play.html', playContext(request, str(e), None))
-    
-    # let chat know that the tournament has started
+    # CHAT MODULE announce tournament start
     return render(request, 'user/play.html', playContext(request, None, 'Tournament started!'))
 
 

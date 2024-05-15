@@ -43,7 +43,6 @@ def save_cw_game_state(request):
 	p2_score = request.POST.get("p2_score")
 	game_instance.p1_score = p1_score
 	game_instance.p2_score = p2_score
-	logger.debug(p1_username + ' scored ' + p1_score + ' and ' + p2_username + ' scored ' + p2_score)
 	game_instance.status = 'Finished'
 	if p1_score > p2_score:
 			game_instance.winner = p1
@@ -52,7 +51,7 @@ def save_cw_game_state(request):
 	game_instance.save()
 	if game_instance.tournament_match is True:
 		update_tournament(game_instance)
-	logger.debug('Color war game instance updated!')
+	logger.debug('COLOR game id ' + str(game_instance.id) + ' | p1 ' + game_instance.p1.username + ' scored ' + game_instance.p1_score + ' | p2 ' + game_instance.p2.username + ' scored ' + game_instance.p2_score + ' | winner: ' + game_instance.winner.username)
 	return JsonResponse({'message': 'Game data saved successfully!'}, status=200)
 
 
@@ -81,7 +80,6 @@ def save_pong_game_state(request) -> JsonResponse:
 	p2_score = request.POST.get("p2_score")
 	game_instance.p1_score = p1_score
 	game_instance.p2_score = p2_score
-	logger.debug(p1_username + ' scored ' + p1_score + ' and ' + p2_username + ' scored ' + p2_score)
 	game_instance.status = 'Finished'
 	if p1_score > p2_score:
 			game_instance.winner = p1
@@ -90,5 +88,6 @@ def save_pong_game_state(request) -> JsonResponse:
 	game_instance.save()
 	if game_instance.tournament_match is True:
 		update_tournament(game_instance)
+	logger.debug('PONG game id ' + str(game_instance.id) + ' | p1 ' + game_instance.p1.username + ' scored ' + game_instance.p1_score + ' | p2 ' + game_instance.p2.username + ' scored ' + game_instance.p2_score + ' | winner: ' + game_instance.winner.username)
 	return JsonResponse({'message': 'Game data saved successfully!'}, status=200)
 	
