@@ -1,4 +1,4 @@
-import { profileLinkHandler, checkLogin } from "./index.js"
+import { profileLinkHandler } from "./index.js"
 
 let   socket = null;
 
@@ -14,8 +14,6 @@ document.addEventListener("logout", disconnect);
 connect();
 
 function connect() {
-    console.log("Chat connecting...");
-
     if (!socket) {
         console.log("Establishing chat websocket connection...");
         try {
@@ -34,6 +32,7 @@ function connect() {
 
         socket.onclose   = (event) => {
             console.log('Chat connection closed:', event);
+            socket = null;
             _set_disabled(true);
             while (chatLog.lastChild) chatLog.lastChild.remove();
         };
@@ -56,14 +55,7 @@ function connect() {
     _set_disabled(false);
 }
 
-async function disconnect() {
-    console.log("Chat disconnecting...");
-
-    if (socket) {
-        await socket.close()
-        socket = null;
-    }
-}
+function disconnect() { if (socket) { socket.close(); } }
 
 function _set_disabled(isDisabled) {
     chatLog.disabled      = isDisabled;
@@ -111,8 +103,10 @@ submitButton.onclick = () => {
 
     let event;
 
-    if (inputField.value.startsWith("/")) {
-        const parts = inputField.value.split(/(\w+)\s+(.*)/)
+    const input = inputField.value;
+
+    if (input.startsWith("/")) {
+        const parts = inputField.value.split(/^\/(\w)\S+\s+/g)
 
         if (!parts) {
             return;
@@ -122,7 +116,6 @@ submitButton.onclick = () => {
 
         switch (command) {
             case "w":
-            case "whisper":
                 const args = rest.split(/\s+(.*)/);
                 console.log(args);
                 if (args.length < 3) {
@@ -137,7 +130,6 @@ submitButton.onclick = () => {
                 break;
 
             case "h":
-            case "help":
             default:
                 _appendMessage("System",
                     "\n" +
