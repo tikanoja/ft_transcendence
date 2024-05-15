@@ -80,6 +80,7 @@ def save_pong_game_state(request) -> JsonResponse:
 	p2_score = request.POST.get("p2_score")
 	game_instance.p1_score = p1_score
 	game_instance.p2_score = p2_score
+	logger.debug(p1_username + ' scored ' + p1_score + ' and ' + p2_username + ' scored ' + p2_score)
 	game_instance.status = 'Finished'
 	if p1_score > p2_score:
 			game_instance.winner = p1
