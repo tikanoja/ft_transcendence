@@ -20,7 +20,7 @@
 {% endif %}
 
 
-<h3>* * * * * * * * * *</h3>
+{% comment %} <h3>* * * * * * * * * *</h3>
 <br>
 
 <h2>Quick play</h2>
@@ -33,7 +33,7 @@
 	</div>
 	{% endfor %}
 	<input type="submit" value="Start game">
-</form>
+</form> {% endcomment %}
 
 <h3>* * * * * * * * * *</h3>
 <br>
@@ -106,6 +106,27 @@
 	{% endif %}
 {% else %}
 	<p>In active tournament. Please follow chat for more info!</p>
+	<ul>
+        {% for match in matches %}
+                <li>
+					{% if match.game_instance.p1.username is not None %}
+                   		{{ match.game_instance.p1.username }}
+					{% else %}
+						???
+					{% endif %}
+					vs
+					{% if match.game_instance.p2.username is not None %}
+                   		{{ match.game_instance.p2.username }}
+					{% else %}
+						???
+					{% endif %}
+					- Status: {{ match.status }}
+					{% if match.status == 'Finished' %}
+					- Winner: {{ match.game_instance.winner.username }}
+					{% endif %}
+                </li>
+        {% endfor %}
+    </ul>
 {% endif %}
 <h3>* * * * * * * * * *</h3>
 <br>

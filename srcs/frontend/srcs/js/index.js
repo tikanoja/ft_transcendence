@@ -2,25 +2,8 @@ import { routeRedirect } from './router.js'
 import { startScreen} from './pong.js'
 import { startScreenColorwar} from './colorwar.js'
 
-// document.addEventListener('DOMContentLoaded', function() {
-//     const navLinks = document.querySelectorAll('#profile-navbar.nav-link');
-  
-//     navLinks.forEach(link => {
-//       link.addEventListener('click', function(event) {
-//         // Prevent the default action of the anchor tag
-//         event.preventDefault();
-  
-//         // Get the target element ID from the href attribute
-//         const targetId = this.getAttribute('href').substring(1);
-  
-//         // Find the target element
-//         const targetElement = document.getElementById(targetId);
-  
-//         // Scroll smoothly to the target element
-//         targetElement.scrollIntoView({ behavior: 'smooth' });
-//       });
-//     });
-//   });
+const loginEvent  = new Event("login");
+const logoutEvent = new Event("logout");
 
 document.addEventListener("DOMContentLoaded", function () {
 	// Get the current URL path
@@ -293,6 +276,7 @@ async function logoutButtonClickHandler(event) {
     const querystring = window.location.search;
     var endpoint = '/app/logout/' + querystring;
     const response = await sendPostRequest(endpoint, null);
+    document.dispatchEvent(logoutEvent);
     if (response.redirected) {
         let redirect_location = response.url;
         routeRedirect(redirect_location);
@@ -340,6 +324,7 @@ const loginFormHandler = async (event) => {
     const querystring = window.location.search;
     var endpoint = '/app/login/' + querystring;
 	const response = await sendPostRequest(endpoint, formData);
+    document.dispatchEvent(loginEvent);
     if (response.redirected) {
         let redirect_location = response.url;
         routeRedirect(redirect_location);

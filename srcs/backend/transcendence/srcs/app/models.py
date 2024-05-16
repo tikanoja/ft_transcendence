@@ -142,6 +142,11 @@ class Match(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=SCHEDULED)
     level = models.PositiveIntegerField(default=1)
 
+    def is_last_of_level(self):
+        unfinished_matches = self.tournament.match_set.filter(level=self.level).exclude(status='Finished').count()
+        logger.debug('Unfinished matches on this level of tournament: ' + str(unfinished_matches))
+        return unfinished_matches == 1
+
 
 class Participant(models.Model):
     PENDING = 'Pending'
@@ -185,7 +190,11 @@ class Tournament(models.Model):
     creator = models.ForeignKey("CustomUser", related_name="creator", on_delete=models.SET_NULL, null=True)
     participants = models.ManyToManyField("CustomUser", through=Participant, related_name="participants")
     matches = models.ManyToManyField("GameInstance", through=Match, related_name="matches")
-    # results
+    
+    def get_highest_level(self):
+        highest_level = self.match_set.aggregate(max_level=models.Max('level'))['max_level']
+        logger.debug('Highest match level in tournament: ' + str(highest_level))
+        return highest_level if highest_level is not None else 0
 
 
 # user profile model

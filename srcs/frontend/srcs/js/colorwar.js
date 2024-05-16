@@ -34,12 +34,12 @@ function connectWebSocket() {
 
 export const verifyUsername = () => {
     return new Promise((resolve, reject) => {
-        const username1Element = document.getElementById('player1');
-        const username2Element = document.getElementById('player2');
-        const username1 = username1Element.innerText.trim();
-        const username2 = username2Element.innerText.trim();
-        const usernameString = username1 + "," + username2;
+        const player1username = document.getElementById('player1username').value;
+        const player2username = document.getElementById('player2username').value;
+        const current_game_id = document.getElementById('current_game_id').value;
+        const usernameString = player1username + "," + player2username + "," + current_game_id;
         
+        console.log('usernameString id: ', usernameString);
         socket.emit("username", usernameString);
 
         socket.on('setup_game', (data) => {
@@ -422,13 +422,24 @@ export const renderColorwar = (gameNumber, data) => {
     const tileMeshes = setupGameBoard(data, boardStartX, boardStartY, numRows, numCols, render, colorTextures, tileSize, scene);
     
 
+    document.addEventListener('keydown', (event) => {
+		event.preventDefault();
+			if (event.key == 'c')
+		{
+            console.log("attempting to stop game")
+			socket.emit('message', 'stop_game,' + gameNumber);
+            exit_game(data, tileMeshes, render, colorTextures)
+			render = false;
+		}
+    });
     
     socket.on('state', (data) => {
         updateGameState(data, tileMeshes,  render, colorTextures)
     });
 
 	socket.on('endstate', (data) => {
-        exitGame(data, tileMeshes, render, colorTextures, tileMesh, scene)
+        socket.emit('message', 'stop_game,' + gameNumber);
+        exit_game(data, tileMeshes, render, colorTextures)
     });
 
 
