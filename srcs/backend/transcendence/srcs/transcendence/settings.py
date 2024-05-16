@@ -83,7 +83,8 @@ SESSION_COOKIE_SAMESITE = 'None' #Remove this for CORS
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'Lax' # Might have to be removed once we have templates
 CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_AGE = 2520 # 42 min * 60 sec
+SESSION_COOKIE_AGE = 90 * 60 # == 1h30min
+SESSION_SAVE_EVERY_REQUEST = True
 # added trying to get form submission to work from templates
 # CSRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"  # The header name used by Nginx
 # SESSION_COOKIE_DOMAIN = None
