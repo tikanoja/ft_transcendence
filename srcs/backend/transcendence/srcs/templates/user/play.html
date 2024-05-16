@@ -39,66 +39,95 @@
 <br>
 
 <h2>Tournament</h2>
-{% if hosting_tournament is False and my_participant.status != 'Accepted' %}
-<form id="startTournamentForm"> {% comment %} We are not hosting a tournament, show form to create one {% endcomment %}
-	{% csrf_token %}
-	<input type="hidden" name="formname" value="startTournamentForm">
-	{% for field in tournamentform %}
-	<div class="form-group">
-	<p style="color: red">{{ field.errors }}<p>
-	{{ field.label_tag }} {{ field }}
-	</div>
-	{% endfor %}
-	<input type="submit" class="btn btn-primary" value="Start tournament">
-</form>
-{% elif hosting_tournament is True %} {% comment %} We ARE hosting a tournament, show form to invite users {% endcomment %}
-<button type="submit" id="tournamentButton" data-tournament-id={{ my_tournament.id }} data-action="nuke" class="btn btn-outline-danger">Cancel tournament</button>
-	{% if my_tournament_count >= 4 and my_tournament_count <= 16 %}
-	<button type="submit" id="tournamentButton" data-tournament-id={{ my_tournament.id }} data-action="startTournament" class="btn btn-success">Start tournament!</button>
-	{% endif %}
-<form id="tournamentInviteForm" >
-	{% csrf_token %}
-	<input type="hidden" name="formname" value="tournamentInviteForm">
-	{% for field in tournamentinviteform %}
-	<div class="form-group">
-	<p style="color: red">{{ field.errors }}<p>
-	{{ field.label_tag }} {{ field }}
-	</div>
-	{% endfor %}
-	<input type="submit" class="btn btn-primary" value="Send invite">
-</form>
-{% endif %}
-{% if participating_in_tournament is True %} {% comment %} We are a part of a pending tournament {% endcomment %}
-	{% if my_participant.status == 'Pending' %} {% comment %} We have not confirmed attendance yet {% endcomment %}
-		<p>{{ tournament_in.creator.username }} invited you to a {{ tournament_in.game }} tournament!</p>
-		<form id="tournamentJoinForm" >
-			{% csrf_token %}
-			<input type="hidden" name="participant_id" value={{ my_participant.id }} >
-			<input type="hidden" name="formname" value="tournamentJoinForm">
-			{% for field in tournamentjoinform %}
-			<div class="form-group">
-			<p style="color: red">{{ field.errors }}<p>
-			{{ field.label_tag }} {{ field }}
-			</div>
-			{% endfor %}
-			<input type="submit" class="btn btn-primary" value="Join tournament">
-		</form>
-		<button type="submit" id="tournamentButton" data-participant-id={{ my_participant.id }} data-action="rejectTournamentInvite" class="btn btn-danger">Reject</button>
-	{% else %} {% comment %} Attendance and alias confirmed, show list of players, their statuses and the option to cancel {% endcomment %}
-		<h4>{{ tournament_in.creator.username }}'s {{ tournament_in.game }} tournament</h3>
-		{% for participant in tournament_in_participants %}
-		<li>
-			{{ participant.user.username }} as {{ participant.alias }}. Status: {{ participant.status }}
-			{% if participant.user == current_user and current_user != tournament_in.creator%}
-			<button type="submit" id="tournamentButton" data-participant-id={{ participant.id }} data-action="leaveTournament" class="btn btn-danger">Cancel</button>
-			{% endif %}
-		</li>
-		{% empty %}
-		<li>No participants yet.</li>
+{% if in_active_tournament is False %}
+	{% if hosting_tournament is False and my_participant.status != 'Accepted' %}
+	<form id="startTournamentForm"> {% comment %} We are not hosting a tournament, show form to create one {% endcomment %}
+		{% csrf_token %}
+		<input type="hidden" name="formname" value="startTournamentForm">
+		{% for field in tournamentform %}
+		<div class="form-group">
+		<p style="color: red">{{ field.errors }}<p>
+		{{ field.label_tag }} {{ field }}
+		</div>
 		{% endfor %}
+		<input type="submit" class="btn btn-primary" value="Start tournament">
+	</form>
+	{% elif hosting_tournament is True %} {% comment %} We ARE hosting a tournament, show form to invite users {% endcomment %}
+	<button type="submit" id="tournamentButton" data-tournament-id={{ my_tournament.id }} data-action="nuke" class="btn btn-outline-danger">Cancel tournament</button>
+		{% if my_tournament_count == 4 or my_tournament_count == 8 %}
+			<button type="submit" id="tournamentButton" data-tournament-id={{ my_tournament.id }} data-action="startTournament" class="btn btn-success">Start tournament!</button>
+		{% else %}
+			<p>Invite 4 or 8 players</p>
+		{% endif %}
+	<form id="tournamentInviteForm" >
+		{% csrf_token %}
+		<input type="hidden" name="formname" value="tournamentInviteForm">
+		{% for field in tournamentinviteform %}
+		<div class="form-group">
+		<p style="color: red">{{ field.errors }}<p>
+		{{ field.label_tag }} {{ field }}
+		</div>
+		{% endfor %}
+		<input type="submit" class="btn btn-primary" value="Send invite">
+	</form>
 	{% endif %}
+	{% if participating_in_tournament is True %} {% comment %} We are a part of a pending tournament {% endcomment %}
+		{% if my_participant.status == 'Pending' %} {% comment %} We have not confirmed attendance yet {% endcomment %}
+			<p>{{ tournament_in.creator.username }} invited you to a {{ tournament_in.game }} tournament!</p>
+			<form id="tournamentJoinForm" >
+				{% csrf_token %}
+				<input type="hidden" name="participant_id" value={{ my_participant.id }} >
+				<input type="hidden" name="formname" value="tournamentJoinForm">
+				{% for field in tournamentjoinform %}
+				<div class="form-group">
+				<p style="color: red">{{ field.errors }}<p>
+				{{ field.label_tag }} {{ field }}
+				</div>
+				{% endfor %}
+				<input type="submit" class="btn btn-primary" value="Join tournament">
+			</form>
+			<button type="submit" id="tournamentButton" data-participant-id={{ my_participant.id }} data-action="rejectTournamentInvite" class="btn btn-danger">Reject</button>
+		{% else %} {% comment %} Attendance and alias confirmed, show list of players, their statuses and the option to cancel {% endcomment %}
+			<h4>{{ tournament_in.creator.username }}'s {{ tournament_in.game }} tournament</h3>
+			{% for participant in tournament_in_participants %}
+			<li>
+				{{ participant.user.username }} as {{ participant.alias }}. Status: {{ participant.status }}
+				{% if participant.user == current_user and current_user != tournament_in.creator%}
+					<button type="submit" id="tournamentButton" data-participant-id={{ participant.id }} data-action="leaveTournament" class="btn btn-danger">Cancel</button>
+				{% endif %}
+				{% if current_user == tournament_in.creator and participant.user != current_user %}
+					<button type="submit" id="tournamentButton" data-participant-id={{ participant.id }} data-action="leaveTournament" class="btn btn-danger">Kick</button>
+				{% endif %}
+			</li>
+			{% empty %}
+			<li>No participants yet.</li>
+			{% endfor %}
+		{% endif %}
+	{% endif %}
+{% else %}
+	<p>In active tournament. Please follow chat for more info!</p>
+	<ul>
+        {% for match in matches %}
+                <li>
+					{% if match.game_instance.p1.username is not None %}
+                   		{{ match.game_instance.p1.username }}
+					{% else %}
+						???
+					{% endif %}
+					vs
+					{% if match.game_instance.p2.username is not None %}
+                   		{{ match.game_instance.p2.username }}
+					{% else %}
+						???
+					{% endif %}
+					- Status: {{ match.status }}
+					{% if match.status == 'Finished' %}
+					- Winner: {{ match.game_instance.winner.username }}
+					{% endif %}
+                </li>
+        {% endfor %}
+    </ul>
 {% endif %}
-
 <h3>* * * * * * * * * *</h3>
 <br>
 

@@ -24,11 +24,36 @@
     font-size: 80px;
 }
 
-#scoreboard {
-    display: flex;
-    justify-content: space-between;
+#GameControls button img {
+    width: 100px; /* Set a specific width for the images */
+    height: 100px; /* Set a specific height for the images */
+    object-fit: cover; /* Maintain aspect ratio and cover container */
+    display: none;
 }
 
+#GameControls {
+    display: none; /* Hide the GameControls initially */
+}
+
+
+#scoreboard {
+    display: flex;
+    justify-content: space-between; /* This will evenly distribute the children elements */
+    position: absolute;
+    top: 100px; /* Adjust this value to position the scoreboard vertically */
+    left: 900px; /* Adjust this value to position the scoreboard horizontally */
+    z-index: 1000; /* Ensure the scoreboard appears above other elements */
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+}
+.move-count {
+    order: 1;
+}
+
+.canvas-container {
+    position: relative;
+}
 .score-left {
     order: 1;
     margin-right: auto;
@@ -74,7 +99,11 @@ body {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Add a shadow for depth */
 }
 
-#canvasContainer {
+#canvas {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    height: 100vh; /* Set canvas height to full viewport height */
     position: relative;
     width: 10%;
     height: 10%;

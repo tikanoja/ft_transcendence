@@ -1,25 +1,9 @@
 import { routeRedirect } from './router.js'
 import { startScreen} from './pong.js'
+import { startScreenColorwar} from './colorwar.js'
 
-// document.addEventListener('DOMContentLoaded', function() {
-//     const navLinks = document.querySelectorAll('#profile-navbar.nav-link');
-  
-//     navLinks.forEach(link => {
-//       link.addEventListener('click', function(event) {
-//         // Prevent the default action of the anchor tag
-//         event.preventDefault();
-  
-//         // Get the target element ID from the href attribute
-//         const targetId = this.getAttribute('href').substring(1);
-  
-//         // Find the target element
-//         const targetElement = document.getElementById(targetId);
-  
-//         // Scroll smoothly to the target element
-//         targetElement.scrollIntoView({ behavior: 'smooth' });
-//       });
-//     });
-//   });
+const loginEvent  = new Event("login");
+const logoutEvent = new Event("logout");
 
 document.addEventListener("DOMContentLoaded", function () {
 	// Get the current URL path
@@ -119,6 +103,7 @@ function updateEventListeners() {
     var registerForm = document.getElementById('registerForm');
     var logoutButton = document.getElementById('logoutButton');
 	var playButton = document.getElementById('playButton');
+    var playButtoncolorwar = document.getElementById('ColorwarPlayButton');
     var addFriendButton = document.getElementById('addFriendButton');
     var blockUserButton = document.getElementById('blockUserButton');
     var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
@@ -137,6 +122,7 @@ function updateEventListeners() {
     var tournamentInviteForm = document.getElementById('tournamentInviteForm');
     var tournamentButtons = document.querySelectorAll('[id^="tournamentButton"]');
     var tournamentJoinForm = document.getElementById('tournamentJoinForm');
+    var autoregister = document.getElementById('autoRegister');
 
     // remove listeners
     if (profilePictureForm)
@@ -158,6 +144,8 @@ function updateEventListeners() {
         logoutButton.removeEventListener('click', logoutButtonClickHandler);
 	if (playButton)
         playButton.removeEventListener('click', playButtonClickHandler);
+    if (playButtoncolorwar)
+        playButtoncolorwar.removeEventListener('click', playButtoncolorwarClickHandler);
     if (addFriendButton)
         addFriendButton.removeEventListener('click', addFriendHandler);
     if (blockUserButton)
@@ -198,6 +186,8 @@ function updateEventListeners() {
     if (tournamentJoinForm) {
         tournamentJoinForm.removeEventListener('submit', tournamentFormHandler);
     }
+    if (autoregister)
+        autoregister.removeEventListener('click', automate_register);
 
     // begin add listeners if currently present
     if (profilePictureForm)
@@ -211,8 +201,10 @@ function updateEventListeners() {
         logoutButton.addEventListener('click', logoutButtonClickHandler);
     if (playButton)
         playButton.addEventListener('click', playButtonClickHandler);
+    if (playButtoncolorwar)
+        playButtoncolorwar.addEventListener('click', playButtoncolorwarClickHandler);
     if (addFriendButton)
-        addFriendButton.addEventListener('click', addFriendHandler);
+        addFriendButton.addEventListener('click', addFriendHandler);    
     if (blockUserButton)
         blockUserButton.addEventListener('click', blockUserHandler);
     if (friendRequestButtons) {
@@ -259,6 +251,8 @@ function updateEventListeners() {
     if (tournamentJoinForm) {
         tournamentJoinForm.addEventListener('submit', tournamentFormHandler);
     }
+    if (autoregister)
+        autoregister.addEventListener('click', automate_register);
 }
 
 function updateContent(html, title, description) {
@@ -282,6 +276,7 @@ async function logoutButtonClickHandler(event) {
     const querystring = window.location.search;
     var endpoint = '/app/logout/' + querystring;
     const response = await sendPostRequest(endpoint, null);
+    document.dispatchEvent(logoutEvent);
     if (response.redirected) {
         let redirect_location = response.url;
         routeRedirect(redirect_location);
@@ -316,6 +311,12 @@ const playButtonClickHandler = async (event) => {
     startScreen();
 }
 
+const playButtoncolorwarClickHandler = async (event) => {
+    event.preventDefault();
+    console.log("in color war click handler");
+    startScreenColorwar();
+}
+
 const loginFormHandler = async (event) => {
     console.log('In loginFormHandler()');
     event.preventDefault();
@@ -323,6 +324,7 @@ const loginFormHandler = async (event) => {
     const querystring = window.location.search;
     var endpoint = '/app/login/' + querystring;
 	const response = await sendPostRequest(endpoint, formData);
+    document.dispatchEvent(loginEvent);
     if (response.redirected) {
         let redirect_location = response.url;
         routeRedirect(redirect_location);
@@ -617,6 +619,48 @@ const tournamentButtonHandler = async (event) => {
 		console.log("Response status in tournamentButtons(): ", response.status)
 	}
 }
+
+const automate_register = async (event) => {
+    console.log('In automate_register');
+    event.preventDefault();
+
+    const users = [
+        { username: 'qwe', first_name: 'qwe', last_name: 'qwe', email: 'qwe@qwe.com', password: 'qweQWE123!@#', confirm_password: 'qweQWE123!@#' },
+        { username: 'asd', first_name: 'asd', last_name: 'asd', email: 'asd@asd.com', password: 'qweQWE123!@#', confirm_password: 'qweQWE123!@#' },
+        { username: 'zxc', first_name: 'zxc', last_name: 'zxc', email: 'zxc@zxc.com', password: 'qweQWE123!@#', confirm_password: 'qweQWE123!@#' },
+        { username: 'jen', first_name: 'jen', last_name: 'jen', email: 'jen@jen.com', password: 'qweQWE123!@#', confirm_password: 'qweQWE123!@#' },
+        { username: 'ben', first_name: 'ben', last_name: 'ben', email: 'ben@ben.com', password: 'qweQWE123!@#', confirm_password: 'qweQWE123!@#' },
+        { username: 'ken', first_name: 'ken', last_name: 'ken', email: 'ken@ken.com', password: 'qweQWE123!@#', confirm_password: 'qweQWE123!@#' },
+        { username: 'hen', first_name: 'hen', last_name: 'hen', email: 'hen@hen.com', password: 'qweQWE123!@#', confirm_password: 'qweQWE123!@#' },
+        { username: 'foo', first_name: 'foo', last_name: 'foo', email: 'foo@foo.com', password: 'qweQWE123!@#', confirm_password: 'qweQWE123!@#' },
+        { username: 'bar', first_name: 'bar', last_name: 'bar', email: 'bar@bar.com', password: 'qweQWE123!@#', confirm_password: 'qweQWE123!@#' },
+        { username: 'baz', first_name: 'baz', last_name: 'baz', email: 'baz@baz.com', password: 'qweQWE123!@#', confirm_password: 'qweQWE123!@#' },
+    ];
+
+    for (const user of users) {
+        const formData = new FormData();
+        Object.entries(user).forEach(([key, value]) => formData.append(key, value));
+
+        const querystring = window.location.search;
+        var endpoint = '/app/register/' + querystring;
+        const response = await sendPostRequest(endpoint, formData);
+        if (response.redirected) {
+            let redirect_location = response.url;
+            console.log("Redirected to: ", redirect_location);
+            routeRedirect(redirect_location);
+        } else if (response.ok) {
+            // Handling normal content update
+            const html = await response.text();
+            updateContent(html, "Registration | Pong", "Description");
+        } else {
+            // Something is not quite right...
+            console.log('submitRegistrationHandler(): Response status: ' + response.status);
+        }
+    }
+}
+
+
+
 
 export { profileLinkHandler, checkLogin, updateContent, updateEventListeners, setActive }
 

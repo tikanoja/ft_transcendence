@@ -26,9 +26,9 @@ export const loadScript = () => {
 
 
 function connectWebSocket() {
-    socket = io.connect('https://' + window.location.hostname);
-	console.log(window.location.hostname)
+    socket = io.connect('https://' + window.location.hostname, {path: "/pong/socket.io"});
     socket.on('connect', () => {
+        console.log("connect recieved: pong")
     });
     socket.on('error', (error) => {
         console.error('WebSocket error:', error);
@@ -37,12 +37,12 @@ function connectWebSocket() {
 
 export const verifyUsername = () => {
     return new Promise((resolve, reject) => {
-        const username1Element = document.getElementById('player1');
-        const username2Element = document.getElementById('player2');
-        const username1 = username1Element.innerText.trim();
-        const username2 = username2Element.innerText.trim();
-        const usernameString = username1 + "," + username2;
+        const player1username = document.getElementById('player1username').value;
+        const player2username = document.getElementById('player2username').value;
+        const current_game_id = document.getElementById('current_game_id').value;
+        const usernameString = player1username + "," + player2username + "," + current_game_id;
         
+        console.log('usernameString id: ', usernameString);
         socket.emit("username", usernameString);
 
         socket.on('setup_game', (data) => {
@@ -70,10 +70,10 @@ export const startScreen = async () => {
 			const styleCheckbox = document.getElementById('styleCheckbox');
 			let is3DGraphics = false;
             
+
             await verifyUsername()
             console.log("after verify: ", gameNumber);
             
-            playButton.addEventListener('click', () => {
                 console.log("in the click listener")
                 startScreen.style.display = 'none';
                 canvasContainer.style.display = 'block';
@@ -83,15 +83,13 @@ export const startScreen = async () => {
                 socket.emit('message', 'start_game,' + gameNumber);
 
                 socket.on('start_game', (data) => {
-                    console.log("start game was called")
-                    startScreen.style.display = 'none';
+                    startScreen.remove();
                     canvasContainer.style.display = 'block';
                     console.log(data)
                     const valuesArray = data.split(',')
                     gameNumber = valuesArray[1]
                     renderPongGame(is3DGraphics, gameNumber);
                 });
-            });
     } catch (error) {
         console.error('Error loading script:', error);
     }
@@ -156,7 +154,7 @@ function addLighting(scene) {
 
 function setup2DScene(scene) {
     const camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 1000);
-    // scene.add(camera);
+
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -191,7 +189,7 @@ function setup3DScene(scene) {
     p1_paddle.position.set(-100,  0, 0);
     p2_paddle.position.set(100, 0, 0);
 
-    return camera;
+    return { camera, p1_paddle, p2_paddle, ball };
 }
 
 
@@ -228,7 +226,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     if (existingCanvas) {
         existingCanvas.remove();
     }
-    
+
     const renderer = new THREE.WebGLRenderer();
     const pixelRatio = window.devicePixelRatio;
     renderer.setPixelRatio(pixelRatio);
@@ -237,7 +235,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
     let p1_paddle, p2_paddle, ball;
     if (is3DGraphics) {
-        camera = setup3DScene(scene);
+        ({ camera, p1_paddle, p2_paddle, ball } = setup3DScene(scene));
     } else {
         ({ camera, p1_paddle, p2_paddle, ball } = setup2DScene(scene));
 
