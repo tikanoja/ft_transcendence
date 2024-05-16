@@ -179,6 +179,7 @@ def playPOST(request):
 
     new_game_instance = GameInstance(p1=current_user, p2=challenged_user, game=sent_form.cleaned_data['game_type'], status='Pending')
     new_game_instance.save()
+    # CHAT MODULE let challenged user know that they have been challenged
     return render(request, 'user/play.html', playContext(request, None, "Game invite sent!")) 
 
 
@@ -257,6 +258,7 @@ def tournament_invite(request):
         return render(request, 'user/play.html', playContext(request, 'You have already invited that user', None))
     # add the invited_user to the tournament
     Participant.objects.create(user=invited_user, tournament=tournament, status='Pending')
+    # CHAT MODULE msg to invited_user to inform that they have been invited to a tournament
     return render(request, 'user/play.html', playContext(request, None, 'Invite sent!'))
 
 
