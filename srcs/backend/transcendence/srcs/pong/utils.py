@@ -30,7 +30,7 @@ def save_pong_game_state(request) -> JsonResponse:
 	logger.debug(request.POST)
 
 	game_id = request.POST.get('game_id')
-	game_instance = GameInstance.objects.get(pk=game_id)
+	game_instance = PongGameInstance.objects.get(pk=game_id)
 	if game_instance is None:
 		return JsonResponse({'message': 'Matching game instance not found'}, status=404)
 
@@ -61,5 +61,8 @@ def save_pong_game_state(request) -> JsonResponse:
 	game_instance.save()
 	if game_instance.tournament_match is True:
 		update_tournament(game_instance)
+	logger.debug("before return: ")
+	check_instance = GameInstance.objects.get(pk=game_id)
+	logger.debug(check_instance)
 	return JsonResponse({'message': 'Game data saved successfully!'}, status=200)
 	

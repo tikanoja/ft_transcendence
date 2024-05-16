@@ -1,7 +1,7 @@
 from .forms import GameRequestForm, LocalGameForm, StartTournamentForm, TournamentInviteForm, TournamentJoinForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import get_user_model
-from .models import CustomUser, GameInstance, Tournament, Participant, Match
+from .models import CustomUser, GameInstance, Tournament, Participant, Match, PongGameInstance, ColorGameInstance
 from django.core.exceptions import ValidationError
 import logging
 # from django.http import JsonResponse
@@ -177,7 +177,10 @@ def playPOST(request):
     if prior_request is not None:
         return render(request, 'user/play.html', playContext(request, "You have already sent a game request to this user", None)) 
 
-    new_game_instance = GameInstance(p1=current_user, p2=challenged_user, game=sent_form.cleaned_data['game_type'], status='Pending')
+    if sent_form.cleaned_data['game_type'] == 'Pong':
+        new_game_instance = PongGameInstance(p1=current_user, p2=challenged_user, game=sent_form.cleaned_data['game_type'], status='Pending')
+    else:
+        new_game_instance = ColorGameInstance(p1=current_user, p2=challenged_user, game=sent_form.cleaned_data['game_type'], status='Pending')
     new_game_instance.save()
     return render(request, 'user/play.html', playContext(request, None, "Game invite sent! Should we be redirected to game here?")) 
 
