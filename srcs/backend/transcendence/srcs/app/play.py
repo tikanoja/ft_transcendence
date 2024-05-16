@@ -1,7 +1,7 @@
 from .forms import GameRequestForm, LocalGameForm, StartTournamentForm, TournamentInviteForm, TournamentJoinForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import get_user_model
-from .models import CustomUser, GameInstance, Tournament, Participant, Match
+from .models import CustomUser, GameInstance, Tournament, Participant, Match, PongGameInstance, ColorGameInstance
 from django.core.exceptions import ValidationError
 import logging
 # from django.http import JsonResponse
@@ -129,8 +129,10 @@ def gameResponse(request, data):
     challenger = data.get('from_user')
     challenger_user = CustomUser.objects.filter(username=challenger).first()
     if not challenger_user:
-        return render(request, 'user/play.html', playContext(request, "Error: game cancelled / user deleted", None))    
-    game_instance = GameInstance.objects.filter(p1=challenger_user, p2=request.user).first()
+        return render(request, 'user/play.html', playContext(request, "Error: game cancelled / user deleted", None))
+    game_instance = GameInstance.objects.filter(p1=challenger_user, p2=request.user, status='Pending').first()
+    if game_instance is None:
+        return render(request, 'user/play.html', playContext(request, "Could not find game", None))
     if action == 'accept':
         if check_player_activity(game_instance) != True:
             return render(request, 'user/play.html', playContext(request, "Busy player, try again later", None))
@@ -177,7 +179,11 @@ def playPOST(request):
     if prior_request is not None:
         return render(request, 'user/play.html', playContext(request, "You have already sent a game request to this user", None)) 
 
-    new_game_instance = GameInstance(p1=current_user, p2=challenged_user, game=sent_form.cleaned_data['game_type'], status='Pending')
+    game=sent_form.cleaned_data['game_type']
+    if game == 'Pong':
+        new_game_instance = PongGameInstance(p1=current_user, p2=challenged_user, game=game, status='Pending')
+    else:
+        new_game_instance = ColorGameInstance(p1=current_user, p2=challenged_user, game=game, status='Pending')
     new_game_instance.save()
     # CHAT MODULE let challenged user know that they have been challenged
     return render(request, 'user/play.html', playContext(request, None, "Game invite sent!")) 
