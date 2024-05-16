@@ -14,14 +14,16 @@ from django.contrib.auth import authenticate
 
 logger = logging.getLogger(__name__)
 
-
+# /cli_dashboard/username
 @csrf_exempt
 def cli_dashboard(request, username):
      try:
+        print(request, username)
         if request.method == 'GET':
             user = CustomUser.objects.filter(username=username).first()
             pong_games = PongGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
             resource = dashboard.get_stats_for_cli(user, pong_games)
+            print(resource)
             return JsonResponse({'pong': resource}, status=200)
         else:
             return JsonResponse({"error": "method not allowed, try GET"}, status=405)
