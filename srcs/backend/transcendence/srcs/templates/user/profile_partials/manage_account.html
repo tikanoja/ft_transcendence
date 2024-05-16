@@ -11,8 +11,7 @@
 			<p class="m-auto"><b>Name:</b> {{details.first_name}} {{details.last_name}}</p>
 			<p class="m-auto"><b>E-mail:</b> {{details.email}}</p>
 		</div>
-		<div class="row gy-5">
-			<div class="col">
+
 				<h4 id="change-profile-picture" class="mt-5 text-light">Change Profile Picture</h4>
 				{% if profile_picture_upload_message %}
 				<p>{{ profile_picture_upload_message }}</p>
@@ -22,10 +21,8 @@
 				<button type="submit" id="profile_image_upload_btn" class="btn btn-primary">Upload</button>
 				</form>
 				{% endif %}
-			</div>
-		</div>
-		<div class="row gy-5">
-			<div class="col">
+
+
 				<h4 id="change-name" class="mt-5 text-light">Change Name</h4>
 				{% if name_form_result %}
 				<div class="alert alert-info" role="alert">{{name_form_result}}</div>
@@ -44,10 +41,7 @@
 					<button type="submit" id="nameChange" class="btn btn-primary">Submit</button>
 				</form>
 				{% endif %}
-			</div>
-		</div>
-		<div class="row gy-5">
-			<div class="col">
+
 				<h4 id="change-email" class="mt-5 text-light">Change E-mail</h4>
 				{% if email_form_result %}
 				<div class="alert alert-info" role="alert">{{email_form_result}}</div>
@@ -61,10 +55,7 @@
 				<button type="submit" id="emailChange" class="btn btn-primary">Submit</button>
 				</form>
 				{% endif %}
-			</div>
-		</div>
-		<div class="row gy-5">
-			<div class="col">
+">
 				<h4 id="change-password" class="mt-5 text-light">Change Password</h4>
 				{% if pasword_form_result %}
 				<div class="alert alert-info" role="alert">{{pasword_form_result}}</div>
@@ -84,12 +75,8 @@
 				</form>
 				{% endif %}
 			</div>
-		</div>
-		<div class="row gy-5">
-			<div class="col">
+
 				{% include "./delete_account.html" with form=delete_account_form%}
 			</div>
-		</div>
-	</div>
 
 </div>
