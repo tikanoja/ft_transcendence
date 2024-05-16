@@ -169,6 +169,8 @@ function exitGame(data, tileMeshes, render, colorTextures, scene)
     cleanupGameBoard(tileMeshes, scene)
     const canvas = document.getElementById('canvasContainer');
     canvas.remove();
+    const scoreboard = document.getElementById('scoreboard');
+    scoreboard.remove;
     AnimationController.stopAnimation();
 }
 
@@ -302,7 +304,6 @@ export const renderColorwar = (gameNumber, data) => {
     const scoreboard = document.getElementById('scoreboard');
     scoreboard.display = 'block';
     const canvasContainer = document.getElementById('canvasContainer');
-    canvasContainer.innerHTML = '';
     canvasContainer.appendChild(renderer.domElement);
     
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4)); 
@@ -422,16 +423,16 @@ export const renderColorwar = (gameNumber, data) => {
     const tileMeshes = setupGameBoard(data, boardStartX, boardStartY, numRows, numCols, render, colorTextures, tileSize, scene);
     
 
-    document.addEventListener('keydown', (event) => {
-		event.preventDefault();
-			if (event.key == 'c')
-		{
-            console.log("attempting to stop game")
-			socket.emit('message', 'stop_game,' + gameNumber);
-            exit_game(data, tileMeshes, render, colorTextures)
-			render = false;
-		}
-    });
+    // document.addEventListener('keydown', (event) => {
+	// 	event.preventDefault();
+	// 		if (event.key == 'c')
+	// 	{
+    //         console.log("attempting to stop game")
+	// 		socket.emit('message', 'stop_game,' + gameNumber);
+    //         exitGame(data, tileMeshes, render, colorTextures)
+	// 		render = false;
+	// 	}
+    // });
     
     socket.on('state', (data) => {
         updateGameState(data, tileMeshes,  render, colorTextures)
@@ -439,7 +440,7 @@ export const renderColorwar = (gameNumber, data) => {
 
 	socket.on('endstate', (data) => {
         socket.emit('message', 'stop_game,' + gameNumber);
-        exit_game(data, tileMeshes, render, colorTextures)
+        exitGame(data, tileMeshes, render, colorTextures)
     });
 
 
