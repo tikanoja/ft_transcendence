@@ -2,6 +2,9 @@ import { routeRedirect } from './router.js'
 import { startScreen} from './pong.js'
 import { startScreenColorwar} from './colorwar.js'
 
+const loginEvent  = new Event("login");
+const logoutEvent = new Event("logout");
+
 document.addEventListener("DOMContentLoaded", function () {
 	// Get the current URL path
 	var currentPath = window.location.pathname;
@@ -273,6 +276,7 @@ async function logoutButtonClickHandler(event) {
     const querystring = window.location.search;
     var endpoint = '/app/logout/' + querystring;
     const response = await sendPostRequest(endpoint, null);
+    document.dispatchEvent(logoutEvent);
     if (response.redirected) {
         let redirect_location = response.url;
         routeRedirect(redirect_location);
@@ -320,6 +324,7 @@ const loginFormHandler = async (event) => {
     const querystring = window.location.search;
     var endpoint = '/app/login/' + querystring;
 	const response = await sendPostRequest(endpoint, formData);
+    document.dispatchEvent(loginEvent);
     if (response.redirected) {
         let redirect_location = response.url;
         routeRedirect(redirect_location);
