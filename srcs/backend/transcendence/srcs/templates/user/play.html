@@ -50,7 +50,7 @@
 		{% if my_tournament_count == 4 or my_tournament_count == 8 %}
 			<button type="submit" id="tournamentButton" data-tournament-id={{ my_tournament.id }} data-action="startTournament" class="btn btn-success">Start tournament!</button>
 		{% else %}
-			<p>Invite 4 or 8 players</p>
+			<p>Send invites. You can start with 4 or 8 accepted players!</p>
 		{% endif %}
 	<form id="tournamentInviteForm" >
 		{% csrf_token %}
