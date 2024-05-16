@@ -26,7 +26,7 @@ export const loadScript = () => {
 
 
 function connectWebSocket() {
-    socket = io.connect('https://' + window.location.hostname, {path: "/pong/socket.io"});
+    socket = io.connect('https://' + window.location.hostname, {path: "/pong/socket.io"});  
     socket.on('connect', () => {
         console.log("connect recieved: pong")
     });
