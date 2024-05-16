@@ -1,7 +1,7 @@
 from .forms import GameRequestForm, LocalGameForm, StartTournamentForm, TournamentInviteForm, TournamentJoinForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import get_user_model
-from .models import CustomUser, GameInstance, Tournament, Participant, Match
+from .models import CustomUser, GameInstance, Tournament, Participant, Match, PongGameInstance, ColorGameInstance
 from django.core.exceptions import ValidationError
 import logging
 # from django.http import JsonResponse
@@ -129,8 +129,10 @@ def gameResponse(request, data):
     challenger = data.get('from_user')
     challenger_user = CustomUser.objects.filter(username=challenger).first()
     if not challenger_user:
-        return render(request, 'user/play.html', playContext(request, "Error: game cancelled / user deleted", None))    
-    game_instance = GameInstance.objects.filter(p1=challenger_user, p2=request.user).first()
+        return render(request, 'user/play.html', playContext(request, "Error: game cancelled / user deleted", None))
+    game_instance = GameInstance.objects.filter(p1=challenger_user, p2=request.user, status='Pending').first()
+    if game_instance is None:
+        return render(request, 'user/play.html', playContext(request, "Could not find game", None))
     if action == 'accept':
         if check_player_activity(game_instance) != True:
             return render(request, 'user/play.html', playContext(request, "Busy player, try again later", None))
@@ -177,9 +179,14 @@ def playPOST(request):
     if prior_request is not None:
         return render(request, 'user/play.html', playContext(request, "You have already sent a game request to this user", None)) 
 
-    new_game_instance = GameInstance(p1=current_user, p2=challenged_user, game=sent_form.cleaned_data['game_type'], status='Pending')
+    game=sent_form.cleaned_data['game_type']
+    if game == 'Pong':
+        new_game_instance = PongGameInstance(p1=current_user, p2=challenged_user, game=game, status='Pending')
+    else:
+        new_game_instance = ColorGameInstance(p1=current_user, p2=challenged_user, game=game, status='Pending')
     new_game_instance.save()
-    return render(request, 'user/play.html', playContext(request, None, "Game invite sent! Should we be redirected to game here?")) 
+    # CHAT MODULE let challenged user know that they have been challenged
+    return render(request, 'user/play.html', playContext(request, None, "Game invite sent!")) 
 
 
 def start_tournament(request):
@@ -257,6 +264,7 @@ def tournament_invite(request):
         return render(request, 'user/play.html', playContext(request, 'You have already invited that user', None))
     # add the invited_user to the tournament
     Participant.objects.create(user=invited_user, tournament=tournament, status='Pending')
+    # CHAT MODULE msg to invited_user to inform that they have been invited to a tournament
     return render(request, 'user/play.html', playContext(request, None, 'Invite sent!'))
 
 
@@ -315,31 +323,89 @@ def update_tournament(game_instance):
                     next_level_match.status = Match.SCHEDULED
                     next_level_match.save()
                     logger.debug(f'Scheduled a game: {p1_user.username} vs {p2_user.username}!')
+                    # CHAT MODULE let player know in chat that they have a new game
         else:
             logger.debug('No more levels in tournament, finishing tournament!')
+            # CHAT MODULE announce tournament winner
             match.status = Match.FINISHED
             match.save()
             tournament.status = Tournament.FINISHED
             tournament.save()
     else:
         logger.debug('There are still matches remaining on this level of the tournament')
+        # CHAT MODULE let player know that we are waiting for games to finish
         match.status = Match.FINISHED
         match.save()
 
     
+def get_wl_ratio(user, game):
+    """
+    if no previous games, returns 1
+    if no losses, returns wins to avoid division by 0
+    otherwise, returns a ratio wins/losses
+    """
+    logger.debug('calculating ratio of user ' + user.username + ' for game ' + game)
+    if game == 'Pong':
+        all_games = PongGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
+    else:
+        all_games = ColorGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
+    if all_games.first() is None:
+        logger.debug('no prior games, assuming ratio of 1')
+        return 1
+    wins = 0
+    losses = 0
+    games = 0
+    for game in all_games:
+        games += 1
+        if user == game.winner:
+            wins += 1
+        else:
+            losses += 1
+    if losses == 0:
+        logger.debug('no prior losses, assuming ratio of WIN == ' + wins)
+        return wins
+    ratio = wins / losses
+    logger.debug('calculated ratio of ' + str(ratio))
+    return ratio
+
+
 def generate_brackets(tournament, accepted_participants):
+    logger.debug('generating tournament brackets...')
     if tournament.status != Tournament.ACTIVE:
         raise ValueError("Tournament must be active to generate brackets!")
     num_participants = accepted_participants.count()
     total_games = num_participants - 1
+    game_type = tournament.game
 
-    # arrange the participants to the order or their W/L ratio for a fair & square game!!!!
+    participants_with_ratios = []
+    for participant in accepted_participants:
+        user = participant.user
+        ratio = get_wl_ratio(user, game_type)
+        participants_with_ratios.append((participant, ratio))
+
+    logger.debug('\nbefore sorting')
+    for participant, ratio in participants_with_ratios:
+        logger.debug(f"{participant.user.username}: {ratio}")
+
+    # Sort participants based on their win/loss ratio
+    sorted_participants = sorted(participants_with_ratios, key=lambda x: x[1])
+
+    logger.debug('\nafter sorting')
+    for participant, ratio in sorted_participants:
+        logger.debug(f"{participant.user.username}: {ratio}")
+
+    # Extract just the sorted participants (without the ratios)
+    sorted_participant_objects = [item[0] for item in sorted_participants]
+
+    logger.debug("\nUsernames in sorted order:")
+    for participant in sorted_participant_objects:
+        logger.debug(participant.user.username)
 
     # creating the first round of games
     for i in range(0, num_participants, 2):
         game_instance = GameInstance.objects.create(
-            p1=accepted_participants[i].user,
-            p2=accepted_participants[i+1].user,
+            p1=sorted_participant_objects[i].user,
+            p2=sorted_participant_objects[i+1].user,
             status='Accepted',
             tournament_match=True,
             game=tournament.game,
@@ -431,8 +497,7 @@ def tournament_start(request, data):
         generate_brackets(tournament, accepted_participants)
     except ValueError as e:
         return render(request, 'user/play.html', playContext(request, str(e), None))
-    
-    # let chat know that the tournament has started
+    # CHAT MODULE announce tournament start
     return render(request, 'user/play.html', playContext(request, None, 'Tournament started!'))
 
 
