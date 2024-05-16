@@ -1,10 +1,10 @@
 <div class="container">
 
-	<h2 class='text-center jersey-20-regular'>Manage Account</h2>
+	<h2 class='text-center jersey-20-regular text-primary'>Manage Account</h2>
 	{% if error %}
 	<p class="color: red;"> {{error}} </p>
 	{% endif %}
-	<h3 id="account-summary" class="mt-5">Account Summary</h3>
+	<h3 id="account-summary" class="mt-5 text-light text-center">Account Details</h3>
 	<div class="d-flex flex-column">
 		<div class="d-flex bg-white">
 			<p class="m-auto"><b>Username:</b> {{details.username}}<p>
@@ -13,7 +13,7 @@
 		</div>
 		<div class="row gy-5">
 			<div class="col">
-				<h4 id="change-profile-picture" class="mt-5">Change Profile Picture</h4>
+				<h4 id="change-profile-picture" class="mt-5 text-light">Change Profile Picture</h4>
 				{% if profile_picture_upload_message %}
 				<p>{{ profile_picture_upload_message }}</p>
 				{% else %}
@@ -26,7 +26,7 @@
 		</div>
 		<div class="row gy-5">
 			<div class="col">
-				<h4 id="change-name" class="mt-5">Change Name</h4>
+				<h4 id="change-name" class="mt-5 text-light">Change Name</h4>
 				{% if name_form_result %}
 				<div class="alert alert-info" role="alert">{{name_form_result}}</div>
 				{% else %}
@@ -48,7 +48,7 @@
 		</div>
 		<div class="row gy-5">
 			<div class="col">
-				<h4 id="change-email" class="mt-5">Change E-mail</h4>
+				<h4 id="change-email" class="mt-5 text-light">Change E-mail</h4>
 				{% if email_form_result %}
 				<div class="alert alert-info" role="alert">{{email_form_result}}</div>
 				{% else %}
@@ -65,7 +65,7 @@
 		</div>
 		<div class="row gy-5">
 			<div class="col">
-				<h4 id="change-password" class="mt-5">Change Password</h4>
+				<h4 id="change-password" class="mt-5 text-light">Change Password</h4>
 				{% if pasword_form_result %}
 				<div class="alert alert-info" role="alert">{{pasword_form_result}}</div>
 				{% else %}

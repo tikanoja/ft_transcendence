@@ -129,8 +129,10 @@ def gameResponse(request, data):
     challenger = data.get('from_user')
     challenger_user = CustomUser.objects.filter(username=challenger).first()
     if not challenger_user:
-        return render(request, 'user/play.html', playContext(request, "Error: game cancelled / user deleted", None))    
-    game_instance = GameInstance.objects.filter(p1=challenger_user, p2=request.user).first()
+        return render(request, 'user/play.html', playContext(request, "Error: game cancelled / user deleted", None))
+    game_instance = GameInstance.objects.filter(p1=challenger_user, p2=request.user, status='Pending').first()
+    if game_instance is None:
+        return render(request, 'user/play.html', playContext(request, "Could not find game", None))
     if action == 'accept':
         if check_player_activity(game_instance) != True:
             return render(request, 'user/play.html', playContext(request, "Busy player, try again later", None))
@@ -260,6 +262,7 @@ def tournament_invite(request):
         return render(request, 'user/play.html', playContext(request, 'You have already invited that user', None))
     # add the invited_user to the tournament
     Participant.objects.create(user=invited_user, tournament=tournament, status='Pending')
+    # CHAT MODULE msg to invited_user to inform that they have been invited to a tournament
     return render(request, 'user/play.html', playContext(request, None, 'Invite sent!'))
 
 
@@ -318,14 +321,17 @@ def update_tournament(game_instance):
                     next_level_match.status = Match.SCHEDULED
                     next_level_match.save()
                     logger.debug(f'Scheduled a game: {p1_user.username} vs {p2_user.username}!')
+                    # CHAT MODULE let player know in chat that they have a new game
         else:
             logger.debug('No more levels in tournament, finishing tournament!')
+            # CHAT MODULE announce tournament winner
             match.status = Match.FINISHED
             match.save()
             tournament.status = Tournament.FINISHED
             tournament.save()
     else:
         logger.debug('There are still matches remaining on this level of the tournament')
+        # CHAT MODULE let player know that we are waiting for games to finish
         match.status = Match.FINISHED
         match.save()
 
@@ -434,8 +440,7 @@ def tournament_start(request, data):
         generate_brackets(tournament, accepted_participants)
     except ValueError as e:
         return render(request, 'user/play.html', playContext(request, str(e), None))
-    
-    # let chat know that the tournament has started
+    # CHAT MODULE announce tournament start
     return render(request, 'user/play.html', playContext(request, None, 'Tournament started!'))
 
 
