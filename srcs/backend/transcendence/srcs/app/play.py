@@ -338,19 +338,74 @@ def update_tournament(game_instance):
         match.save()
 
     
+def get_wl_ratio(user, game):
+    """
+    if no previous games, returns 1
+    if no losses, returns wins to avoid division by 0
+    otherwise, returns a ratio wins/losses
+    """
+    logger.debug('calculating ratio of user ' + user.username + ' for game ' + game)
+    if game == 'Pong':
+        all_games = PongGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
+    else:
+        all_games = ColorGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
+    if all_games.first() is None:
+        logger.debug('no prior games, assuming ratio of 1')
+        return 1
+    wins = 0
+    losses = 0
+    games = 0
+    for game in all_games:
+        games += 1
+        if user == game.winner:
+            wins += 1
+        else:
+            losses += 1
+    if losses == 0:
+        logger.debug('no prior losses, assuming ratio of WIN == ' + wins)
+        return wins
+    ratio = wins / losses
+    logger.debug('calculated ratio of ' + str(ratio))
+    return ratio
+
+
 def generate_brackets(tournament, accepted_participants):
+    logger.debug('generating tournament brackets...')
     if tournament.status != Tournament.ACTIVE:
         raise ValueError("Tournament must be active to generate brackets!")
     num_participants = accepted_participants.count()
     total_games = num_participants - 1
+    game_type = tournament.game
 
-    # arrange the participants to the order or their W/L ratio for a fair & square game!!!!
+    participants_with_ratios = []
+    for participant in accepted_participants:
+        user = participant.user
+        ratio = get_wl_ratio(user, game_type)
+        participants_with_ratios.append((participant, ratio))
+
+    logger.debug('\nbefore sorting')
+    for participant, ratio in participants_with_ratios:
+        logger.debug(f"{participant.user.username}: {ratio}")
+
+    # Sort participants based on their win/loss ratio
+    sorted_participants = sorted(participants_with_ratios, key=lambda x: x[1])
+
+    logger.debug('\nafter sorting')
+    for participant, ratio in sorted_participants:
+        logger.debug(f"{participant.user.username}: {ratio}")
+
+    # Extract just the sorted participants (without the ratios)
+    sorted_participant_objects = [item[0] for item in sorted_participants]
+
+    logger.debug("\nUsernames in sorted order:")
+    for participant in sorted_participant_objects:
+        logger.debug(participant.user.username)
 
     # creating the first round of games
     for i in range(0, num_participants, 2):
         game_instance = GameInstance.objects.create(
-            p1=accepted_participants[i].user,
-            p2=accepted_participants[i+1].user,
+            p1=sorted_participant_objects[i].user,
+            p2=sorted_participant_objects[i+1].user,
             status='Accepted',
             tournament_match=True,
             game=tournament.game,

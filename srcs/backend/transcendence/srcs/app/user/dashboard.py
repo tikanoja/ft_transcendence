@@ -146,3 +146,32 @@ def get_game_history_and_stats(username:str) -> dict:
     history = {'pong': pong_history, 'color': color_history}
     return history, stats
 
+def get_wl_ratio(user, game):
+    """
+    if no previous games, returns 1
+    if no losses, returns wins to avoid division by 0
+    otherwise, returns a ratio wins/losses
+    """
+    logger.debug('calculating ratio of user ' + user.username + ' for game ' + game)
+    if game == 'Pong':
+        all_games = PongGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
+    else:
+        all_games = ColorGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
+    if all_games.first() is None:
+        logger.debug('no prior games, assuming ratio of 1')
+        return 1
+    wins = 0
+    losses = 0
+    games = 0
+    for game in all_games:
+        games += 1
+        if user == game.winner:
+            wins += 1
+        else:
+            losses += 1
+    if losses == 0:
+        logger.debug('no prior losses, assuming ratio of WIN == ' + wins)
+        return wins
+    ratio = wins / losses
+    logger.debug('calculated ratio of ' + ratio)
+    return ratio
