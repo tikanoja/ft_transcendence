@@ -191,23 +191,24 @@ function setup3DScene(scene) {
     const sizeFactor = 0.2;
     const ballRadiusScreen = (25 * 2) * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
     const textureLoader = new THREE.TextureLoader();
+    
+    // Texture for ball
     const texture = textureLoader.load('../textures/checkers.jpg');
     //const texture = textureLoader.load('../textures/earth.jpg');
     ball = new THREE.Mesh(new THREE.SphereGeometry(ballRadiusScreen * 2, 10, 10), new THREE.MeshBasicMaterial({ map: texture }));
 
-    //const textureLoader = new THREE.TextureLoader();
+    // Texture for field
     const groundTexture = textureLoader.load('../textures/football_field.jpg');
     groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
     groundTexture.repeat.set(1, 1); // 1, 1 means only one texture
-    
+   
     const groundMaterial = new THREE.MeshBasicMaterial({ map: groundTexture });
     const groundGeometry = new THREE.PlaneGeometry(1950, 1200); // Now good dont touch
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2; // Rotate the ground to be horizontal
-    // Adjust the position of the ground mesh to move it down
     ground.position.y = -14; // To show whole ball the ground needs to go down a little bit
 
-    //Load background texture
+    // Bsackground texture
     textureLoader.load('../textures/space.jpg' , function(texture) { scene.background = texture;});
 
     scene.add(ground);
@@ -252,12 +253,12 @@ function create3DPaddle(color) {
     const fireTexture = textureLoader.load('../textures/fire.jpg');
 
     const materials = [
-        new THREE.MeshBasicMaterial({ map: fireTexture }),   // Front
-        new THREE.MeshBasicMaterial({ map: fireTexture }),    // Back
-        new THREE.MeshBasicMaterial({ map: fireTexture }),     // Top
-        new THREE.MeshBasicMaterial({ map: fireTexture }),  // Bottom
-        new THREE.MeshBasicMaterial({ map: fireTexture }),   // Right
-        new THREE.MeshBasicMaterial({ map: fireTexture })     // Left
+        new THREE.MeshBasicMaterial({ map: fireTexture }), // Front
+        new THREE.MeshBasicMaterial({ map: fireTexture }), // Back
+        new THREE.MeshBasicMaterial({ map: fireTexture }), // Top
+        new THREE.MeshBasicMaterial({ map: fireTexture }), // Bottom
+        new THREE.MeshBasicMaterial({ map: fireTexture }), // Right
+        new THREE.MeshBasicMaterial({ map: fireTexture })  // Left
     ];
 
     const geometry = new THREE.BoxGeometry(paddleWidth, paddleZed, paddleHeight);
@@ -306,17 +307,26 @@ function updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics) {
 	}
 }
 
-function animateBallRotation(ball) {
-    if (!render) return;
-    // Define random rotation angles for each axis
-    const randomRotationX = Math.random() * Math.PI * 2;
-    const randomRotationY = Math.random() * Math.PI * 2;
-    const randomRotationZ = Math.random() * Math.PI * 2;
+let rotate_ball_turn = 0;
+let ball_rotation_slowdown_factor = 2;
 
-    // Apply the random rotations to the ball
-    ball.rotation.x += randomRotationX;
-    ball.rotation.y += randomRotationY;
-    ball.rotation.z += randomRotationZ;
+function animateBallRotation(ball) {
+    if (rotate_ball_turn == 0)
+    {
+        if (!render) return;
+        // Define random rotation angles for each axis
+        const randomRotationX = Math.random() * Math.PI * 2;
+        const randomRotationY = Math.random() * Math.PI * 2;
+        const randomRotationZ = Math.random() * Math.PI * 2;
+
+        // Apply the random rotations to the ball
+        ball.rotation.x += randomRotationX;
+        ball.rotation.y += randomRotationY;
+        ball.rotation.z += randomRotationZ;
+    }
+    rotate_ball_turn += 1;
+    if (rotate_ball_turn >= ball_rotation_slowdown_factor)
+        rotate_ball_turn = 0;
 }
 
 const AnimationController = {
@@ -467,39 +477,75 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
         switch (event.key) {
             case 'r': // Move camera along the positive x-axis
                 camera.position.x += moveDistance;
+                if (camera.position.x > -1000)
+                    camera.position.x = -1000;
                 break;
             case 'f': // Move camera along the negative x-axis
                 camera.position.x -= moveDistance;
+                if (camera.position.x < -1500)
+                    camera.position.x = -1500;
                 break;
             case 't': // Move camera along the positive y-axis
                 camera.position.y += moveDistance;
+                if (camera.position.y > 500)
+                    camera.position.y = 500;
                 break;
             case 'g': // Move camera along the negative y-axis
                 camera.position.y -= moveDistance;
+                if (camera.position.y < 50)
+                    camera.position.y = 50;
                 break;
             case 'y': // Move camera along the positive z-axis
                 camera.position.z += moveDistance;
+                if (camera.position.z > 1500)
+                    camera.position.z = 1500;
                 break;
             case 'h': // Move camera along the negative z-axis
                 camera.position.z -= moveDistance;
+                if (camera.position.z < 1050)
+                    camera.position.z = 1050;
                 break;
             case 'u': // Rotate camera around the positive x-axis
                 camera.rotation.x += rotateAngle;
+                if (camera.rotation.x < 0)
+                    camera.rotation.x += (2 * Math.PI);
+                if (camera.rotation.x > 6.278732645827805)
+                    camera.rotation.x = 6.278732645827805;
                 break;
             case 'j': // Rotate camera around the negative x-axis
                 camera.rotation.x -= rotateAngle;
+                if (camera.rotation.x < 0)
+                    camera.rotation.x += (2 * Math.PI);
+                if (camera.rotation.x < 5.755133870229507)
+                    camera.rotation.x = 5.755133870229507;
                 break;
             case 'i': // Rotate camera around the positive y-axis
                 camera.rotation.y += rotateAngle;
+                if (camera.rotation.y < 0)
+                    camera.rotation.y += (2 * Math.PI);
+                if (camera.rotation.y > 5.952051587572457)
+                    camera.rotation.y = 5.952051587572457;
                 break;
             case 'k': // Rotate camera around the negative y-axis
                 camera.rotation.y -= rotateAngle;
+                if (camera.rotation.y < 0)
+                    camera.rotation.y += (2 * Math.PI);
+                if (camera.rotation.y < 5.428452811974159)
+                    camera.rotation.y = 5.428452811974159;
                 break;
             case 'o': // Rotate camera around the positive z-axis
                 camera.rotation.z += rotateAngle;
+                if (camera.rotation.z < 0)
+                    camera.rotation.z += (2 * Math.PI);
+                if (camera.rotation.z > 6.53237506803245)
+                    camera.rotation.z = 6.53237506803245;
                 break;
             case 'l': // Rotate camera around the negative z-axis
                 camera.rotation.z -= rotateAngle;
+                if (camera.rotation.z < 0)
+                    camera.rotation.z += (2 * Math.PI);
+                if (camera.rotation.z < 5.57244397943557)
+                    camera.rotation.z = 5.57244397943557;
                 break;
             default:
                 // Handle other key presses if needed
