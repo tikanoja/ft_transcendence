@@ -1,8 +1,6 @@
 import logging
 import json
 
-from asgiref.sync import sync_to_async
-
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 from app.models import CustomUser
@@ -29,13 +27,16 @@ class UserConsumer(AsyncWebsocketConsumer):
         for group in self.groups:
             await self.channel_layer.group_add(group, self.channel_name)
 
-
     async def disconnect(self, close_code):
         for group in self.groups:
             await self.channel_layer.group_discard(group, self.channel_name)
     
 
     async def receive(self, text_data):
+        user : CustomUser = self.scope["user"]
+        if not user.is_authenticated or user.is_anonymous:
+            return await self.close()
+
         try:
             event: dict = json.loads(text_data)
         except:
