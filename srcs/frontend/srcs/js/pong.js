@@ -333,17 +333,17 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
 			render = false;
 		}
     });
-
+    
     document.addEventListener('keyup', (event) => {
-		event.preventDefault();
-		if (event.key == 'ArrowUp')
-			socket.emit('message', 'right_paddle_down_release,' + gameNumber);
+        event.preventDefault();
+        if (event.key == 'ArrowUp')
+            socket.emit('message', 'right_paddle_down_release,' + gameNumber);
         if (event.key  == 'ArrowDown')
-			socket.emit('message', 'right_paddle_up_release,' + gameNumber);
+            socket.emit('message', 'right_paddle_up_release,' + gameNumber);
         if (event.key  == 'w')
-			socket.emit('message', 'left_paddle_down_release,' + gameNumber);
+            socket.emit('message', 'left_paddle_down_release,' + gameNumber);
         if (event.key  == 's')
-			socket.emit('message', 'left_paddle_up_release,' + gameNumber);
+            socket.emit('message', 'left_paddle_up_release,' + gameNumber);
     });
 
 
