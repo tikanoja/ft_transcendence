@@ -1,6 +1,6 @@
-<div class="container">
+<div class="container bg-secondary py-3 rounded">
 
-	<h2 class='text-center jersey-20-regular text-primary'>Manage Account</h2>
+	<h2 class='text-center jersey-20-regular'>Manage Account</h2>
 	{% if error %}
 	<p class="color: red;"> {{error}} </p>
 	{% endif %}
@@ -55,7 +55,7 @@
 				<button type="submit" id="emailChange" class="btn btn-primary">Submit</button>
 				</form>
 				{% endif %}
-">
+
 				<h4 id="change-password" class="mt-5 text-light">Change Password</h4>
 				{% if pasword_form_result %}
 				<div class="alert alert-info" role="alert">{{pasword_form_result}}</div>
