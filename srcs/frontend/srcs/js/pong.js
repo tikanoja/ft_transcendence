@@ -1,10 +1,6 @@
-// Import required modules
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.module.js';
 
-// //TODO: the size of paddles, ball and their positioning MUST BE DYNAMIC!
-// //TODO: A better looking start screen the also shows user name, and opponent name
-// //TODO: Make lighting better
 let socket;
 let gameNumber = -1;
 
@@ -12,6 +8,7 @@ let camera;
 let p1_paddle;
 let p2_paddle;
 let ball;
+let ground;
 
 let render = true
 
@@ -34,11 +31,11 @@ export const loadScript = () => {
 
 function connectWebSocket() {
     socket = io.connect('https://' + window.location.hostname);
-	console.log(window.location.hostname)
     socket.on('connect', () => {
+        // empty on purpose nothing todo
     });
     socket.on('error', (error) => {
-        console.error('WebSocket error:', error);
+        // empty on purpose nothing todo
     });
 }
 
@@ -53,10 +50,8 @@ export const verifyUsername = () => {
         socket.emit("username", usernameString);
 
         socket.on('setup_game', (data) => {
-            console.log("in setup game");
             const valuesArray = data.split(',');
             gameNumber = valuesArray[1];
-            console.log("after setup game: ", gameNumber);
             resolve(gameNumber);
         });
 
@@ -78,32 +73,24 @@ export const startScreen = async () => {
 			let is3DGraphics = false;
             
             await verifyUsername()
-            console.log("after verify: ", gameNumber);
-            
-
                 startScreen.style.display = 'none';
                 canvasContainer.style.display = 'block';
                 is3DGraphics = styleCheckbox.checked;
 
-                // # DONT FORGET to maybe insert to here to get permission from django to start the game
                 socket.emit('message', 'start_game,' + gameNumber);
 
                 socket.on('start_game', (data) => {
-                    console.log("start game was called")
                     startScreen.style.display = 'none';
                     canvasContainer.style.display = 'block';
-                    console.log(data)
                     const valuesArray = data.split(',')
                     gameNumber = valuesArray[1]
                     renderPongGame(is3DGraphics, gameNumber);
                 })
-                
     } catch (error) {
         console.error('Error loading script:', error);
     }
 };
 
-// Define the gameOverScreen function within the same scope
 function loadGameOverScreen(data) {
     const winnerInfo = document.getElementById('winnerInfo');
     const gameOverScreen = document.getElementById('gameOverScreen');
@@ -144,7 +131,7 @@ export const updateScoreboard = (p1Score, p2Score) => {
             previousP2Score = p2Score;
         }
     } else {
-        console.error('Scoreboard elements not found.');
+        // empty on purpose if creation of elements dont succeed
     }
 };
 
@@ -169,7 +156,7 @@ function setup2DScene(scene) {
     directionalLight.position.set(0, 0, 1);
     scene.add(directionalLight);
 
-    let p1_paddle = create2DPaddle(0x808080); // Old-school TV Pong grey
+    let p1_paddle = create2DPaddle(0x808080);
     let p2_paddle = create2DPaddle(0x808080);
 
     const sizeFactor = 0.2;
@@ -182,6 +169,24 @@ function setup2DScene(scene) {
     return { camera, p1_paddle, p2_paddle, ball };
 }
 
+function create3DBall(ballRadiusScreen) {
+    const textureLoader = new THREE.TextureLoader();
+    const texture = textureLoader.load('../textures/checkers.jpg');
+    return new THREE.Mesh(new THREE.SphereGeometry(ballRadiusScreen * 2, 10, 10), new THREE.MeshBasicMaterial({ map: texture }));
+}
+
+function createGround() {
+    const textureLoader = new THREE.TextureLoader();
+    const groundTexture = textureLoader.load('../textures/football_field.jpg');
+    groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping; // x, y
+    groundTexture.repeat.set(1, 1); // 1, 1 means only one texture
+   
+    const groundMaterial = new THREE.MeshBasicMaterial({ map: groundTexture });
+    const groundGeometry = new THREE.PlaneGeometry(1950, 1200);
+    return new THREE.Mesh(groundGeometry, groundMaterial);
+}
+
+
 function setup3DScene(scene) {
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
 
@@ -190,25 +195,15 @@ function setup3DScene(scene) {
     p2_paddle = create3DPaddle(0xC2C9C9);
     const sizeFactor = 0.2;
     const ballRadiusScreen = (25 * 2) * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
-    const textureLoader = new THREE.TextureLoader();
     
-    // Texture for ball
-    const texture = textureLoader.load('../textures/checkers.jpg');
-    //const texture = textureLoader.load('../textures/earth.jpg');
-    ball = new THREE.Mesh(new THREE.SphereGeometry(ballRadiusScreen * 2, 10, 10), new THREE.MeshBasicMaterial({ map: texture }));
+    ball = create3DBall(ballRadiusScreen);
 
-    // Texture for field
-    const groundTexture = textureLoader.load('../textures/football_field.jpg');
-    groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
-    groundTexture.repeat.set(1, 1); // 1, 1 means only one texture
-   
-    const groundMaterial = new THREE.MeshBasicMaterial({ map: groundTexture });
-    const groundGeometry = new THREE.PlaneGeometry(1950, 1200); // Now good dont touch
-    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground = createGround();
     ground.rotation.x = -Math.PI / 2; // Rotate the ground to be horizontal
     ground.position.y = -14; // To show whole ball the ground needs to go down a little bit
 
-    // Bsackground texture
+    // Set background texture
+    const textureLoader = new THREE.TextureLoader();    
     textureLoader.load('../textures/space.jpg' , function(texture) { scene.background = texture;});
 
     scene.add(ground);
@@ -222,7 +217,6 @@ function setup3DScene(scene) {
 }
 
 function create2DPaddle(color) {
-
     let widthRatio = (20 * 2) / 1920
     let heightRatio = (90 * 2) / 1080
 	let screenWidth = window.innerWidth;
@@ -234,10 +228,10 @@ function create2DPaddle(color) {
 
     const geometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, 0);
     const material = new THREE.MeshStandardMaterial({ color });
+
     return new THREE.Mesh(geometry, material);
 }
 
-// Function to create a 3D paddle
 function create3DPaddle(color) {
     let widthRatio = (20 * 2) / 1920
     let heightRatio = (90 * 2) / 1080
@@ -262,10 +256,8 @@ function create3DPaddle(color) {
     ];
 
     const geometry = new THREE.BoxGeometry(paddleWidth, paddleZed, paddleHeight);
-    //const material = new THREE.MeshPhongMaterial({ color });
     return new THREE.Mesh(geometry, materials);
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics) {
     let p1_paddle_y, p1_paddle_x, p2_paddle_y, p2_paddle_x, ball_x, ball_y, p1_score, p2_score;
@@ -307,23 +299,25 @@ function updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics) {
 	}
 }
 
+// Slow down the ball rotation
 let rotate_ball_turn = 0;
 let ball_rotation_slowdown_factor = 2;
 
 function animateBallRotation(ball) {
-    if (rotate_ball_turn == 0)
+    if (rotate_ball_turn == 0) // Is it time to update ball rotation
     {
-        if (!render) return;
-        // Define random rotation angles for each axis
+        if (!render) return; // If rendering is not active dont update ball
+        // Define rotations for the ball
         const randomRotationX = Math.random() * Math.PI * 2;
         const randomRotationY = Math.random() * Math.PI * 2;
         const randomRotationZ = Math.random() * Math.PI * 2;
 
-        // Apply the random rotations to the ball
+        // Apply rotations for the ball
         ball.rotation.x += randomRotationX;
         ball.rotation.y += randomRotationY;
         ball.rotation.z += randomRotationZ;
     }
+    // These are related to slowning down the ball rotation
     rotate_ball_turn += 1;
     if (rotate_ball_turn >= ball_rotation_slowdown_factor)
         rotate_ball_turn = 0;
@@ -333,16 +327,15 @@ const AnimationController = {
     animationId: null,
     
     animate: function(scene, camera, renderer) {
-    
-            this.animationId = requestAnimationFrame(() => this.animate(scene, camera, renderer));
-            animateBallRotation(ball);
-            renderer.render(scene, camera);
+        this.animationId = requestAnimationFrame(() => this.animate(scene, camera, renderer));
+        animateBallRotation(ball);
+        renderer.render(scene, camera);
     },
     
     stopAnimation: function() {
         socket.emit('message', 'stop_game,' + gameNumber);
         socket.on('disconnect', () => {
-            console.log('Disconnected from server');
+            // empty on purpose nothing todo
         });
         cancelAnimationFrame(this.animationId);
     },
@@ -357,6 +350,7 @@ function cleanUpScene(scene) {
     scene.remove(p1_paddle);
     scene.remove(p2_paddle);
     scene.remove(ball);
+    scene.remove(ground);
 }
 
 function exit_game(data, scene)
@@ -389,15 +383,15 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
         camera.position.set(0, 0, 100);
     }
 
-    socket.on('state', (data) => {
+    socket.on('state', (data) => { // game update
         updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics)
     });
 
-    socket.on('endstate', (data) => {
+    socket.on('endstate', (data) => { // game has ended
         exit_game(data, scene)
         AnimationController.stopAnimation();
     });
-        
+
     document.addEventListener('keydown', (event) => {
         event.preventDefault();
         if (is3DGraphics)
@@ -437,11 +431,6 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
             {
                 socket.emit('message', 'left_paddle_down,' + gameNumber);
             }
-        }
-        if (event.key == 'c')
-        {
-            socket.emit('message', 'stop_game,' + gameNumber);
-            render = false;
         }
     });
 
@@ -472,7 +461,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     });
 
     document.addEventListener('keydown', (event) => {
-        const moveDistance = 10; // Adjust the movement distance as needed
+        const moveDistance = 10;
         const rotateAngle = Math.PI / 36;
         switch (event.key) {
             case 'r': // Move camera along the positive x-axis
@@ -551,15 +540,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
                 // Handle other key presses if needed
                 break;
         }
-
-        //console.log("camera position x ", camera.position.x)
-        //console.log("camera position y ", camera.position.y)
-        //console.log("camera position z ", camera.position.z)
-        //console.log("camera rotation x ", camera.rotation.x)
-        //console.log("camera rotation y ", camera.rotation.y)
-        //console.log("camera rotation z ", camera.rotation.z)
     });
-
 
     if (render) {
         AnimationController.startAnimation(scene, camera, renderer);
@@ -568,5 +549,4 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     {
         AnimationController.stopAnimation();
     }
-
 };
