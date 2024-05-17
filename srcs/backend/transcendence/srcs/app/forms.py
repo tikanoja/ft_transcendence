@@ -149,8 +149,9 @@ class GameRequestForm(forms.Form):
         (GameInstance.PONG, 'Pong'),
         (GameInstance.COLOR, 'Color'),
     ]
-    game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
-    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
+    # 
+    game_type = forms.ChoiceField(widget=forms.RadioSelect(attrs={'class': 'form-check-input'}), choices=GAME_TYPE_CHOICES, label='Choose Game Type:')
+    username = forms.CharField(label='Enter username', widget=forms.TextInput(attrs={'placeholder': 'Enter username', 'class': 'form-control'}), max_length=256, required=True)
 
     def is_valid(self):
         valid = super().is_valid()
@@ -195,8 +196,8 @@ class StartTournamentForm(forms.Form):
         (GameInstance.PONG, 'Pong'),
         (GameInstance.COLOR, 'Color'),
     ]
-    game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
-    alias = forms.CharField(label='Alias', widget=forms.TextInput(attrs={'placeholder': 'Enter alias'}), max_length=256, required=True)
+    game_type = forms.ChoiceField(widget=forms.RadioSelect(attrs={'class': 'form-check-input'}), choices=GAME_TYPE_CHOICES, label='Game Type')
+    alias = forms.CharField(label='Enter alias', widget=forms.TextInput(attrs={'placeholder': 'Enter alias', 'class': 'form-control'}), max_length=256, required=True)
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -205,7 +206,7 @@ class StartTournamentForm(forms.Form):
 
 
 class TournamentInviteForm(forms.Form):
-    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username', 'class': 'form-control'}), max_length=256, required=True)
 
     def is_valid(self):
         valid = super().is_valid()
@@ -224,4 +225,4 @@ class TournamentInviteForm(forms.Form):
             self.fields['formname'] = forms.CharField(widget=forms.HiddenInput(), initial=kwargs['formname'])
 
 class TournamentJoinForm(forms.Form):
-    alias = forms.CharField(label='Alias', widget=forms.TextInput(attrs={'placeholder': 'Enter alias'}), max_length=256, required=True)
+    alias = forms.CharField(label='Alias', widget=forms.TextInput(attrs={'placeholder': 'Enter alias', 'class': 'form-control'}), max_length=256, required=True)
