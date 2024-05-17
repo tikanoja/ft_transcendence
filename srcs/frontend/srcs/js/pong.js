@@ -30,7 +30,7 @@ export const loadScript = () => {
 }
 
 function connectWebSocket() {
-    socket = io.connect('https://' + window.location.hostname);
+    socket = io.connect('https://' + window.location.hostname, {path: "/pong/socket.io"});
     socket.on('connect', () => {
         // empty on purpose nothing todo
     });

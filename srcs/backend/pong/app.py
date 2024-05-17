@@ -278,7 +278,7 @@ class Game: # Full class that handles the game
 		self.down_pressed = 0
 		# print new scores
 		# Check game end condition the stop the game if necessary
-		if (self.left_score or self.right_score) >= self.game_end_condition:
+		if ((self.left_score >= self.game_end_condition) or (self.right_score >= self.game_end_condition)):
 			self.game_running = 0 # set game not running
 			self.winner = self.left_player_id
 			if self.right_score > self.left_score:
