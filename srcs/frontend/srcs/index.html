@@ -29,22 +29,20 @@
 	<!-- The router logic -->
 	<script type="module" src="/js/router.js"></script>
   </head>
-	<body>
+	<body class="bg-dark">
 		<div class="container-fluid m-0 p-0">
 			<!-- The main content of the app -->
-			<div class="bg-light ">
-				<!-- The content of this div is displayed dynamically using URL-based routing -->
+			<div class="bg-light">
 				<div id="content">
-
+					<!-- The content of this div is displayed dynamically using URL-based routing -->
 				</div>
-
-            <div class="border rounded mx-2 p-2">
+            <div class="border rounded mx-2 p-2 bg-light">
                 <div id="chat-log" class="chat-log chat-text border rounded p-2 mb-2"> </div>
                 <div class="d-flex flex-wrap">
                     <textarea id="chat-input" class="chat-text col-7 col-md-9 px-2 py-1" placeholder="Message..." rows=1 style="resize: none"></textarea>
                     <button id="chat-submit" class="col-5 col-md-3">Submit</button>
                 </div>
-                <script type="module" src="./js/chat.js"></script>
+                <script type="module" src="/js/chat.js"></script>
             </div>
 
 		</div>

@@ -106,7 +106,7 @@ class GameInstance(models.Model):
     tournament_match = models.BooleanField(default=False)
  
     def __str__(self):
-        return f'({self.game} instance:  p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'
+        return f'(Game type: {self.game}, instance: {self.id}, p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'
 
 
 class PongGameInstance(GameInstance):

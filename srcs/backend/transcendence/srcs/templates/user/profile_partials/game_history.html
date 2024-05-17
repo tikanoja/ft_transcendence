@@ -1,12 +1,11 @@
 <div class="container">
-	<h2>Game History</h2>
-	<h3>Pong Games</h3>
+	<h3 class="text-center">Pong</h3>
 	<table class="table table-hover table-responsive">
 		<thead>
 			<th scope="col">#</th>
 			<th scope="col">Date</th>
-			<th scope="col">Opponent</th>
-			<th scope="col">Opponent Score</th>
+			<th scope="col">Foe</th>
+			<th scope="col">Foe Score</th>
 			<th scope="col">User Score</th>
 			<th scope="col">Winner</th>
 		</thead>
@@ -14,7 +13,7 @@
 		{% for key, entry in history.pong.items %}
 			<tr>
 				<th scope="row ">{{ forloop.counter }}</th>
-				<td>{{ entry.date }}</td>
+				<td>{{ entry.date|date:"d/m/Y"}}</td>
 				<td>{{ entry.opponent }}</td>
 				<td>{{ entry.opponent_score }}</td>
 				<td>{{ entry.user_score }}</td>
@@ -27,12 +26,12 @@
 		{% endfor %}
 		</tbody>
 	</table>
-	<h3>Color War Games</h3>
+	<h3 class="text-center">Color War</h3>
 	<table class="table table-hover table-responsive">
 		<thead>
 			<th scope="col">#</th>
 			<th scope="col">Date</th>
-			<th scope="col">Opponent</th>
+			<th scope="col">Foe</th>
 			<th scope="col">Moves to Win</th>
 			<th scope="col">Winner</th>
 		</thead>
@@ -40,7 +39,7 @@
 		{% for key, entry in history.color.items %}
 			<tr>
 				<th scope="row ">{{ forloop.counter }}</th>
-				<td>{{ entry.date }}</td>
+				<td>{{ entry.date|date:"d/m/Y" }}</td>
 				<td>{{ entry.opponent }}</td>
 				<td>{{ entry.opponent_score }}</td>
 				<td>{{ entry.user_score }}</td>
