@@ -265,83 +265,6 @@ function create3DPaddle(color) {
     return new THREE.Mesh(geometry, materials);
 }
 
-export const renderPongGame = (is3DGraphics, gameNumber) => {
-	console.log("GAME IS RENDERING")
-    const scene = new THREE.Scene();
-    let camera;
-    // Remove any existing canvas
-    const existingCanvas = document.getElementById('pongCanvas');
-    if (existingCanvas) {
-        existingCanvas.remove();
-    }
-
-    const renderer = new THREE.WebGLRenderer();
-    const pixelRatio = window.devicePixelRatio;
-    renderer.setPixelRatio(pixelRatio);
-	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
-    renderer.domElement.id = 'pongCanvas'; // Set an id for the new canvas
-    document.getElementById('canvasContainer').appendChild(renderer.domElement);
-    let p1_paddle, p2_paddle, ball;
-    if (is3DGraphics) {
-        ({ camera, p1_paddle, p2_paddle, ball } = setup3DScene(scene));
-    } else {
-        ({ camera, p1_paddle, p2_paddle, ball } = setup2DScene(scene));
-
-    }
-    let render = true
-	let min_visible_x, max_visible_x, min_visible_y, max_visible_y;
-	calculateVisibleArea();
-
-    function calculateVisibleArea() {  //TODO: potentially needs to be calculated differently for perspective, currently functions with 
-        const half_width = window.innerWidth / 2;
-        const half_height = window.innerHeight / 2;
-        min_visible_x = camera.position.x - half_width;
-        max_visible_x = camera.position.x + half_width;
-        min_visible_y = camera.position.y - half_height;
-        max_visible_y = camera.position.y + half_height;
-    }
-
-
-    camera.position.set(0, 0, 100);
-    let p1_paddle_y, p1_paddle_x, p2_paddle_y, p2_paddle_x, ball_x, ball_y, p1_score, p2_score;
-    const min_visible_x = -1010;
-    const max_visible_x = 1010;
-    const min_visible_y = -586;
-    const max_visible_y = 586;
-    const valuesArray = data.split(',');
-
-	if (valuesArray[0] == gameNumber){
-	    ball_x = parseFloat(valuesArray[1]);
-		ball_y = parseFloat(valuesArray[2]);
-		p2_paddle_x = parseFloat(valuesArray[3]);
-		p2_paddle_y = parseFloat(valuesArray[4]);
-		p1_paddle_x = parseFloat(valuesArray[5]);
-		p1_paddle_y = parseFloat(valuesArray[6]);
-		p2_score = parseInt(valuesArray[7]);
-		p1_score = parseInt(valuesArray[8]);
-
-		ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
-		ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);
-		p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[3]);
-		p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[4]);
-		p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[5]);
-		p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[6]);
-        if  (is3DGraphics == true)
-        {
-            p1_paddle.position.set(p1_paddle_x, 0, p1_paddle_y); 
-            p2_paddle.position.set(p2_paddle_x, 0, p2_paddle_y); 
-            ball.position.set(ball_x, 0, ball_y);
-        }
-        else
-        {
-            p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
-            p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
-            ball.position.set(ball_x,  ball_y, 0);
-        }
-		updateScoreboard(p1_score, p2_score);
-	}
-}
-
 let rotate_ball_turn = 0;
 let ball_rotation_slowdown_factor = 2;
 
@@ -399,6 +322,49 @@ function exit_game(data, scene)
     loadGameOverScreen(data);
     cleanUpScene(scene);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics) {
+    let p1_paddle_y, p1_paddle_x, p2_paddle_y, p2_paddle_x, ball_x, ball_y, p1_score, p2_score;
+    const min_visible_x = -1010;
+    const max_visible_x = 1010;
+    const min_visible_y = -586;
+    const max_visible_y = 586;
+    const valuesArray = data.split(',');
+
+	if (valuesArray[0] == gameNumber){
+	    ball_x = parseFloat(valuesArray[1]);
+		ball_y = parseFloat(valuesArray[2]);
+		p2_paddle_x = parseFloat(valuesArray[3]);
+		p2_paddle_y = parseFloat(valuesArray[4]);
+		p1_paddle_x = parseFloat(valuesArray[5]);
+		p1_paddle_y = parseFloat(valuesArray[6]);
+		p2_score = parseInt(valuesArray[7]);
+		p1_score = parseInt(valuesArray[8]);
+
+		ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
+		ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);
+		p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[3]);
+		p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[4]);
+		p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[5]);
+		p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[6]);
+        if  (is3DGraphics == true)
+        {
+            p1_paddle.position.set(p1_paddle_x, 0, p1_paddle_y); 
+            p2_paddle.position.set(p2_paddle_x, 0, p2_paddle_y); 
+            ball.position.set(ball_x, 0, ball_y);
+        }
+        else
+        {
+            p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
+            p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
+            ball.position.set(ball_x,  ball_y, 0);
+        }
+		updateScoreboard(p1_score, p2_score);
+	}
+}
+
 
 ///Main function for setting up and animating game
 export const renderPongGame = (is3DGraphics, gameNumber) => {
