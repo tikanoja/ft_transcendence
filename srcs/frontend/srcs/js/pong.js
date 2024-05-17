@@ -366,7 +366,6 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
         }
     });
 
-
     let animationId;
 
     function startAnimation() {
