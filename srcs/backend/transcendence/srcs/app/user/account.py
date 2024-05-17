@@ -9,6 +9,8 @@ import os
 from transcendence import settings
 import logging
 from django.db.models import Q
+from PIL import Image, ImageFile
+import io
 
 
 logger = logging.getLogger(__name__)
@@ -150,6 +152,18 @@ def manage_accountPOST(request):
             old_image = current_user.profile_picture
             if not form.is_valid():
                 raise ValidationError("Form filled incorrectly for profile picture")
+
+            # Resizing the uploaded img to be 300x300 while maintaining aspect ratio
+            img = Image.open(new_image)
+            if img.mode!= 'RGB':
+                img = img.convert('RGB')
+            max_size = (300, 300)
+            img.thumbnail(max_size, Image.Resampling.LANCZOS)
+            in_mem_file = io.BytesIO()
+            img.save(in_mem_file, format='JPEG')
+            in_mem_file.seek(0)
+            new_image.file = in_mem_file
+
             if old_image.url != '/media/default.png':
                 os.remove(os.path.join(settings.MEDIA_ROOT, old_image.path))
             current_user.profile_picture = new_image
