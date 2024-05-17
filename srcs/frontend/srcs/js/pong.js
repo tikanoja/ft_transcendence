@@ -33,9 +33,9 @@ export const loadScript = () => {
 }
 
 function connectWebSocket() {
-    socket = io.connect('https://' + window.location.hostname);
-	console.log(window.location.hostname)
+    socket = io.connect('https://' + window.location.hostname, {path: "/pong/socket.io"});
     socket.on('connect', () => {
+        console.log("connect recieved: pong")
     });
     socket.on('error', (error) => {
         console.error('WebSocket error:', error);
@@ -44,12 +44,12 @@ function connectWebSocket() {
 
 export const verifyUsername = () => {
     return new Promise((resolve, reject) => {
-        const username1Element = document.getElementById('player1');
-        const username2Element = document.getElementById('player2');
-        const username1 = username1Element.innerText.trim();
-        const username2 = username2Element.innerText.trim();
-        const usernameString = username1 + "," + username2;
+        const player1username = document.getElementById('player1username').value;
+        const player2username = document.getElementById('player2username').value;
+        const current_game_id = document.getElementById('current_game_id').value;
+        const usernameString = player1username + "," + player2username + "," + current_game_id;
         
+        console.log('usernameString id: ', usernameString);
         socket.emit("username", usernameString);
 
         socket.on('setup_game', (data) => {
@@ -77,10 +77,11 @@ export const startScreen = async () => {
 			const styleCheckbox = document.getElementById('styleCheckbox');
 			let is3DGraphics = false;
             
+
             await verifyUsername()
             console.log("after verify: ", gameNumber);
             
-
+                console.log("in the click listener")
                 startScreen.style.display = 'none';
                 canvasContainer.style.display = 'block';
                 is3DGraphics = styleCheckbox.checked;
@@ -89,15 +90,13 @@ export const startScreen = async () => {
                 socket.emit('message', 'start_game,' + gameNumber);
 
                 socket.on('start_game', (data) => {
-                    console.log("start game was called")
-                    startScreen.style.display = 'none';
+                    startScreen.remove();
                     canvasContainer.style.display = 'block';
                     console.log(data)
                     const valuesArray = data.split(',')
                     gameNumber = valuesArray[1]
                     renderPongGame(is3DGraphics, gameNumber);
-                })
-                
+                });
     } catch (error) {
         console.error('Error loading script:', error);
     }
@@ -161,7 +160,7 @@ function addLighting(scene) {
 }
 
 function setup2DScene(scene) {
-    let camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 1000);
+    const camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 1000);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
@@ -217,7 +216,7 @@ function setup3DScene(scene) {
     scene.add(ball);
     p1_paddle.position.set(-100,  0, 0);
     p2_paddle.position.set(100, 0, 0);
-    
+
     return { camera, p1_paddle, p2_paddle, ball };
 }
 
@@ -265,9 +264,45 @@ function create3DPaddle(color) {
     //const material = new THREE.MeshPhongMaterial({ color });
     return new THREE.Mesh(geometry, materials);
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics) {
+export const renderPongGame = (is3DGraphics, gameNumber) => {
+	console.log("GAME IS RENDERING")
+    const scene = new THREE.Scene();
+    let camera;
+    // Remove any existing canvas
+    const existingCanvas = document.getElementById('pongCanvas');
+    if (existingCanvas) {
+        existingCanvas.remove();
+    }
+
+    const renderer = new THREE.WebGLRenderer();
+    const pixelRatio = window.devicePixelRatio;
+    renderer.setPixelRatio(pixelRatio);
+	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
+    renderer.domElement.id = 'pongCanvas'; // Set an id for the new canvas
+    document.getElementById('canvasContainer').appendChild(renderer.domElement);
+    let p1_paddle, p2_paddle, ball;
+    if (is3DGraphics) {
+        ({ camera, p1_paddle, p2_paddle, ball } = setup3DScene(scene));
+    } else {
+        ({ camera, p1_paddle, p2_paddle, ball } = setup2DScene(scene));
+
+    }
+    let render = true
+	let min_visible_x, max_visible_x, min_visible_y, max_visible_y;
+	calculateVisibleArea();
+
+    function calculateVisibleArea() {  //TODO: potentially needs to be calculated differently for perspective, currently functions with 
+        const half_width = window.innerWidth / 2;
+        const half_height = window.innerHeight / 2;
+        min_visible_x = camera.position.x - half_width;
+        max_visible_x = camera.position.x + half_width;
+        min_visible_y = camera.position.y - half_height;
+        max_visible_y = camera.position.y + half_height;
+    }
+
+
+    camera.position.set(0, 0, 100);
     let p1_paddle_y, p1_paddle_x, p2_paddle_y, p2_paddle_x, ball_x, ball_y, p1_score, p2_score;
     const min_visible_x = -1010;
     const max_visible_x = 1010;
