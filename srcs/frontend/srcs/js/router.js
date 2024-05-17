@@ -70,6 +70,11 @@ const routes = {
 		view: "app/profile/",
 		title: "test_profile | " +  pageTitle,
 		description: "Only Jen's profile"
+	},
+	"/play/active-game" : {
+		view: "app/play/",
+		title: "Play | " + pageTitle,
+		description: "Play games"
 	}
 }
 // route above should not be the same as the calls to the backend...seems fragile

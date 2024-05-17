@@ -124,6 +124,7 @@ function updateEventListeners() {
     var tournamentJoinForm = document.getElementById('tournamentJoinForm');
     var autoregister = document.getElementById('autoRegister');
 
+
     // remove listeners
     if (profilePictureForm)
         profilePictureForm.removeEventListener('submit', manageAccountHandler);
@@ -188,7 +189,6 @@ function updateEventListeners() {
     }
     if (autoregister)
         autoregister.removeEventListener('click', automate_register);
-
     // begin add listeners if currently present
     if (profilePictureForm)
         profilePictureForm.addEventListener('submit', manageAccountHandler);
@@ -537,7 +537,7 @@ const gameRenderButtonHandler = async (event) => {
         console.log('response,ok triggered');
 		// stay on this page, display the content again
         const html = await response.text();
-        // window.history.pushState("", "", profilePath);
+        window.history.pushState("", "", "/play/active-game");
         updateContent(html, "Playing " + gameType, "Playing " + gameType);
 	}
 	else {

@@ -65,44 +65,52 @@ export const startScreen = async () => {
 			connectWebSocket();
             
 			const startScreen = document.getElementById('startScreen');
-			const playButton = document.getElementById('playButton');
 			const canvasContainer = document.getElementById('canvasContainer');
 			const styleCheckbox = document.getElementById('styleCheckbox');
 			let is3DGraphics = false;
             
 
             await verifyUsername()
-            console.log("after verify: ", gameNumber);
+
             
-                console.log("in the click listener")
-                startScreen.style.display = 'none';
+            startScreen.style.display = 'none';
+            canvasContainer.style.display = 'block';
+            is3DGraphics = styleCheckbox.checked;
+
+            // # DONT FORGET to maybe insert to here to get permission from django to start the game
+            socket.emit('message', 'start_game,' + gameNumber);
+
+            socket.on('start_game', (data) => {
+                startScreen.remove();
                 canvasContainer.style.display = 'block';
-                is3DGraphics = styleCheckbox.checked;
-
-                // # DONT FORGET to maybe insert to here to get permission from django to start the game
-                socket.emit('message', 'start_game,' + gameNumber);
-
-                socket.on('start_game', (data) => {
-                    startScreen.remove();
-                    canvasContainer.style.display = 'block';
-                    console.log(data)
-                    const valuesArray = data.split(',')
-                    gameNumber = valuesArray[1]
-                    renderPongGame(is3DGraphics, gameNumber);
-                });
+                const P1score = document.getElementById('P1Card');
+                P1score.style.display = 'block';
+                const P2score = document.getElementById('P2Card');
+                P2score.style.display = 'block';
+                const valuesArray = data.split(',')
+                gameNumber = valuesArray[1]
+                renderPongGame(is3DGraphics, gameNumber);
+            });
     } catch (error) {
         console.error('Error loading script:', error);
     }
 };
 
-// Define the gameOverScreen function within the same scope
 function loadGameOverScreen(data) {
     const winnerInfo = document.getElementById('winnerInfo');
     const gameOverScreen = document.getElementById('gameOverScreen');
-    
+    const canvasContainer = document.getElementById('canvasContainer');
+    const scoreboard = document.getElementById('scoreboard');
+    const P1score = document.getElementById('P1Card');
+    const P2score = document.getElementById('P2Card');
+
+    P1score.style.display = 'none';
+    P2score.style.display = 'none';
+    scoreboard.style.display = 'none';
+
     const valuesArray = data.split(',');
-    const p1Score = parseInt(valuesArray[8]);
-    const p2Score = parseInt(valuesArray[7]);
+    const p1Score = parseInt(valuesArray[7]);
+    const p2Score = parseInt(valuesArray[8]);
 
     let winnerText;
     if (p1Score > p2Score) {
@@ -115,6 +123,7 @@ function loadGameOverScreen(data) {
 
     winnerInfo.textContent = winnerText;
     gameOverScreen.style.display = 'block';
+
     canvasContainer.style.display = 'none';
 }
 
@@ -122,16 +131,19 @@ let previousP1Score = null;
 let previousP2Score = null;
 
 export const updateScoreboard = (p1Score, p2Score) => {
-    const scoreLeftElement = document.querySelector('.score-left');
-    const scoreRightElement = document.querySelector('.score-right');
+    const player1username = document.getElementById('player1username').textContent;
+    const player2username = document.getElementById('player2username').textContent;
+
+    const scoreLeftElement = document.getElementById('player1Score');
+    const scoreRightElement = document.getElementById('player2Score');
     
     if (isNaN(p1Score) || isNaN(p2Score)) {
         return;
     }
     if (scoreLeftElement && scoreRightElement) {
         if (p1Score !== previousP1Score || p2Score !== previousP2Score) {
-            scoreLeftElement.textContent = `P1 SCORE: ${p1Score}`;
-            scoreRightElement.textContent = `P2 SCORE: ${p2Score}`;
+            scoreLeftElement.textContent = `${p1Score}`;
+            scoreRightElement.textContent = `${p2Score}`;
             previousP1Score = p1Score;
             previousP2Score = p2Score;
         }
@@ -226,7 +238,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     if (existingCanvas) {
         existingCanvas.remove();
     }
-    let canvasFocused = false;
+    let canvasFocused = true;
     
     const renderer = new THREE.WebGLRenderer();
     const pixelRatio = window.devicePixelRatio;
@@ -240,12 +252,10 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     
     canvas.addEventListener('focus', () => {
         canvasFocused = true;
-        console.log('Canvas is focused');
     });
     
     canvas.addEventListener('blur', () => {
         canvasFocused = false;
-        console.log('Canvas lost focus');
     });
     
     
@@ -283,8 +293,8 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
 				p2_paddle_y = parseFloat(valuesArray[4]);
 				p1_paddle_x = parseFloat(valuesArray[5]);
 				p1_paddle_y = parseFloat(valuesArray[6]);
-				p2_score = parseInt(valuesArray[7]);
-				p1_score = parseInt(valuesArray[8]);
+				p1_score = parseInt(valuesArray[7]);
+				p2_score = parseInt(valuesArray[8]);
 
 				ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
 				ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);

@@ -80,14 +80,16 @@ def authenticate_player(request):
 
     current_game = GameInstance.objects.get(pk=game_id)
     game_type = current_game.game
-
+    current_user = request.user
     context = {
         'p1_username': current_game.p1.username,
         'p2_username': current_game.p2.username,
         'p1_user': current_game.p1,
         'p2_user': current_game.p2,
         'form': PlayerAuthForm,
-        'current_game': current_game
+        'current_game': current_game,
+        'current_user': current_user,
+        'current_user':  current_user.username
     }
 
     user = authenticate(request, username=username, password=password)
