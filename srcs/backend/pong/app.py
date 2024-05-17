@@ -5,7 +5,7 @@ import random
 import requests
 from typing import Optional
 from dataclasses import dataclass
-from flask import Flask, request, jsonify # ,current_app is this needed?
+from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 from flask_restful import Resource, Api
@@ -19,14 +19,14 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 app.debug = True
 app.host = '0.0.0.0'
 
-@dataclass
+@dataclass # "struct" in c/c++ terms
 class GameObject:
 	x: float
 	y: float
 	width: float
 	height: float
 
-class Game:
+class Game: # Full class that handles the game
 	def __init__(self):
 		self.game_slot: int = -1
 		self.ball_coordinates: Optional[GameObject.GameObject] = None # x,y,width,height
@@ -54,7 +54,7 @@ class Game:
 		self.down_pressed: bool = False # right down
 		self.left_score: int = 0 # actual score not tkinter object
 		self.right_score: int = 0 # actual score not tkinter object
-		self.game_end_condition: int = 1 # how many points till end
+		self.game_end_condition: int = 3 # how many points till end
 		self.game_running: int = 0 # 1 running, 0 end
 		self.winner: str = 'nobody'
 		self.left_player_id: str = 'left_player'
@@ -62,7 +62,7 @@ class Game:
 		self.create_ball_initial_coordinates()
 		self.create_left_paddle_initial_coordinates()
 		self.create_right_paddle_initial_coordinates()
-		self.ball_bounces: int = 0
+		self.ball_bounces: int = 0 # how many times ball has bounced
 
 	def set_game_slot(self, number):
 		self.game_slot = number
@@ -159,7 +159,6 @@ class Game:
 				self.even_odd_ball_direction = self.even_odd_ball_direction % 2 # if more than 1 set to 0
 				self.right_score += 1 # increase score
 				self.reset_game_position() # also checks has the game ended
-
 
 	def too_far_right(self): # checks if ball hits right paddle
 		if (self.ball_coordinates.x + self.ball_coordinates.width >= self.right_paddle_coordinates.x - self.paddle_width):
@@ -295,8 +294,6 @@ class Game:
 		self.game_running = running_or_not
 
 	def return_game_state(self): # returns all necessary information of game state to frontend to render
-		# self.screen_width: int = 1920 # x
-		# self.screen_height: int = 1080 # y
 		ball_world_pos_x = self.ball_coordinates.x / self.screen_width # calculates relative position between 0 and 1
 		ball_world_pos_y = self.ball_coordinates.y / self.screen_height # calculates relative position between 0 and 1
 		left_paddle_world_pos_x = self.left_paddle_coordinates.x / self.screen_width # calculates relative position between 0 and 1
@@ -379,7 +376,6 @@ def game_loop():
 					socketio.emit('state', games[game].return_game_state())
 		time.sleep(0.02) # 50 times per second
 
-# string format is "set_game_settings,0,player1,player2" 
 def set_game_settings(splitted_command):
 	global socketio
 	global games
@@ -396,13 +392,12 @@ def set_game_settings(splitted_command):
 			socketio.emit('message', 'ERROR, game already running.')
 			return
 		else:
-			# DONT FORGET in here we should insert the check if django approves game start
 			games[number].left_player_id = splitted_command[2]
 			games[number].right_player_id = splitted_command[3]
 			socketio.emit('message', 'OK, game settings set.')
 			return
 
-# returns "OK, 0,0,1,0" if there is only 1 game running and it is on slot 2
+# returns which games are running
 def	games_running(splitted_command):
 	global games
 	global games_lock
@@ -442,23 +437,6 @@ def start_game(splitted_command):
 			games[number].set_game_running(1)
 			socketio.emit('start_game', 'OK,{}'.format(number))
 			return
-
-	# LET THIS STAY here commented out for know, remove only after timo and sheree have checked that everything works as should
-	#with games_lock:
-	#    for index in range(4):
-	#        if games[index].game_running == 0:
-	#            number = index
-	#            break
-	#with games_lock:
-	#    if number == -1:
-	#        socketio.emit('message', 'ERROR, game already running cannot create new.')
-	#        return
-	#    else:
-	#        games[number].new_game_initilization()
-	#        games[number].set_game_slot(number)
-	#        games[number].set_game_running(1)
-	#        socketio.emit('start_game', 'OK,{}'.format(number))
-	#        return
 
 # stops game from specific slot
 def stop_game(splitted_command):
@@ -669,15 +647,14 @@ def right_paddle_up_release(splitted_command):
 # when the connection has been established
 @socketio.on('connect')
 def handle_connect():
-	global socketio
-	socketio.emit('message', 'client connected')
+	pass # empty on purpose nothing todo
 
 # when the connection has been disconnected 
 @socketio.on('disconnect')
 def handle_disconnect():
-	pass
+	pass # empty on purpose nothing todo
 
-# DONT FORGET is this function actually needed?
+# returns state for command line interface cli
 def get_state_cli(splitted_command):
 	global socketio
 	global games_lock
@@ -737,7 +714,6 @@ def handle_message(message):
 	else:
 		socketio.emit('message', 'ERROR, nothing was sent.')
 
-
 @socketio.on('username')
 def validate_username(data):
 	global games
@@ -751,7 +727,6 @@ def validate_username(data):
 	with app.app_context():
 		django_url = "http://transcendence:8000/pong/validate_match/"
 		try:
-
 			slot = -1
 			response = requests.post(django_url, data=data_to_send)
 			if response.status_code == 200:
@@ -765,16 +740,13 @@ def validate_username(data):
 					else:
 						games[slot].left_player_id = usernames[1]
 						games[slot].right_player_id = usernames[0]
-						print("Emiting setup game")
 						socketio.emit('setup_game', 'OK,{}'.format(slot))
 						return jsonify({"message": "Usernames verified"})
 			else:
 				return jsonify({"error": "Failed to send request"}), response.status_code
 		except Exception as e:
-			print("threw except", str(e))
 			return jsonify({"error": str(e)}), 500
 
-# @app.route('/send_game_over_data', methods=['POST'])
 def send_game_over_data(p1_score, p2_score, rally):
 	data_to_send = {"test" : "rally",
 		"p1_username": "placeholder",
@@ -785,7 +757,6 @@ def send_game_over_data(p1_score, p2_score, rally):
 	}
 	with app.app_context():
 		django_url = "http://transcendence:8000/pong/send_game_data/"
-
 		try:
 			response = requests.post(django_url, data=data_to_send)
 			if response.status_code == 200:
@@ -793,23 +764,16 @@ def send_game_over_data(p1_score, p2_score, rally):
 			else:
 				return jsonify({"error": "Failed to send request"}), response.status_code
 		except Exception as e:
-			print("threw except", str(e))
 			return jsonify({"error": str(e)}), 500
-
 
 @app.route('/init_usernames', methods=['GET'])
 def init_usernames():
 	try:
-		print("inside try")
-		# Assuming the request body contains JSON data with 'p1_username' and 'p2_username'
 		data = request.get_json()
 		p1_username = data['p1_username']
 		p2_username = data['p2_username']
-		# Process the data as needed
-		# For example, you can return a response indicating success
 		return jsonify({'message': 'Usernames initialized successfully', 'p1_username': p1_username, 'p2_username': p2_username}), 200
 	except Exception as e:
-		# Handle any errors
 		return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
@@ -820,4 +784,4 @@ if __name__ == '__main__':
 		background_thread_running = 1
 		thread = threading.Thread(target=game_loop)
 		thread.start()
-	socketio.run(app, host='0.0.0.0', port=8888, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
+	socketio.run(app, host='0.0.0.0', port=8888, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True) # unsafe is for self signed ssl certificates
