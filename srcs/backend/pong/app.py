@@ -753,9 +753,7 @@ def validate_username(data):
 
 def send_game_over_data(p1_score, p2_score, rally, game_id):
 	data_to_send = {"game" : "Pong",
-		"p1_username": "hen",
 		"p1_score": f"{p1_score}",
-		"p2_username": "jen",
 		"p2_score": f"{p2_score}",
 		"longest_rally": f"{rally}",
 		"game_id": f"{game_id}"
