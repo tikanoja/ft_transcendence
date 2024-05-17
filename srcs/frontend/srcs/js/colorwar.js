@@ -421,18 +421,7 @@ export const renderColorwar = (gameNumber, data) => {
     addLighting(scene);
 
     const tileMeshes = setupGameBoard(data, boardStartX, boardStartY, numRows, numCols, render, colorTextures, tileSize, scene);
-    
 
-    // document.addEventListener('keydown', (event) => {
-	// 	event.preventDefault();
-	// 		if (event.key == 'c')
-	// 	{
-    //         console.log("attempting to stop game")
-	// 		socket.emit('message', 'stop_game,' + gameNumber);
-    //         exitGame(data, tileMeshes, render, colorTextures)
-	// 		render = false;
-	// 	}
-    // });
     
     socket.on('state', (data) => {
         updateGameState(data, tileMeshes,  render, colorTextures)
@@ -442,7 +431,6 @@ export const renderColorwar = (gameNumber, data) => {
         socket.emit('message', 'stop_game,' + gameNumber);
         exitGame(data, tileMeshes, render, colorTextures)
     });
-
 
     
     if (made_listner == 0)

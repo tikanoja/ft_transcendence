@@ -226,13 +226,29 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     if (existingCanvas) {
         existingCanvas.remove();
     }
-
+    let canvasFocused = false;
+    
     const renderer = new THREE.WebGLRenderer();
     const pixelRatio = window.devicePixelRatio;
     renderer.setPixelRatio(pixelRatio);
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
     renderer.domElement.id = 'pongCanvas'; // Set an id for the new canvas
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
+    
+    const canvas = renderer.domElement;
+    canvas.setAttribute('tabindex', '0');
+    
+    canvas.addEventListener('focus', () => {
+        canvasFocused = true;
+        console.log('Canvas is focused');
+    });
+    
+    canvas.addEventListener('blur', () => {
+        canvasFocused = false;
+        console.log('Canvas lost focus');
+    });
+    
+    
     let p1_paddle, p2_paddle, ball;
     if (is3DGraphics) {
         ({ camera, p1_paddle, p2_paddle, ball } = setup3DScene(scene));
@@ -311,40 +327,43 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
 
     //THESE ARE INVERTED DUE TO COORD DIFFERENCE
 	document.addEventListener('keydown', (event) => {
-		event.preventDefault();
-		if (event.key == 'ArrowUp')
-		{
-			socket.emit('message', 'right_paddle_down,' + gameNumber);
-		}
-        if (event.key  == 'ArrowDown')
-		{
-			socket.emit('message', 'right_paddle_up,' + gameNumber);
-		}
-        if (event.key  == 'w')
-		{
-			socket.emit('message', 'left_paddle_down,' + gameNumber);
-		}
-        if (event.key  == 's')
-		{
-			socket.emit('message', 'left_paddle_up,' + gameNumber);
-		}
-			if (event.key == 'c')
-		{
-			socket.emit('message', 'stop_game,' + gameNumber);
-			render = false;
-		}
+        if (canvasFocused) {
+            event.preventDefault();
+            if (event.key == 'ArrowUp') {
+                socket.emit('message', 'right_paddle_down,' + gameNumber);
+            }
+            if (event.key == 'ArrowDown') {
+                socket.emit('message', 'right_paddle_up,' + gameNumber);
+            }
+            if (event.key == 'w') {
+                socket.emit('message', 'left_paddle_down,' + gameNumber);
+            }
+            if (event.key == 's') {
+                socket.emit('message', 'left_paddle_up,' + gameNumber);
+            }
+            if (event.key == 'c') {
+                socket.emit('message', 'stop_game,' + gameNumber);
+                render = false;
+            }
+        }
     });
     
     document.addEventListener('keyup', (event) => {
-        event.preventDefault();
-        if (event.key == 'ArrowUp')
-            socket.emit('message', 'right_paddle_down_release,' + gameNumber);
-        if (event.key  == 'ArrowDown')
-            socket.emit('message', 'right_paddle_up_release,' + gameNumber);
-        if (event.key  == 'w')
-            socket.emit('message', 'left_paddle_down_release,' + gameNumber);
-        if (event.key  == 's')
-            socket.emit('message', 'left_paddle_up_release,' + gameNumber);
+        if (canvasFocused) {
+            event.preventDefault();
+            if (event.key == 'ArrowUp') {
+                socket.emit('message', 'right_paddle_down_release,' + gameNumber);
+            }
+            if (event.key == 'ArrowDown') {
+                socket.emit('message', 'right_paddle_up_release,' + gameNumber);
+            }
+            if (event.key == 'w') {
+                socket.emit('message', 'left_paddle_down_release,' + gameNumber);
+            }
+            if (event.key == 's') {
+                socket.emit('message', 'left_paddle_up_release,' + gameNumber);
+            }
+        }
     });
 
 
