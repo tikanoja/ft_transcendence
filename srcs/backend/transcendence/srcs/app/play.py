@@ -414,8 +414,6 @@ def generate_brackets(tournament, accepted_participants):
     else:
         game_instance_model = ColorGameInstance
 
-
-
     # creating the first round of games
     for i in range(0, num_participants, 2):
         game_instance = game_instance_model.objects.create(
