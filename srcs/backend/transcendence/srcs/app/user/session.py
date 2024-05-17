@@ -10,6 +10,11 @@ from app.models import CustomUser
 logger = logging.getLogger(__name__)
 
 
+def cut_leading_app(path):
+    cleaned_path = path.lstrip('/app')
+    return cleaned_path
+
+
 def loginPOST(request):
     title = "Sign in"
     sent_form = LoginForm(request.POST)
@@ -30,8 +35,9 @@ def loginPOST(request):
         user.save()
         res = JsonResponse({'success': "you just logged in"}, status=301)
         next = request.GET.get('next', '/play')
+        logger.debug('in loginPOST next: ' + next)
         if next:
-            res['Location'] = next
+            res['Location'] = cut_leading_app(next)
         return res
         # could send a redirect to the home page or user profile
     else:
@@ -48,7 +54,13 @@ def loginGET(request):
         # return redirect("/user/logout")
     form = LoginForm()
     logger.debug(form)
-    return render(request, 'user/login.html', {"form": form, "title": title})
+    logger.debug('in loginGET: ' + request.GET.get('next'))
+    next = request.GET.get('next', '/play')
+    logger.debug('in loginPOST next: ' + next)
+    res = render(request, 'user/login.html', {"form": form, "title": title})
+    if next:
+        res['Location'] = cut_leading_app(next)
+    return res
 
 
 def	logoutPOST(request):
@@ -57,6 +69,7 @@ def	logoutPOST(request):
         request.user.save()
         logout(request)
         next = request.GET.get('next', '/login')
+        logger.debug('in logoutPOST next: ' + next)
         return HttpResponseRedirect(next)	
     else:
         response = JsonResponse({'error': "Already logged out."})
