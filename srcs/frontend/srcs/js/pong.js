@@ -74,6 +74,12 @@ export const startScreen = async () => {
             
 
             await verifyUsername()
+<<<<<<< HEAD
+=======
+            console.log("after verify: ", gameNumber);
+            
+                console.log("in the click listener")
+>>>>>>> 9b03de0b85ea2c3b59cea722f7161a14b099ebac
                 startScreen.style.display = 'none';
                 canvasContainer.style.display = 'block';
                 is3DGraphics = styleCheckbox.checked;
@@ -86,7 +92,11 @@ export const startScreen = async () => {
                     const valuesArray = data.split(',')
                     gameNumber = valuesArray[1]
                     renderPongGame(is3DGraphics, gameNumber);
+<<<<<<< HEAD
                 })
+=======
+                });
+>>>>>>> 9b03de0b85ea2c3b59cea722f7161a14b099ebac
     } catch (error) {
         console.error('Error loading script:', error);
     }
@@ -213,6 +223,10 @@ function setup3DScene(scene) {
     scene.add(ball);
     p1_paddle.position.set(-100,  0, 0);
     p2_paddle.position.set(100, 0, 0);
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9b03de0b85ea2c3b59cea722f7161a14b099ebac
     return { camera, p1_paddle, p2_paddle, ball };
 }
 
@@ -358,6 +372,49 @@ function exit_game(data, scene)
     loadGameOverScreen(data);
     cleanUpScene(scene);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics) {
+    let p1_paddle_y, p1_paddle_x, p2_paddle_y, p2_paddle_x, ball_x, ball_y, p1_score, p2_score;
+    const min_visible_x = -1010;
+    const max_visible_x = 1010;
+    const min_visible_y = -586;
+    const max_visible_y = 586;
+    const valuesArray = data.split(',');
+
+	if (valuesArray[0] == gameNumber){
+	    ball_x = parseFloat(valuesArray[1]);
+		ball_y = parseFloat(valuesArray[2]);
+		p2_paddle_x = parseFloat(valuesArray[3]);
+		p2_paddle_y = parseFloat(valuesArray[4]);
+		p1_paddle_x = parseFloat(valuesArray[5]);
+		p1_paddle_y = parseFloat(valuesArray[6]);
+		p2_score = parseInt(valuesArray[7]);
+		p1_score = parseInt(valuesArray[8]);
+
+		ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
+		ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);
+		p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[3]);
+		p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[4]);
+		p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[5]);
+		p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[6]);
+        if  (is3DGraphics == true)
+        {
+            p1_paddle.position.set(p1_paddle_x, 0, p1_paddle_y); 
+            p2_paddle.position.set(p2_paddle_x, 0, p2_paddle_y); 
+            ball.position.set(ball_x, 0, ball_y);
+        }
+        else
+        {
+            p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
+            p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
+            ball.position.set(ball_x,  ball_y, 0);
+        }
+		updateScoreboard(p1_score, p2_score);
+	}
+}
+
 
 ///Main function for setting up and animating game
 export const renderPongGame = (is3DGraphics, gameNumber) => {
