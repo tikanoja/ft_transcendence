@@ -103,6 +103,8 @@ function loadGameOverScreen(data) {
     const scoreboard = document.getElementById('scoreboard');
     const P1score = document.getElementById('P1Card');
     const P2score = document.getElementById('P2Card');
+    const player1username = document.getElementById('player1username').textContent;
+    const player2username = document.getElementById('player2username').textContent;
 
     P1score.style.display = 'none';
     P2score.style.display = 'none';
@@ -114,9 +116,9 @@ function loadGameOverScreen(data) {
 
     let winnerText;
     if (p1Score > p2Score) {
-        winnerText = "Player 1 wins!";
+        winnerText = `${player1username} wins!`;
     } else if (p1Score < p2Score) {
-        winnerText = "Player 2 wins!";
+        winnerText = `${player2username} wins!`;
     } else {
         winnerText = "It's a tie!";
     }
