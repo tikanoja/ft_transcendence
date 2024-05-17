@@ -18,6 +18,10 @@ RUN openssl req -newkey rsa:2048 -x509 -sha256 -days 365 -nodes \
 # Add a new user within the container
 RUN adduser -D -H -s /sbin/nologin -g www-data -G www-data www-data
 
+RUN mkdir -p /var/lib/nginx/tmp/client_body/ &&\
+    chown -R www-data:www-data /var/lib/nginx/tmp/client_body/ &&\
+    chmod 777 /var/lib/nginx/tmp/client_body/
+
 # Copy NGINX configuration to the container
 COPY conf/nginx.conf /etc/nginx/nginx.conf
 RUN chmod 644 /etc/nginx/nginx.conf

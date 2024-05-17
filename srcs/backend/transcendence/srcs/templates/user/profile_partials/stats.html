@@ -1,3 +1,21 @@
-<div>
-	<h2>This will be the game stats!</h2>
+<div class="container">
+	<h3>Pong Stats</h3>
+	{% if stats.pong.games_played %}
+		<p>Total games: {{ stats.pong.games_played }}</p>
+		<p>Total wins: {{ stats.pong.wins }}</p>
+		<p>Largest win margin: {{ stats.pong.largest_win_margin }}</p>
+		<p>Largest loss margin: {{ stats.pong.largest_loss_margin }}</p>
+		<p>Longest rally: {{ stats.pong.longest_rally }}</p>
+	{% else %}
+		<p>No Pong statistics to report</p>
+	{% endif %}
+	<h3>Color War Stats</h3>
+	{% if stats.color.games_played %}
+		<p>Total games: {{ stats.color.games_played }}</p>
+		<p>Total wins: {{ stats.color.wins }}</p>
+		<p>Least moves to win: {{ stats.color.least_moves_to_win }}</p>
+		<p>Average moves to win: {{ stats.color.average_move_to_win }}</p>
+	{% else %}
+		<p>No ColorWar statistics to report</p>
+	{% endif %}
 </div>

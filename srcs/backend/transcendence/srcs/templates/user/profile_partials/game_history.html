@@ -1,3 +1,56 @@
-<div>
-	<h2>This will be the game history!</h2>
+<div class="container">
+	<h2>Game History</h2>
+	<h3>Pong Games</h3>
+	<table class="table">
+		<thead>
+			<th scope="col">#</th>
+			<th scope="col">Date</th>
+			<th scope="col">Opponent</th>
+			<th scope="col">Opponent Score</th>
+			<th scope="col">User Score</th>
+			<th scope="col">Winner</th>
+		</thead>
+		<tbody>
+		{% for key, entry in history.pong.items %}
+			<tr>
+				<th scope="row ">{{ forloop.counter }}</th>
+				<td>{{ entry.date }}</td>
+				<td>{{ entry.opponent }}</td>
+				<td>{{ entry.opponent_score }}</td>
+				<td>{{ entry.user_score }}</td>
+				<td>{{ entry.winner }}</td>
+			</tr>
+		{% empty %}
+			<tr>
+				<td colspan="6">No Pong games played</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+	<h3>Color War Games</h3>
+	<table class="table">
+		<thead>
+			<th scope="col">#</th>
+			<th scope="col">Date</th>
+			<th scope="col">Opponent</th>
+			<th scope="col">Moves to Win</th>
+			<th scope="col">Winner</th>
+		</thead>
+		<tbody>
+		{% for key, entry in history.color.items %}
+			<tr>
+				<th scope="row ">{{ forloop.counter }}</th>
+				<td>{{ entry.date }}</td>
+				<td>{{ entry.opponent }}</td>
+				<td>{{ entry.opponent_score }}</td>
+				<td>{{ entry.user_score }}</td>
+				<td>{{ entry.winner }}</td>
+			</tr>
+		{% empty %}
+			<tr>
+				<td colspan="6">No Color War games played</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
 </div>

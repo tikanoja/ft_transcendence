@@ -30,9 +30,15 @@ export const loadScript = () => {
 }
 
 function connectWebSocket() {
+<<<<<<< HEAD
     socket = io.connect('https://' + window.location.hostname);
     socket.on('connect', () => {
         // empty on purpose nothing todo
+=======
+    socket = io.connect('https://' + window.location.hostname, {path: "/pong/socket.io"});
+    socket.on('connect', () => {
+        console.log("connect recieved: pong")
+>>>>>>> 2f46c1ce3fb5e86d274c6cb8b55c50208985edda
     });
     socket.on('error', (error) => {
         // empty on purpose nothing todo
@@ -41,12 +47,12 @@ function connectWebSocket() {
 
 export const verifyUsername = () => {
     return new Promise((resolve, reject) => {
-        const username1Element = document.getElementById('player1');
-        const username2Element = document.getElementById('player2');
-        const username1 = username1Element.innerText.trim();
-        const username2 = username2Element.innerText.trim();
-        const usernameString = username1 + "," + username2;
+        const player1username = document.getElementById('player1username').value;
+        const player2username = document.getElementById('player2username').value;
+        const current_game_id = document.getElementById('current_game_id').value;
+        const usernameString = player1username + "," + player2username + "," + current_game_id;
         
+        console.log('usernameString id: ', usernameString);
         socket.emit("username", usernameString);
 
         socket.on('setup_game', (data) => {
@@ -72,7 +78,14 @@ export const startScreen = async () => {
 			const styleCheckbox = document.getElementById('styleCheckbox');
 			let is3DGraphics = false;
             
+
             await verifyUsername()
+<<<<<<< HEAD
+=======
+            console.log("after verify: ", gameNumber);
+            
+                console.log("in the click listener")
+>>>>>>> 2f46c1ce3fb5e86d274c6cb8b55c50208985edda
                 startScreen.style.display = 'none';
                 canvasContainer.style.display = 'block';
                 is3DGraphics = styleCheckbox.checked;
@@ -80,12 +93,20 @@ export const startScreen = async () => {
                 socket.emit('message', 'start_game,' + gameNumber);
 
                 socket.on('start_game', (data) => {
+<<<<<<< HEAD
                     startScreen.style.display = 'none';
+=======
+                    startScreen.remove();
+>>>>>>> 2f46c1ce3fb5e86d274c6cb8b55c50208985edda
                     canvasContainer.style.display = 'block';
                     const valuesArray = data.split(',')
                     gameNumber = valuesArray[1]
                     renderPongGame(is3DGraphics, gameNumber);
+<<<<<<< HEAD
                 })
+=======
+                });
+>>>>>>> 2f46c1ce3fb5e86d274c6cb8b55c50208985edda
     } catch (error) {
         console.error('Error loading script:', error);
     }
@@ -148,7 +169,11 @@ function addLighting(scene) {
 }
 
 function setup2DScene(scene) {
+<<<<<<< HEAD
     let camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 1000);
+=======
+    const camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 1000);
+>>>>>>> 2f46c1ce3fb5e86d274c6cb8b55c50208985edda
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
@@ -212,7 +237,11 @@ function setup3DScene(scene) {
     scene.add(ball);
     p1_paddle.position.set(-100,  0, 0);
     p2_paddle.position.set(100, 0, 0);
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 2f46c1ce3fb5e86d274c6cb8b55c50208985edda
     return { camera, p1_paddle, p2_paddle, ball };
 }
 
@@ -367,6 +396,10 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     if (existingCanvas) {
         existingCanvas.remove();
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2f46c1ce3fb5e86d274c6cb8b55c50208985edda
     const renderer = new THREE.WebGLRenderer();
     const pixelRatio = window.devicePixelRatio;
     renderer.setPixelRatio(pixelRatio);
@@ -375,9 +408,13 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
     
     if (is3DGraphics) {
+<<<<<<< HEAD
         ({ camera, p1_paddle, p2_paddle, ball} = setup3DScene(scene));
         camera.position.set(-1100, 300, 1100);
         camera.lookAt(0, 0, 0);
+=======
+        ({ camera, p1_paddle, p2_paddle, ball } = setup3DScene(scene));
+>>>>>>> 2f46c1ce3fb5e86d274c6cb8b55c50208985edda
     } else {
         ({ camera, p1_paddle, p2_paddle, ball} = setup2DScene(scene));
         camera.position.set(0, 0, 100);
