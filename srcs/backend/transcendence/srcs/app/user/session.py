@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 import logging
+from app.models import CustomUser
 
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,9 @@ def loginPOST(request):
     if request.user.is_authenticated:
         response = JsonResponse({'error': "already logged in!"})
         return response
+    user_check = CustomUser.objects.filter(username=username).first()
+    if user_check is None:
+        return render(request, 'user/login.html', {"form": sent_form, "title": title, "error": "user not found!"})
     user = authenticate(request, username=username, password=password) #verifiy credentials, if match with db, returns user object
     if user is not None:
         login(request, user) #log user in, create new session, add sessionID cookie for the response
@@ -32,7 +36,7 @@ def loginPOST(request):
         # could send a redirect to the home page or user profile
     else:
         logger.debug("user not authenticated")
-        return render(request, 'user/login.html', {"form": sent_form, "title": title, "error": "user not found"})
+        return render(request, 'user/login.html', {"form": sent_form, "title": title, "error": "wrong password!"})
 
 
 def loginGET(request):

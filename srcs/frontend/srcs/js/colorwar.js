@@ -416,6 +416,7 @@ export const renderColorwar = (gameNumber, data) => {
 		{
             console.log("attempting to stop game")
 			socket.emit('message', 'stop_game,' + gameNumber);
+            exit_game(data, tileMeshes, render, colorTextures)
 			render = false;
 		}
     });
@@ -426,6 +427,7 @@ export const renderColorwar = (gameNumber, data) => {
     });
 
 	socket.on('endstate', (data) => {
+        socket.emit('message', 'stop_game,' + gameNumber);
         exit_game(data, tileMeshes, render, colorTextures)
     });
 
