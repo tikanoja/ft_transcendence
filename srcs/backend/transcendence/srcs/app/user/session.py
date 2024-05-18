@@ -11,7 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 def cut_leading_app(path):
-    cleaned_path = path.lstrip('/app')
+    logger.debug(f"Original path: {path}")
+    if path.startswith('/app'):
+        cleaned_path = path[4:]
+    else:
+        cleaned_path = path
+    logger.debug(f"Cleaned path: {cleaned_path}")
     return cleaned_path
 
 
@@ -56,10 +61,11 @@ def loginGET(request):
     logger.debug(form)
     logger.debug('in loginGET: ' + request.GET.get('next'))
     next = request.GET.get('next', '/play')
-    logger.debug('in loginPOST next: ' + next)
+    logger.debug('in loginGET next: ' + next)
     res = render(request, 'user/login.html', {"form": form, "title": title})
     if next:
         res['Location'] = cut_leading_app(next)
+        logger.debug('added location to rendering in loginGET')
     return res
 
 
