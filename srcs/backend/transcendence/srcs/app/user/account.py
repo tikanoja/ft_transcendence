@@ -11,7 +11,6 @@ import logging
 from django.db.models import Q
 from PIL import Image, ImageFile
 import io
-from .session import cut_leading_app
 
 
 logger = logging.getLogger(__name__)
@@ -72,6 +71,7 @@ def tournament_deleted_user(user):
         game_instance.save()
         match.status = Match.FINISHED
         match.save()
+
 
 def delete_accountPOST(request, context):
     if request.user.is_authenticated:

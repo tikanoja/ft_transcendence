@@ -35,4 +35,19 @@ class UpdateLastSeenMiddleware:
             except User.DoesNotExist:
                 return response
         return response
-    
+
+
+class NextParamMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        
+        if response.status_code == 302 and 'Location' in response.headers:
+            location = response.headers['Location']
+            while '?next=/app/' in location:
+                location = location.replace('?next=/app/', '?next=/')
+            response.headers['Location'] = location
+            
+        return response

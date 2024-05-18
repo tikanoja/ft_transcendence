@@ -10,16 +10,6 @@ from app.models import CustomUser
 logger = logging.getLogger(__name__)
 
 
-def cut_leading_app(path):
-    logger.debug(f"Original path: {path}")
-    if path.startswith('/app'):
-        cleaned_path = path[4:]
-    else:
-        cleaned_path = path
-    logger.debug(f"Cleaned path: {cleaned_path}")
-    return cleaned_path
-
-
 def loginPOST(request):
     title = "Sign in"
     sent_form = LoginForm(request.POST)
@@ -42,7 +32,7 @@ def loginPOST(request):
         next = request.GET.get('next', '/play')
         logger.debug('in loginPOST next: ' + next)
         if next:
-            res['Location'] = cut_leading_app(next)
+            res['Location'] = next
         return res
         # could send a redirect to the home page or user profile
     else:
@@ -64,8 +54,7 @@ def loginGET(request):
     logger.debug('in loginGET next: ' + next)
     res = render(request, 'user/login.html', {"form": form, "title": title})
     if next:
-        res['Location'] = cut_leading_app(next)
-        logger.debug('added location to rendering in loginGET')
+        res['Location'] = next
     return res
 
 
@@ -80,6 +69,7 @@ def	logoutPOST(request):
     else:
         response = JsonResponse({'error': "Already logged out."})
     return response
+
 
 def	get_current_usernameGET(request):
     if request.user.is_authenticated:
