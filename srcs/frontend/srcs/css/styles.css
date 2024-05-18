@@ -170,3 +170,8 @@ body {
     padding-left: 2em;
     text-indent: -2em;
 }
+
+/* adjust alert icon */
+.custom-icon-transform {
+    transform: translateY(-12px); /* Adjust this value to move the icon up */
+  }

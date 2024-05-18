@@ -112,7 +112,8 @@
 					{% if my_tournament_count == 4 or my_tournament_count == 8 %}
 					<button type="submit" id="tournamentButton" data-tournament-id={{ my_tournament.id }} data-action="startTournament" class="btn btn-success">Start tournament!</button>
 					{% else %}
-					<p class="h5 m-3" >Invite 4 or 8 players</p>
+					<p class="h5 mt-3" >Invite 4 or 8 players</p>
+					<p class="mb-3" ><i>At least 4 players needed to start a tournamnet</i></p>
 					{% endif %}
 					
 					<div class="bg-secondary rounded p-3" style="width: 90%;">
