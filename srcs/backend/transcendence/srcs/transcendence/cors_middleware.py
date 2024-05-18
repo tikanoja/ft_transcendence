@@ -46,6 +46,8 @@ class NextParamMiddleware:
         
         if response.status_code == 302 and 'Location' in response.headers:
             location = response.headers['Location']
+            if location.endswith('/'):
+                    location = location[:-1]
             while '?next=/app/' in location:
                 location = location.replace('?next=/app/', '?next=/')
             response.headers['Location'] = location
