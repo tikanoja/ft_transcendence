@@ -1,50 +1,82 @@
-<div class="container">
+<div class="container bg-secondary py-3 rounded">
 
-	<h2>Manage Account</h2>
+	<h2 class='text-center jersey-20-regular'>Manage Account</h2>
 	{% if error %}
 	<p class="color: red;"> {{error}} </p>
 	{% endif %}
+	<h3 id="account-summary" class="mt-5 text-light text-center">Account Details</h3>
+	<div class="d-flex flex-column">
+		<div class="d-flex bg-white">
+			<p class="m-auto"><b>Username:</b> {{details.username}}<p>
+			<p class="m-auto"><b>Name:</b> {{details.first_name}} {{details.last_name}}</p>
+			<p class="m-auto"><b>E-mail:</b> {{details.email}}</p>
+		</div>
 
-	{% if profile_picture_upload_message %}
-	<p>{{ profile_picture_upload_message }}</p>
-	{% else %}
-	<form id='profile_picture_upload' enctype='multipart/form-data'>
-	{{upload_image_form}}
-	<button type="submit" id="profile_image_upload_btn" class="btn btn-primary">Upload</button>
-	</form>
-	{% endif %}
+				<h4 id="change-profile-picture" class="mt-5 text-light">Change Profile Picture</h4>
+				{% if profile_picture_upload_message %}
+				<p>{{ profile_picture_upload_message }}</p>
+				{% else %}
+				<form id='profile_picture_upload' enctype='multipart/form-data'>
+				{{upload_image_form}}
+				<button type="submit" id="profile_image_upload_btn" class="btn btn-primary">Upload</button>
+				</form>
+				{% endif %}
 
-	<p>Username: {{details.username}}</h3>
 
-	<p>Name: {{details.first_name}} {{details.last_name}}</p>
-	<button style="btn-primary" id="change-name">Change Name</button>
-	{% if name_form_result %}
-	<p>{{name_form_result}}</p>
-	{% else %}
-	<form id="name-change-form" enctype="multipart/form-data">
-		{{name_form}}
-		<button type="submit" id="nameChange" class="btn btn-primary">Submit</button>
-	</form>
-	{% endif %}
-	<p>E-mail: {{details.email}}</p>
-	{% if email_form_result %}
-	<p>{{email_form_result}}</p>
-	{% else %}
-	<button style="btn-primary" id="change-email">Change E-mail</button>
-	<form id="email-change-form">
-		{{email_form}}
-	<button type="submit" id="emailChange" class="btn btn-primary">Submit</button>
-	</form>
-	{% endif %}
-	<button style="btn-primary" id="change-password">Change Password</button>
-	{% if pasword_form_result %}
-	<p>{{pasword_form_result}}</p>
-	{% else %}
-	<form id="password-change-form">
-		{{password_form}}
-		<button type="submit" id="passwordChange" class="btn btn-primary">Submit</button>
-	</form>
-	{% endif %}
-	{% include "./delete_account.html" with form=delete_account_form%}
+				<h4 id="change-name" class="mt-5 text-light">Change Name</h4>
+				{% if name_form_result %}
+				<div class="alert alert-info" role="alert">{{name_form_result}}</div>
+				{% else %}
+				<form id="name-change-form" enctype="multipart/form-data">
+					<div class="form-floating">
+						{{ name_form.first_name }}
+						{{ name_form.first_name.label_tag }}
+						<p style="text-danger">{{ name_form.first_name.errors }}<p>
+					</div>
+					<div class="form-floating">
+						{{ name_form.last_name }}
+						{{ name_form.last_name.label_tag }}
+						<p style="text-danger">{{ name_form.last_name.errors }}<p>
+					</div>
+					<button type="submit" id="nameChange" class="btn btn-primary">Submit</button>
+				</form>
+				{% endif %}
+
+				<h4 id="change-email" class="mt-5 text-light">Change E-mail</h4>
+				{% if email_form_result %}
+				<div class="alert alert-info" role="alert">{{email_form_result}}</div>
+				{% else %}
+				<form id="email-change-form">
+					<div class="form-floating">
+						{{ email_form.email }}
+						{{ email_form.email.label_tag }}
+						<p style="text-danger">{{ email_form.email.errors }}<p>
+					</div>
+				<button type="submit" id="emailChange" class="btn btn-primary">Submit</button>
+				</form>
+				{% endif %}
+
+				<h4 id="change-password" class="mt-5 text-light">Change Password</h4>
+				{% if pasword_form_result %}
+				<div class="alert alert-info" role="alert">{{pasword_form_result}}</div>
+				{% else %}
+				<form id="password-change-form" enctype="multipart/form-data">
+					<div class="form-floating">
+						{{ password_form.new_password }}
+						{{ password_form.new_password.label_tag }}
+						<p style="text-danger">{{ password_form.new_password.errors }}<p>
+					</div>
+					<div class="form-floating">
+						{{ password_form.new_confirm_password }}
+						{{ password_form.new_confirm_password.label_tag }}
+						<p style="text-danger">{{ password_form.confirm_new_password.errors }}<p>
+					</div>
+					<button type="submit" id="passwordChange" class="btn btn-primary">Submit</button>
+				</form>
+				{% endif %}
+			</div>
+
+				{% include "./delete_account.html" with form=delete_account_form%}
+			</div>
 
 </div>
