@@ -49,9 +49,7 @@ def loginGET(request):
         # return redirect("/user/logout")
     form = LoginForm()
     logger.debug(form)
-    logger.debug('in loginGET: ' + request.GET.get('next'))
     next = request.GET.get('next', '/play')
-    logger.debug('in loginGET next: ' + next)
     res = render(request, 'user/login.html', {"form": form, "title": title})
     if next:
         res['Location'] = next
