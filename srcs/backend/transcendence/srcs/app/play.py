@@ -1,7 +1,7 @@
 from .forms import GameRequestForm, LocalGameForm, StartTournamentForm, TournamentInviteForm, TournamentJoinForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import get_user_model
-from .models import CustomUser, GameInstance, Tournament, Participant, Match, PongGameInstance, ColorGameInstance
+from .models import CustomUser, GameInstance, Tournament, Participant, Match, PongGameInstance, ColorGameInstance, PongGameInstance, ColorGameInstance
 from django.core.exceptions import ValidationError
 import logging
 # from django.http import JsonResponse
@@ -229,13 +229,7 @@ def tournament_join(request):
 
     if participant is None:
         return render(request, 'user/play.html', playContext(request, 'Participant instance not found', None))
-
-    # check if participant is hosting a pending tournament, cancel that if yes
-    participant_user = participant.user
-    hosting_tournament = Tournament.objects.filter(creator=participant_user, status='Pending').first()
-    if hosting_tournament is not None:
-        hosting_tournament.delete()
-
+ 
     # change the status of the participant instance to 'Accepted'
     Participant.objects.filter(pk=participant_id).update(status='Accepted')
     Participant.objects.filter(pk=participant_id).update(alias=alias)
@@ -260,8 +254,6 @@ def tournament_invite(request):
         return render(request, 'user/play.html', playContext(request, 'User not found', None))
     if invited_user == current_user:
         return render(request, 'user/play.html', playContext(request, 'Please do not invite yourself', None))
-    if current_user in invited_user.blocked_users.all():
-        return render(request, 'user/play.html', playContext(request, 'You cannot invite users who have blocked you.', None))
 
     tournament = Tournament.objects.get(creator=current_user)
     if tournament is None:
@@ -409,14 +401,9 @@ def generate_brackets(tournament, accepted_participants):
     for participant in sorted_participant_objects:
         logger.debug(participant.user.username)
 
-    if game_type == 'Pong':
-        game_instance_model = PongGameInstance
-    else:
-        game_instance_model = ColorGameInstance
-
     # creating the first round of games
     for i in range(0, num_participants, 2):
-        game_instance = game_instance_model.objects.create(
+        game_instance = GameInstance.objects.create(
             p1=sorted_participant_objects[i].user,
             p2=sorted_participant_objects[i+1].user,
             status='Accepted',
@@ -432,7 +419,7 @@ def generate_brackets(tournament, accepted_participants):
     
     # creating 4 player final 
     if num_participants == 4:
-        game_instance = game_instance_model.objects.create(
+        game_instance = GameInstance.objects.create(
             p1=None,
             p2=None,
             status='Accepted',
@@ -451,7 +438,7 @@ def generate_brackets(tournament, accepted_participants):
     if num_participants == 8:
         logger.debug('In 8 player follow up creation')
         for _ in range(2): # Creates semifinals
-            game_instance = game_instance_model.objects.create(
+            game_instance = GameInstance.objects.create(
                 p1=None,
                 p2=None,
                 status='Accepted',
@@ -466,7 +453,7 @@ def generate_brackets(tournament, accepted_participants):
             )
             logger.debug('created a semifinal (8p)')
         # Final
-        game_instance = game_instance_model.objects.create(
+        game_instance = GameInstance.objects.create(
             p1=None,
             p2=None,
             status='Accepted',
@@ -496,17 +483,6 @@ def tournament_start(request, data):
     # Check that we still have 4 - 16 players accepted
     if accepted_participants.count() != 4 and accepted_participants.count() != 8:
         return render(request, 'user/play.html', playContext(request, 'Wrong amount of participants', None))
-
-    # Delete Pending, Active and Accepted GameInstances
-    for participant in accepted_participants:
-        user = participant.user
-        all_games = GameInstance.objects.filter(Q(p1=user) | Q(p2=user))
-        if all_games.first() is not None:
-            all_non_finished_games = all_games.exclude(status='Finished')
-            if all_non_finished_games is not None:
-                logger.debug('found this many unfinished games: ' + str(all_non_finished_games.count()) + ' for user: ' + user.username + '!!!')
-                logger.debug('deleted pending games')
-                all_non_finished_games.delete()
 
     # Delete pending participants (those who did not accept the inv before the creator started the tournament)
     pending_participants = participants.filter(status='Pending')

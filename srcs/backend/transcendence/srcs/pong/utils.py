@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 
 """
 	Data format from pong_c:
-	data_to_send = {"game" : "Pong",
+	data_to_send = {
+		"game" : "Pong",
 		"p1_username": "placeholder",
 		"p1_score": f"{p1_score}",
 		"p2_username": "placeholder2",
@@ -89,6 +90,5 @@ def save_pong_game_state(request) -> JsonResponse:
 	game_instance.save()
 	if game_instance.tournament_match is True:
 		update_tournament(game_instance)
-	logger.debug('PONG game id ' + str(game_instance.id) + ' | p1 ' + game_instance.p1.username + ' scored ' + game_instance.p1_score + ' | p2 ' + game_instance.p2.username + ' scored ' + game_instance.p2_score + ' | winner: ' + game_instance.winner.username)
 	return JsonResponse({'message': 'Game data saved successfully!'}, status=200)
 	

@@ -1,7 +1,27 @@
-@font-face {
+/* @font-face {
     font-family: 'PressStart2P';
     src: url('../fonts/Press_Start_2P/PressStart2P-Regular.ttf') format('truetype');
-    /* You may include other font formats (woff, woff2, etc.) for better cross-browser support */
+} */
+
+* {
+    font-family: "Raleway", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+}
+
+.jersey-20-regular {
+    font-family: "Jersey 20", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 44px;
+}
+
+.jersey-60-regular {
+    font-family: "Jersey 20", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 80px;
 }
 
 #GameControls button img {
@@ -90,17 +110,6 @@ body {
     display: block;
 }
 
-.sidebar {
-    width: 200px;
-    /* Fill entire viewport height */
-    height: 100vh;
-    /* Dont move on scroll */
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: #343a40; /* Change sidebar background color */
-    color: white; /* Change text color */
-}
 .nav-item {
     /* padding-left: 15px; */
     margin-top: 10px;
@@ -161,3 +170,8 @@ body {
     padding-left: 2em;
     text-indent: -2em;
 }
+
+/* adjust alert icon */
+.custom-icon-transform {
+    transform: translateY(-12px); /* Adjust this value to move the icon up */
+  }

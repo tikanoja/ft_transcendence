@@ -3,14 +3,11 @@ from django.contrib.auth import get_user_model, authenticate
 from django.shortcuts import render
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
-from app.models import CustomUser, CustomUserManager, GameInstance, Friendship, Tournament, Match
+from app.models import CustomUser, CustomUserManager, GameInstance, Friendship
 from .profile import get_profile_details
 import os
 from transcendence import settings
 import logging
-from django.db.models import Q
-from PIL import Image, ImageFile
-import io
 
 
 logger = logging.getLogger(__name__)
@@ -51,26 +48,6 @@ def registerGET(request):
     return render(request, 'user/register.html', {"form": form, "title": title})
 
 
-def tournament_deleted_user(user):
-    tournament = Tournament.objects.filter(Q(status=Tournament.ACTIVE), Q(participants=user)).first()
-    matches = Match.objects.filter(tournament=tournament, status=Match.SCHEDULED)
-    for match in matches:
-        game_instance = match.game_instance
-
-        if game_instance.p1 == user:
-            game_instance.p1 = None
-            game_instance.winner = game_instance.p2
-        elif game_instance.p2 == user:
-            game_instance.p2 = None
-            game_instance.winner = game_instance.p1
-        else:
-            continue
-        
-        game_instance.status = GameInstance.FINISHED
-        game_instance.save()
-        match.status = Match.FINISHED
-        match.save()
-
 def delete_accountPOST(request, context):
     if request.user.is_authenticated:
         context["details"] = get_profile_details(request.user.username, True)
@@ -87,13 +64,10 @@ def delete_accountPOST(request, context):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             # check if this should cascade delete the profile etc. remove from friend lists...
-            tournament_deleted_user(user)
             Friendship.objects.filter(from_user=username).delete()
             Friendship.objects.filter(to_user=username).delete()
             GameInstance.objects.filter(p1=username, status='Pending').delete()
             GameInstance.objects.filter(p2=username, status='Pending').delete()
-            GameInstance.objects.filter(p1=username, status='Accepted').delete()
-            GameInstance.objects.filter(p2=username, status='Accepted').delete()
             CustomUser.objects.filter(username=username).delete()
             # delete account, return a success page with a 'link' to go to homepage
             return JsonResponse({'message': 'Your account has been deleted'})
@@ -152,18 +126,6 @@ def manage_accountPOST(request):
             old_image = current_user.profile_picture
             if not form.is_valid():
                 raise ValidationError("Form filled incorrectly for profile picture")
-
-            # Resizing the uploaded img to be 300x300 while maintaining aspect ratio
-            img = Image.open(new_image)
-            if img.mode!= 'RGB':
-                img = img.convert('RGB')
-            max_size = (300, 300)
-            img.thumbnail(max_size, Image.Resampling.LANCZOS)
-            in_mem_file = io.BytesIO()
-            img.save(in_mem_file, format='JPEG')
-            in_mem_file.seek(0)
-            new_image.file = in_mem_file
-
             if old_image.url != '/media/default.png':
                 os.remove(os.path.join(settings.MEDIA_ROOT, old_image.path))
             current_user.profile_picture = new_image

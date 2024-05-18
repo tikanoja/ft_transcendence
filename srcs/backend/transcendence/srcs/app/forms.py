@@ -7,12 +7,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 class RegistrationForm(forms.Form):
-    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
-    first_name = forms.CharField(label='First Name', widget=forms.TextInput(attrs={'placeholder': 'Enter given name'}), max_length=256, required=True)
-    last_name = forms.CharField(label='Last Name', widget=forms.TextInput(attrs={'placeholder': 'Enter family name'}), max_length=256, required=True)
-    email = forms.EmailField(label='Email', widget=forms.TextInput(attrs={'placeholder': 'Enter email'}), max_length=320, required=False)
-    password = forms.CharField(label="Password", widget=forms.PasswordInput)
-    confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username', "class": "form-control"}), max_length=256, required=True)
+    first_name = forms.CharField(label='First Name', widget=forms.TextInput(attrs={'placeholder': 'Enter given name', "class": "form-control"}), max_length=256, required=True)
+    last_name = forms.CharField(label='Last Name', widget=forms.TextInput(attrs={'placeholder': 'Enter family name', "class": "form-control"}), max_length=256, required=True)
+    email = forms.EmailField(label='Email', widget=forms.TextInput(attrs={'placeholder': 'Enter email', "class": "form-control"}), max_length=320, required=False)
+    password = forms.CharField(label="Password", widget=forms.PasswordInput(attrs={'placeholder': 'Enter password', "class": "form-control"}))
+    confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput(attrs={'placeholder': 'Confirm password', "class": "form-control"}))
 
     def is_valid(self):
         valid = super().is_valid()
@@ -44,8 +44,8 @@ class RegistrationForm(forms.Form):
         
 
 class LoginForm(forms.Form):
-    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
-    password = forms.CharField(label="Password", widget=forms.PasswordInput)
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username', "class": "form-control"}), max_length=256, required=True)
+    password = forms.CharField(label="Password", widget=forms.PasswordInput(attrs={'placeholder': 'Enter password', "class": "form-control"}))
 
 
 class PlayerAuthForm(forms.Form):
@@ -59,8 +59,8 @@ class PlayerAuthForm(forms.Form):
 
 class DeleteAccountForm(forms.Form):
     # username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
-    password = forms.CharField(label="Password", widget=forms.PasswordInput)
-    confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
+    password = forms.CharField(label="Password", widget=forms.PasswordInput(attrs={'class': 'form-control','placeholder': 'Enter password'}))
+    confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput(attrs={'class': 'form-control','placeholder': 'Confirm password'}))
 
     def is_valid(self):
         valid = super().is_valid()
@@ -75,8 +75,8 @@ class DeleteAccountForm(forms.Form):
 
 
 class UpdatePasswordForm(forms.Form):
-    password = forms.CharField(label="Password", widget=forms.PasswordInput)
-    confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
+    new_password = forms.CharField(label="New Password", widget=forms.PasswordInput(attrs={'class': 'form-control','placeholder': 'Enter new password'}))
+    new_confirm_password = forms.CharField(label="Confirm New Password", widget=forms.PasswordInput(attrs={'class': 'form-control','placeholder': 'Confirm new password'}))
     
     def is_valid(self):
         valid = super().is_valid()
@@ -100,7 +100,7 @@ class UpdatePasswordForm(forms.Form):
         return True
     
 class UpdateEmailForm(forms.Form):
-    email = forms.EmailField(label='Email', widget=forms.TextInput(attrs={'placeholder': 'Enter email'}), max_length=320, required=False)
+    email = forms.EmailField(label='Email', widget=forms.TextInput(attrs={'placeholder': 'Enter email', 'class': 'form-control'}), max_length=320, required=False)
 
     def	is_valid(self):
         valid = super().is_valid()
@@ -114,7 +114,7 @@ class UpdateEmailForm(forms.Form):
 
 
 class AddFriendForm(forms.Form):
-    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
+    username = forms.CharField(label='Username to friend or block', widget=forms.TextInput(attrs={'placeholder': 'Enter username', 'class':'form-control'}), max_length=256, required=True)
 
     def is_valid(self):
         valid = super().is_valid()
@@ -134,8 +134,8 @@ class AddFriendForm(forms.Form):
 
 
 class UpdateNameForm(forms.Form):
-    first_name = forms.CharField(label='First Name', widget=forms.TextInput(attrs={'placeholder': 'Enter given name'}), max_length=256, required=True)
-    last_name = forms.CharField(label='Last Name', widget=forms.TextInput(attrs={'placeholder': 'Enter family name'}), max_length=256, required=True)
+    first_name = forms.CharField(label='First Name', widget=forms.TextInput(attrs={'placeholder': 'Enter given name', 'class': 'form-control'}), max_length=256, required=True)
+    last_name = forms.CharField(label='Last Name', widget=forms.TextInput(attrs={'placeholder': 'Enter family name', 'class': 'form-control'}), max_length=256, required=True)
 
 
 class UploadImageForm(forms.ModelForm):
@@ -149,8 +149,9 @@ class GameRequestForm(forms.Form):
         (GameInstance.PONG, 'Pong'),
         (GameInstance.COLOR, 'Color'),
     ]
-    game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
-    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
+    # 
+    game_type = forms.ChoiceField(widget=forms.RadioSelect(attrs={'class': 'form-check-input'}), choices=GAME_TYPE_CHOICES, label='Choose Game Type:')
+    username = forms.CharField(label='Enter username', widget=forms.TextInput(attrs={'placeholder': 'Enter username', 'class': 'form-control'}), max_length=256, required=True)
 
     def is_valid(self):
         valid = super().is_valid()
@@ -195,8 +196,8 @@ class StartTournamentForm(forms.Form):
         (GameInstance.PONG, 'Pong'),
         (GameInstance.COLOR, 'Color'),
     ]
-    game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
-    alias = forms.CharField(label='Alias', widget=forms.TextInput(attrs={'placeholder': 'Enter alias'}), max_length=256, required=True)
+    game_type = forms.ChoiceField(widget=forms.RadioSelect(attrs={'class': 'form-check-input'}), choices=GAME_TYPE_CHOICES, label='Choose Game Type:')
+    alias = forms.CharField(label='Enter alias', widget=forms.TextInput(attrs={'placeholder': 'Enter alias', 'class': 'form-control'}), max_length=256, required=True)
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -205,7 +206,7 @@ class StartTournamentForm(forms.Form):
 
 
 class TournamentInviteForm(forms.Form):
-    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=256, required=True)
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username', 'class': 'form-control'}), max_length=256, required=True)
 
     def is_valid(self):
         valid = super().is_valid()
@@ -224,4 +225,4 @@ class TournamentInviteForm(forms.Form):
             self.fields['formname'] = forms.CharField(widget=forms.HiddenInput(), initial=kwargs['formname'])
 
 class TournamentJoinForm(forms.Form):
-    alias = forms.CharField(label='Alias', widget=forms.TextInput(attrs={'placeholder': 'Enter alias'}), max_length=256, required=True)
+    alias = forms.CharField(label='Alias', widget=forms.TextInput(attrs={'placeholder': 'Enter alias', 'class': 'form-control'}), max_length=256, required=True)
