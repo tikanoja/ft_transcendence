@@ -2,9 +2,11 @@
 
 	<h2 class='text-center jersey-20-regular'>Manage Account</h2>
 	{% if error %}
-	<p class="color: red;"> {{error}} </p>
+	<div class="d-flex justify-content-center">
+	<p class="alert alert-danger w-50 text-center" role="alert"> {{error}} </p>
+	</div>
 	{% endif %}
-	<h3 id="account-summary" class="mt-5 text-light text-center">Account Details</h3>
+	<h3 id="account-summary" class="text-light text-center">Account Details</h3>
 	<div class="d-flex flex-column">
 		<div class="d-flex bg-white">
 			<p class="m-auto"><b>Username:</b> {{details.username}}<p>
@@ -14,19 +16,24 @@
 
 				<h4 id="change-profile-picture" class="mt-5 text-light">Change Profile Picture</h4>
 				{% if profile_picture_upload_message %}
-				<p>{{ profile_picture_upload_message }}</p>
-				{% else %}
+				<p class="alert alert-info" role="alert">{{ profile_picture_upload_message }}</p>
+				{% endif %}
+				{% if pic_error %}
+				<p class="alert alert-warning" role="alert">{{ pic_error }}</p>
+				{% endif %}
 				<form id='profile_picture_upload' enctype='multipart/form-data'>
 				{{upload_image_form}}
 				<button type="submit" id="profile_image_upload_btn" class="btn btn-primary">Upload</button>
 				</form>
-				{% endif %}
 
 
 				<h4 id="change-name" class="mt-5 text-light">Change Name</h4>
 				{% if name_form_result %}
-				<div class="alert alert-info" role="alert">{{name_form_result}}</div>
-				{% else %}
+				<div class="alert alert-info" role="alert">{{ name_form_result }}</div>
+				{% endif %}
+				{% if name_error %}
+				<div class="alert alert-warning" role="alert">{{ name_error }}</div>
+				{% endif %}
 				<form id="name-change-form" enctype="multipart/form-data">
 					<div class="form-floating">
 						{{ name_form.first_name }}
@@ -36,46 +43,65 @@
 					<div class="form-floating">
 						{{ name_form.last_name }}
 						{{ name_form.last_name.label_tag }}
-						<p style="text-danger">{{ name_form.last_name.errors }}<p>
+						<ul>
+							{% for error in name_form.last_name.errors %}
+							<li style="text-danger">{{ error }}</li>
+							{% endfor %}
+						</ul>
 					</div>
 					<button type="submit" id="nameChange" class="btn btn-primary">Submit</button>
 				</form>
-				{% endif %}
 
 				<h4 id="change-email" class="mt-5 text-light">Change E-mail</h4>
 				{% if email_form_result %}
-				<div class="alert alert-info" role="alert">{{email_form_result}}</div>
-				{% else %}
+				<div class="alert alert-info" role="alert">{{ email_form_result }}</div>
+				{% endif %}
+				{% if email_error %}
+				<div class="alert alert-warning" role="alert">{{ email_error }}</div>
+				{% endif %}
 				<form id="email-change-form">
 					<div class="form-floating">
 						{{ email_form.email }}
 						{{ email_form.email.label_tag }}
-						<p style="text-danger">{{ email_form.email.errors }}<p>
+						<ul>
+							{% for error in email_form.email.errors %}
+							<li style="text-danger">{{ error }}</li>
+							{% endfor %}
+						</ul>
 					</div>
 				<button type="submit" id="emailChange" class="btn btn-primary">Submit</button>
 				</form>
-				{% endif %}
 
 				<h4 id="change-password" class="mt-5 text-light">Change Password</h4>
 				{% if pasword_form_result %}
 				<div class="alert alert-info" role="alert">{{pasword_form_result}}</div>
-				{% else %}
+				{% endif %}
+				{% if pw_error %}
+				<div class="alert alert-warning" role="alert">{{pw_error}}</div>
+				{% endif %}
 				<form id="password-change-form" enctype="multipart/form-data">
 					<div class="form-floating">
 						{{ password_form.new_password }}
 						{{ password_form.new_password.label_tag }}
-						<p style="text-danger">{{ password_form.new_password.errors }}<p>
+						<ul>
+							{% for error in password_form.new_password.errors %}
+							<li style="text-danger">{{ error }}</li>
+							{% endfor %}
+						</ul>
 					</div>
 					<div class="form-floating">
 						{{ password_form.new_confirm_password }}
 						{{ password_form.new_confirm_password.label_tag }}
-						<p style="text-danger">{{ password_form.confirm_new_password.errors }}<p>
+						<ul>
+							{% for error in password_form.confirm_new_password.errors %}
+							<li style="text-danger">{{ error }}</li>
+							{% endfor %}
+						</ul>
 					</div>
 					<button type="submit" id="passwordChange" class="btn btn-primary">Submit</button>
 				</form>
-				{% endif %}
+				
 			</div>
-
 				{% include "./delete_account.html" with form=delete_account_form%}
 			</div>
 
