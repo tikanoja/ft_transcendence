@@ -15,11 +15,9 @@
 					</p>
 				</div>
 				{% endif %}
-				<div id="profile-picture" class="d-flex flex-column justify-content-center">
+				<div class="d-flex flex-column justify-content-center">
 					<h2 class="text-center jersey-20-regular text-primary">{{details.username}}</h2>
-					{% if profile_picture %}
-					<img src="{{ profile_picture.url }}" alt="profile picture for user {{ details.username }}" class="img-thumbnail rounded mx-auto d-block w-300"></img>
-					{% endif %}
+					{% include './profile_partials/profile_picture.html' with username=details.username profile_picture=profile_picture %}
 				</div>
 			</div>
 		</div>

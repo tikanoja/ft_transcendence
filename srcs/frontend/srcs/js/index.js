@@ -471,12 +471,37 @@ const manageAccountHandler = async (event) => {
 		// stay on this page, display the content only for the manage-content div
         const html = await response.text();
         updateElementContent(html, "manage-account");
+        if (event.target.id === "profile_picture_upload") {
+            updateProfilePicture();
+        }
 	}
 	else {
 		console.log("Response status: ", response.status)
 		// some 400 or 500 code probably, show the error that was sent?
 	}
 }
+
+const updateProfilePicture = async(event) => {
+    console.log("in update profile picture func")
+    let response = await sendGetRequest("/app/profile_picture/");
+    if (response.redirected) {
+        console.log('redirect status found');
+        let redirect_location = response.url;
+        console.log("redir to: ", redirect_location);
+        routeRedirect(redirect_location);
+    }
+	else if (response.ok) {
+        console.log('response,ok triggered');
+		// stay on this page, display the content only for the manage-content div
+        const html = await response.text();
+        updateElementContent(html, "profile-picture");
+	}
+	else {
+		console.log("Response status: ", response.status)
+		// some 400 or 500 code probably, show the error that was sent?
+	}
+}
+
 
 const profileLinkHandler = async (event) => {
     event.preventDefault();
