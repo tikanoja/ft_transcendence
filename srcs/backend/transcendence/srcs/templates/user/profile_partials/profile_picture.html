@@ -1,0 +1,5 @@
+<div id="profile-picture" class="d-flex flex-column justify-content-center">
+	{% if profile_picture %}
+	<img src="{{ profile_picture.url }}" alt="profile picture for user {{ username }}" class="img-thumbnail rounded mx-auto d-block w-300"></img>
+	{% endif %}
+</div>

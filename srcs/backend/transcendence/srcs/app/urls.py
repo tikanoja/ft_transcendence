@@ -18,6 +18,7 @@ urlpatterns = [
 	path('block_user/', relations.block_user, name="block_user"),
 	path('tournament_forms/', play.tournament_forms, name='tournament_forms'),
 	path('tournament_buttons/', play.tournament_buttons, name='tournament_buttons'),
+	path('profile_picture/', views.profile_picture, name="profile_picture"),
 ]
 
 # TODO block user need divverent view definition.

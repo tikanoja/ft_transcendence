@@ -48,3 +48,15 @@ def profileContext(username:str, self:bool) -> dict:
         context['error'] = e
         logger.debug('unable to search image')
     return context
+
+def get_profile_picture_context(username:str):
+    """
+    returns context to render the prfile_picture.html template
+    """
+    current_user = CustomUser.objects.filter(username=username).first()
+    context = {}
+    context["username"] = username
+    if not current_user:
+        return context
+    context["profile_picture"] = current_user.profile_picture
+    return context
