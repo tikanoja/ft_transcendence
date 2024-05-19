@@ -82,7 +82,7 @@ def delete_accountPOST(request, context):
                 raise ValidationError("Values given are not valid") 
         except ValidationError as ve:
             context["form"] = delete_form
-            context["error"] = ve
+            context["del_error"] = ve
             return render(request, "user/profile_partials/manage_account.html", context)
         username = request.user
         password = delete_form.cleaned_data["password"]
@@ -100,10 +100,10 @@ def delete_accountPOST(request, context):
             # delete account, return a success page with a 'link' to go to homepage
             return JsonResponse({'message': 'Your account has been deleted'})
         else:
-            context["error"] = 'Unable to delete account. Check which account you are logged in as'
+            context["del_error"] = 'Unable to delete account. Check which account you are logged in as or re-enter your password'
             return render(request, "user/profile_partials/manage_account.html", context)
     else:
-        context["error"] = 'User needs to be logged into delete account'
+        context["del_error"] = 'User needs to be logged into delete account'
         return render(request, "user/profile_partials/manage_account.html", context)
     
 
@@ -120,7 +120,7 @@ def manage_accountPOST(request):
             user_manager.update_user(request.user.username, first_name=form.cleaned_data["first_name"], last_name=form.cleaned_data["last_name"])
             context["name_form_result"] = 'Name updated successfully'
         except ValidationError as ve:
-            context["error"] = ve
+            context["name_error"] = ve
             context["name_form"] = form
     elif "email-change-form" == request.POST['form_id']:
         logger.debug("email change form found")
@@ -131,7 +131,7 @@ def manage_accountPOST(request):
             user_manager.update_user(request.user.username, email=form.cleaned_data["email"])
             context['email_form_result'] = 'Email updated successfully'
         except ValidationError as ve:
-            context["error"] = ve
+            context["email_error"] = ve
             context["email_form"] = form 
     elif "password-change-form" == request.POST['form_id']:
         logger.debug("password change form found")
@@ -142,7 +142,7 @@ def manage_accountPOST(request):
             user_manager.update_user(request.user.username, password=form.cleaned_data["password"])
             context['pasword_form_result'] = 'Password updated successfully. Please log back in with your new password'
         except ValidationError as ve:
-            context["error"] = ve
+            context["pw_error"] = ve
             context["email_form"] = form 
     elif "delete-account-form" == request.POST['form_id']:
         return delete_accountPOST(request, context)
@@ -172,7 +172,7 @@ def manage_accountPOST(request):
             current_user.save()
             context['profile_picture_upload_message'] = 'new image uploaded!'
         except Exception as e:
-            context["error"] = e
+            context["pic_error"] = e
             context["profile_picture_upload"] = form 
     else:
         context["error"] = 'Invalid form submitted'
