@@ -30,7 +30,6 @@ def loginPOST(request):
         user.save()
         res = JsonResponse({'success': "you just logged in"}, status=301)
         next = request.GET.get('next', '/play')
-        logger.debug('in loginPOST next: ' + next)
         if next:
             res['Location'] = next
         return res
@@ -62,7 +61,6 @@ def	logoutPOST(request):
         request.user.save()
         logout(request)
         next = request.GET.get('next', '/login')
-        logger.debug('in logoutPOST next: ' + next)
         return HttpResponseRedirect(next)	
     else:
         response = JsonResponse({'error': "Already logged out."})

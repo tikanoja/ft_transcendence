@@ -33,8 +33,8 @@ const routes = {
 	},
 	"/" : {
 		view: "/app/play/",
-		title: "Home | " + pageTitle,
-		description: "Home page"
+		title: "Play | " + pageTitle,
+		description: "Play games"
 	},
 	"/play" : {
 		view: "/app/play/",

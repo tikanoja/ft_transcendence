@@ -40,7 +40,6 @@ def	registerPOST(request):
     new_user.objects.create_user(username=sent_form.cleaned_data['username'], email=sent_form.cleaned_data['email'], password=sent_form.cleaned_data['password'], first_name=sent_form.cleaned_data['first_name'], last_name=sent_form.cleaned_data['last_name'])
     res = JsonResponse({'success': "account created"}, status=301)
     next = request.GET.get('next', '/login')
-    logger.debug('in registerPOST next: ' + next)
     if next:
         res['Location'] = next
     return res
