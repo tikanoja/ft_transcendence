@@ -62,6 +62,7 @@ def check_login(request):
 
 # POST only
 # returns JSON resonse with result of form handling success or error
+@login_required
 def manage_account(request):
 	logger.debug('In manage_account()')
 	if request.method =='POST':
@@ -137,7 +138,7 @@ def notfound(request):
 	else:
 		return JsonResponse({'error': "method not allowed. please use GET"})
 
-
+@login_required
 def profile(request, username):
 	logger.debug('getting profile')
 	self = False
