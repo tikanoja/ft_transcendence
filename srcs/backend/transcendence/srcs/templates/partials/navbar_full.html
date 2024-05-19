@@ -1,0 +1,17 @@
+<nav class="navbar navbar-expand-md bg-dark z-10" id="navbar">
+	<div class="container-fluid">
+		<h1 class="navbar-brand text-primary jersey-20-regular">PongChamps</h1>
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="" role="button" ><i class="fa fa-bars" aria-hidden="true" style="color:#e6e6ff"></i></span>
+		</button>
+		<!-- Init bootstrap nav component as horizontal bar -->
+		<div class="collapse navbar-collapse justify-content-md-end" id="navbarSupportedContent">
+			<ul class="navbar-nav ml-auto">
+				<!-- The items of the nav component -->
+				<li class="nav-item"> <a href="/play" class="nav-link" onclick="setActive(this)">Play</a></li>
+				<li class="nav-item"> <a id="profileLinkTag" href="/profile/{{current_user}}" class="nav-link" onclick="setActive(this)">My Profile</a></li>
+				<li class="nav-item"> <button type="submit" id="logoutButton" class="btn btn-primary">Logout</button></li>
+			</ul>
+		</div>
+	</div>
+</nav>

@@ -8,11 +8,13 @@ const pageTitle = "Pong";
 import { updateEventListeners, updateContent } from './index.js'
 
 // Listens to clicks on the entire document
+//TODO: maybe change this for only the play? everything else will be gone
 document.addEventListener("click", (e) => {
 	// Save the clicked element as target
 	const target = e.target;
 	// Check if the clicked element is a part of the nav anchors
-	if (!target.matches("nav a")) {
+	console.log("target id in click listener" + target.id)
+	if (!target.matches("nav a") || target.id === "profile-nav") {
 		return ;
 	}
 	// Prevent the navigation to a new page
@@ -96,19 +98,13 @@ const locationHandler = async () => {
 
 	console.log('locationHandler(): matching this to routes: ' + location)
 	// Check the routes (the views above) for a match, if no match: 404
-	const route = routes[location] || routes[404];
-	if (location === '/profile') {
-		let userQuery = await fetch('app/get_current_username/');
-		let username = await userQuery.json()
-		console.log('curent username returned as' + username['message'])
-		if (username['message'] === 'unknown user') {
-			// TODO: take this out and make sure that the routing for the profile requires login. this results in wrong url shown
-			route.view = "app/login/"
-		}
-		else {
-			route.view = "app/profile/" + username['message']
-		}
-
+	let route = routes[location] || routes[404];
+	const profileRe = new RegExp("^/profile/[a-zA-Z1-9]+(/)?$")
+	if (profileRe.test(location)) {
+		route = {
+			view: "/app" + location,
+			title: "Profile | " + pageTitle,
+			description: "PogChamp Profile"}
 	}
 	const querystring = window.location.search;
 	console.log('locationHandler(): fetching this: ' + route.view + querystring);
