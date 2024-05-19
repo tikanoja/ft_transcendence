@@ -71,6 +71,7 @@ def tournament_deleted_user(user):
         match.status = Match.FINISHED
         match.save()
 
+
 def delete_accountPOST(request, context):
     if request.user.is_authenticated:
         context["details"] = get_profile_details(request.user.username, True)

@@ -32,24 +32,14 @@ const routes = {
 		description: "Page not found"
 	},
 	"/" : {
-		view: "/app/home/",
-		title: "Home | " + pageTitle,
-		description: "Home page"
+		view: "/app/play/",
+		title: "Play | " + pageTitle,
+		description: "Play games"
 	},
 	"/play" : {
 		view: "/app/play/",
 		title: "Play | " + pageTitle,
 		description: "Play games"
-	},
-	"/friends" : {
-		view: "/app/friends/",
-		title: "Friends | " + pageTitle,
-		description: "Chat and manage friends"
-	},
-	"/settings" : {
-		view: "/app/settings/",
-		title: "Settings | " + pageTitle,
-		description: "Manage your settings"
 	},
 	"/login" : {
 		view: "/app/login/",
@@ -58,11 +48,6 @@ const routes = {
 	}, 
 	"/register" : {
 		view: "/app/register/",
-		title: "Login | " + pageTitle,
-		description: "Login"
-	},
-	"/delete-account" : {
-		view: "/app/delete_account",
 		title: "Login | " + pageTitle,
 		description: "Login"
 	},
