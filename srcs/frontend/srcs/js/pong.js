@@ -96,6 +96,7 @@ export const startScreen = async () => {
         console.error('Error loading script:', error);
     }
 };
+
 function loadGameOverScreen(data) {
     const winnerInfo = document.getElementById('winnerInfo');
     const gameOverScreen = document.getElementById('gameOverScreen');
@@ -378,19 +379,6 @@ function exit_game(data, scene)
     cleanUpScene(scene);
 }
 
-// function onWindowResize(camera, renderer)
-// {
-//     camera.aspect = window.innerWidth / window.innerHeight;
-//     camera.updateProjectionMatrix();
-//     renderer.setSize(window.innerWidth, window.innerHeight)
-
-//    const originalWidth = 100; 
-//    const originalHeight = 100; 
-  
-//    const scaleFactor = Math.min(window.innerWidth, window.innerHeight) / 1000;
-
-// }
-
 ///Main function for setting up and animating game
 export const renderPongGame = (is3DGraphics, gameNumber) => {
     const scene = new THREE.Scene();
@@ -427,12 +415,30 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
         camera.position.set(0, 0, 100);
         camera.lookAt(0, 0, 0);
     }
+    const canvasBounds = canvas.getBoundingClientRect();
+    const P1score = document.getElementById('P1Card');
+    const P2score = document.getElementById('P2Card');
+    P1score.style.top = canvasBounds.top + 10 + 'px';
+    P1score.style.left = canvasBounds.left + 10 + 'px';
+    P2score.style.top = canvasBounds.top + 10 + 'px';
+    P2score.style.right = window.innerWidth - canvasBounds.right + 10 + 'px';
 
 
     window.addEventListener('resize', () => {
-        renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
+        const width = window.innerWidth - (window.innerWidth / 4);
+        const height = window.innerHeight - (window.innerHeight / 4);
+        renderer.setSize(width, height);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
+
+        // Adjust scorecard positions
+        const canvasBounds = canvas.getBoundingClientRect();
+        const P1score = document.getElementById('P1Card');
+        const P2score = document.getElementById('P2Card');
+        P1score.style.top = canvasBounds.top + 10 + 'px';
+        P1score.style.left = canvasBounds.left + 10 + 'px';
+        P2score.style.top = canvasBounds.top + 10 + 'px';
+        P2score.style.right = window.innerWidth - canvasBounds.right + 10 + 'px';
     });
     
 
