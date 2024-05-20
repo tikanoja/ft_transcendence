@@ -431,7 +431,6 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
 
-        // Adjust scorecard positions
         const canvasBounds = canvas.getBoundingClientRect();
         const P1score = document.getElementById('P1Card');
         const P2score = document.getElementById('P2Card');
@@ -442,11 +441,11 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     });
     
 
-    socket.on('state', (data) => { // game update
+    socket.on('state', (data) => {
         updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics)
     });
 
-    socket.on('endstate', (data) => { // game has ended
+    socket.on('endstate', (data) => {
         exit_game(data, scene)
         AnimationController.stopAnimation();
     });
@@ -599,7 +598,6 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
                     camera.rotation.z = 5.57244397943557;
                 break;
             default:
-                // Handle other key presses if needed
                 break;
         }
     });

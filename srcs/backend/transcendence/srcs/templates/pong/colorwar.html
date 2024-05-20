@@ -62,7 +62,7 @@
     </label>
 </div>
 
-<div id="gameOverScreen">
+<!-- <div id="gameOverScreen">
     <h1>Game Over</h1>
     <div id="winnerInfo"></div>
     <input type="hidden" id="current_game_id" value="{{ current_game.id }}">
@@ -77,7 +77,41 @@
 
 </div>
 
-<div id="canvasContainer"></div>
+<div id="canvasContainer"></div> -->
+<div id="gameOverScreen" class="container mt-3">
+    <h1 class="text-center">Game Over</h1>
+    <div id="winnerInfo" class="my-4 text-center"></div>
+    <div class="text-center mt-4">
+        <input type="hidden" id="current_game_id" value="{{ current_game.id }}">
+        <input type="hidden" id="player1username" value="{{ p1_username }}">
+        <input type="hidden" id="player2username" value="{{ p2_username }}">
+        <button class="btn btn-primary">
+            <nav>
+                <a href="/play" class="nav-link" onclick="setActive(this)">Return to Game Manager</a>
+            </nav>
+        </button>
+    </div>
+</div>
+
+<div id="scoreboard" class="container-fluid d-flex justify-content-between position-absolute" style="top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; display: none;">
+    <div class="card text-center flex-fill mx-1 my-0 p-2" id="P1Card">
+        <div class="card-body p-1">
+            <h6 class="card-title mb-1" id="player1username">{{ p1_username }}</h6>
+            <p class="card-text mb-1">Score: <span id="player1Score">0</span></p>
+        </div>
+    </div>
+    <div class="card text-center flex-fill mx-1 my-0 p-2" id="P2Card">
+        <div class="card-body p-1">
+            <h6 class="card-title mb-1" id="player2username">{{ p2_username }}</h6>
+            <p class="card-text mb-1">Score: <span id="player2Score">0</span></p>
+        </div>
+    </div>
+    <div class="move-count" id="moveCount"></div> <!-- Move the move count element here -->
+</div>
+
+<div id="canvasContainer" style="position: relative; display: none;">
+
+</div>
 
 <div id="GameControls">
     <button type="Colour 1">
@@ -93,5 +127,4 @@
         <img src="" alt="buttonpng" border="0" />
     </button>
 </div>
-
 {% endblock %}

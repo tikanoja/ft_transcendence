@@ -53,7 +53,6 @@ export const verifyUsername = () => {
         });
     });
 };
-
 export const startScreenColorwar = async () => {
     try {
         await loadScript();
@@ -98,8 +97,8 @@ let previousP1Score = null;
 let previousP2Score = null;
 
 export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
-    const scoreLeftElement = document.querySelector('.score-left');
-    const scoreRightElement = document.querySelector('.score-right');
+    const scoreLeftElement = document.querySelector('#player1Score');
+    const scoreRightElement = document.querySelector('#player2Score');
     const moveCountElement = document.querySelector('.move-count');
 
     if (isNaN(p1Score) || isNaN(p2Score)) {
@@ -107,8 +106,8 @@ export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
     }
     if (scoreLeftElement && scoreRightElement) {
         if (p1Score !== previousP1Score || p2Score !== previousP2Score) {
-            scoreLeftElement.textContent = `P1 Score: ${p1Score}`;
-            scoreRightElement.textContent = `P2 Score: ${p2Score}`;
+            scoreLeftElement.textContent = p1Score;
+            scoreRightElement.textContent = p2Score;
             moveCountElement.textContent = `Moves: ${currentMoveCount}`;
             previousP1Score = p1Score;
             previousP2Score = p2Score;
@@ -117,6 +116,7 @@ export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
         console.error('Scoreboard elements not found.');
     }
 };
+
 
 function loadGameOverScreen(data) {
     const winnerInfo = document.getElementById('winnerInfo');
@@ -288,6 +288,14 @@ function onWindowResize(camera, renderer)
    const originalWidth = 100; 
    const originalHeight = 100; 
   
+   const canvasBounds = canvas.getBoundingClientRect();
+   const P1score = document.getElementById('P1Card');
+   const P2score = document.getElementById('P2Card');
+   P1score.style.top = canvasBounds.top + 10 + 'px';
+   P1score.style.left = canvasBounds.left + 10 + 'px';
+   P2score.style.top = canvasBounds.top + 10 + 'px';
+   P2score.style.right = window.innerWidth - canvasBounds.right + 10 + 'px';
+
    const scaleFactor = Math.min(window.innerWidth, window.innerHeight) / 1000;
    const buttons = document.querySelectorAll('#GameControls button img');
    buttons.forEach(button => {
@@ -307,7 +315,13 @@ export const renderColorwar = (gameNumber, data) => {
     canvasContainer.appendChild(renderer.domElement);
     
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4)); 
-    
+    const canvasBounds = canvasContainer.getBoundingClientRect();
+    const P1score = document.getElementById('P1Card');
+    const P2score = document.getElementById('P2Card');
+    P1score.style.top = canvasBounds.top + 10 + 'px';
+    P1score.style.left = canvasBounds.left + 10 + 'px';
+    P2score.style.top = canvasBounds.top + 10 + 'px';
+    P2score.style.right = window.innerWidth - canvasBounds.right + 10 + 'px';
     scene.background = new THREE.Color(0x332D2D);
 
     const numRows = 19;
