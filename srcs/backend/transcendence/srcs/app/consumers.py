@@ -1,11 +1,23 @@
 import logging
 import json
 
+from asgiref.sync import async_to_sync
+
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.layers import get_channel_layer
 
 from app.models import CustomUser
 
 logger = logging.getLogger(__name__)
+
+channel_layer = get_channel_layer()
+
+def chat_system_message(user, message: str):
+    if (channel_layer is not None):
+        async_to_sync(channel_layer.group_send)(user.username, {
+            "type" : "chat.system",
+            "message" : message,
+        })
 
 def _has_keys(event: dict, keys):
     for key in keys:
@@ -42,9 +54,10 @@ class UserConsumer(AsyncWebsocketConsumer):
         except:
             print("Invalid JSON sent by user: ", self.scope["user"].username)
             return
-        
+
         match event["type"]:
             case "chat.broadcast":
+        
                 if not _has_keys(event, ["message"]):
                     print("Chat broadcast event with missing fields by user: ", self.scope["user"].username)
                     return
@@ -65,7 +78,8 @@ class UserConsumer(AsyncWebsocketConsumer):
                 event["sender"] = self.scope["user"].username
 
                 await self.channel_layer.group_send(event["receiver"], event)
-                await self.channel_layer.group_send(self.groups[0], event)
+                if (event["receiver"] != self.groups[0]):
+                    await self.channel_layer.group_send(self.groups[0], event)
 
             case _:
                 print("Invalid event by user: ", self.scope["user"].username)
@@ -92,9 +106,11 @@ class UserConsumer(AsyncWebsocketConsumer):
 
         await self.send(text_data = json.dumps(event))
 
+    async def chat_system(self, event : dict):
+        await self.send(text_data = json.dumps(event))
 
     async def error_response(self, message : str):
         await self.send(text_data = json.dumps({
             "type" : "chat.error",
-            "message" : message
+            "message" : message,
         }));

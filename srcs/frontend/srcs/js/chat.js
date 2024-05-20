@@ -8,6 +8,17 @@ const submitButton = document.getElementById("chat-submit");
 
 const logMessageCountMax = 32;
 
+const helpMessage = "\n" +
+                    "/h - Display chat commands.\n" +
+                    "/w - Send a direct message.\n" +
+                    "/b - Block user.\n" +
+                    "/u - Unblock user.\n" +
+                    "/i - Send a game invite.\n";
+
+inputField.onkeydown = (e) => { if (e.key === "Enter") { _submitHandler(); e.preventDefault(); } }
+
+submitButton.onclick = _submitHandler;
+
 document.addEventListener("login" , connect);
 document.addEventListener("logout", disconnect);
 
@@ -16,6 +27,7 @@ connect();
 function connect() {
     if (!socket) {
         console.log("Establishing chat websocket connection...");
+
         try {
             socket = new WebSocket('wss://' + window.location.host + '/ws/app/');
         } catch (e) {
@@ -25,37 +37,112 @@ function connect() {
         }
 
         socket.onopen    = (event) => { console.log('Chat connection opened' , event); _set_disabled(false); };
-
-        socket.onerror   = (event) => {
-            console.log('Chat socket error: ', event);
-        };
-
-        socket.onclose   = (event) => {
-            console.log('Chat connection closed:', event);
-            socket = null;
-            _set_disabled(true);
-            while (chatLog.lastChild) chatLog.lastChild.remove();
-        };
-
-        socket.onmessage = (event) => {
-            try {
-                const content = JSON.parse(event.data);
-                switch (content.type) {
-                    case "chat.broadcast":
-                    case "chat.whisper"  : _appendMessage(content.sender, content.message); break;
-                    case "chat.error"    : _appendMessage("System", content.message); break;
-                    default: console.log("Unknown chat event");
-                }
-            } catch (e) {
-                console.log("Event error:", e);
-            }
-        };
+        socket.onerror   = (event) => { console.log('Chat socket error: ',     event); };
+        socket.onclose   = disconnect;
+        socket.onmessage = _messageHandler;
     }
 
     _set_disabled(false);
 }
 
-function disconnect() { if (socket) { socket.close(); } }
+function disconnect() {
+            socket = null;
+            _set_disabled(true);
+            while (chatLog.lastChild) { chatLog.lastChild.remove(); }
+}
+
+function _submitHandler() {
+    try {
+        const payload = _parseInput(inputField.value) 
+
+        if (payload) {
+            socket.send(JSON.stringify(payload));
+        }
+    } catch (e) {
+        console.log("Failed to submit chat message: ", e);
+    }
+
+    inputField.value = '';
+};
+
+function _parseInput(input) {
+    inputField.value.trim();
+
+    if (!inputField.value || socket.readyState != WebSocket.OPEN) {
+        return null;
+    }
+
+    if (!input.startsWith("/")) {
+        return { type: "chat.broadcast", message: input };
+    }
+
+    const parts = input.split(/^\/(\S)\S*\s+/g).filter(s => { return s != ""; });
+
+    if (!parts || parts.length != 2) {
+        return null;
+    }
+
+    const [ command, rest ] = parts;
+
+    console.log(parts);
+
+    switch (command) {
+        case "w": {
+            const args = rest.split(/^(\S+)\s+/g).filter(s => { return s != ""; });
+            if (args && args.length == 2) {
+                return {
+                    type: "chat.whisper",
+                    receiver: args[0],
+                    message: args[1]
+                };
+            }
+            _appendMessage( _createSourceElement("Error"), "Invalid whisper arguments")
+            break;
+        }
+
+         case "b": {
+            const args = rest.split(/^(\S+)\s+/g).filter(s => { return s != ""; });
+            if (args && args.length == 2) {
+                // BLOCK behaviour
+            }
+         }
+
+         case "u": {
+            const args = rest.split(/^(\S+)\s+/g).filter(s => { return s != ""; });
+            if (args && args.length == 2) {
+                // UNBLOCK behaviour
+            }
+         }
+
+         case "i": {
+            const args = rest.split(/^(\S+)\s+/g).filter(s => { return s != ""; });
+            if (args && args.length == 2) {
+                // UNBLOCK behaviour
+            }
+         }
+
+           _appendMessage( _createSourceElement("Error"), "Invalid whisper arguments")
+
+        default: break;
+    };
+    _appendMessage( _createSourceElement("System"), helpMessage);
+    return null;
+}
+
+
+function _messageHandler(event) {
+    try {
+        const content = JSON.parse(event.data);
+        switch (content.type) {
+            case "chat.broadcast": // Same fronted behaviour as whisper, difference being indicated would be nice I guess.
+            case "chat.whisper"  : _appendMessage( _createUsernameElement(content.sender), content.message ); break;
+            case "chat.system"   : _appendMessage( _createSourceElement("System"), content.message ); break;
+            case "chat.error"    : _appendMessage( _createSourceElement("Error"),  content.message ); break;
+
+            default: throw Error("Unknown chat event");
+        }
+    } catch (e) { console.err("Chat message handling failure: ", e); }
+}
 
 function _set_disabled(isDisabled) {
     chatLog.disabled      = isDisabled;
@@ -63,20 +150,30 @@ function _set_disabled(isDisabled) {
     inputField.disabled   = isDisabled;
 }
 
-function _appendMessage(source, message) {
-    if ([...message].length === 0) { return; }
-
+function _createUsernameElement(name) {
     const userLink = document.createElement("a");
-    userLink.href = "/profile/" + source;
-    userLink.append(document.createTextNode(source));
+    userLink.href = "/profile/" + name;
+    userLink.append(document.createTextNode(name));
     userLink.addEventListener("click", profileLinkHandler);
 
     const userLinkBold = document.createElement("b");
     userLinkBold.append(userLink);
 
+    return userLinkBold;
+}
+
+function _createSourceElement(name) {
+    const element = document.createElement("b");
+    element.textContent = name;
+    return element
+}
+
+function _appendMessage(source, message) {
+    if ([...message].length === 0) { return; }
+
     const container = document.createElement("div");
     container.classList.add("chat-message");
-    container.append(userLinkBold);
+    container.append(source);
     container.append(document.createTextNode("  " + message));
 
     if (chatLog.childElementCount + 1 > logMessageCountMax) {
@@ -88,66 +185,3 @@ function _appendMessage(source, message) {
     chatLog.append(container);
     chatLog.lastChild.scrollIntoView();
 }
-
-inputField.addEventListener("keydown", (event) => {
-    if (document.activeElement === inputField && event.key === "Enter") {
-        submitButton.onclick();
-        event.preventDefault();
-    }
-});
-
-submitButton.onclick = () => {
-    if (!inputField.value || socket.readyState != WebSocket.OPEN) {
-        return;
-    }
-
-    let event;
-
-    if (inputField.value.startsWith("/")) {
-        const parts = inputField.value.split(/^\/(\w)\S+\s+/g)
-
-        if (!parts) {
-            return;
-        }
-
-        const [ , command, rest, ] = parts;
-
-        switch (command) {
-            case "w":
-                const args = rest.split(/\s+(.*)/);
-                console.log(args);
-                if (args.length < 3) {
-                    _appendMessage("System", "Invalid command arguments")
-                    return;
-                }
-                event = {
-                    type: "chat.whisper",
-                    receiver: args[0],
-                    message: args[1]
-                };
-                break;
-
-            case "h":
-            default:
-                _appendMessage("System",
-                    "\n" +
-                    "/h(elp) - Display chat commands.\n" +
-                    "/w(hisper) [username] [message] - Send a direct message.\n"
-                );
-                return;
-        };
-    } else {
-        event = {
-            type : "chat.broadcast",
-            message : inputField.value
-        };
-    }
-
-    try {
-        socket.send(JSON.stringify(event));
-    } catch {
-        console.log("Chat socket not open");
-    }
-
-    inputField.value = '';
-};

@@ -13,6 +13,8 @@ from django.utils import timezone
 import os
 from transcendence import settings
 
+from app.consumers import chat_system_message
+
 logger = logging.getLogger(__name__)
 
 def playContext(request, error, success):
@@ -191,7 +193,10 @@ def playPOST(request):
     else:
         new_game_instance = ColorGameInstance(p1=current_user, p2=challenged_user, game=game, status='Pending')
     new_game_instance.save()
+
     # CHAT MODULE let challenged user know that they have been challenged
+    chat_system_message(challenged_user, "{name} has challenged you to a game of {game}".format(name = request.user.username, game = game))
+
     return render(request, 'user/play.html', playContext(request, None, "Game invite sent!")) 
 
 
@@ -278,7 +283,10 @@ def tournament_invite(request):
         return render(request, 'user/play.html', playContext(request, 'You have already invited that user', None))
     # add the invited_user to the tournament
     Participant.objects.create(user=invited_user, tournament=tournament, status='Pending')
+
     # CHAT MODULE msg to invited_user to inform that they have been invited to a tournament
+    chat_system_message(invited_user, "{name} has invited you to a tournament!".format(name = request.user.username))
+
     return render(request, 'user/play.html', playContext(request, None, 'Invite sent!'))
 
 
@@ -350,18 +358,27 @@ def update_tournament(game_instance):
                     next_level_match.save()
                     logger.debug(f'Scheduled a game: {p1_user.username} vs {p2_user.username}!')
                     # CHAT MODULE let player know in chat that they have a new game
+                    for matchup in [(p1_user, p2_user), (p2_user, p1_user)]:
+                        chat_system_message(matchup.first, "Your next tournament match against {name}!".format(name=matchup.second))
+
         else:
             logger.debug('No more levels in tournament, finishing tournament!')
-            # CHAT MODULE announce tournament winner
             match.status = Match.FINISHED
             match.save()
             tournament.status = Tournament.FINISHED
             tournament.save()
+            # CHAT MODULE announce tournament winner
+            winner_username = match.game_instance.winner.username;
+            for user in tournament.participants:
+                chat_system_message(user, "Congratulations to {name} for winning the tournament!".format(name=winner_username))
     else:
         logger.debug('There are still matches remaining on this level of the tournament')
-        # CHAT MODULE let player know that we are waiting for games to finish
         match.status = Match.FINISHED
         match.save()
+
+        # CHAT MODULE let player know that we are waiting for games to finish
+        winner = match.game_instance.winner
+        chat_system_message(winner, "Matches are still ongoing, please wait for your next game.")
 
     
 def get_wl_ratio(user, game):
@@ -539,7 +556,11 @@ def tournament_start(request, data):
         generate_brackets(tournament, accepted_participants)
     except ValueError as e:
         return render(request, 'user/play.html', playContext(request, str(e), None))
+
     # CHAT MODULE announce tournament start
+    for user in participants:
+        chat_system_message(user, "Tournament is starting!")
+
     return render(request, 'user/play.html', playContext(request, None, 'Tournament started!'))
 
 
