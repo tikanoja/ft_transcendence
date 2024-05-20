@@ -52,6 +52,8 @@ class NextParamMiddleware:
                 location = location.replace('?next=/app/', '?next=/')
             while '/app' in location:
                 location = location.replace('/app', '')
+            if '/pong/post_pong_canvas' in location:
+                location = location.replace('/pong/post_pong_canvas', '/play')
             response.headers['Location'] = location
             
         return response

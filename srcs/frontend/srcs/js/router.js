@@ -64,16 +64,6 @@ const routes = {
 		view: "/pong/post_cw_canvas/",
 		title: "Play | " + pageTitle,
 		description: "Play games"
-	},
-	"/pong/post_pong_canvas" : {
-		view: "/pong/post_cw_canvas/",
-		title: "Play | " + pageTitle,
-		description: "Play games"
-	},
-	"/pong/post_pong_canvas" : {
-		view: "/app/play/",
-		title: "Play | " + pageTitle,
-		description: "Play games"
 	}
 }
 // route above should not be the same as the calls to the backend...seems fragile
