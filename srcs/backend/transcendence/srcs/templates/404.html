@@ -1,0 +1,17 @@
+{% if current_user %}
+<div>
+	{% include 'partials/navbar_full.html' with current_user=current_user %}
+</div>
+{% else %}
+<div>
+	{% include 'partials/navbar_empty.html' %}
+</div>
+{% endif %}
+
+<div class="d-flex flex-column align-items-center text-white">
+	<h1>Whoops!</h1>
+	<p>The content you are looking doesn't seem to be here</p>
+		<i class="bi bi-emoji-frown-fill text-warning " style="font-size: 300px;"></i>
+	<p>404 Not Found</p> 
+</div>
+

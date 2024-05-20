@@ -134,7 +134,10 @@ def home(request):
 def notfound(request):
 	logger.debug('in notfound()')
 	if request.method == 'GET':
-		return render(request, 'user/404.html', {})
+		# check for current_user
+		context = {}
+		context["current_user"] = request.user.username
+		return render(request, '404.html', context)
 	else:
 		return JsonResponse({'error': "method not allowed. please use GET"})
 
