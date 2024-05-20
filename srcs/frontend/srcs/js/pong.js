@@ -150,7 +150,7 @@ export const updateScoreboard = (p1Score, p2Score) => {
             previousP2Score = p2Score;
         }
     } else {
-        // empty on purpose if creation of elements dont succeed
+        console.error('Error loading html elements');
     }
 };
 
@@ -384,6 +384,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     if (existingCanvas) {
         existingCanvas.remove();
     }
+    let canvasFocused = true;
     const renderer = new THREE.WebGLRenderer();
     const pixelRatio = window.devicePixelRatio;
     renderer.setPixelRatio(pixelRatio);
@@ -391,6 +392,17 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     renderer.domElement.id = 'pongCanvas'; 
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
     
+
+    const canvas = renderer.domElement;
+    canvas.setAttribute('tabindex', '0');
+    canvas.addEventListener('focus', () => {
+        canvasFocused = true;
+    });
+    
+    canvas.addEventListener('blur', () => {
+        canvasFocused = false;
+    });
+
     if (is3DGraphics) {
         ({ camera, p1_paddle, p2_paddle, ball} = setup3DScene(scene));
         camera.position.set(-1100, 300, 1100);
@@ -410,43 +422,46 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     });
 
     document.addEventListener('keydown', (event) => {
-        event.preventDefault();
-        if (is3DGraphics)
+        if (canvasFocused)
         {
-            if (event.key == 'ArrowDown')
+            event.preventDefault();
+            if (is3DGraphics)
             {
-                socket.emit('message', 'right_paddle_down,' + gameNumber);
+                if (event.key == 'ArrowDown')
+                {
+                    socket.emit('message', 'right_paddle_down,' + gameNumber);
+                }
+                if (event.key  == 'ArrowUp')
+                {
+                    socket.emit('message', 'right_paddle_up,' + gameNumber);
+                }
+                if (event.key  == 's')
+                {
+                    socket.emit('message', 'left_paddle_down,' + gameNumber);
+                }
+                if (event.key  == 'w')
+                {
+                    socket.emit('message', 'left_paddle_up,' + gameNumber);
+                }
             }
-            if (event.key  == 'ArrowUp')
+            else
             {
-                socket.emit('message', 'right_paddle_up,' + gameNumber);
-            }
-            if (event.key  == 's')
-            {
-                socket.emit('message', 'left_paddle_down,' + gameNumber);
-            }
-            if (event.key  == 'w')
-            {
-                socket.emit('message', 'left_paddle_up,' + gameNumber);
-            }
-        }
-        else
-        {
-            if (event.key == 'ArrowDown')
-            {
-                socket.emit('message', 'right_paddle_up,' + gameNumber);
-            }
-            if (event.key  == 'ArrowUp')
-            {
-                socket.emit('message', 'right_paddle_down,' + gameNumber);
-            }
-            if (event.key  == 's')
-            {
-                socket.emit('message', 'left_paddle_up,' + gameNumber);
-            }
-            if (event.key  == 'w')
-            {
-                socket.emit('message', 'left_paddle_down,' + gameNumber);
+                if (event.key == 'ArrowDown')
+                {
+                    socket.emit('message', 'right_paddle_up,' + gameNumber);
+                }
+                if (event.key  == 'ArrowUp')
+                {
+                    socket.emit('message', 'right_paddle_down,' + gameNumber);
+                }
+                if (event.key  == 's')
+                {
+                    socket.emit('message', 'left_paddle_up,' + gameNumber);
+                }
+                if (event.key  == 'w')
+                {
+                    socket.emit('message', 'left_paddle_down,' + gameNumber);
+                }
             }
         }
     });
