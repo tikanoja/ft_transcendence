@@ -308,11 +308,18 @@ export const renderColorwar = (gameNumber, data) => {
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer();
     let render = true;
+    
+    const existingCanvas = document.getElementById('colorCanvas');
+    if (existingCanvas) {
+        existingCanvas.remove();
+    }
+    
     renderer.setSize(window.innerWidth, window.innerHeight);
     const scoreboard = document.getElementById('scoreboard');
     scoreboard.display = 'block';
-    const canvasContainer = document.getElementById('canvasContainer');
-    canvasContainer.appendChild(renderer.domElement);
+    renderer.domElement.id = 'colorCanvas'; 
+    document.getElementById('canvasContainer').appendChild(renderer.domElement);
+ 
     
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4)); 
     let canvasFocused = true;
@@ -329,6 +336,9 @@ export const renderColorwar = (gameNumber, data) => {
     const canvasBounds = canvas.getBoundingClientRect();
     const P1score = document.getElementById('P1Card');
     const P2score = document.getElementById('P2Card');
+    P1score.display = 'block';
+    P2score.display = 'block';
+
     P1score.style.top = canvasBounds.top + 10 + 'px';
     P1score.style.left = canvasBounds.left + 10 + 'px';
     P2score.style.top = canvasBounds.top + 10 + 'px';
