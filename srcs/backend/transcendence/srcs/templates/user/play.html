@@ -1,177 +1,208 @@
 {% extends 'base.html' %}
 {% block content%}
-<h2>{{title | title}}</h2>
 
-{% if message %}
-<p>{{message}}</p>
-{% endif %}
+<h1 class="jersey-60-regular text-center text-white">Play!</h1>
 
 {% if error %}
-<p style="color: red">Error: {{error}}</p>
+<div class="alert alert-danger" role="alert">Error: {{error}}</div>
 {% endif %}
 
 {% if success %}
-<p style="color: green">Success: {{success}}</p>
+<div class="alert alert-success" role="alert">Success: {{success}}</div>
 {% endif %}
 
-{% if active_game %}
-<h2 style="color: green">You have an active game of {{ active_game.game }} with {% if active_game.p1.username == current_user.username %}{{ active_game.p2.username }}{% else %}{{ active_game.p1.username }}{% endif %}.</h2>
-<button type="submit" id="gameRenderButton" data-game={{ active_game.game }} data-p1={{ active_game.p1.username }} data-p2={{ active_game.p2.username }} data-action="render_game" class="btn btn-success">Render game</button>
-{% endif %}
-
-
-{% comment %} <h3>* * * * * * * * * *</h3>
-<br>
-
-<h2>Quick play</h2>
-<form id="gameRequestForm" >
-	{% csrf_token %}
-	{% for field in playform %}
-	<div class="form-group">
-	<p style="color: red">{{ field.errors }}<p>
-	{{ field.label_tag }} {{ field }}
-	</div>
-	{% endfor %}
-	<input type="submit" value="Start game">
-</form> {% endcomment %}
-
-<h3>* * * * * * * * * *</h3>
-<br>
-
-<h2>Tournament</h2>
-{% if in_active_tournament is False %}
-	{% if hosting_tournament is False and my_participant.status != 'Accepted' %}
-	<form id="startTournamentForm"> {% comment %} We are not hosting a tournament, show form to create one {% endcomment %}
-		{% csrf_token %}
-		<input type="hidden" name="formname" value="startTournamentForm">
-		{% for field in tournamentform %}
-		<div class="form-group">
-		<p style="color: red">{{ field.errors }}<p>
-		{{ field.label_tag }} {{ field }}
-		</div>
-		{% endfor %}
-		<input type="submit" class="btn btn-primary" value="Start tournament">
-	</form>
-	{% elif hosting_tournament is True %} {% comment %} We ARE hosting a tournament, show form to invite users {% endcomment %}
-	<button type="submit" id="tournamentButton" data-tournament-id={{ my_tournament.id }} data-action="nuke" class="btn btn-outline-danger">Cancel tournament</button>
-		{% if my_tournament_count == 4 or my_tournament_count == 8 %}
-			<button type="submit" id="tournamentButton" data-tournament-id={{ my_tournament.id }} data-action="startTournament" class="btn btn-success">Start tournament!</button>
-		{% else %}
-			<p>Invite 4 or 8 players</p>
-		{% endif %}
-	<form id="tournamentInviteForm" >
-		{% csrf_token %}
-		<input type="hidden" name="formname" value="tournamentInviteForm">
-		{% for field in tournamentinviteform %}
-		<div class="form-group">
-		<p style="color: red">{{ field.errors }}<p>
-		{{ field.label_tag }} {{ field }}
-		</div>
-		{% endfor %}
-		<input type="submit" class="btn btn-primary" value="Send invite">
-	</form>
+<div class="d-flex justify-content-center align-items-center">
+	{% if active_game %}
+	<h4 class="alert alert-success w-50 text-center" role="alert">
+		You have an active game of {{ active_game.game }} with {% if active_game.p1.username == current_user.username %}{{ active_game.p2.username }}{% else %}{{ active_game.p1.username }}{% endif %}.
+	</h4>
+	<button class="btn btn-success ms-3" type="submit" id="gameRenderButton" data-game={{ active_game.game }} data-p1={{ active_game.p1.username }} data-p2={{ active_game.p2.username }} data-action="render_game">Render game</button>
+	{% else %}
+	<h4 class="alert alert-secondary w-50 text-center" role="alert"> No active games</h4>
 	{% endif %}
-	{% if participating_in_tournament is True %} {% comment %} We are a part of a pending tournament {% endcomment %}
-		{% if my_participant.status == 'Pending' %} {% comment %} We have not confirmed attendance yet {% endcomment %}
-			<p>{{ tournament_in.creator.username }} invited you to a {{ tournament_in.game }} tournament!</p>
-			<form id="tournamentJoinForm" >
-				{% csrf_token %}
-				<input type="hidden" name="participant_id" value={{ my_participant.id }} >
-				<input type="hidden" name="formname" value="tournamentJoinForm">
-				{% for field in tournamentjoinform %}
-				<div class="form-group">
-				<p style="color: red">{{ field.errors }}<p>
-				{{ field.label_tag }} {{ field }}
+</div>
+
+<div class="m-5">
+	<div class="row g-3">
+		<div class="col-xxl-6 col-xl-6 col-lg-6 col-md-12 col-sml-12">
+			<div class="card h-250">
+				<div class="card-title h2 text-center jersey-20-regular">1 v 1</div>
+				<div class="card-body d-flex flex-column align-items-center">
+					<h3>Send Invite</h3>
+					<form id="gameInviteForm" class="w-90 bg-secondary rounded p-3">
+						{% csrf_token %}
+						<div class="mb-3 d-flex text-white">
+							{{ inviteform.game_type.label}}
+							{% for widget in inviteform.game_type %}
+							<div class="p-3">
+								{{ widget.tag }}
+								{{ widget.choice_label }}
+							</div>
+							{% endfor %}
+							<p class="text-danger">{{ inviteform.game_type.errors }}<p>
+						</div>
+						<div class="form-floating mb-3">
+							{{ inviteform.username }}
+							{{ inviteform.username.label_tag }}
+							<p class="text-danger">{{ inviteform.username.errors }}<p>
+						</div>
+						<button class="btn btn-primary btn-sm" type="submit">Send request</button>
+					</form>
+			
+					<h3>Pending Invites</h3>
+					<div class="w-90" style="height: 200px; overflow-y:scroll;">
+						<ul class="list-group list-group-flush">	
+							{% for invite in invites_sent %}
+								<li class="list-group-item h6 pe-5">
+									Challenged <a id="profileLinkTag" href="/profile/{{ invite.p2.username }}" >{{ invite.p2.username }}</a> to <b>{{ invite.game }}</b>
+									<button type="submit" id="gameRequestButton" data-from-user={{ invite.p2.username }} data-action="cancel" class="btn btn-danger btn-sm">Cancel</button>
+								</li>
+							{% endfor %}
+						</ul>
+						<ul class="list-group list-group-flush">	
+							{% for invite in invites_received %}
+								<li class="list-group-item h6 pe-5">
+									<a id="profileLinkTag" href="/profile/{{ invite.p1.username }}" >{{ invite.p1.username }}</a> challenged you to <b>{{ invite.game }}</b>
+									<button type="submit" id="gameRequestButton" data-from-user={{ invite.p1.username }} data-action="accept" class="btn btn-primary btn-sm">✓</button> or
+									<button type="submit" id="gameRequestButton" data-from-user={{ invite.p1.username }} data-action="reject" class="btn btn-danger btn-sm">✗</button>
+								</li>
+							{% empty %}
+								<li class="list-group-item">No pending invites.</li>
+							{% endfor %}
+						</ul>
+					
+					{% comment %} <h3>* * * * * * * * * *</h3>
+					<br>
+					<h2>Nuke all game instances</h2>
+					<button type="submit" id="gameRequestButton" data-from-user="nuke" data-action="nuke" class="btn btn-danger">Let's go</button> {% endcomment %}
+					
+					</div>
 				</div>
-				{% endfor %}
-				<input type="submit" class="btn btn-primary" value="Join tournament">
-			</form>
-			<button type="submit" id="tournamentButton" data-participant-id={{ my_participant.id }} data-action="rejectTournamentInvite" class="btn btn-danger">Reject</button>
-		{% else %} {% comment %} Attendance and alias confirmed, show list of players, their statuses and the option to cancel {% endcomment %}
-			<h4>{{ tournament_in.creator.username }}'s {{ tournament_in.game }} tournament</h3>
-			{% for participant in tournament_in_participants %}
-			<li>
-				{{ participant.user.username }} as {{ participant.alias }}. Status: {{ participant.status }}
-				{% if participant.user == current_user and current_user != tournament_in.creator%}
-					<button type="submit" id="tournamentButton" data-participant-id={{ participant.id }} data-action="leaveTournament" class="btn btn-danger">Cancel</button>
-				{% endif %}
-				{% if current_user == tournament_in.creator and participant.user != current_user %}
-					<button type="submit" id="tournamentButton" data-participant-id={{ participant.id }} data-action="leaveTournament" class="btn btn-danger">Kick</button>
-				{% endif %}
-			</li>
-			{% empty %}
-			<li>No participants yet.</li>
-			{% endfor %}
-		{% endif %}
-	{% endif %}
-{% else %}
-	<p>In active tournament. Please follow chat for more info!</p>
-	<ul>
-        {% for match in matches %}
-                <li>
-					{% if match.game_instance.p1.username is not None %}
-                   		{{ match.game_instance.p1.username }}
-					{% else %}
-						???
-					{% endif %}
-					vs
-					{% if match.game_instance.p2.username is not None %}
-                   		{{ match.game_instance.p2.username }}
-					{% else %}
-						???
-					{% endif %}
-					- Status: {{ match.status }}
-					{% if match.status == 'Finished' %}
-					- Winner: {{ match.game_instance.winner.username }}
-					{% endif %}
-                </li>
-        {% endfor %}
-    </ul>
-{% endif %}
-<h3>* * * * * * * * * *</h3>
-<br>
+			</div>
+		</div>
+		<div class="col-xxl-6 col-xl-6 col-lg-6 col-md-12 col-sml-12">
+			<div class="card h-250">
+				<div class="card-title h2 text-center jersey-20-regular">Tournaments</div>
+				<div class="card-body d-flex flex-column align-items-center">
+					{% if in_active_tournament is False %}
+						{% if hosting_tournament is False and my_participant.status != 'Accepted' %}
+						<h3>Start a Tournament</h3>
+						<form id="startTournamentForm" class="bg-secondary rounded p-3"  style="width: 90%;"> {% comment %} We are not hosting a tournament, show form to create one {% endcomment %}
+							{% csrf_token %}
+							<input type="hidden" name="formname" value="startTournamentForm">
+							<div class="mb-3 d-flex text-white">
+								{{ tournamentform.game_type.label}}
+								{% for widget in tournamentform.game_type %}
+								<div class="p-3">
+									{{ widget.tag }}
+									{{ widget.choice_label }}
+								</div>
+								{% endfor %}
+								<p class="text-danger">{{ tournamentform.game_type.errors }}<p>
+							</div>
+							<div class="form-floating mb-3">
+								{{ tournamentform.alias }}
+								{{ tournamentform.alias.label_tag }}
+								<p class="text-danger">{{ tournamentform.alias.errors }}<p>
+							</div>
+							<button type="submit" class="btn btn-primary btn-sm">Start tournament</button>
+						</form>
 
-<h2>Custom invite</h2>
-<form id="gameInviteForm" >
-	{% csrf_token %}
-	{% for field in inviteform %}
-	<div class="form-group">
-	<p style="color: red">{{ field.errors }}<p>
-	{{ field.label_tag }} {{ field }}
+					{% elif hosting_tournament is True %} {% comment %} We ARE hosting a tournament, show form to invite users {% endcomment %}
+					{% if my_tournament_count == 4 or my_tournament_count == 8 %}
+					<button type="submit" id="tournamentButton" data-tournament-id={{ my_tournament.id }} data-action="startTournament" class="btn btn-success">Start tournament!</button>
+					{% else %}
+					<p class="h5 mt-3" >Invite 4 or 8 players</p>
+					<p class="mb-3" ><i>At least 4 players needed to start a tournamnet</i></p>
+					{% endif %}
+					
+					<div class="bg-secondary rounded p-3" style="width: 90%;">
+						<form id="tournamentInviteForm">
+							{% csrf_token %}
+							<input type="hidden" name="formname" value="tournamentInviteForm">
+							<div class="form-floating mb-3">
+								{{ tournamentinviteform.username }}
+								{{ tournamentinviteform.username.label_tag }}
+								<p class="text-danger">{{ tournamentinviteform.username.errors }}<p>
+								</div>
+								<button type="submit" class="btn btn-primary btn-sm">Send invite</button>
+							</form>
+						</div>
+						
+						<button type="submit" id="tournamentButton" data-tournament-id={{ my_tournament.id }} data-action="nuke" class="btn btn-outline-danger mt-3">Cancel tournament</button>
+						{% endif %}
+						{% if participating_in_tournament is True %} {% comment %} We are a part of a pending tournament {% endcomment %}
+
+							{% if my_participant.status == 'Pending' %} {% comment %} We have not confirmed attendance yet {% endcomment %}
+							<div>
+								<p class="h5 pt-3 "><a id="profileLinkTag" href="/profile/{{ tournament_in.creator.username }}" >{{ tournament_in.creator.username }}</a> invited you to a {{ tournament_in.game }} tournament!</p>
+								<form id="tournamentJoinForm">
+									{% csrf_token %}
+									<input type="hidden" name="participant_id" value={{ my_participant.id }}>
+									<input type="hidden" name="formname" value="tournamentJoinForm">
+									<div class="form-floating mb-3">
+										{{ tournamentjoinform.alias }}
+										{{ tournamentjoinform.alias.label_tag }}
+										<p class="text-danger">{{ tournamentjoinform.alias.errors }}<p>
+									</div>
+									<button type="submit" class="btn btn-primary btn-sm">Join</button>
+									<button type="submit" id="tournamentButton" data-participant-id={{ my_participant.id }} data-action="rejectTournamentInvite" class="btn btn-danger btn-sm">Reject</button>
+								</form>
+							</div>
+
+							{% else %} {% comment %} Attendance and alias confirmed, show list of players, their statuses and the option to cancel {% endcomment %}
+								<h4 class="pt-3">{{ tournament_in.creator.username }}'s {{ tournament_in.game }} tournament</h4>
+								<div class="w-90" style="height: 200px; overflow-y:scroll;">
+									<ul class="list-group list-group-flush">
+										{% for participant in tournament_in_participants %}
+										<li class="list-group-item h6 pe-5">
+											{% if current_user == participant.user%}
+											{{ participant.user.username }}
+											{% else %}
+											<a id="profileLinkTag" href="/profile/{{ participant.user.username }}" >{{ participant.user.username }}</a>
+											{% endif %}
+											as {{ participant.alias }}   Status: {% if participant.status == "Accepted" %}<p class="text-success d-inline">{{ participant.status }}</p>{% else %}<p class="text-warning d-inline">{{ participant.status }}{% endif %}
+											{% if participant.user == current_user and current_user != tournament_in.creator%}
+												<button type="submit" id="tournamentButton" data-participant-id={{ participant.id }} data-action="leaveTournament" class="btn btn-danger btn-sm">Cancel</button>
+											{% endif %}
+											{% if current_user == tournament_in.creator and participant.user != current_user %}
+												<button type="submit" id="tournamentButton" data-participant-id={{ participant.id }} data-action="leaveTournament" class="btn btn-danger btn-sm">Kick</button>
+											{% endif %}
+										</li>
+										{% empty %}
+										<li class="list-group-item">No participants yet</li>
+										{% endfor %}
+									</ul>
+								</div>
+							{% endif %}
+						{% endif %}
+					{% else %}
+						<h3>In active tournament. Please follow chat for more info!</h3>
+						<ul class="list-group list-group-flush">
+							{% for match in matches %}
+									<li class="list-group-item h6 pe-5">
+										{% if match.game_instance.p1.username is not None %}
+											   {{ match.game_instance.p1.username }}
+										{% else %}
+											???
+										{% endif %}
+										vs
+										{% if match.game_instance.p2.username is not None %}
+											   {{ match.game_instance.p2.username }}
+										{% else %}
+											???
+										{% endif %}
+										 Status: {{ match.status }}
+										{% if match.status == 'Finished' %}
+										 Winner: {{ match.game_instance.winner.username }}
+										{% endif %}
+									</li>
+							{% endfor %}
+						</ul>
+					{% endif %}
+				</div>
+			</div>
+		</div>
 	</div>
-	{% endfor %}
-	<input type="submit" value="Send request">
-</form>
-
-<h3>* * * * * * * * * *</h3>
-</br>
-
-<div>
-<h2>Pending Invites</h2>
-<ul>	
-	{% for invite in invites_sent %}
-		<li>
-			Challenged {{ invite.p2.username }} to a game of {{ invite.game }} -
-			<button type="submit" id="gameRequestButton" data-from-user={{ invite.p2.username }} data-action="cancel" class="btn btn-danger">Cancel</button>
-		</li>
-	{% endfor %}
-</ul>
-<ul>	
-	{% for invite in invites_received %}
-		<li>
-			Challenger: {{ invite.p1.username }} - Game: {{ invite.game }} -
-			<button type="submit" id="gameRequestButton" data-from-user={{ invite.p1.username }} data-action="accept" class="btn btn-primary">✓</button> or
-			<button type="submit" id="gameRequestButton" data-from-user={{ invite.p1.username }} data-action="reject" class="btn btn-danger">✗</button>
-		</li>
-	{% empty %}
-		<li>No pending invites.</li>
-	{% endfor %}
-</ul>
-
-<h3>* * * * * * * * * *</h3>
-<br>
-<h2>Nuke all game instances</h2>
-<button type="submit" id="gameRequestButton" data-from-user="nuke" data-action="nuke" class="btn btn-danger">Let's go</button>
-
 </div>
 {% endblock %}

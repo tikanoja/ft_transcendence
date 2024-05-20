@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content%}
-<div id="profile">
+<div id="profile" class="m-5">
 	<div class="m-5">
 		<div class="row">
 			<div class="col">
@@ -15,11 +15,9 @@
 					</p>
 				</div>
 				{% endif %}
-				<div id="profile-picture" class="d-flex flex-column justify-content-center">
+				<div class="d-flex flex-column justify-content-center">
 					<h2 class="text-center jersey-20-regular text-primary">{{details.username}}</h2>
-					{% if profile_picture %}
-					<img src="{{ profile_picture.url }}" alt="profile picture for user {{ details.username }}" class="img-thumbnail rounded mx-auto d-block w-300"></img>
-					{% endif %}
+					{% include './profile_partials/profile_picture.html' with username=details.username profile_picture=profile_picture %}
 				</div>
 			</div>
 		</div>
@@ -47,7 +45,6 @@
 		{% endif %}
 		<div class="row">
 			<div class="col-xl-5 col-lg-5 col-sm-12 gy-3">
-				{% comment %} set height {% endcomment %}
 				<div class="card h-100" style="overflow-y:scroll;"> 
 					<div class="card-title h1 text-center jersey-20-regular">History</div>
 					<div class="card-body">

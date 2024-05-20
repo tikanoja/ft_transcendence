@@ -55,7 +55,6 @@ class CustomUser(AbstractBaseUser):
 
     objects = CustomUserManager()
 
-
 class Friendship(models.Model):
     PENDING = 'Pending'
     ACCEPTED = 'Accepted'
@@ -68,7 +67,6 @@ class Friendship(models.Model):
     from_user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='friend_request_from')
     to_user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='friend_request_to')
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default=PENDING)
-
 
 class GameInstance(models.Model):
     PENDING = 'Pending'

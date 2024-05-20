@@ -48,7 +48,11 @@ def loginGET(request):
         # return redirect("/user/logout")
     form = LoginForm()
     logger.debug(form)
-    return render(request, 'user/login.html', {"form": form, "title": title})
+    next = request.GET.get('next', '/play')
+    res = render(request, 'user/login.html', {"form": form, "title": title})
+    if next:
+        res['Location'] = next
+    return res
 
 
 def	logoutPOST(request):
@@ -61,6 +65,7 @@ def	logoutPOST(request):
     else:
         response = JsonResponse({'error': "Already logged out."})
     return response
+
 
 def	get_current_usernameGET(request):
     if request.user.is_authenticated:
