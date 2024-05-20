@@ -35,35 +35,9 @@
     display: none; /* Hide the GameControls initially */
 }
 
-.card {
-    max-width: 120px; /* Adjust the width as needed */
-}
-
-.card-body {
-    padding: 5px; /* Reduce padding inside the card body */
-}
-
-.card-title, 
-.card-text {
-    margin-bottom: 5px; /* Reduce the bottom margin */
-    font-size: 0.8rem; /* Adjust font size */
-}
-
-.move-count {
-    order: 1;
-}
 
 .canvas-container {
     position: relative;
-}
-.score-left {
-    order: 1;
-    margin-right: auto;
-}
-
-.score-right {
-    order: 2; 
-    margin-left: auto;
 }
 
 body {

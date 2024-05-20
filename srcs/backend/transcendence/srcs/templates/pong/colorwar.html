@@ -94,19 +94,19 @@
 </div>
 
 <div id="scoreboard" class="container-fluid d-flex justify-content-between position-absolute" style="top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; display: none;">
-    <div class="card text-center flex-fill mx-1 my-0 p-2" id="P1Card">
-        <div class="card-body p-1">
-            <h6 class="card-title mb-1" id="player1username">{{ p1_username }}</h6>
-            <p class="card-text mb-1">Score: <span id="player1Score">0</span></p>
+    <div class="card text-center flex-fill mx-1 my-0 p-2" id="P1Card" style="display: none; max-width: 120px;">
+        <div class="card-body p-1" style="padding: 5px;">
+            <h6 class="card-title mb-1" id="player1username" style="margin-bottom: 5px; font-size: 0.8rem;">{{ p1_username }}</h6>
+            <p class="card-text mb-1" style="margin-bottom: 5px; font-size: 0.8rem;">Score: <span id="player1Score">0</span></p>
         </div>
     </div>
-    <div class="card text-center flex-fill mx-1 my-0 p-2" id="P2Card">
-        <div class="card-body p-1">
-            <h6 class="card-title mb-1" id="player2username">{{ p2_username }}</h6>
-            <p class="card-text mb-1">Score: <span id="player2Score">0</span></p>
+    <div class="card text-center flex-fill mx-1 my-0 p-2" id="P2Card" style="display: none; max-width: 120px;">
+        <div class="card-body p-1" style="padding: 5px;">
+            <h6 class="card-title mb-1" id="player2username" style="margin-bottom: 5px; font-size: 0.8rem;">{{ p2_username }}</h6>
+            <p class="card-text mb-1" style="margin-bottom: 5px; font-size: 0.8rem;">Score: <span id="player2Score">0</span></p>
         </div>
     </div>
-    <div class="move-count" id="moveCount"></div> <!-- Move the move count element here -->
+    <div class="move-count" id="moveCount" style="order: 1;"></div>
 </div>
 
 <div id="canvasContainer" style="position: relative; display: none;">

@@ -418,26 +418,31 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     const canvasBounds = canvas.getBoundingClientRect();
     const P1score = document.getElementById('P1Card');
     const P2score = document.getElementById('P2Card');
+    
+    P1score.style.position = 'absolute';
     P1score.style.top = canvasBounds.top + 10 + 'px';
-    P1score.style.left = canvasBounds.left + 10 + 'px';
+    P1score.style.left = canvasBounds.left + 70 + 'px';
+    
+    P2score.style.position = 'absolute';
     P2score.style.top = canvasBounds.top + 10 + 'px';
-    P2score.style.right = window.innerWidth - canvasBounds.right + 10 + 'px';
-
-
+    P2score.style.left = canvasBounds.right - P2score.offsetWidth - 70 + 'px';
+    
     window.addEventListener('resize', () => {
         const width = window.innerWidth - (window.innerWidth / 4);
         const height = window.innerHeight - (window.innerHeight / 4);
         renderer.setSize(width, height);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
-
+    
         const canvasBounds = canvas.getBoundingClientRect();
         const P1score = document.getElementById('P1Card');
         const P2score = document.getElementById('P2Card');
+        
         P1score.style.top = canvasBounds.top + 10 + 'px';
-        P1score.style.left = canvasBounds.left + 10 + 'px';
+        P1score.style.left = canvasBounds.left + 70 + 'px';
+        
         P2score.style.top = canvasBounds.top + 10 + 'px';
-        P2score.style.right = window.innerWidth - canvasBounds.right + 10 + 'px';
+        P2score.style.left = canvasBounds.right - P2score.offsetWidth - 70 + 'px';
     });
     
 

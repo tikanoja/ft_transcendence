@@ -315,7 +315,18 @@ export const renderColorwar = (gameNumber, data) => {
     canvasContainer.appendChild(renderer.domElement);
     
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4)); 
-    const canvasBounds = canvasContainer.getBoundingClientRect();
+    let canvasFocused = true;
+    const canvas = renderer.domElement;
+    canvas.setAttribute('tabindex', '0');
+    canvas.addEventListener('focus', () => {
+        canvasFocused = true;
+    });
+    
+    canvas.addEventListener('blur', () => {
+        canvasFocused = false;
+    });
+
+    const canvasBounds = canvas.getBoundingClientRect();
     const P1score = document.getElementById('P1Card');
     const P2score = document.getElementById('P2Card');
     P1score.style.top = canvasBounds.top + 10 + 'px';
@@ -424,7 +435,7 @@ export const renderColorwar = (gameNumber, data) => {
             }
         }
     };
-    button1.addEventListener('mouseup', () => handleMouseUpButton1(gameNumber))
+
     window.addEventListener('resize',() => onWindowResize(camera, renderer));
 
     const controls = document.getElementById('GameControls');
@@ -449,11 +460,14 @@ export const renderColorwar = (gameNumber, data) => {
     
     if (made_listner == 0)
     {
-        button1.addEventListener('mouseup', () => handleMouseUpButton1(gameNumber));
-        button2.addEventListener('mouseup', () => handleMouseUpButton2(gameNumber));
-        button3.addEventListener('mouseup', () => handleMouseUpButton3(gameNumber));
-        button4.addEventListener('mouseup', () => handleMouseUpButton4(gameNumber));
-        made_listner = 1
+        if (canvasFocused)
+        {
+            button1.addEventListener('mouseup', () => handleMouseUpButton1(gameNumber));
+            button2.addEventListener('mouseup', () => handleMouseUpButton2(gameNumber));
+            button3.addEventListener('mouseup', () => handleMouseUpButton3(gameNumber));
+            button4.addEventListener('mouseup', () => handleMouseUpButton4(gameNumber));
+            made_listner = 1
+        }
     }
 
 
