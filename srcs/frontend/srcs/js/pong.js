@@ -346,9 +346,12 @@ const AnimationController = {
     animationId: null,
     
     animate: function(scene, camera, renderer, is3DGraphics) {
-        this.animationId = requestAnimationFrame(() => this.animate(scene, camera, renderer));
+        this.animationId = requestAnimationFrame(() => this.animate(scene, camera, renderer, is3DGraphics));
+        console.log(is3DGraphics)
         if (is3DGraphics)
+        {
             animateBallRotation(ball);
+        }
         renderer.render(scene, camera);
     },
     
@@ -398,6 +401,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
 
     const canvas = renderer.domElement;
     canvas.setAttribute('tabindex', '0');
+
     canvas.addEventListener('focus', () => {
         canvasFocused = true;
     });
@@ -421,11 +425,11 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     
     P1score.style.position = 'absolute';
     P1score.style.top = canvasBounds.top + 10 + 'px';
-    P1score.style.left = canvasBounds.left + 70 + 'px';
+    P1score.style.left = canvasBounds.left + 100 + 'px';
     
     P2score.style.position = 'absolute';
     P2score.style.top = canvasBounds.top + 10 + 'px';
-    P2score.style.left = canvasBounds.right - P2score.offsetWidth - 70 + 'px';
+    P2score.style.left = canvasBounds.right - P2score.offsetWidth - 100 + 'px';
     
     window.addEventListener('resize', () => {
         const width = window.innerWidth - (window.innerWidth / 4);
@@ -439,10 +443,10 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
         const P2score = document.getElementById('P2Card');
         
         P1score.style.top = canvasBounds.top + 10 + 'px';
-        P1score.style.left = canvasBounds.left + 70 + 'px';
+        P1score.style.left = canvasBounds.left + 100 + 'px';
         
         P2score.style.top = canvasBounds.top + 10 + 'px';
-        P2score.style.left = canvasBounds.right - P2score.offsetWidth - 70 + 'px';
+        P2score.style.left = canvasBounds.right - P2score.offsetWidth - 100 + 'px';
     });
     
 
@@ -456,50 +460,38 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     });
 
     document.addEventListener('keydown', (event) => {
-        if (canvasFocused)
-        {
+        if (canvasFocused) {
             event.preventDefault();
-            if (is3DGraphics)
-            {
-                if (event.key == 'ArrowDown')
-                {
+            if (is3DGraphics) {
+                if (event.key == 'ArrowDown') {
                     socket.emit('message', 'right_paddle_down,' + gameNumber);
                 }
-                if (event.key  == 'ArrowUp')
-                {
+                if (event.key  == 'ArrowUp') {
                     socket.emit('message', 'right_paddle_up,' + gameNumber);
                 }
-                if (event.key  == 's')
-                {
+                if (event.key  == 's') {
                     socket.emit('message', 'left_paddle_down,' + gameNumber);
                 }
-                if (event.key  == 'w')
-                {
+                if (event.key  == 'w') {
                     socket.emit('message', 'left_paddle_up,' + gameNumber);
                 }
-            }
-            else
-            {
-                if (event.key == 'ArrowDown')
-                {
+            } else {
+                if (event.key == 'ArrowDown') {
                     socket.emit('message', 'right_paddle_up,' + gameNumber);
                 }
-                if (event.key  == 'ArrowUp')
-                {
+                if (event.key  == 'ArrowUp') {
                     socket.emit('message', 'right_paddle_down,' + gameNumber);
                 }
-                if (event.key  == 's')
-                {
+                if (event.key  == 's') {
                     socket.emit('message', 'left_paddle_up,' + gameNumber);
                 }
-                if (event.key  == 'w')
-                {
+                if (event.key  == 'w') {
                     socket.emit('message', 'left_paddle_down,' + gameNumber);
                 }
             }
         }
     });
-    
+
     document.addEventListener('keyup', (event) => {
         event.preventDefault();
         if (is3DGraphics)
