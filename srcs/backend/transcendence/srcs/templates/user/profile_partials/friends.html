@@ -54,7 +54,9 @@
 			<ul class="list-group list-group-flush">
 				{% for invite in friends.in_invites %}
 					<li class="list-group-item h5">
-						<a class="pe-5" id="profileLinkTag" href="/profile/{{ invite.from_user.username }}" >{{ invite.from_user.username }}</a>
+						<nav>
+							<a class="pe-5" href="/profile/{{ invite.from_user.username }}" >{{ invite.from_user.username }}</a>
+						</nav>
 						<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="accept" class="btn btn-primary btn-sm">Accept</button>
 						<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="reject" class="btn btn-danger btn-sm">Reject</button>
 					</li>
@@ -85,7 +87,9 @@
 			<ul class="list-group list-group-flush">
 				{% for invite in friends.out_invites %}
 					<li class="list-group-item pe-5 text-secondary">
-						<a class="h5 text-black" id="profileLinkTag" href="/profile/{{ invite.to_user.username }}" >{{ invite.to_user.username }}</a> 
+						<nav>
+							<a class="h5 text-black" href="/profile/{{ invite.to_user.username }}" >{{ invite.to_user.username }}</a> 
+						</nav>
 						Friend request pending...
 					</li>
 				{% endfor %}
@@ -93,7 +97,9 @@
 				{% for friendship in friends.friendships %}
 					{% if friends.current_user == friendship.to_user %}
 						<li class="list-group-item h5 pe-5">
-							<a id="profileLinkTag" href="/profile/{{ friendship.from_user.username }}" >{{ friendship.from_user.username }}</a> 
+							<nav>
+								<a href="/profile/{{ friendship.from_user.username }}" >{{ friendship.from_user.username }}</a> 
+							</nav>
 							{% if friendship.from_user.is_online %}
 							<span class="text-success" id="online_status">
 								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-emoji-laughing-fill" viewBox="0 0 16 16">
@@ -111,7 +117,9 @@
 						</li>
 					{% else %}
 						<li class="list-group-item h5 pe-5">
-							<a id="profileLinkTag" href="/profile/{{friendship.to_user.username}}" >{{ friendship.to_user.username }}</a> 
+							<nav>
+								<a href="/profile/{{friendship.to_user.username}}" >{{ friendship.to_user.username }}</a> 
+							</nav>
 							{% if friendship.to_user.is_online %}
 							<span class="text-success" id="online_status">
 								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-emoji-laughing-fill" viewBox="0 0 16 16">
@@ -138,7 +146,9 @@
 				{% for friendship in friends.friendships %}
 					{% if friends.current_user == friendship.to_user %}
 						<li class="list-group-item h5 pe-5">
-							<a id="profileLinkTag" href="/profile/{{friendship.from_user.username}}" >{{ friendship.from_user.username }}</a>
+							<nav>
+								<a href="/profile/{{friendship.from_user.username}}" >{{ friendship.from_user.username }}</a>
+							</nav>
 							{% if friendship.from_user.is_online %}
 							<span class="text-success" id="online_status">
 								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-emoji-laughing-fill" viewBox="0 0 16 16">
@@ -155,7 +165,9 @@
 						</li>
 					{% else %}
 						<li class="list-group-item h5 pe-5">
-							<a id="profileLinkTag" href="/profile/{{friendship.to_user.username}}" >{{ friendship.to_user.username }}</a> 
+							<nav>
+								<a href="/profile/{{friendship.to_user.username}}" >{{ friendship.to_user.username }}</a> 
+							</nav>
 							{% if friendship.to_user.is_online %}
 							<span class="text-success" id="online_status">
 								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-emoji-laughing-fill" viewBox="0 0 16 16">
