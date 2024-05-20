@@ -96,10 +96,7 @@ const locationHandler = async () => {
 	location = "/";
 	if (location.startsWith('/app/'))
 	location = location.substring(4);
-	
-	console.log("window path: " + window.location.pathname)
-	// if (location == window.location.pathname)
-	// 	return ;
+
 	console.log('locationHandler(): matching this to routes: ' + location)
 	// Check the routes (the views above) for a match, if no match: 404
 	let route = routes[location] || routes[404];
