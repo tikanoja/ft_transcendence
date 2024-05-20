@@ -96,7 +96,6 @@ export const startScreen = async () => {
         console.error('Error loading script:', error);
     }
 };
-
 function loadGameOverScreen(data) {
     const winnerInfo = document.getElementById('winnerInfo');
     const gameOverScreen = document.getElementById('gameOverScreen');
@@ -104,8 +103,11 @@ function loadGameOverScreen(data) {
     const scoreboard = document.getElementById('scoreboard');
     const P1score = document.getElementById('P1Card');
     const P2score = document.getElementById('P2Card');
-    const player1username = document.getElementById('player1username').textContent;
-    const player2username = document.getElementById('player2username').textContent;
+    const player1username = document.getElementById('player1username').value;
+    const player2username = document.getElementById('player2username').value;
+    
+    console.log("p1 user:   ", player1username)
+    console.log("p2 user:   ", player2username)
 
     P1score.style.display = 'none';
     P2score.style.display = 'none';
@@ -134,9 +136,6 @@ let previousP1Score = null;
 let previousP2Score = null;
 
 export const updateScoreboard = (p1Score, p2Score) => {
-    const player1username = document.getElementById('player1username').textContent;
-    const player2username = document.getElementById('player2username').textContent;
-
     const scoreLeftElement = document.getElementById('player1Score');
     const scoreRightElement = document.getElementById('player2Score');
     
@@ -292,8 +291,8 @@ function updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics) {
 		p2_paddle_y = parseFloat(valuesArray[4]);
 		p1_paddle_x = parseFloat(valuesArray[5]);
 		p1_paddle_y = parseFloat(valuesArray[6]);
-		p2_score = parseInt(valuesArray[7]);
-		p1_score = parseInt(valuesArray[8]);
+		p1_score = parseInt(valuesArray[7]);
+		p2_score = parseInt(valuesArray[8]);
 
 		ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
 		ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);
