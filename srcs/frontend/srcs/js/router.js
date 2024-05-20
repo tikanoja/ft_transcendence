@@ -13,8 +13,7 @@ document.addEventListener("click", (e) => {
 	// Save the clicked element as target
 	const target = e.target;
 	// Check if the clicked element is a part of the nav anchors
-	console.log("target id in click listener" + target.id)
-	if (!target.matches("nav a") || target.id === "profile-nav") {
+	if (!target.matches("nav a")) {
 		return ;
 	}
 	// Prevent the navigation to a new page
@@ -66,6 +65,8 @@ const route = (event) => {
 	event = event || window.event;
 	event.preventDefault();
 	// Update browser history without triggering page reload
+	console.log("route event target : " + event.target.href)
+	console.log("route window location : " + window.location.href)
 	if (event.target.href == window.location.href)
 		return ;
 	console.log('route(): pushing this to history: ' + event.target.href);
@@ -90,11 +91,11 @@ const locationHandler = async () => {
 	let location = window.location.pathname;
 	// Redirect https://example.com to https://example.com/ in order to land on home page
 	if (location.endsWith('/'))
-		location = location.slice(0, -1);
+	location = location.slice(0, -1);
 	if (location.length == 0)
-		location = "/";
+	location = "/";
 	if (location.startsWith('/app/'))
-		location = location.substring(4);
+	location = location.substring(4);
 
 	console.log('locationHandler(): matching this to routes: ' + location)
 	// Check the routes (the views above) for a match, if no match: 404
