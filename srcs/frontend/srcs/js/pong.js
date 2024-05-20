@@ -1,11 +1,16 @@
-                                                                                                                                                                            // // Import required modules
+
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.module.js';
 
-// //TODO:the size of paddles, ball and their positioning MUST BE DYNAMIC!
-// //TODO: A better looking start screen the also shows user name, and opponent name
-// //TODO: Make lighting better
 let socket;
 let gameNumber = -1;
+
+let camera;
+let p1_paddle;
+let p2_paddle;
+let ball;
+let ground;
+
+let render = true
 
 export const loadScript = () => {
     return new Promise((resolve, reject) => {
@@ -24,14 +29,13 @@ export const loadScript = () => {
     });
 }
 
-
 function connectWebSocket() {
     socket = io.connect('https://' + window.location.hostname, {path: "/pong/socket.io"});
     socket.on('connect', () => {
-        console.log("connect recieved: pong")
+        // empty on purpose nothing todo
     });
     socket.on('error', (error) => {
-        console.error('WebSocket error:', error);
+        // empty on purpose nothing todo
     });
 }
 
@@ -46,10 +50,8 @@ export const verifyUsername = () => {
         socket.emit("username", usernameString);
 
         socket.on('setup_game', (data) => {
-            console.log("in setup game");
             const valuesArray = data.split(',');
             gameNumber = valuesArray[1];
-            console.log("after setup game: ", gameNumber);
             resolve(gameNumber);
         });
 
@@ -69,33 +71,29 @@ export const startScreen = async () => {
 			const canvasContainer = document.getElementById('canvasContainer');
 			const styleCheckbox = document.getElementById('styleCheckbox');
 			let is3DGraphics = false;
-            
 
             await verifyUsername()
             console.log("after verify: ", gameNumber);
             
-                console.log("in the click listener")
-                startScreen.style.display = 'none';
-                canvasContainer.style.display = 'block';
-                is3DGraphics = styleCheckbox.checked;
+            console.log("in the click listener")
+            startScreen.style.display = 'none';
+            canvasContainer.style.display = 'block';
+            is3DGraphics = styleCheckbox.checked;
 
-                // # DONT FORGET to maybe insert to here to get permission from django to start the game
-                socket.emit('message', 'start_game,' + gameNumber);
+            socket.emit('message', 'start_game,' + gameNumber);
 
-                socket.on('start_game', (data) => {
-                    startScreen.remove();
-                    canvasContainer.style.display = 'block';
-                    console.log(data)
-                    const valuesArray = data.split(',')
-                    gameNumber = valuesArray[1]
-                    renderPongGame(is3DGraphics, gameNumber);
-                });
+            socket.on('start_game', (data) => {
+            startScreen.remove();
+            canvasContainer.style.display = 'block';
+            const valuesArray = data.split(',')
+                gameNumber = valuesArray[1]
+                renderPongGame(is3DGraphics, gameNumber);
+            })
     } catch (error) {
         console.error('Error loading script:', error);
     }
 };
 
-// Define the gameOverScreen function within the same scope
 function loadGameOverScreen(data) {
     const winnerInfo = document.getElementById('winnerInfo');
     const gameOverScreen = document.getElementById('gameOverScreen');
@@ -136,7 +134,7 @@ export const updateScoreboard = (p1Score, p2Score) => {
             previousP2Score = p2Score;
         }
     } else {
-        console.error('Scoreboard elements not found.');
+        // empty on purpose if creation of elements dont succeed
     }
 };
 
@@ -161,210 +159,395 @@ function setup2DScene(scene) {
     directionalLight.position.set(0, 0, 1);
     scene.add(directionalLight);
 
-    const p1_paddle = create2DPaddle(0x808080); // Old-school TV Pong grey
-    const p2_paddle = create2DPaddle(0x808080);
-
+    let p1_paddle = create2DPaddle(0x808080);
+    let p2_paddle = create2DPaddle(0x808080);
 
     const sizeFactor = 0.2;
     const ballRadiusScreen = (25 * 2) * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
-    const ball = new THREE.Mesh(new THREE.PlaneGeometry(ballRadiusScreen * 2, ballRadiusScreen * 2), new THREE.MeshStandardMaterial({ color: 0x808080 }));
+    let ball = new THREE.Mesh(new THREE.PlaneGeometry(ballRadiusScreen * 2, ballRadiusScreen * 2), new THREE.MeshStandardMaterial({ color: 0x808080 }));
     
     scene.add(p1_paddle);
     scene.add(p2_paddle);
     scene.add(ball);
-
     return { camera, p1_paddle, p2_paddle, ball };
 }
 
+function create3DBall(ballRadiusScreen) {
+    const textureLoader = new THREE.TextureLoader();
+    const texture = textureLoader.load('../textures/checkers.jpg');
+    return new THREE.Mesh(new THREE.SphereGeometry(ballRadiusScreen * 2, 10, 10), new THREE.MeshBasicMaterial({ map: texture }));
+}
+
+function createGround() {
+    const textureLoader = new THREE.TextureLoader();
+    const groundTexture = textureLoader.load('../textures/football_field.jpg');
+    groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping; // x, y
+    groundTexture.repeat.set(1, 1); // 1, 1 means only one texture
+   
+    const groundMaterial = new THREE.MeshBasicMaterial({ map: groundTexture });
+    const groundGeometry = new THREE.PlaneGeometry(1950, 1200);
+    return new THREE.Mesh(groundGeometry, groundMaterial);
+}
+
 function setup3DScene(scene) {
-    let p1_paddle, p2_paddle, ball;
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+
     addLighting(scene);
     p1_paddle = create3DPaddle(0xEF85A8);
     p2_paddle = create3DPaddle(0xC2C9C9);
-    ball = new THREE.Mesh(new THREE.SphereGeometry(5, 10, 6), new THREE.MeshPhongMaterial({color: 0xff00ff}))
+    const sizeFactor = 0.2;
+    const ballRadiusScreen = (25 * 2) * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
+    
+    ball = create3DBall(ballRadiusScreen);
+
+    ground = createGround();
+    ground.rotation.x = -Math.PI / 2; // Rotate the ground to be horizontal
+    ground.position.y = -14; // To show whole ball the ground needs to go down a little bit
+
+    // Set background texture
+    const textureLoader = new THREE.TextureLoader();    
+    textureLoader.load('../textures/space.jpg' , function(texture) { scene.background = texture;});
+
+    scene.add(ground);
     scene.add(p1_paddle);
     scene.add(p2_paddle);
     scene.add(ball);
     p1_paddle.position.set(-100,  0, 0);
     p2_paddle.position.set(100, 0, 0);
-
     return { camera, p1_paddle, p2_paddle, ball };
 }
 
-
 function create2DPaddle(color) {
-    // Adjust the dimensions of the paddle geometry based on the ratios
     let widthRatio = (20 * 2) / 1920
     let heightRatio = (90 * 2) / 1080
 	let screenWidth = window.innerWidth;
     let screenHeight = window.innerHeight;
 	const sizeFactor = 0.7;
 
-
     let paddleWidth = (screenWidth * widthRatio) * sizeFactor;
     let paddleHeight = (screenHeight * heightRatio) * sizeFactor;
 
     const geometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, 0);
     const material = new THREE.MeshStandardMaterial({ color });
+
     return new THREE.Mesh(geometry, material);
 }
 
-// Function to create a 3D paddle
 function create3DPaddle(color) {
-    const geometry = new THREE.BoxGeometry(5, 20, 5);
-    const material = new THREE.MeshPhongMaterial({ color });
-    return new THREE.Mesh(geometry, material);
+    let widthRatio = (20 * 2) / 1920
+    let heightRatio = (90 * 2) / 1080
+	let screenWidth = window.innerWidth;
+    let screenHeight = window.innerHeight;
+	const sizeFactor = 0.7;
+
+    let paddleWidth = (screenWidth * widthRatio) * sizeFactor;
+    let paddleHeight = (screenHeight * heightRatio) * sizeFactor;
+    let paddleZed = (0.30 * paddleHeight) * sizeFactor;
+
+    const textureLoader = new THREE.TextureLoader();
+    const fireTexture = textureLoader.load('../textures/fire.jpg');
+
+    const materials = [
+        new THREE.MeshBasicMaterial({ map: fireTexture }), // Front
+        new THREE.MeshBasicMaterial({ map: fireTexture }), // Back
+        new THREE.MeshBasicMaterial({ map: fireTexture }), // Top
+        new THREE.MeshBasicMaterial({ map: fireTexture }), // Bottom
+        new THREE.MeshBasicMaterial({ map: fireTexture }), // Right
+        new THREE.MeshBasicMaterial({ map: fireTexture })  // Left
+    ];
+
+    const geometry = new THREE.BoxGeometry(paddleWidth, paddleZed, paddleHeight);
+    return new THREE.Mesh(geometry, materials);
 }
 
+function updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics) {
+    let p1_paddle_y, p1_paddle_x, p2_paddle_y, p2_paddle_x, ball_x, ball_y, p1_score, p2_score;
+    const min_visible_x = -1010;
+    const max_visible_x = 1010;
+    const min_visible_y = -586;
+    const max_visible_y = 586;
+    const valuesArray = data.split(',');
+
+	if (valuesArray[0] == gameNumber){
+	    ball_x = parseFloat(valuesArray[1]);
+		ball_y = parseFloat(valuesArray[2]);
+		p2_paddle_x = parseFloat(valuesArray[3]);
+		p2_paddle_y = parseFloat(valuesArray[4]);
+		p1_paddle_x = parseFloat(valuesArray[5]);
+		p1_paddle_y = parseFloat(valuesArray[6]);
+		p2_score = parseInt(valuesArray[7]);
+		p1_score = parseInt(valuesArray[8]);
+
+		ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
+		ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);
+		p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[3]);
+		p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[4]);
+		p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[5]);
+		p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[6]);
+        if  (is3DGraphics == true)
+        {
+            p1_paddle.position.set(p1_paddle_x, 0, p1_paddle_y); 
+            p2_paddle.position.set(p2_paddle_x, 0, p2_paddle_y); 
+            ball.position.set(ball_x, 0, ball_y);
+        }
+        else
+        {
+            p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
+            p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
+            ball.position.set(ball_x,  ball_y, 0);
+        }
+		updateScoreboard(p1_score, p2_score);
+	}
+}
+
+// Slow down the ball rotation
+let rotate_ball_turn = 0;
+let ball_rotation_slowdown_factor = 2;
+
+function animateBallRotation(ball) {
+    if (rotate_ball_turn == 0) // Is it time to update ball rotation
+    {
+        if (!render) return; // If rendering is not active dont update ball
+        // Define rotations for the ball
+        const randomRotationX = Math.random() * Math.PI * 2;
+        const randomRotationY = Math.random() * Math.PI * 2;
+        const randomRotationZ = Math.random() * Math.PI * 2;
+
+        // Apply rotations for the ball
+        ball.rotation.x += randomRotationX;
+        ball.rotation.y += randomRotationY;
+        ball.rotation.z += randomRotationZ;
+    }
+    // These are related to slowning down the ball rotation
+    rotate_ball_turn += 1;
+    if (rotate_ball_turn >= ball_rotation_slowdown_factor)
+        rotate_ball_turn = 0;
+}
+
+const AnimationController = {
+    animationId: null,
+    
+    animate: function(scene, camera, renderer) {
+        this.animationId = requestAnimationFrame(() => this.animate(scene, camera, renderer));
+        animateBallRotation(ball);
+        renderer.render(scene, camera);
+    },
+    
+    stopAnimation: function() {
+        socket.emit('message', 'stop_game,' + gameNumber);
+        socket.on('disconnect', () => {
+            // empty on purpose nothing todo
+        });
+        cancelAnimationFrame(this.animationId);
+    },
+    
+    startAnimation: function(scene, camera, renderer)
+    {
+        this.animate(scene, camera, renderer);
+    }
+};
+
+function cleanUpScene(scene) {
+    scene.remove(p1_paddle);
+    scene.remove(p2_paddle);
+    scene.remove(ball);
+    scene.remove(ground);
+}
+
+function exit_game(data, scene)
+{
+    loadGameOverScreen(data);
+    cleanUpScene(scene);
+}
+
+///Main function for setting up and animating game
 export const renderPongGame = (is3DGraphics, gameNumber) => {
-	console.log("GAME IS RENDERING")
     const scene = new THREE.Scene();
-    let camera;
-    // Remove any existing canvas
+
     const existingCanvas = document.getElementById('pongCanvas');
     if (existingCanvas) {
         existingCanvas.remove();
     }
-
     const renderer = new THREE.WebGLRenderer();
     const pixelRatio = window.devicePixelRatio;
     renderer.setPixelRatio(pixelRatio);
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
-    renderer.domElement.id = 'pongCanvas'; // Set an id for the new canvas
+    renderer.domElement.id = 'pongCanvas'; 
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
-    let p1_paddle, p2_paddle, ball;
+    
     if (is3DGraphics) {
-        ({ camera, p1_paddle, p2_paddle, ball } = setup3DScene(scene));
+        ({ camera, p1_paddle, p2_paddle, ball} = setup3DScene(scene));
+        camera.position.set(-1100, 300, 1100);
+        camera.lookAt(0, 0, 0);
     } else {
-        ({ camera, p1_paddle, p2_paddle, ball } = setup2DScene(scene));
-
-    }
-    let render = true
-	let min_visible_x, max_visible_x, min_visible_y, max_visible_y;
-	calculateVisibleArea();
-
-    function calculateVisibleArea() {  //TODO: potentially needs to be calculated differently for perspective, currently functions with 
-        const half_width = window.innerWidth / 2;
-        const half_height = window.innerHeight / 2;
-        min_visible_x = camera.position.x - half_width;
-        max_visible_x = camera.position.x + half_width;
-        min_visible_y = camera.position.y - half_height;
-        max_visible_y = camera.position.y + half_height;
+        ({ camera, p1_paddle, p2_paddle, ball} = setup2DScene(scene));
+        camera.position.set(0, 0, 100);
     }
 
-
-    camera.position.set(0, 0, 100);
-    let p1_paddle_y, p1_paddle_x, p2_paddle_y, p2_paddle_x, ball_x, ball_y, p1_score, p2_score;
-
-    function updateGameState(data) {
-        const valuesArray = data.split(',');
-
-		if (valuesArray[0] == gameNumber){
-				ball_x = parseFloat(valuesArray[1]);
-				ball_y = parseFloat(valuesArray[2]);
-				p2_paddle_x = parseFloat(valuesArray[3]);
-				p2_paddle_y = parseFloat(valuesArray[4]);
-				p1_paddle_x = parseFloat(valuesArray[5]);
-				p1_paddle_y = parseFloat(valuesArray[6]);
-				p2_score = parseInt(valuesArray[7]);
-				p1_score = parseInt(valuesArray[8]);
-
-				ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
-				ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);
-				p2_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[3]);
-				p2_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[4]);
-				p1_paddle_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[5]);
-				p1_paddle_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[6]);
-				p1_paddle.position.set(p1_paddle_x, p1_paddle_y, 0); 
-				p2_paddle.position.set(p2_paddle_x, p2_paddle_y, 0); 
-				ball.position.set(ball_x,  ball_y, 0);
-				updateScoreboard(p1_score, p2_score);
-			}
-		}
-
-    socket.on('state', (data) => {
-        updateGameState(data)
+    socket.on('state', (data) => { // game update
+        updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics)
     });
 
-	function exit_game(data)
-	{
-        updateGameState(data)
-        loadGameOverScreen(data)
-		stopAnimation()
-
-	}
-
-	socket.on('endstate', (data) => {
-        exit_game(data)
+    socket.on('endstate', (data) => { // game has ended
+        exit_game(data, scene)
+        AnimationController.stopAnimation();
     });
 
-    function animate() {
-        if (render) {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-        } else {
-            stopAnimation();
+    document.addEventListener('keydown', (event) => {
+        event.preventDefault();
+        if (is3DGraphics)
+        {
+            if (event.key == 'ArrowDown')
+            {
+                socket.emit('message', 'right_paddle_down,' + gameNumber);
+            }
+            if (event.key  == 'ArrowUp')
+            {
+                socket.emit('message', 'right_paddle_up,' + gameNumber);
+            }
+            if (event.key  == 's')
+            {
+                socket.emit('message', 'left_paddle_down,' + gameNumber);
+            }
+            if (event.key  == 'w')
+            {
+                socket.emit('message', 'left_paddle_up,' + gameNumber);
+            }
         }
-    }
-	
-
-    //THESE ARE INVERTED DUE TO COORD DIFFERENCE
-	document.addEventListener('keydown', (event) => {
-		event.preventDefault();
-		if (event.key == 'ArrowUp')
-		{
-			socket.emit('message', 'right_paddle_down,' + gameNumber);
-		}
-        if (event.key  == 'ArrowDown')
-		{
-			socket.emit('message', 'right_paddle_up,' + gameNumber);
-		}
-        if (event.key  == 'w')
-		{
-			socket.emit('message', 'left_paddle_down,' + gameNumber);
-		}
-        if (event.key  == 's')
-		{
-			socket.emit('message', 'left_paddle_up,' + gameNumber);
-		}
-			if (event.key == 'c')
-		{
-			socket.emit('message', 'stop_game,' + gameNumber);
-			render = false;
-		}
+        else
+        {
+            if (event.key == 'ArrowDown')
+            {
+                socket.emit('message', 'right_paddle_up,' + gameNumber);
+            }
+            if (event.key  == 'ArrowUp')
+            {
+                socket.emit('message', 'right_paddle_down,' + gameNumber);
+            }
+            if (event.key  == 's')
+            {
+                socket.emit('message', 'left_paddle_up,' + gameNumber);
+            }
+            if (event.key  == 'w')
+            {
+                socket.emit('message', 'left_paddle_down,' + gameNumber);
+            }
+        }
     });
 
     document.addEventListener('keyup', (event) => {
-		event.preventDefault();
-		if (event.key == 'ArrowUp')
-			socket.emit('message', 'right_paddle_down_release,' + gameNumber);
-        if (event.key  == 'ArrowDown')
-			socket.emit('message', 'right_paddle_up_release,' + gameNumber);
-        if (event.key  == 'w')
-			socket.emit('message', 'left_paddle_down_release,' + gameNumber);
-        if (event.key  == 's')
-			socket.emit('message', 'left_paddle_up_release,' + gameNumber);
+        event.preventDefault();
+        if (is3DGraphics)
+        {
+            if (event.key == 'ArrowDown')
+                socket.emit('message', 'right_paddle_down_release,' + gameNumber);
+            if (event.key  == 'ArrowUp')
+                socket.emit('message', 'right_paddle_up_release,' + gameNumber);
+            if (event.key  == 's')
+                socket.emit('message', 'left_paddle_down_release,' + gameNumber);
+            if (event.key  == 'w')
+                socket.emit('message', 'left_paddle_up_release,' + gameNumber);
+        }
+        else
+        {
+            if (event.key == 'ArrowDown')
+                socket.emit('message', 'right_paddle_up_release,' + gameNumber);
+            if (event.key  == 'ArrowUp')
+                socket.emit('message', 'right_paddle_down_release,' + gameNumber);
+            if (event.key  == 's')
+                socket.emit('message', 'left_paddle_up_release,' + gameNumber);
+            if (event.key  == 'w')
+                socket.emit('message', 'left_paddle_down_release,' + gameNumber);
+        }
     });
 
+    document.addEventListener('keydown', (event) => {
+        const moveDistance = 10;
+        const rotateAngle = Math.PI / 36;
+        switch (event.key) {
+            case 'r': // Move camera along the positive x-axis
+                camera.position.x += moveDistance;
+                if (camera.position.x > -1000)
+                    camera.position.x = -1000;
+                break;
+            case 'f': // Move camera along the negative x-axis
+                camera.position.x -= moveDistance;
+                if (camera.position.x < -1500)
+                    camera.position.x = -1500;
+                break;
+            case 't': // Move camera along the positive y-axis
+                camera.position.y += moveDistance;
+                if (camera.position.y > 500)
+                    camera.position.y = 500;
+                break;
+            case 'g': // Move camera along the negative y-axis
+                camera.position.y -= moveDistance;
+                if (camera.position.y < 50)
+                    camera.position.y = 50;
+                break;
+            case 'y': // Move camera along the positive z-axis
+                camera.position.z += moveDistance;
+                if (camera.position.z > 1500)
+                    camera.position.z = 1500;
+                break;
+            case 'h': // Move camera along the negative z-axis
+                camera.position.z -= moveDistance;
+                if (camera.position.z < 1050)
+                    camera.position.z = 1050;
+                break;
+            case 'u': // Rotate camera around the positive x-axis
+                camera.rotation.x += rotateAngle;
+                if (camera.rotation.x < 0)
+                    camera.rotation.x += (2 * Math.PI);
+                if (camera.rotation.x > 6.278732645827805)
+                    camera.rotation.x = 6.278732645827805;
+                break;
+            case 'j': // Rotate camera around the negative x-axis
+                camera.rotation.x -= rotateAngle;
+                if (camera.rotation.x < 0)
+                    camera.rotation.x += (2 * Math.PI);
+                if (camera.rotation.x < 5.755133870229507)
+                    camera.rotation.x = 5.755133870229507;
+                break;
+            case 'i': // Rotate camera around the positive y-axis
+                camera.rotation.y += rotateAngle;
+                if (camera.rotation.y < 0)
+                    camera.rotation.y += (2 * Math.PI);
+                if (camera.rotation.y > 5.952051587572457)
+                    camera.rotation.y = 5.952051587572457;
+                break;
+            case 'k': // Rotate camera around the negative y-axis
+                camera.rotation.y -= rotateAngle;
+                if (camera.rotation.y < 0)
+                    camera.rotation.y += (2 * Math.PI);
+                if (camera.rotation.y < 5.428452811974159)
+                    camera.rotation.y = 5.428452811974159;
+                break;
+            case 'o': // Rotate camera around the positive z-axis
+                camera.rotation.z += rotateAngle;
+                if (camera.rotation.z < 0)
+                    camera.rotation.z += (2 * Math.PI);
+                if (camera.rotation.z > 6.53237506803245)
+                    camera.rotation.z = 6.53237506803245;
+                break;
+            case 'l': // Rotate camera around the negative z-axis
+                camera.rotation.z -= rotateAngle;
+                if (camera.rotation.z < 0)
+                    camera.rotation.z += (2 * Math.PI);
+                if (camera.rotation.z < 5.57244397943557)
+                    camera.rotation.z = 5.57244397943557;
+                break;
+            default:
+                // Handle other key presses if needed
+                break;
+        }
+    });
 
-    let animationId;
-
-    function startAnimation() {
-
-        animationId = requestAnimationFrame(animate);
-        animate();}
-
-		function stopAnimation() {
-		socket.emit('message', 'stop_game,' + gameNumber);
-		socket.on('disconnect', () => {
-			console.log('Disconnected from server');
-		});
-        cancelAnimationFrame(animationId);
-        render = true
+    if (render) {
+        AnimationController.startAnimation(scene, camera, renderer);
     }
-    if (render)
+    else
     {
-        startAnimation();
+        AnimationController.stopAnimation();
     }
 };
