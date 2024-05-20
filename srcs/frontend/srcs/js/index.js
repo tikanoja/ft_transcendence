@@ -530,7 +530,7 @@ const gameRenderButtonHandler = async (event) => {
         console.log('response,ok triggered');
 		// stay on this page, display the content again
         const html = await response.text();
-        // window.history.pushState("", "", profilePath);
+        window.history.pushState("", "", "https://localhost/play/" + gameType.toLowerCase());
         updateContent(html, "Playing " + gameType, "Playing " + gameType);
 	}
 	else {

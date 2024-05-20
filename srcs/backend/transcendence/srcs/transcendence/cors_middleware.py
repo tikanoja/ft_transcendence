@@ -50,6 +50,8 @@ class NextParamMiddleware:
                     location = location[:-1]
             while '?next=/app/' in location:
                 location = location.replace('?next=/app/', '?next=/')
+            while '/app' in location:
+                location = location.replace('/app', '')
             response.headers['Location'] = location
             
         return response

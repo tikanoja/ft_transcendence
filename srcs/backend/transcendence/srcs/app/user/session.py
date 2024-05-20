@@ -44,8 +44,7 @@ def loginGET(request):
     title = "Sign in to play!"
     # send a redirect to logout pg?
     if request.user.is_authenticated:
-        return render(request, "user/logout.html", {}) #redirect to show game view
-        # return redirect("/user/logout")
+        return render(request, 'user/logged_in.html', {"current_user": request.user})
     form = LoginForm()
     logger.debug(form)
     next = request.GET.get('next', '/play')
