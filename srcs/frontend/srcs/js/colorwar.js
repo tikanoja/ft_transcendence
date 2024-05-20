@@ -3,7 +3,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.m
 let socket;
 let gameNumber = -1;
 let made_listner = 0;
-let setup_done = 0;
+
 
 export const loadScript = () => {
     return new Promise((resolve, reject) => {

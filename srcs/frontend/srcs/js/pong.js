@@ -181,7 +181,8 @@ function setup2DScene(scene) {
     const sizeFactor = 0.2;
     const ballRadiusScreen = (25 * 2) * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
     let ball = new THREE.Mesh(new THREE.PlaneGeometry(ballRadiusScreen * 2, ballRadiusScreen * 2), new THREE.MeshStandardMaterial({ color: 0x808080 }));
-    
+    p1_paddle.position.set(-100,  0, 0);
+    p2_paddle.position.set(100, 0, 0);
     scene.add(p1_paddle);
     scene.add(p2_paddle);
     scene.add(ball);
@@ -343,9 +344,10 @@ function animateBallRotation(ball) {
 const AnimationController = {
     animationId: null,
     
-    animate: function(scene, camera, renderer) {
+    animate: function(scene, camera, renderer, is3DGraphics) {
         this.animationId = requestAnimationFrame(() => this.animate(scene, camera, renderer));
-        animateBallRotation(ball);
+        if (is3DGraphics)
+            animateBallRotation(ball);
         renderer.render(scene, camera);
     },
     
@@ -357,9 +359,9 @@ const AnimationController = {
         cancelAnimationFrame(this.animationId);
     },
     
-    startAnimation: function(scene, camera, renderer)
+    startAnimation: function(scene, camera, renderer, is3DGraphics)
     {
-        this.animate(scene, camera, renderer);
+        this.animate(scene, camera, renderer, is3DGraphics);
     }
 };
 
@@ -375,6 +377,19 @@ function exit_game(data, scene)
     loadGameOverScreen(data);
     cleanUpScene(scene);
 }
+
+// function onWindowResize(camera, renderer)
+// {
+//     camera.aspect = window.innerWidth / window.innerHeight;
+//     camera.updateProjectionMatrix();
+//     renderer.setSize(window.innerWidth, window.innerHeight)
+
+//    const originalWidth = 100; 
+//    const originalHeight = 100; 
+  
+//    const scaleFactor = Math.min(window.innerWidth, window.innerHeight) / 1000;
+
+// }
 
 ///Main function for setting up and animating game
 export const renderPongGame = (is3DGraphics, gameNumber) => {
@@ -408,9 +423,18 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
         camera.position.set(-1100, 300, 1100);
         camera.lookAt(0, 0, 0);
     } else {
-        ({ camera, p1_paddle, p2_paddle, ball} = setup2DScene(scene));
+        ({ camera, p1_paddle, p2_paddle, ball } = setup2DScene(scene));
         camera.position.set(0, 0, 100);
+        camera.lookAt(0, 0, 0);
     }
+
+
+    window.addEventListener('resize', () => {
+        renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4));
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+    });
+    
 
     socket.on('state', (data) => { // game update
         updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics)
@@ -575,7 +599,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     });
 
     if (render) {
-        AnimationController.startAnimation(scene, camera, renderer);
+        AnimationController.startAnimation(scene, camera, renderer , is3DGraphics);
     }
     else
     {
