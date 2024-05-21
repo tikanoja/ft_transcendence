@@ -1,7 +1,7 @@
 from .forms import GameRequestForm, LocalGameForm, StartTournamentForm, TournamentInviteForm, TournamentJoinForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import get_user_model
-from .models import CustomUser, GameInstance, Tournament, Participant, Match, PongGameInstance, ColorGameInstance
+from .models import CustomUser, GameInstance, Tournament, Participant, Match, PongGameInstance, ColorGameInstance, PongGameInstance, ColorGameInstance
 from django.core.exceptions import ValidationError
 import logging
 # from django.http import JsonResponse

@@ -36,32 +36,8 @@
 }
 
 
-#scoreboard {
-    display: flex;
-    justify-content: space-between; /* This will evenly distribute the children elements */
-    position: absolute;
-    top: 100px; /* Adjust this value to position the scoreboard vertically */
-    left: 900px; /* Adjust this value to position the scoreboard horizontally */
-    z-index: 1000; /* Ensure the scoreboard appears above other elements */
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 10px;
-    border-radius: 5px;
-}
-.move-count {
-    order: 1;
-}
-
 .canvas-container {
     position: relative;
-}
-.score-left {
-    order: 1;
-    margin-right: auto;
-}
-
-.score-right {
-    order: 2; 
-    margin-left: auto;
 }
 
 body {

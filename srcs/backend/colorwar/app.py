@@ -255,10 +255,9 @@ def stop_game(splitted_command):
 			return
 		else:
 			games[number].set_game_running(0)
-			games[number].set_game_slot(-1)
 			socketio.emit('endstate', 'OK,{}'.format(games[number].return_game_state()))
 			send_game_over_data(games[number].left_score, games[number].right_score, games[number].moves, games[number].game_id)
-			socketio.emit('message', 'OK, game stopped {}'.format(number))
+			games[number].set_game_slot(-1)
 			return
 
 def get_state(splitted_command):
@@ -292,7 +291,6 @@ def	games_running(splitted_command):
 			if games[index].is_game_running() == 1:
 				games_running[index] = '1'
 	socketio.emit('message', 'OK,{}'.format(str(','.join(games_running))))
-	socketio.emit('endstate', 'OK,{}'.format(games[index].return_game_state()))
 	return
 
 def make_move(splitted_command):
@@ -326,6 +324,7 @@ def make_move(splitted_command):
 	else:
 		games[number].set_game_running(0)
 		socketio.emit('endstate', 'OK,{}'.format(games[number].return_game_state()))
+		send_game_over_data(games[number].left_score, games[number].right_score, games[number].moves, games[number].game_id)
 		games[number].set_game_slot(-1)
 
 @socketio.on('connect')
@@ -404,21 +403,16 @@ def validate_username(data):
 			print("threw except", str(e))
 			return jsonify({"error": str(e)}), 500
 
-# @app.route('/send_game_over_data', methods=['POST'])
 def send_game_over_data(p1_score, p2_score, rally, game_id):
 	print('Sending game over data!!!!!!!!!!')
-	data_to_send = {"test" : "rally",
-		"p1_username": "placeholder",
+	data_to_send = {"game": "Color",
 		"p1_score": f"{p1_score}",
-		"p2_username": "placeholder2",
 		"p2_score": f"{p2_score}",
 		"longest_rally": f"{rally}",
 		"game_id": f"{game_id}",
-		"game": "Color"
 	}
 	with app.app_context():
 		django_url = "http://transcendence:8000/pong/send_game_data/"
-
 		try:
 			response = requests.post(django_url, data=data_to_send)
 			if response.status_code == 200:
@@ -428,7 +422,6 @@ def send_game_over_data(p1_score, p2_score, rally, game_id):
 		except Exception as e:
 			print("threw except", str(e))
 			return jsonify({"error": str(e)}), 500
-
 
 @app.route('/init_usernames', methods=['GET'])
 def init_usernames():

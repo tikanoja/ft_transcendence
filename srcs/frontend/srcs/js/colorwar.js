@@ -3,7 +3,8 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.m
 let socket;
 let gameNumber = -1;
 let made_listner = 0;
-let setup_done = 0;
+let render = true;
+
 
 export const loadScript = () => {
     return new Promise((resolve, reject) => {
@@ -25,7 +26,7 @@ export const loadScript = () => {
 function connectWebSocket() {
     socket = io.connect('https://' + window.location.hostname, {path: "/colorwar/socket.io"});
     socket.on('connect', () => {
-        console.log("connect recieved: Color war")
+        console.log("connection recieved: Color war")
     });
     socket.on('error', (error) => {
         console.error('WebSocket error:', error);
@@ -53,7 +54,6 @@ export const verifyUsername = () => {
         });
     });
 };
-
 export const startScreenColorwar = async () => {
     try {
         await loadScript();
@@ -63,7 +63,6 @@ export const startScreenColorwar = async () => {
         const canvasContainer = document.getElementById('canvasContainer');
         
         await verifyUsername();
-        console.log(gameNumber);
         
         startScreen.style.display = 'none';
         canvasContainer.style.display = 'block';
@@ -99,18 +98,18 @@ let previousP1Score = null;
 let previousP2Score = null;
 
 export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
-    const scoreLeftElement = document.querySelector('.score-left');
-    const scoreRightElement = document.querySelector('.score-right');
-    const moveCountElement = document.querySelector('.move-count');
+    const scoreLeftElement = document.querySelector('#player1Score');
+    const scoreRightElement = document.querySelector('#player2Score');
+    const moveCountElement = document.getElementById('moveCounter'); 
 
     if (isNaN(p1Score) || isNaN(p2Score)) {
         return;
     }
     if (scoreLeftElement && scoreRightElement) {
         if (p1Score !== previousP1Score || p2Score !== previousP2Score) {
-            scoreLeftElement.textContent = `P1 Score: ${p1Score}`;
-            scoreRightElement.textContent = `P2 Score: ${p2Score}`;
-            moveCountElement.textContent = `Moves: ${currentMoveCount}`;
+            scoreLeftElement.textContent = p1Score;
+            scoreRightElement.textContent = p2Score;
+            moveCountElement.textContent = currentMoveCount;
             previousP1Score = p1Score;
             previousP2Score = p2Score;
         }
@@ -119,10 +118,16 @@ export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
     }
 };
 
+
 function loadGameOverScreen(data) {
     const winnerInfo = document.getElementById('winnerInfo');
     const gameOverScreen = document.getElementById('gameOverScreen');
-    
+    const P1score = document.getElementById('P1Card');
+    const P2score = document.getElementById('P2Card');
+    const moveCount = document.getElementById('moveCard');
+    P1score.style.display = 'none';
+    P2score.style.display = 'none';
+    moveCount.style.display = 'none';
     const valuesArray = data.split(',');
     let player1score = valuesArray[2];
     let player2score = valuesArray[3];
@@ -133,30 +138,55 @@ function loadGameOverScreen(data) {
     buttons.forEach(button => {
         button.style.display = 'none';
     });
-
+    const player1username = document.getElementById('player1username').value;
+    const player2username = document.getElementById('player2username').value;
     let winnerText;
     if (player1score > player2score) {
-        winnerText = "Player 1 wins!";
+        winnerText = `${player1username} wins!`;
     } else if (player1score < player2score) {
-        winnerText = "Player 2 wins!";
+        winnerText = `${player2username} wins!`;
     } else {
         winnerText = "It's a tie!";
     }
+
 
     winnerInfo.textContent = winnerText;
     gameOverScreen.style.display = 'block';
     canvasContainer.style.display = 'none';
 }
 
-function exit_game(data, tileMeshes, render, colorTextures)
+function cleanupGameBoard(tileMeshes) {
+    tileMeshes.forEach(tileMesh => {
+        tileMesh.geometry.dispose();
+        tileMesh.material.dispose();
+    });
+}
+
+function exitGame(data, tileMeshes, colorTextures)
 {
-    updateGameState(data, tileMeshes, render, colorTextures)
+    updateGameState(data, tileMeshes, colorTextures)
     loadGameOverScreen(data)
+    if (made_listner == 1)
+    {   
+        const button1 = document.querySelector('button[type="Colour 1"] img');
+        const button2 = document.querySelector('button[type="Colour 2"] img');
+        const button3 = document.querySelector('button[type="Colour 3"] img');
+        const button4 = document.querySelector('button[type="Colour 4"] img');
+        button1.removeEventListener('mouseup', () => handleMouseUpButton1(gameNumber));
+        button2.removeEventListener('mouseup', () => handleMouseUpButton2(gameNumber));
+        button3.removeEventListener('mouseup', () => handleMouseUpButton3(gameNumber));
+        button4.removeEventListener('mouseup', () => handleMouseUpButton4(gameNumber));
+    }
+    cleanupGameBoard(tileMeshes)
+    const canvas = document.getElementById('canvasContainer');
+    canvas.remove();
+    const scoreboard = document.getElementById('scoreboard');
+    scoreboard.remove;
     AnimationController.stopAnimation();
 }
 
 
-function updateGameState(data, tileMeshes, render, colorTextures) {
+function updateGameState(data, tileMeshes, colorTextures) {
     const valuesArray = data.split(',');
     if (gameNumber == valuesArray[1]) {
         let tileLegend = [];
@@ -197,7 +227,7 @@ function updateGameState(data, tileMeshes, render, colorTextures) {
     }
 }
 
-function setupGameBoard(data, boardStartX, boardStartY, numRows, numCols, render, colorTextures, tileSize, scene) {
+function setupGameBoard(data, boardStartX, boardStartY, numRows, numCols,  colorTextures, tileSize, scene) {
         
     const tileMeshes = [];
 
@@ -214,29 +244,25 @@ function setupGameBoard(data, boardStartX, boardStartY, numRows, numCols, render
             tileMeshes.push(tileMesh);
         }
     }
-    updateGameState(data, tileMeshes, render, colorTextures);
+    updateGameState(data, tileMeshes, colorTextures);
     return tileMeshes;
 }
 
 
 function handleMouseUpButton1(gameNumber) {
-    console.log('Button 1 released');
     socket.emit('message', 'make_move,' + gameNumber + ',' + "1");
 }
 
 
 function handleMouseUpButton2(gameNumber) {
-    console.log('Button 2 released');
     socket.emit('message', 'make_move,' + gameNumber + ',' + "2");
 }
 
 function handleMouseUpButton3(gameNumber) {
-    console.log('Button 3 released');
     socket.emit('message', 'make_move,' + gameNumber + ',' + "3");
 }
 
 function handleMouseUpButton4(gameNumber) {
-    console.log('Button 4 released');
     socket.emit('message', 'make_move,' + gameNumber + ',' + "4");
 }
 
@@ -264,61 +290,110 @@ const AnimationController = {
     }
 };
 
-function onWindowResize(camera, renderer)
-{
+function onWindowResize(camera, renderer) {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight)
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
-   const originalWidth = 100; 
-   const originalHeight = 100; 
+    const originalWidth = 100; 
+    const originalHeight = 100; 
+    const canvas = renderer.domElement;
   
-   const scaleFactor = Math.min(window.innerWidth, window.innerHeight) / 1000;
-   const buttons = document.querySelectorAll('#GameControls button img');
-   buttons.forEach(button => {
-       button.style.width = `${scaleFactor * originalWidth}px`;
-       button.style.height = `${scaleFactor * originalHeight}px`;
-   });
+    const canvasBounds = canvas.getBoundingClientRect();
+    const P1score = document.getElementById('P1Card');
+    const P2score = document.getElementById('P2Card');
+    const moveCount = document.getElementById('moveCard');
+   
+    const scaleFactor = Math.min(window.innerWidth, window.innerHeight) / 1000;
+    const buttons = document.querySelectorAll('#GameControls button img');
+    buttons.forEach(button => {
+        button.style.width = `${scaleFactor * originalWidth}px`;
+        button.style.height = `${scaleFactor * originalHeight}px`;
+    });
+
+    const canvasCenterX = canvasBounds.left + canvasBounds.width / 2;
+
+    moveCount.style.position = 'absolute';
+    moveCount.style.display = 'block';
+    moveCount.style.top = canvasBounds.top + 10 + 'px';
+    moveCount.style.left = `${canvasCenterX - moveCount.offsetWidth / 2}px`;
+
+    P1score.style.position = 'absolute';
+    P1score.style.display = 'block';
+    P1score.style.top = canvasBounds.top + 10 + 'px';
+    P1score.style.left = `${Math.max(canvasBounds.left + 50, 10)}px`;
+
+    P2score.style.position = 'absolute';
+    P2score.style.display = 'block';
+    P2score.style.top = canvasBounds.top + 10 + 'px';
+    P2score.style.right = `${Math.max(window.innerWidth - canvasBounds.right + 50, 10)}px`;
+
+    const gameControls = document.getElementById('GameControls');
+    const gameControlsBottomMargin = 7; // Adjust this value as needed
+    gameControls.style.position = 'absolute';
+    gameControls.style.bottom = `${gameControlsBottomMargin}px`;
+
+    const gameControlsLeftOffsetFactor = 1.3; // Adjust this value as needed
+    gameControls.style.left = `${(canvasCenterX - gameControls.offsetWidth) / gameControlsLeftOffsetFactor}px`;    
+    gameControls.style.display = 'block';
 }
+
 
 export const renderColorwar = (gameNumber, data) => {
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer();
-    let render = true;
+    
+    const existingCanvas = document.getElementById('colorCanvas');
+    if (existingCanvas) {
+        existingCanvas.remove();
+    }
+    
     renderer.setSize(window.innerWidth, window.innerHeight);
     const scoreboard = document.getElementById('scoreboard');
     scoreboard.display = 'block';
-    const canvasContainer = document.getElementById('canvasContainer');
-    canvasContainer.innerHTML = '';
-    canvasContainer.appendChild(renderer.domElement);
+    renderer.domElement.id = 'colorCanvas'; 
+    document.getElementById('canvasContainer').appendChild(renderer.domElement);
+ 
     
 	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4)); 
+    let canvasFocused = true;
+    const canvas = renderer.domElement;
+    canvas.setAttribute('tabindex', '0');
+    canvas.addEventListener('focus', () => {
+        canvasFocused = true;
+    });
+    
+    canvas.addEventListener('blur', () => {
+        canvasFocused = false;
+    });
+
     
     scene.background = new THREE.Color(0x332D2D);
-
+    
     const numRows = 19;
     const numCols = 36;
     const canvasWidth = window.innerWidth - 250;
     const canvasHeight = window.innerHeight;
-
+    
     const tileSize = Math.min(canvasWidth, canvasHeight)
-
+    
     const boardWidth = numCols * tileSize;
     const boardHeight = numRows * tileSize;
     const boardStartX = (canvasWidth - boardWidth) / 1.9;
     const boardStartY = (canvasHeight - boardHeight)/ 2;
-   
+    
     const camera = new THREE.PerspectiveCamera(
         75,
         canvasWidth / canvasHeight,
         -2,
         10000
-    );
-
-    const distance = Math.max(boardWidth, boardHeight) / (2 * Math.tan(Math.PI * camera.fov / 290));
-    camera.position.set(0, 20, distance);
-    camera.lookAt(scene.position);
-    
+        );
+        
+        const distance = Math.max(boardWidth, boardHeight) / (2 * Math.tan(Math.PI * camera.fov / 290));
+        camera.position.set(0, 20, distance);
+        camera.lookAt(scene.position);
+        
+    onWindowResize(camera, renderer);
     const textureLoader = new THREE.TextureLoader();
     let colourOneSrc = "../textures/purple_square.png";
     let colourOneSrc_1 = "../textures/purple_1_sm.png";
@@ -396,7 +471,7 @@ export const renderColorwar = (gameNumber, data) => {
             }
         }
     };
-    button1.addEventListener('mouseup', () => handleMouseUpButton1(gameNumber))
+
     window.addEventListener('resize',() => onWindowResize(camera, renderer));
 
     const controls = document.getElementById('GameControls');
@@ -406,40 +481,29 @@ export const renderColorwar = (gameNumber, data) => {
     });
     addLighting(scene);
 
-    const tileMeshes = setupGameBoard(data, boardStartX, boardStartY, numRows, numCols, render, colorTextures, tileSize, scene);
-    
-    ///////////////////////////////////////////
+    const tileMeshes = setupGameBoard(data, boardStartX, boardStartY, numRows, numCols, colorTextures, tileSize, scene);
 
-    document.addEventListener('keydown', (event) => {
-		event.preventDefault();
-			if (event.key == 'c')
-		{
-            console.log("attempting to stop game")
-			socket.emit('message', 'stop_game,' + gameNumber);
-            exit_game(data, tileMeshes, render, colorTextures)
-			render = false;
-		}
-    });
     
     socket.on('state', (data) => {
-        console.log("state recieved")
-        updateGameState(data, tileMeshes,  render, colorTextures)
+        updateGameState(data, tileMeshes, colorTextures)
     });
 
 	socket.on('endstate', (data) => {
         socket.emit('message', 'stop_game,' + gameNumber);
-        exit_game(data, tileMeshes, render, colorTextures)
+        exitGame(data, tileMeshes, colorTextures)
     });
-
 
     
     if (made_listner == 0)
     {
-        button1.addEventListener('mouseup', () => handleMouseUpButton1(gameNumber));
-        button2.addEventListener('mouseup', () => handleMouseUpButton2(gameNumber));
-        button3.addEventListener('mouseup', () => handleMouseUpButton3(gameNumber));
-        button4.addEventListener('mouseup', () => handleMouseUpButton4(gameNumber));
-        made_listner = 1
+        if (canvasFocused)
+        {
+            button1.addEventListener('mouseup', () => handleMouseUpButton1(gameNumber));
+            button2.addEventListener('mouseup', () => handleMouseUpButton2(gameNumber));
+            button3.addEventListener('mouseup', () => handleMouseUpButton3(gameNumber));
+            button4.addEventListener('mouseup', () => handleMouseUpButton4(gameNumber));
+            made_listner = 1
+        }
     }
 
 

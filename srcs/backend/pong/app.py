@@ -464,8 +464,9 @@ def stop_game(splitted_command):
 			return
 		else:
 			games[number].set_game_running(0)
+			socketio.emit('endstate', games[number].return_game_state())
+			send_game_over_data(games[number].left_score, games[number].right_score, games[number].moves, games[number].game_id)
 			games[number].set_game_slot(-1)
-			socketio.emit('message', 'OK, game stopped {}'.format(number))
 			return
 
 # get state of game from specific slot
