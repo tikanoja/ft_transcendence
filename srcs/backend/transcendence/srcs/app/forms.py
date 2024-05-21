@@ -184,7 +184,7 @@ class LocalGameForm(forms.Form):
     ]
     game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
     username = forms.CharField(label='P2 Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=50, required=True)
-    password = forms.CharField(label='P2 Password', widget=forms.PasswordInput(attrs={'placeholder': 'Enter password'}), required=True, max_length=64, required=True) #max_length=50
+    password = forms.CharField(label='P2 Password', widget=forms.PasswordInput(attrs={'placeholder': 'Enter password'}), max_length=64, required=True) #max_length=50
     
     def is_valid(self):
         valid = super().is_valid()

@@ -193,14 +193,3 @@ class Tournament(models.Model):
         highest_level = self.match_set.aggregate(max_level=models.Max('level'))['max_level']
         logger.debug('Highest match level in tournament: ' + str(highest_level))
         return highest_level if highest_level is not None else 0
-
-
-# user profile model
-#  language -> maybe add to CustomUser model?
-#  picture
-#  custom setting for paddle?
-
-# stats model -  individual game stats that linked to the user
-#  define what about a game to save
-#  expect game service to send game info to us
-
