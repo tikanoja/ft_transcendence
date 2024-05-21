@@ -8,6 +8,7 @@
 			<th scope="col">Foe Score</th>
 			<th scope="col">User Score</th>
 			<th scope="col">Winner</th>
+			<th scope="col">Tournamnet Game</th>
 		</thead>
 		<tbody>
 		{% for key, entry in history.pong.items %}
@@ -18,6 +19,13 @@
 				<td>{{ entry.opponent_score }}</td>
 				<td>{{ entry.user_score }}</td>
 				<td>{{ entry.winner }}</td>
+				<td>
+					{% if entry.is_tournament_game %}
+					Y
+					{% else %}
+					N
+					{% endif %}
+				</td>
 			</tr>
 		{% empty %}
 			<tr>
@@ -34,6 +42,7 @@
 			<th scope="col">Foe</th>
 			<th scope="col">Moves to Win</th>
 			<th scope="col">Winner</th>
+			<th scope="col">Tournamnet Game</th>
 		</thead>
 		<tbody>
 		{% for key, entry in history.color.items %}
@@ -44,6 +53,13 @@
 				<td>{{ entry.opponent_score }}</td>
 				<td>{{ entry.user_score }}</td>
 				<td>{{ entry.winner }}</td>
+				<td>
+					{% if entry.is_tournament_game %}
+					Y
+					{% else %}
+					N
+					{% endif %}
+				</td>
 			</tr>
 		{% empty %}
 			<tr>

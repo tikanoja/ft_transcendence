@@ -42,6 +42,7 @@ def get_pong_history(username:str, pong_games:QuerySet) -> dict:
             entry["opponent_score"] = game.p1_score
             entry["user_score"] = game.p2_score
         entry["winner"] = check_user_not_none(game.winner)
+        entry["is_tournament_game"] = game.tournament_match
         pong_history[iter] = entry
     logger.debug(pong_history)
     return pong_history
@@ -89,6 +90,7 @@ def get_pong_stats(user:CustomUser, pong_games:QuerySet) -> dict:
     pong_stats['largest_loss_margin'] = largest_loss_margin
     pong_stats['longest_rally'] = longest_rally
     pong_stats['win_percent'] = round((wins / pong_stats["games_played"]) * 100, 2)
+    pong_stats["tournament_games"] = len(pong_games.filter(tournament_match=True))
     logger.debug(pong_stats)
     return pong_stats
 
@@ -110,6 +112,7 @@ def get_color_history(username:str, color_games:QuerySet) -> dict:
             entry["opponent"] = p1_username
         entry["winner"] = check_user_not_none(game.winner)
         entry["turns_to_win"] = game.turns_to_win
+        entry["is_tournament_game"] = game.tournament_match
         color_history[iter] = entry
     logger.debug(color_history)
     return color_history
@@ -142,6 +145,7 @@ def get_color_stats(user:CustomUser, color_games:QuerySet) -> dict:
         color_stats["average_move_to_win"] = sum_moves_to_win / wins
     else:
         color_stats["average_move_to_win"] = 0
+    color_stats["tournament_games"] = len(color_games.filter(tournament_match=True))
     logger.debug(color_stats)
     return color_stats
 
