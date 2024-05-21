@@ -16,6 +16,11 @@ def get_stats_for_cli(user:CustomUser, pong_games:QuerySet) -> dict:
     pong_stats["wins"] = len(won_games)
     return pong_stats
 
+def check_user_not_none(user):
+    if user is None:
+        return "Deleted User"
+    else:
+        return user.username
 
 def get_pong_history(username:str, pong_games:QuerySet) -> dict:
     pong_history = {}
@@ -25,15 +30,18 @@ def get_pong_history(username:str, pong_games:QuerySet) -> dict:
         entry = {}
         entry["game"] = game.game
         entry["date"] = game.updated_at
-        if game.p1.username == username:
-            entry["opponent"] = game.p2
+        p1_username = check_user_not_none(game.p1)
+        p2_username = check_user_not_none(game.p2)
+
+        if p1_username == username:
+            entry["opponent"] = p2_username
             entry["opponent_score"] = game.p2_score
             entry["user_score"] = game.p1_score
         else:
-            entry["opponent"] = game.p1
+            entry["opponent"] = p1_username
             entry["opponent_score"] = game.p1_score
             entry["user_score"] = game.p2_score
-        entry["winner"] = game.winner.username
+        entry["winner"] = check_user_not_none(game.winner)
         pong_history[iter] = entry
     logger.debug(pong_history)
     return pong_history
@@ -93,11 +101,14 @@ def get_color_history(username:str, color_games:QuerySet) -> dict:
         entry = {}
         entry["game"] = game.game
         entry["date"] = game.updated_at
-        if game.p1.username == username:
-            entry["opponent"] = game.p2
+        p1_username = check_user_not_none(game.p1)
+        p2_username = check_user_not_none(game.p2)
+
+        if p1_username == username:
+            entry["opponent"] = p2_username
         else:
-            entry["opponent"] = game.p1
-        entry["winner"] = game.winner.username
+            entry["opponent"] = p1_username
+        entry["winner"] = check_user_not_none(game.winner)
         entry["turns_to_win"] = game.turns_to_win
         color_history[iter] = entry
     logger.debug(color_history)
