@@ -3,6 +3,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.m
 let socket;
 let gameNumber = -1;
 let made_listner = 0;
+let render = true;
 
 
 export const loadScript = () => {
@@ -121,7 +122,12 @@ export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
 function loadGameOverScreen(data) {
     const winnerInfo = document.getElementById('winnerInfo');
     const gameOverScreen = document.getElementById('gameOverScreen');
-    
+    const P1score = document.getElementById('P1Card');
+    const P2score = document.getElementById('P2Card');
+    const moveCount = document.getElementById('moveCard');
+    P1score.style.display = 'none';
+    P2score.style.display = 'none';
+    moveCount.style.display = 'none';
     const valuesArray = data.split(',');
     let player1score = valuesArray[2];
     let player2score = valuesArray[3];
@@ -147,26 +153,29 @@ function loadGameOverScreen(data) {
     canvasContainer.style.display = 'none';
 }
 
-function cleanupGameBoard(tileMeshes, scene) {
+function cleanupGameBoard(tileMeshes) {
     tileMeshes.forEach(tileMesh => {
-        scene.remove(tileMesh);
         tileMesh.geometry.dispose();
         tileMesh.material.dispose();
     });
 }
 
-function exitGame(data, tileMeshes, render, colorTextures, scene)
+function exitGame(data, tileMeshes, colorTextures)
 {
-    updateGameState(data, tileMeshes, render, colorTextures)
+    updateGameState(data, tileMeshes, colorTextures)
     loadGameOverScreen(data)
     if (made_listner == 1)
     {   
+        const button1 = document.querySelector('button[type="Colour 1"] img');
+        const button2 = document.querySelector('button[type="Colour 2"] img');
+        const button3 = document.querySelector('button[type="Colour 3"] img');
+        const button4 = document.querySelector('button[type="Colour 4"] img');
         button1.removeEventListener('mouseup', () => handleMouseUpButton1(gameNumber));
         button2.removeEventListener('mouseup', () => handleMouseUpButton2(gameNumber));
         button3.removeEventListener('mouseup', () => handleMouseUpButton3(gameNumber));
         button4.removeEventListener('mouseup', () => handleMouseUpButton4(gameNumber));
     }
-    cleanupGameBoard(tileMeshes, scene)
+    cleanupGameBoard(tileMeshes)
     const canvas = document.getElementById('canvasContainer');
     canvas.remove();
     const scoreboard = document.getElementById('scoreboard');
@@ -175,7 +184,7 @@ function exitGame(data, tileMeshes, render, colorTextures, scene)
 }
 
 
-function updateGameState(data, tileMeshes, render, colorTextures) {
+function updateGameState(data, tileMeshes, colorTextures) {
     const valuesArray = data.split(',');
     if (gameNumber == valuesArray[1]) {
         let tileLegend = [];
@@ -216,7 +225,7 @@ function updateGameState(data, tileMeshes, render, colorTextures) {
     }
 }
 
-function setupGameBoard(data, boardStartX, boardStartY, numRows, numCols, render, colorTextures, tileSize, scene) {
+function setupGameBoard(data, boardStartX, boardStartY, numRows, numCols,  colorTextures, tileSize, scene) {
         
     const tileMeshes = [];
 
@@ -233,7 +242,7 @@ function setupGameBoard(data, boardStartX, boardStartY, numRows, numCols, render
             tileMeshes.push(tileMesh);
         }
     }
-    updateGameState(data, tileMeshes, render, colorTextures);
+    updateGameState(data, tileMeshes, colorTextures);
     return tileMeshes;
 }
 
@@ -279,8 +288,7 @@ const AnimationController = {
     }
 };
 
-function onWindowResize(camera, renderer)
-{
+function onWindowResize(camera, renderer) {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -304,26 +312,34 @@ function onWindowResize(camera, renderer)
     const canvasCenterX = canvasBounds.left + canvasBounds.width / 2;
 
     moveCount.style.position = 'absolute';
+    moveCount.style.display = 'block';
     moveCount.style.top = canvasBounds.top + 10 + 'px';
     moveCount.style.left = `${canvasCenterX - moveCount.offsetWidth / 2}px`;
 
     P1score.style.position = 'absolute';
+    P1score.style.display = 'block';
     P1score.style.top = canvasBounds.top + 10 + 'px';
     P1score.style.left = `${Math.max(canvasBounds.left + 50, 10)}px`;
 
     P2score.style.position = 'absolute';
+    P2score.style.display = 'block';
     P2score.style.top = canvasBounds.top + 10 + 'px';
     P2score.style.right = `${Math.max(window.innerWidth - canvasBounds.right + 50, 10)}px`;
 
-    P1score.style.display = 'block';
-    P2score.style.display = 'block';
-    moveCount.style.display = 'block';
+    const gameControls = document.getElementById('GameControls');
+    const gameControlsBottomMargin = 7; // Adjust this value as needed
+    gameControls.style.position = 'absolute';
+    gameControls.style.bottom = `${gameControlsBottomMargin}px`;
+
+    const gameControlsLeftOffsetFactor = 1.3; // Adjust this value as needed
+    gameControls.style.left = `${(canvasCenterX - gameControls.offsetWidth) / gameControlsLeftOffsetFactor}px`;    
+    gameControls.style.display = 'block';
 }
+
 
 export const renderColorwar = (gameNumber, data) => {
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer();
-    let render = true;
     
     const existingCanvas = document.getElementById('colorCanvas');
     if (existingCanvas) {
@@ -375,7 +391,7 @@ export const renderColorwar = (gameNumber, data) => {
         camera.position.set(0, 20, distance);
         camera.lookAt(scene.position);
         
-    onWindowResize(camera, renderer)
+    onWindowResize(camera, renderer);
     const textureLoader = new THREE.TextureLoader();
     let colourOneSrc = "../textures/purple_square.png";
     let colourOneSrc_1 = "../textures/purple_1_sm.png";
@@ -463,16 +479,16 @@ export const renderColorwar = (gameNumber, data) => {
     });
     addLighting(scene);
 
-    const tileMeshes = setupGameBoard(data, boardStartX, boardStartY, numRows, numCols, render, colorTextures, tileSize, scene);
+    const tileMeshes = setupGameBoard(data, boardStartX, boardStartY, numRows, numCols, colorTextures, tileSize, scene);
 
     
     socket.on('state', (data) => {
-        updateGameState(data, tileMeshes,  render, colorTextures)
+        updateGameState(data, tileMeshes, colorTextures)
     });
 
 	socket.on('endstate', (data) => {
         socket.emit('message', 'stop_game,' + gameNumber);
-        exitGame(data, tileMeshes, render, colorTextures)
+        exitGame(data, tileMeshes, colorTextures)
     });
 
     
