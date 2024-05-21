@@ -141,9 +141,9 @@ function loadGameOverScreen(data) {
     const player1username = document.getElementById('player1username').value;
     const player2username = document.getElementById('player2username').value;
     let winnerText;
-    if (p1Score > p2Score) {
+    if (player1score > player2score) {
         winnerText = `${player1username} wins!`;
-    } else if (p1Score < p2Score) {
+    } else if (player1score < player2score) {
         winnerText = `${player2username} wins!`;
     } else {
         winnerText = "It's a tie!";
