@@ -100,6 +100,7 @@ function updateEventListeners() {
     var tournamentJoinForm = document.getElementById('tournamentJoinForm');
     var autoregister = document.getElementById('autoRegister');
 
+
     // remove listeners
     if (profilePictureForm)
         profilePictureForm.removeEventListener('submit', manageAccountHandler);
@@ -159,7 +160,6 @@ function updateEventListeners() {
     }
     if (autoregister)
         autoregister.removeEventListener('click', automate_register);
-
     // begin add listeners if currently present
     if (profilePictureForm)
         profilePictureForm.addEventListener('submit', manageAccountHandler);

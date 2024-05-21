@@ -15,14 +15,16 @@ from django.contrib.auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
 
-
+# /cli_dashboard/username
 @csrf_exempt
 def cli_dashboard(request, username):
      try:
+        print(request, username)
         if request.method == 'GET':
             user = CustomUser.objects.filter(username=username).first()
             pong_games = PongGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
             resource = dashboard.get_stats_for_cli(user, pong_games)
+            print(resource)
             return JsonResponse({'pong': resource}, status=200)
         else:
             return JsonResponse({"error": "method not allowed, try GET"}, status=405)
@@ -79,14 +81,16 @@ def authenticate_player(request):
 
     current_game = GameInstance.objects.get(pk=game_id)
     game_type = current_game.game
-
+    current_user = request.user
     context = {
         'p1_username': current_game.p1.username,
         'p2_username': current_game.p2.username,
         'p1_user': current_game.p1,
         'p2_user': current_game.p2,
         'form': PlayerAuthForm,
-        'current_game': current_game
+        'current_game': current_game,
+        'current_user': current_user,
+        'current_user':  current_user.username
     }
 
     user = authenticate(request, username=username, password=password)
@@ -124,7 +128,8 @@ def pong_context(request, data):
         'p1_user': p1_user,
         'p2_user': p2_user,
         'form': PlayerAuthForm,
-        'current_game': current_game
+        'current_game': current_game,
+        'current_user':  current_user.username
     }
     return context
 

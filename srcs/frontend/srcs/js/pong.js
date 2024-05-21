@@ -30,7 +30,7 @@ export const loadScript = () => {
 }
 
 function connectWebSocket() {
-    socket = io.connect('https://' + window.location.hostname, {path: "/pong/socket.io"});
+    socket = io.connect('https://' + window.location.hostname, {path: "/pong/socket.io"});  
     socket.on('connect', () => {
         // empty on purpose nothing todo
     });
@@ -67,13 +67,12 @@ export const startScreen = async () => {
 			connectWebSocket();
             
 			const startScreen = document.getElementById('startScreen');
-			const playButton = document.getElementById('playButton');
 			const canvasContainer = document.getElementById('canvasContainer');
 			const styleCheckbox = document.getElementById('styleCheckbox');
 			let is3DGraphics = false;
 
             await verifyUsername()
-            console.log("after verify: ", gameNumber);
+
             
             console.log("in the click listener")
             startScreen.style.display = 'none';
@@ -83,12 +82,16 @@ export const startScreen = async () => {
             socket.emit('message', 'start_game,' + gameNumber);
 
             socket.on('start_game', (data) => {
-            startScreen.remove();
-            canvasContainer.style.display = 'block';
-            const valuesArray = data.split(',')
+                startScreen.remove();
+                canvasContainer.style.display = 'block';
+                const P1score = document.getElementById('P1Card');
+                P1score.style.display = 'block';
+                const P2score = document.getElementById('P2Card');
+                P2score.style.display = 'block';
+                const valuesArray = data.split(',')
                 gameNumber = valuesArray[1]
                 renderPongGame(is3DGraphics, gameNumber);
-            })
+            });
     } catch (error) {
         console.error('Error loading script:', error);
     }
@@ -97,22 +100,36 @@ export const startScreen = async () => {
 function loadGameOverScreen(data) {
     const winnerInfo = document.getElementById('winnerInfo');
     const gameOverScreen = document.getElementById('gameOverScreen');
+    const canvasContainer = document.getElementById('canvasContainer');
+    const scoreboard = document.getElementById('scoreboard');
+    const P1score = document.getElementById('P1Card');
+    const P2score = document.getElementById('P2Card');
+    const player1username = document.getElementById('player1username').value;
+    const player2username = document.getElementById('player2username').value;
     
+    console.log("p1 user:   ", player1username)
+    console.log("p2 user:   ", player2username)
+
+    P1score.style.display = 'none';
+    P2score.style.display = 'none';
+    scoreboard.style.display = 'none';
+
     const valuesArray = data.split(',');
-    const p1Score = parseInt(valuesArray[8]);
-    const p2Score = parseInt(valuesArray[7]);
+    const p1Score = parseInt(valuesArray[7]);
+    const p2Score = parseInt(valuesArray[8]);
 
     let winnerText;
     if (p1Score > p2Score) {
-        winnerText = "Player 1 wins!";
+        winnerText = `${player1username} wins!`;
     } else if (p1Score < p2Score) {
-        winnerText = "Player 2 wins!";
+        winnerText = `${player2username} wins!`;
     } else {
         winnerText = "It's a tie!";
     }
 
     winnerInfo.textContent = winnerText;
     gameOverScreen.style.display = 'block';
+
     canvasContainer.style.display = 'none';
 }
 
@@ -120,21 +137,21 @@ let previousP1Score = null;
 let previousP2Score = null;
 
 export const updateScoreboard = (p1Score, p2Score) => {
-    const scoreLeftElement = document.querySelector('.score-left');
-    const scoreRightElement = document.querySelector('.score-right');
+    const scoreLeftElement = document.getElementById('player1Score');
+    const scoreRightElement = document.getElementById('player2Score');
     
     if (isNaN(p1Score) || isNaN(p2Score)) {
         return;
     }
     if (scoreLeftElement && scoreRightElement) {
         if (p1Score !== previousP1Score || p2Score !== previousP2Score) {
-            scoreLeftElement.textContent = `P1 SCORE: ${p1Score}`;
-            scoreRightElement.textContent = `P2 SCORE: ${p2Score}`;
+            scoreLeftElement.textContent = `${p1Score}`;
+            scoreRightElement.textContent = `${p2Score}`;
             previousP1Score = p1Score;
             previousP2Score = p2Score;
         }
     } else {
-        // empty on purpose if creation of elements dont succeed
+        console.error('Error loading html elements');
     }
 };
 
@@ -165,7 +182,8 @@ function setup2DScene(scene) {
     const sizeFactor = 0.2;
     const ballRadiusScreen = (25 * 2) * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
     let ball = new THREE.Mesh(new THREE.PlaneGeometry(ballRadiusScreen * 2, ballRadiusScreen * 2), new THREE.MeshStandardMaterial({ color: 0x808080 }));
-    
+    p1_paddle.position.set(-100,  0, 0);
+    p2_paddle.position.set(100, 0, 0);
     scene.add(p1_paddle);
     scene.add(p2_paddle);
     scene.add(ball);
@@ -275,8 +293,8 @@ function updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics) {
 		p2_paddle_y = parseFloat(valuesArray[4]);
 		p1_paddle_x = parseFloat(valuesArray[5]);
 		p1_paddle_y = parseFloat(valuesArray[6]);
-		p2_score = parseInt(valuesArray[7]);
-		p1_score = parseInt(valuesArray[8]);
+		p1_score = parseInt(valuesArray[7]);
+		p2_score = parseInt(valuesArray[8]);
 
 		ball_x = min_visible_x + (max_visible_x - min_visible_x) * parseFloat(valuesArray[1]);
 		ball_y = min_visible_y + (max_visible_y - min_visible_y) * parseFloat(valuesArray[2]);
@@ -327,9 +345,13 @@ function animateBallRotation(ball) {
 const AnimationController = {
     animationId: null,
     
-    animate: function(scene, camera, renderer) {
-        this.animationId = requestAnimationFrame(() => this.animate(scene, camera, renderer));
-        animateBallRotation(ball);
+    animate: function(scene, camera, renderer, is3DGraphics) {
+        this.animationId = requestAnimationFrame(() => this.animate(scene, camera, renderer, is3DGraphics));
+        console.log(is3DGraphics)
+        if (is3DGraphics)
+        {
+            animateBallRotation(ball);
+        }
         renderer.render(scene, camera);
     },
     
@@ -341,9 +363,9 @@ const AnimationController = {
         cancelAnimationFrame(this.animationId);
     },
     
-    startAnimation: function(scene, camera, renderer)
+    startAnimation: function(scene, camera, renderer, is3DGraphics)
     {
-        this.animate(scene, camera, renderer);
+        this.animate(scene, camera, renderer, is3DGraphics);
     }
 };
 
@@ -368,6 +390,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     if (existingCanvas) {
         existingCanvas.remove();
     }
+    let canvasFocused = true;
     const renderer = new THREE.WebGLRenderer();
     const pixelRatio = window.devicePixelRatio;
     renderer.setPixelRatio(pixelRatio);
@@ -375,62 +398,96 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     renderer.domElement.id = 'pongCanvas'; 
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
     
+
+    const canvas = renderer.domElement;
+    canvas.setAttribute('tabindex', '0');
+
+    canvas.addEventListener('focus', () => {
+        canvasFocused = true;
+    });
+    
+    canvas.addEventListener('blur', () => {
+        canvasFocused = false;
+    });
+
     if (is3DGraphics) {
         ({ camera, p1_paddle, p2_paddle, ball} = setup3DScene(scene));
         camera.position.set(-1100, 300, 1100);
         camera.lookAt(0, 0, 0);
     } else {
-        ({ camera, p1_paddle, p2_paddle, ball} = setup2DScene(scene));
+        ({ camera, p1_paddle, p2_paddle, ball } = setup2DScene(scene));
         camera.position.set(0, 0, 100);
+        camera.lookAt(0, 0, 0);
     }
+    const canvasBounds = canvas.getBoundingClientRect();
+    const P1score = document.getElementById('P1Card');
+    const P2score = document.getElementById('P2Card');
+    
+    P1score.style.position = 'absolute';
+    P1score.style.top = canvasBounds.top + 10 + 'px';
+    P1score.style.left = canvasBounds.left + 100 + 'px';
+    
+    P2score.style.position = 'absolute';
+    P2score.style.top = canvasBounds.top + 10 + 'px';
+    P2score.style.left = canvasBounds.right - P2score.offsetWidth - 100 + 'px';
+    
+    window.addEventListener('resize', () => {
+        const width = window.innerWidth - (window.innerWidth / 4);
+        const height = window.innerHeight - (window.innerHeight / 4);
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+    
+        const canvasBounds = canvas.getBoundingClientRect();
+        const P1score = document.getElementById('P1Card');
+        const P2score = document.getElementById('P2Card');
+        
+        P1score.style.top = canvasBounds.top + 10 + 'px';
+        P1score.style.left = canvasBounds.left + 100 + 'px';
+        
+        P2score.style.top = canvasBounds.top + 10 + 'px';
+        P2score.style.left = canvasBounds.right - P2score.offsetWidth - 100 + 'px';
+    });
+    
 
-    socket.on('state', (data) => { // game update
+    socket.on('state', (data) => {
         updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics)
     });
 
-    socket.on('endstate', (data) => { // game has ended
+    socket.on('endstate', (data) => {
         exit_game(data, scene)
         AnimationController.stopAnimation();
     });
 
     document.addEventListener('keydown', (event) => {
-        event.preventDefault();
-        if (is3DGraphics)
-        {
-            if (event.key == 'ArrowDown')
-            {
-                socket.emit('message', 'right_paddle_down,' + gameNumber);
-            }
-            if (event.key  == 'ArrowUp')
-            {
-                socket.emit('message', 'right_paddle_up,' + gameNumber);
-            }
-            if (event.key  == 's')
-            {
-                socket.emit('message', 'left_paddle_down,' + gameNumber);
-            }
-            if (event.key  == 'w')
-            {
-                socket.emit('message', 'left_paddle_up,' + gameNumber);
-            }
-        }
-        else
-        {
-            if (event.key == 'ArrowDown')
-            {
-                socket.emit('message', 'right_paddle_up,' + gameNumber);
-            }
-            if (event.key  == 'ArrowUp')
-            {
-                socket.emit('message', 'right_paddle_down,' + gameNumber);
-            }
-            if (event.key  == 's')
-            {
-                socket.emit('message', 'left_paddle_up,' + gameNumber);
-            }
-            if (event.key  == 'w')
-            {
-                socket.emit('message', 'left_paddle_down,' + gameNumber);
+        if (canvasFocused) {
+            event.preventDefault();
+            if (is3DGraphics) {
+                if (event.key == 'ArrowDown') {
+                    socket.emit('message', 'right_paddle_down,' + gameNumber);
+                }
+                if (event.key  == 'ArrowUp') {
+                    socket.emit('message', 'right_paddle_up,' + gameNumber);
+                }
+                if (event.key  == 's') {
+                    socket.emit('message', 'left_paddle_down,' + gameNumber);
+                }
+                if (event.key  == 'w') {
+                    socket.emit('message', 'left_paddle_up,' + gameNumber);
+                }
+            } else {
+                if (event.key == 'ArrowDown') {
+                    socket.emit('message', 'right_paddle_up,' + gameNumber);
+                }
+                if (event.key  == 'ArrowUp') {
+                    socket.emit('message', 'right_paddle_down,' + gameNumber);
+                }
+                if (event.key  == 's') {
+                    socket.emit('message', 'left_paddle_up,' + gameNumber);
+                }
+                if (event.key  == 'w') {
+                    socket.emit('message', 'left_paddle_down,' + gameNumber);
+                }
             }
         }
     });
@@ -538,13 +595,12 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
                     camera.rotation.z = 5.57244397943557;
                 break;
             default:
-                // Handle other key presses if needed
                 break;
         }
     });
 
     if (render) {
-        AnimationController.startAnimation(scene, camera, renderer);
+        AnimationController.startAnimation(scene, camera, renderer , is3DGraphics);
     }
     else
     {

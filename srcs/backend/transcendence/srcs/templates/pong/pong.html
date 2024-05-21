@@ -1,3 +1,6 @@
+{% extends 'base.html' %}
+{% block content%}
+
 <div id="startScreen">
     <label>
         <div class ="row">
@@ -27,7 +30,6 @@
             </div>
             <div class="col-md-5">
                 <div id="player2">
-                    {% comment %} <h2>Player 2</h2> {% endcomment %}
                     <img src="{{ p2_user.profile_picture.url }}" alt="Player 2 Profile Picture">
                     <p>{{ p2_username }}</p>
                     {% if current_game.p2auth == False %}
@@ -62,17 +64,38 @@
     </label>
 </div>
 
-<div id="gameOverScreen">
-    <h1>Game Over</h1>
-    <div id="winnerInfo"></div>
-    <input type="hidden" id="current_game_id" value="{{ current_game.id }}">
-    <input type="hidden" id="player1username" value="{{ p1_username }}">
-    <input type="hidden" id="player2username" value="{{ p2_username }}">
+<div id="gameOverScreen" class="container mt-3">
+    <h1 class="text-center">Game Over</h1>
+    <div id="winnerInfo" class="my-4 text-center"></div>
+    <div class="text-center mt-4">
+        <input type="hidden" id="current_game_id" value="{{ current_game.id }}">
+        <input type="hidden" id="player1username" value="{{ p1_username }}">
+        <input type="hidden" id="player2username" value="{{ p2_username }}">
+        <button class="btn btn-primary">
+            <nav>
+                <a href="/play" class="nav-link" onclick="setActive(this)">Return to Game Manager</a>
+            </nav>
+        </button>
+    </div>
 </div>
 
-<div id="scoreboard">
-    <div class="score-left"><p id='player1' >{{ p1_username }}</p>score: 0</div>
-    <div class="score-right"><p id='player2' >{{ p2_username }}</p>score: 0</div>
+<div id="scoreboard" class="container-fluid d-flex justify-content-between position-absolute" style="top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; display: none;">
+    <div class="card text-center flex-fill mx-1 my-0 p-2" id="P1Card" style="display: none; max-width: 120px;">
+        <div class="card-body p-1" style="padding: 5px;">
+            <h6 class="card-title mb-1" id="player1username" style="margin-bottom: 5px; font-size: 0.8rem;">{{ p1_username }}</h6>
+            <p class="card-text mb-1" style="margin-bottom: 5px; font-size: 0.8rem;">Score: <span id="player1Score">0</span></p>
+        </div>
+    </div>
+    <div class="card text-center flex-fill mx-1 my-0 p-2" id="P2Card" style="display: none; max-width: 120px;">
+        <div class="card-body p-1" style="padding: 5px;">
+            <h6 class="card-title mb-1" id="player2username" style="margin-bottom: 5px; font-size: 0.8rem;">{{ p2_username }}</h6>
+            <p class="card-text mb-1" style="margin-bottom: 5px; font-size: 0.8rem;">Score: <span id="player2Score">0</span></p>
+        </div>
+    </div>
+    <div class="move-count" id="moveCount" style="order: 1;"></div>
 </div>
 
-<div id="canvasContainer"></div>
+<div id="canvasContainer" style="position: relative; display: none;">
+</div>
+
+{% endblock %}
