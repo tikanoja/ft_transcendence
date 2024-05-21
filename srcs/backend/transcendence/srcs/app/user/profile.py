@@ -61,3 +61,11 @@ def get_profile_picture_context(username:str):
         return context
     context["profile_picture"] = current_user.profile_picture
     return context
+
+
+def user_exists(username:str) -> bool:
+    user = CustomUser.objects.filter(username=username)
+    if not user.first():
+        return False
+    else:
+        return True

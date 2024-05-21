@@ -145,3 +145,14 @@ def post_cw_canvas(request):
         return render(request, "pong/colorwar.html", pong_context(request, data))
     else:
         return render(request, "pong/nogame.html", {'current_user': request.user})
+    
+
+def notfound(request):
+	logger.debug('in notfound()')
+	if request.method == 'GET':
+		# check for current_user
+		context = {}
+		context["current_user"] = request.user.username
+		return render(request, '404.html', context)
+	else:
+		return JsonResponse({'error': "method not allowed. please use GET"})

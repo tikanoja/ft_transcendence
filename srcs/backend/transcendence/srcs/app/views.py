@@ -134,17 +134,22 @@ def home(request):
 def notfound(request):
 	logger.debug('in notfound()')
 	if request.method == 'GET':
-		return render(request, 'user/404.html', {})
+		# check for current_user
+		context = {}
+		context["current_user"] = request.user.username
+		return render(request, '404.html', context)
 	else:
 		return JsonResponse({'error': "method not allowed. please use GET"})
 
 @login_required
 def profile(request, username):
 	logger.debug('getting profile')
-	self = False
-	if request.user.username == username:
-		self = True
 	if request.method == "GET":
+		if not user_profile.user_exists(username):
+			return render(request, '404.html', {"current_user": request.user.username})
+		self = False
+		if request.user.username == username:
+			self = True
 		context = user_profile.profileContext(username, self)
 		context["current_user"] = request.user.username
 		return render(request, 'user/profile.html', context)
