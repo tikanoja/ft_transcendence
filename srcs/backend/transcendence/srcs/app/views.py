@@ -82,18 +82,6 @@ def manage_account(request):
 # 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 # 	return response
 
-# TODO: there is no settingsPOST anywhere in the project. This view is not used at all
-@login_required
-def settings(request):
-	logger.debug('In settings()')
-	if request.method == 'GET':
-		return render(request, 'user/settings.html', {})
-	# elif request.method == 'POST':
-	# 	response = usettingsPOST(request)
-	else:
-		response = JsonResponse({'error': "method not allowed. please use POST or GET"}, status=405)
-	return response
-
 
 @login_required
 def play(request):
@@ -114,18 +102,6 @@ def friends(request):
 		response = relations.friendsGET(request)
 	elif request.method == 'POST':
 		response = relations.friendsPOST(request)
-	else:
-		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
-	return response
-
-
-@login_required
-def home(request):
-	logger.debug('In home()')
-	if request.method == 'GET':
-		return render(request, 'user/home.html', {})
-	elif request.method == 'POST':
-		response = user.playPOST(request)
 	else:
 		response = JsonResponse({'error': "method not allowed. please use POST or GET"})
 	return response

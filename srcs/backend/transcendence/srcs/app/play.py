@@ -131,20 +131,25 @@ def gameResponse(request, data):
     challenger_user = CustomUser.objects.filter(username=challenger).first()
     if not challenger_user:
         return render(request, 'user/play.html', playContext(request, "Error: game cancelled / user deleted", None))
-    game_instance = GameInstance.objects.filter(p1=challenger_user, p2=request.user, status='Pending').first()
-    if game_instance is None:
-        return render(request, 'user/play.html', playContext(request, "Could not find game", None))
     if action == 'accept':
+        game_instance = GameInstance.objects.filter(p1=challenger_user, p2=request.user, status='Pending').first()
+        if game_instance is None:
+            return render(request, 'user/play.html', playContext(request, "Could not find game", None))
         if check_player_activity(game_instance) != True:
             return render(request, 'user/play.html', playContext(request, "Busy player, try again later", None))
         game_instance.status = 'Accepted'
         game_instance.save()
         return render(request, 'user/play.html', playContext(request, None, "Game accepted!"))
     elif action == 'reject':
+        game_instance = GameInstance.objects.filter(p1=challenger_user, p2=request.user, status='Pending').first()
+        if game_instance is None:
+            return render(request, 'user/play.html', playContext(request, "Could not find game", None))
         game_instance.delete()
         return render(request, 'user/play.html', playContext(request, None, "Game rejected"))
     elif action == 'cancel':
-        game_instance = GameInstance.objects.filter(p1=request.user, p2=challenger_user).first()
+        game_instance = GameInstance.objects.filter(p1=request.user, p2=challenger_user, status='Pending').first()
+        if game_instance is None:
+            return render(request, 'user/play.html', playContext(request, "Could not find game", None))
         game_instance.delete()
         return render(request, 'user/play.html', playContext(request, None, "Game cancelled"))
 
@@ -226,7 +231,7 @@ def tournament_join(request):
     
     alias = sent_form.cleaned_data["alias"]
     participant_id = request.POST.get('participant_id')
-    participant = Participant.objects.get(pk=participant_id)
+    participant = Participant.objects.filter(pk=participant_id).first()
 
     if participant is None:
         return render(request, 'user/play.html', playContext(request, 'Participant instance not found', None))
@@ -255,7 +260,7 @@ def tournament_invite(request):
         return render(request, 'user/play.html', playContext(request, ve, None))
     
     invited_username = sent_form.cleaned_data["username"]
-    invited_user = CustomUser.objects.get(username=invited_username)
+    invited_user = CustomUser.objects.filter(username=invited_username).first()
 
     if invited_user is None:
         return render(request, 'user/play.html', playContext(request, 'User not found', None))
@@ -264,7 +269,7 @@ def tournament_invite(request):
     if current_user in invited_user.blocked_users.all():
         return render(request, 'user/play.html', playContext(request, 'You cannot invite users who have blocked you.', None))
 
-    tournament = Tournament.objects.get(creator=current_user)
+    tournament = Tournament.objects.filter(creator=current_user, status='Pending').first()
     if tournament is None:
         return render(request, 'user/play.html', playContext(request, 'Could not find tournament', None))
     
@@ -279,19 +284,28 @@ def tournament_invite(request):
 
 def delete_tournament(request, data):
     logger.debug('In delete_tournament()')
-    Tournament.objects.get(pk=data.get('tournament-id')).delete()
+    tournament = Tournament.objects.filter(pk=data.get('tournament-id')).first()
+    if tournament is None:
+        return render(request, 'user/play.html', playContext(request, 'Tournament instance not found!', None))
+    tournament.delete()
     return render(request, 'user/play.html', playContext(request, None, 'Tournament cancelled!'))
 
 
 def tournament_reject(request, data):
     logger.debug('In tournament_reject()')
-    Participant.objects.get(pk=data.get('participant_id')).delete()
+    participant = Participant.objects.filter(pk=data.get('participant_id')).first()
+    if participant is None:
+        return render(request, 'user/play.html', playContext(request, 'Participant instance not found.', None))
+    participant.delete()
     return render(request, 'user/play.html', playContext(request, None, 'Rejected tournament invite!'))
 
 
 def tournament_leave(request, data):
     logger.debug('In tournament_leave()')
-    Participant.objects.get(pk=data.get('participant_id')).delete()
+    participant = Participant.objects.filter(pk=data.get('participant_id')).first()
+    if participant is None:
+        return render(request, 'user/play.html', playContext(request, 'Participant instance not found.', None))
+    participant.delete()
     return render(request, 'user/play.html', playContext(request, None, 'Left tournament!'))
 
 

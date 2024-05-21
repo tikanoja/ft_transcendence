@@ -140,9 +140,11 @@ def block_user(request):
         return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, ve, None), "self_profile": True})
 
     blocked_username = sent_form.cleaned_data['username']
-    blocked_user = CustomUser.objects.get(username=blocked_username)
+    blocked_user = CustomUser.objects.filter(username=blocked_username).first()
+    if blocked_user is None:
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, "Blocked user not found", None), "self_profile": True})
+
     current_user = request.user
-    logger.debug('tryna block: ' + blocked_username)
 
     if request.user.username == blocked_username:
         return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, "Please do not block yourself", None), "self_profile": True})

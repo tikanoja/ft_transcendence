@@ -24,7 +24,7 @@ def save_cw_game_state(request):
 	logger.debug(request.POST)
 
 	game_id = request.POST.get('game_id')
-	game_instance = ColorGameInstance.objects.get(pk=game_id)
+	game_instance = ColorGameInstance.objects.filter(pk=game_id).first()
 	if game_instance is None:
 		return JsonResponse({'message': 'Matching game instance not found'}, status=404)
 
@@ -61,7 +61,7 @@ def save_pong_game_state(request) -> JsonResponse:
 	logger.debug(request.POST)
 
 	game_id = request.POST.get('game_id')
-	game_instance = PongGameInstance.objects.get(pk=game_id)
+	game_instance = PongGameInstance.objects.filter(pk=game_id).first()
 	if game_instance is None:
 		return JsonResponse({'message': 'Matching game instance not found'}, status=404)
 
