@@ -70,6 +70,9 @@ def tournament_deleted_user(user):
         game_instance.save()
         match.status = Match.FINISHED
         match.save()
+    tournament = Tournament.objects.filter(status=Tournament.PENDING, creator=user).first()
+    if tournament is not None:
+        tournament.delete()
 
 
 def delete_accountPOST(request, context):
@@ -156,8 +159,16 @@ def manage_accountPOST(request):
 
             # Resizing the uploaded img to be 300x300 while maintaining aspect ratio
             img = Image.open(new_image)
-            if img.mode!= 'RGB':
+
+            # Handle transparency (alpha channel) for PNG images
+            if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+                alpha = img.convert('RGBA').split()[-1]
+                bg = Image.new("RGBA", img.size, (255, 255, 255, 255))
+                bg.paste(img, mask=alpha)
+                img = bg.convert('RGB')
+            elif img.mode != 'RGB':
                 img = img.convert('RGB')
+
             max_size = (300, 300)
             img.thumbnail(max_size, Image.Resampling.LANCZOS)
             in_mem_file = io.BytesIO()

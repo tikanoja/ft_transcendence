@@ -77,8 +77,11 @@ def authenticate_player(request):
     game_id = request.POST.get('game_id')
     password = sent_form.cleaned_data['password']
 
-    current_game = GameInstance.objects.get(pk=game_id)
+    current_game = GameInstance.objects.filter(pk=game_id).first()
+    if current_game is None:
+        return render(request, "pong/play.html", playContext(request, 'Could not find game instance', None))
     game_type = current_game.game
+    current_user = request.user
 
     context = {
         'p1_username': current_game.p1.username,
@@ -86,7 +89,8 @@ def authenticate_player(request):
         'p1_user': current_game.p1,
         'p2_user': current_game.p2,
         'form': PlayerAuthForm,
-        'current_game': current_game
+        'current_game': current_game,
+        'current_user': current_user,
     }
 
     user = authenticate(request, username=username, password=password)
@@ -128,11 +132,27 @@ def pong_context(request, data):
     }
     return context
 
+
+def game_exists(data):
+    p1 = data.get('p1')
+    p2 = data.get('p2')
+    p1_user = CustomUser.objects.filter(username=p1).first()
+    p2_user = CustomUser.objects.filter(username=p2).first()
+    if p1_user is None or p2_user is None:
+        return False
+    current_game = GameInstance.objects.filter(p1=p1_user, p2=p2_user, status='Accepted').first()
+    if current_game is None:
+        return False
+    return True
+
+
 @login_required
 def post_pong_canvas(request):
     logger.debug('In post_pong_canvas()')
     if request.method == 'POST':
         data = json.loads(request.body)
+        if game_exists(data) is False:
+            return render(request, 'user/play.html', playContext(request, "Game not found!", None))
         return render(request, "pong/pong.html", pong_context(request, data))
     else:
         return render(request, "pong/nogame.html", {'current_user': request.user})
@@ -142,6 +162,8 @@ def post_cw_canvas(request):
     logger.debug('In post_cw_canvas()')
     if request.method == 'POST':
         data = json.loads(request.body)
+        if game_exists(data) is False:
+            return render(request, 'user/play.html', playContext(request, "Game not found!", None))
         return render(request, "pong/colorwar.html", pong_context(request, data))
     else:
         return render(request, "pong/nogame.html", {'current_user': request.user})
@@ -152,7 +174,7 @@ def notfound(request):
 	if request.method == 'GET':
 		# check for current_user
 		context = {}
-		context["current_user"] = request.user.username
+		context["current_user"] = request.user
 		return render(request, '404.html', context)
 	else:
 		return JsonResponse({'error': "method not allowed. please use GET"})
