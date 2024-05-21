@@ -436,7 +436,12 @@ const manageAccountHandler = async (event) => {
         console.log('response,ok triggered');
 		// stay on this page, display the content only for the manage-content div
         const html = await response.text();
-        updateElementContent(html, "manage-account");
+        if (event.target.id === "delete-account-form") {
+            window.history.pushState("", "", "/account/deleted");
+            updateContent(html, "Account Deleted", "You're account is gone forever!")
+        }
+        else
+            updateElementContent(html, "manage-account");
         if (event.target.id === "profile_picture_upload") {
             updateProfilePicture();
         }
