@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse
 import logging
 # from django.contrib.auth import authenticate
 from app.user import session, account, relations
