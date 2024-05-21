@@ -11,6 +11,7 @@ from app.play import playContext
 from django.db.models import Q
 from app.forms import PlayerAuthForm
 from django.contrib.auth import authenticate
+from django.contrib.auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
 
@@ -127,21 +128,25 @@ def pong_context(request, data):
     }
     return context
 
-
+@login_required
 def post_pong_canvas(request):
     logger.debug('In post_pong_canvas()')
-    data = json.loads(request.body)
     if request.method == 'POST':
-        logger.debug('about to render!')
+        data = json.loads(request.body)
         return render(request, "pong/pong.html", pong_context(request, data))
-
+    else:
+        return render(request, "pong/nogame.html", {'current_user': request.user})
+        
+@login_required
 def post_cw_canvas(request):
     logger.debug('In post_cw_canvas()')
-    data = json.loads(request.body)
     if request.method == 'POST':
-        logger.debug('about to render!')
+        data = json.loads(request.body)
         return render(request, "pong/colorwar.html", pong_context(request, data))
+    else:
+        return render(request, "pong/nogame.html", {'current_user': request.user})
     
+
 def notfound(request):
 	logger.debug('in notfound()')
 	if request.method == 'GET':
