@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 import logging
 # from django.contrib.auth import authenticate
 from app.user import session, account, relations
@@ -144,10 +144,12 @@ def notfound(request):
 @login_required
 def profile(request, username):
 	logger.debug('getting profile')
-	self = False
-	if request.user.username == username:
-		self = True
 	if request.method == "GET":
+		if not user_profile.user_exists(username):
+			return render(request, '404.html', {"current_user": request.user.username})
+		self = False
+		if request.user.username == username:
+			self = True
 		context = user_profile.profileContext(username, self)
 		context["current_user"] = request.user.username
 		return render(request, 'user/profile.html', context)
