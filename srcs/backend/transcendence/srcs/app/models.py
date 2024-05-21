@@ -41,9 +41,9 @@ class CustomUserManager(BaseUserManager):
 
 # Create your models here.
 class CustomUser(AbstractBaseUser):
-    username = models.CharField(max_length = 254, unique=True)
-    first_name = models.CharField(max_length = 254, null=True)
-    last_name = models.CharField(max_length = 254, null=True)
+    username = models.CharField(max_length = 50, unique=True)
+    first_name = models.CharField(max_length = 50, null=True)
+    last_name = models.CharField(max_length = 50, null=True)
     email = models.EmailField(max_length = 320, blank=True, null=True)
     is_online = models.BooleanField(default=False)
     last_seen = models.DateTimeField(auto_now=True)
@@ -157,7 +157,7 @@ class Participant(models.Model):
     ]
     user = models.ForeignKey("CustomUser", on_delete=models.CASCADE)
     tournament = models.ForeignKey("Tournament", on_delete=models.CASCADE)
-    alias = models.CharField(max_length=255, default="alias")
+    alias = models.CharField(max_length=50, default="alias")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
 
     class Meta:
