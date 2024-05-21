@@ -138,15 +138,17 @@ function loadGameOverScreen(data) {
     buttons.forEach(button => {
         button.style.display = 'none';
     });
-
+    const player1username = document.getElementById('player1username').value;
+    const player2username = document.getElementById('player2username').value;
     let winnerText;
-    if (player1score > player2score) {
-        winnerText = "Player 1 wins!";
-    } else if (player1score < player2score) {
-        winnerText = "Player 2 wins!";
+    if (p1Score > p2Score) {
+        winnerText = `${player1username} wins!`;
+    } else if (p1Score < p2Score) {
+        winnerText = `${player2username} wins!`;
     } else {
         winnerText = "It's a tie!";
     }
+
 
     winnerInfo.textContent = winnerText;
     gameOverScreen.style.display = 'block';
