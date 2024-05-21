@@ -59,6 +59,7 @@ def playContext(request, error, success):
         in_active_tournament = False
 
     context = {
+        'active': "play",
         'current_user': current_user,
         'inviteform': inviteform,
         'playform': playform,

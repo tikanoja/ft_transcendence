@@ -13,8 +13,7 @@ document.addEventListener("click", (e) => {
 	// Save the clicked element as target
 	const target = e.target;
 	// Check if the clicked element is a part of the nav anchors
-	console.log("target id in click listener" + target.id)
-	if (!target.matches("nav a") || target.id === "profile-nav") {
+	if (!target.matches("nav a")) {
 		return ;
 	}
 	// Prevent the navigation to a new page
@@ -56,8 +55,13 @@ const routes = {
 		title: "test_profile | " +  pageTitle,
 		description: "Only Jen's profile"
 	},
-	"/play/active-game" : {
-		view: "app/play/",
+	"/play/pong" : {
+		view: "/pong/post_pong_canvas/",
+		title: "Play | " + pageTitle,
+		description: "Play games"
+	},
+	"/play/color" : {
+		view: "/pong/post_cw_canvas/",
 		title: "Play | " + pageTitle,
 		description: "Play games"
 	}
@@ -71,6 +75,8 @@ const route = (event) => {
 	event = event || window.event;
 	event.preventDefault();
 	// Update browser history without triggering page reload
+	console.log("route event target : " + event.target.href)
+	console.log("route window location : " + window.location.href)
 	if (event.target.href == window.location.href)
 		return ;
 	console.log('route(): pushing this to history: ' + event.target.href);
@@ -79,11 +85,7 @@ const route = (event) => {
 }
 
 const routeRedirect = (target) => {
-	console.log('In routeRedirect()');
-	if (target == window.location.href) {
-		// return ;
-	}
-	console.log('routeRedirect(): pushing this to history: ' + target);
+	console.log('In routeRedirect()... pushing to history: ' + target);
 	window.history.pushState("", "", target);
 	locationHandler();
 }
@@ -104,7 +106,7 @@ const locationHandler = async () => {
 	console.log('locationHandler(): matching this to routes: ' + location)
 	// Check the routes (the views above) for a match, if no match: 404
 	let route = routes[location] || routes[404];
-	const profileRe = new RegExp("^/profile/[a-zA-Z1-9]+(/)?$")
+	const profileRe = new RegExp("^/profile/[a-zA-Z0-9]+(/)?$")
 	if (profileRe.test(location)) {
 		route = {
 			view: "/app" + location,
@@ -117,15 +119,8 @@ const locationHandler = async () => {
 	if (!response.ok) {
 		console.log("locationHandler(): Fetch status != OK");
 	} else if (response.redirected) {
-		console.log('locationHandler(): Response redirected');
-		console.log(response);
-		const newUrl = response.url;
-		if (newUrl) {
-			console.log('locationHandler(): replacing history: ' + newUrl);	
-			window.history.replaceState("", "", newUrl);
-			const html = await response.text();
-			updateContent(html, "redir | Pong", "description");
-		}
+		let redirect_location = response.url;
+        routeRedirect(redirect_location);
 	} else {
 		console.log('locationHandler(): Fetch OK, no redirs, updating site content');
 		const html = await response.text();

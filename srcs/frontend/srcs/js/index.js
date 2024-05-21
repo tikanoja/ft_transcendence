@@ -5,29 +5,6 @@ import { startScreenColorwar} from './colorwar.js'
 const loginEvent  = new Event("login");
 const logoutEvent = new Event("logout");
 
-document.addEventListener("DOMContentLoaded", function () {
-	// Get the current URL path
-	var currentPath = window.location.pathname;
-
-	// Find the link corresponding to the current URL path
-	var activeLink = document.querySelector('.nav-link[href="' + currentPath + '"]');
-
-	// If a matching link is found, add 'active' class to it
-	if (activeLink) {
-		activeLink.classList.add('active');
-	}
-});
-
-function setActive(link) {
-	var links = document.querySelectorAll('.nav-link');
-	links.forEach(function (el) {
-		el.classList.remove('active');
-	});
-	link.classList.add('active');
-}
-
-window.setActive = setActive;
-
 // Once we are using templates, we should include a csrftoken in django. Then django will be very happy and there is no need for decorator.
 function getCookie(name) {
     let cookieValue = null;
@@ -107,7 +84,6 @@ function updateEventListeners() {
     var addFriendButton = document.getElementById('addFriendButton');
     var blockUserButton = document.getElementById('blockUserButton');
     var friendRequestButtons = document.querySelectorAll('[id^="friendRequestButton"]');
-    var profileLinks = document.querySelectorAll('#profileLinkTag');
     var gameInviteForm = document.getElementById('gameInviteForm'); 
     var playButton = document.getElementById('playButton');
     var deleteForm = document.getElementById('delete-account-form');
@@ -161,11 +137,6 @@ function updateEventListeners() {
     if (gameRequestButtons) {
         gameRequestButtons.forEach(function(button) {
             button.removeEventListener('click', gameResponseHandler);
-        })
-    }
-    if (profileLinks) {
-        profileLinks.forEach(function(link) {
-            link.removeEventListener('click', profileLinkHandler);
         })
     }
     if (gameRenderButton)
@@ -225,11 +196,6 @@ function updateEventListeners() {
     if (gameRequestButtons) {
         gameRequestButtons.forEach(function(button) {
             button.addEventListener('click', gameResponseHandler);
-        })
-    }
-    if (profileLinks) {
-        profileLinks.forEach(function(link) {
-            link.addEventListener('click', profileLinkHandler);
         })
     }
     if (gameRenderButton)
@@ -509,6 +475,8 @@ const profileLinkHandler = async (event) => {
 
     let profileUrl = new URL(event.target.href);
     console.log("profile url " + profileUrl);
+    if (profileUrl == window.location.href)
+		return ;
     let profilePath = profileUrl.pathname;
     console.log("profile path " + profilePath);
     let profileUsername = event.target.textContent;
@@ -562,7 +530,7 @@ const gameRenderButtonHandler = async (event) => {
         console.log('response,ok triggered');
 		// stay on this page, display the content again
         const html = await response.text();
-        window.history.pushState("", "", "/play/active-game");
+        window.history.pushState("", "", "https://localhost/play/" + gameType.toLowerCase());
         updateContent(html, "Playing " + gameType, "Playing " + gameType);
 	}
 	else {
@@ -687,6 +655,6 @@ const automate_register = async (event) => {
 
 
 
-export { profileLinkHandler, checkLogin, updateContent, updateEventListeners, setActive }
+export { profileLinkHandler, checkLogin, updateContent, updateEventListeners}
 
 // export { updateEventListeners, setActive, checkLogin, updateContent }
