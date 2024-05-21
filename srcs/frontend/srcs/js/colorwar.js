@@ -279,32 +279,45 @@ const AnimationController = {
     }
 };
 
-function onWindowResize(camera, renderer, canvas)
+function onWindowResize(camera, renderer)
 {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight)
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
-   const originalWidth = 100; 
-   const originalHeight = 100; 
+    const originalWidth = 100; 
+    const originalHeight = 100; 
+    const canvas = renderer.domElement;
   
-   const canvasBounds = canvas.getBoundingClientRect();
-   const P1score = document.getElementById('P1Card');
-   const P2score = document.getElementById('P2Card');
-   const moveCount = document.getElementById('moveCard');
-   moveCount .style.top = canvasBounds.top + 10 + 'px';
-   moveCount.style.left = canvasBounds.right / 2 + 'px';
-   P1score.style.top = canvasBounds.top + 10 + 'px';
-   P1score.style.left = canvasBounds.left + 50 + 'px';
-   P2score.style.top = canvasBounds.top + 10 + 'px';
-   P2score.style.right = (window.innerWidth - canvasBounds.right + 100) + 'px';
+    const canvasBounds = canvas.getBoundingClientRect();
+    const P1score = document.getElementById('P1Card');
+    const P2score = document.getElementById('P2Card');
+    const moveCount = document.getElementById('moveCard');
+   
+    const scaleFactor = Math.min(window.innerWidth, window.innerHeight) / 1000;
+    const buttons = document.querySelectorAll('#GameControls button img');
+    buttons.forEach(button => {
+        button.style.width = `${scaleFactor * originalWidth}px`;
+        button.style.height = `${scaleFactor * originalHeight}px`;
+    });
 
-   const scaleFactor = Math.min(window.innerWidth, window.innerHeight) / 1000;
-   const buttons = document.querySelectorAll('#GameControls button img');
-   buttons.forEach(button => {
-       button.style.width = `${scaleFactor * originalWidth}px`;
-       button.style.height = `${scaleFactor * originalHeight}px`;
-   });
+    const canvasCenterX = canvasBounds.left + canvasBounds.width / 2;
+
+    moveCount.style.position = 'absolute';
+    moveCount.style.top = canvasBounds.top + 10 + 'px';
+    moveCount.style.left = `${canvasCenterX - moveCount.offsetWidth / 2}px`;
+
+    P1score.style.position = 'absolute';
+    P1score.style.top = canvasBounds.top + 10 + 'px';
+    P1score.style.left = `${Math.max(canvasBounds.left + 50, 10)}px`;
+
+    P2score.style.position = 'absolute';
+    P2score.style.top = canvasBounds.top + 10 + 'px';
+    P2score.style.right = `${Math.max(window.innerWidth - canvasBounds.right + 50, 10)}px`;
+
+    P1score.style.display = 'block';
+    P2score.style.display = 'block';
+    moveCount.style.display = 'block';
 }
 
 export const renderColorwar = (gameNumber, data) => {
@@ -336,50 +349,33 @@ export const renderColorwar = (gameNumber, data) => {
         canvasFocused = false;
     });
 
-    const canvasBounds = canvas.getBoundingClientRect();
-    const P1score = document.getElementById('P1Card');
-    const P2score = document.getElementById('P2Card');
-    const moveCount = document.getElementById('moveCard');
-    console.log(moveCount)
-    moveCount.style.display = 'block';
-    P1score.style.display = 'block';
-    P2score.style.display = 'block';
     
-    moveCount.style.position = 'absolute';
-    P1score.style.position = 'absolute';
-    P2score.style.position = 'absolute';
-
-    moveCount .style.top = canvasBounds.top + 10 + 'px';
-    moveCount.style.left = canvasBounds.right / 2 + 'px';
-    P1score.style.top = canvasBounds.top + 10 + 'px';
-    P1score.style.left = canvasBounds.left + 50 + 'px';
-    P2score.style.top = canvasBounds.top + 10 + 'px';
-    P2score.style.right = (window.innerWidth - canvasBounds.right + 100) + 'px';
     scene.background = new THREE.Color(0x332D2D);
-
+    
     const numRows = 19;
     const numCols = 36;
     const canvasWidth = window.innerWidth - 250;
     const canvasHeight = window.innerHeight;
-
+    
     const tileSize = Math.min(canvasWidth, canvasHeight)
-
+    
     const boardWidth = numCols * tileSize;
     const boardHeight = numRows * tileSize;
     const boardStartX = (canvasWidth - boardWidth) / 1.9;
     const boardStartY = (canvasHeight - boardHeight)/ 2;
-   
+    
     const camera = new THREE.PerspectiveCamera(
         75,
         canvasWidth / canvasHeight,
         -2,
         10000
-    );
-
-    const distance = Math.max(boardWidth, boardHeight) / (2 * Math.tan(Math.PI * camera.fov / 290));
-    camera.position.set(0, 20, distance);
-    camera.lookAt(scene.position);
-    
+        );
+        
+        const distance = Math.max(boardWidth, boardHeight) / (2 * Math.tan(Math.PI * camera.fov / 290));
+        camera.position.set(0, 20, distance);
+        camera.lookAt(scene.position);
+        
+    onWindowResize(camera, renderer)
     const textureLoader = new THREE.TextureLoader();
     let colourOneSrc = "../textures/purple_square.png";
     let colourOneSrc_1 = "../textures/purple_1_sm.png";
@@ -458,7 +454,7 @@ export const renderColorwar = (gameNumber, data) => {
         }
     };
 
-    window.addEventListener('resize',() => onWindowResize(camera, renderer, canvas));
+    window.addEventListener('resize',() => onWindowResize(camera, renderer));
 
     const controls = document.getElementById('GameControls');
     controls.style.display = 'flex';
