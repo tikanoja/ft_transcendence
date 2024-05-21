@@ -54,6 +54,16 @@ const routes = {
 		view: "app/profile/",
 		title: "test_profile | " +  pageTitle,
 		description: "Only Jen's profile"
+	},
+	"/play/pong" : {
+		view: "/pong/post_pong_canvas/",
+		title: "Play | " + pageTitle,
+		description: "Play games"
+	},
+	"/play/color" : {
+		view: "/pong/post_cw_canvas/",
+		title: "Play | " + pageTitle,
+		description: "Play games"
 	}
 }
 // route above should not be the same as the calls to the backend...seems fragile
@@ -75,11 +85,7 @@ const route = (event) => {
 }
 
 const routeRedirect = (target) => {
-	console.log('In routeRedirect()');
-	if (target == window.location.href) {
-		// return ;
-	}
-	console.log('routeRedirect(): pushing this to history: ' + target);
+	console.log('In routeRedirect()... pushing to history: ' + target);
 	window.history.pushState("", "", target);
 	locationHandler();
 }
@@ -91,11 +97,11 @@ const locationHandler = async () => {
 	let location = window.location.pathname;
 	// Redirect https://example.com to https://example.com/ in order to land on home page
 	if (location.endsWith('/'))
-	location = location.slice(0, -1);
+		location = location.slice(0, -1);
 	if (location.length == 0)
-	location = "/";
+		location = "/";
 	if (location.startsWith('/app/'))
-	location = location.substring(4);
+		location = location.substring(4);
 
 	console.log('locationHandler(): matching this to routes: ' + location)
 	// Check the routes (the views above) for a match, if no match: 404
@@ -113,15 +119,8 @@ const locationHandler = async () => {
 	if (!response.ok) {
 		console.log("locationHandler(): Fetch status != OK");
 	} else if (response.redirected) {
-		console.log('locationHandler(): Response redirected');
-		console.log(response);
-		const newUrl = response.url;
-		if (newUrl) {
-			console.log('locationHandler(): replacing history: ' + newUrl);	
-			window.history.replaceState("", "", newUrl);
-			const html = await response.text();
-			updateContent(html, "redir | Pong", "description");
-		}
+		let redirect_location = response.url;
+        routeRedirect(redirect_location);
 	} else {
 		console.log('locationHandler(): Fetch OK, no redirs, updating site content');
 		const html = await response.text();
