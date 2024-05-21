@@ -20,23 +20,36 @@ class RegistrationForm(forms.Form):
         if not valid:
             return False
 
-        username_exists = CustomUser.objects.filter(username=self.cleaned_data["username"])
+        username = self.cleaned_data["username"]
+        password = self.cleaned_data['password']
+        confirm_password = self.cleaned_data['confirm_password']
+        email = self.cleaned_data["email"]
+
+        if not username or username.isspace():
+            raise forms.ValidationError("Empty username")
+        username_pattern = re.compile(r'^[a-zA-Z0-9]+$')
+        username_match = username_pattern.search(self.data['username'])
+        if not bool(username_match):
+            raise ValidationError("Username may only contain letters and digits")
+        username_exists = CustomUser.objects.filter(username=username)
         if username_exists:
             raise ValidationError("Username is not available")
-        if self.cleaned_data['password'] != self.cleaned_data['confirm_password']:
+
+        if password != self.cleaned_data['confirm_password']:
             raise ValidationError("passwords don't match")
         del self.cleaned_data['confirm_password']
-        if	len(self.cleaned_data['password']) < 8:
+        if	len(password) < 8:
             raise ValidationError("password is too short. Must be at least 8 characters")
         cap_num_pattern = re.compile(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)')
         special_pattern = re.compile(r'[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]')
-        match_one = cap_num_pattern.search(self.cleaned_data['password'])
-        match_two = special_pattern.search(self.cleaned_data['password'])
+        match_one = cap_num_pattern.search(password)
+        match_two = special_pattern.search(password)
         if not bool(match_one):
             raise ValidationError("Password must contain at least one uppercase, one lowercase, and one digit character")
         if not bool(match_two):
             raise ValidationError("Password must contain at least one special character")
-        email_exists = CustomUser.objects.filter(email=self.cleaned_data["email"])
+
+        email_exists = CustomUser.objects.filter(email=email)
         if email_exists:
             raise ValidationError("Email is registered with another account")
         
@@ -149,7 +162,7 @@ class GameRequestForm(forms.Form):
         (GameInstance.PONG, 'Pong'),
         (GameInstance.COLOR, 'Color'),
     ]
-    # 
+    
     game_type = forms.ChoiceField(widget=forms.RadioSelect(attrs={'class': 'form-check-input'}), choices=GAME_TYPE_CHOICES, label='Choose Game Type:')
     username = forms.CharField(label='Enter username', widget=forms.TextInput(attrs={'placeholder': 'Enter username', 'class': 'form-control'}), max_length=256, required=True)
 

@@ -106,7 +106,7 @@ const locationHandler = async () => {
 	console.log('locationHandler(): matching this to routes: ' + location)
 	// Check the routes (the views above) for a match, if no match: 404
 	let route = routes[location] || routes[404];
-	const profileRe = new RegExp("^/profile/[a-zA-Z1-9]+(/)?$")
+	const profileRe = new RegExp("^/profile/[a-zA-Z0-9]+(/)?$")
 	if (profileRe.test(location)) {
 		route = {
 			view: "/app" + location,
