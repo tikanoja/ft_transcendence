@@ -99,7 +99,7 @@ let previousP2Score = null;
 export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
     const scoreLeftElement = document.querySelector('#player1Score');
     const scoreRightElement = document.querySelector('#player2Score');
-    const moveCountElement = document.querySelector('.move-count');
+    const moveCountElement = document.getElementById('moveCounter'); 
 
     if (isNaN(p1Score) || isNaN(p2Score)) {
         return;
@@ -108,7 +108,7 @@ export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
         if (p1Score !== previousP1Score || p2Score !== previousP2Score) {
             scoreLeftElement.textContent = p1Score;
             scoreRightElement.textContent = p2Score;
-            moveCountElement.textContent = `Moves: ${currentMoveCount}`;
+            moveCountElement.textContent = currentMoveCount;
             previousP1Score = p1Score;
             previousP2Score = p2Score;
         }
@@ -279,7 +279,7 @@ const AnimationController = {
     }
 };
 
-function onWindowResize(camera, renderer)
+function onWindowResize(camera, renderer, canvas)
 {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -291,10 +291,13 @@ function onWindowResize(camera, renderer)
    const canvasBounds = canvas.getBoundingClientRect();
    const P1score = document.getElementById('P1Card');
    const P2score = document.getElementById('P2Card');
+   const moveCount = document.getElementById('moveCard');
+   moveCount .style.top = canvasBounds.top + 10 + 'px';
+   moveCount.style.left = canvasBounds.right / 2 + 'px';
    P1score.style.top = canvasBounds.top + 10 + 'px';
-   P1score.style.left = canvasBounds.left + 10 + 'px';
+   P1score.style.left = canvasBounds.left + 50 + 'px';
    P2score.style.top = canvasBounds.top + 10 + 'px';
-   P2score.style.right = window.innerWidth - canvasBounds.right + 10 + 'px';
+   P2score.style.right = (window.innerWidth - canvasBounds.right + 100) + 'px';
 
    const scaleFactor = Math.min(window.innerWidth, window.innerHeight) / 1000;
    const buttons = document.querySelectorAll('#GameControls button img');
@@ -336,13 +339,22 @@ export const renderColorwar = (gameNumber, data) => {
     const canvasBounds = canvas.getBoundingClientRect();
     const P1score = document.getElementById('P1Card');
     const P2score = document.getElementById('P2Card');
-    P1score.display = 'block';
-    P2score.display = 'block';
+    const moveCount = document.getElementById('moveCard');
+    console.log(moveCount)
+    moveCount.style.display = 'block';
+    P1score.style.display = 'block';
+    P2score.style.display = 'block';
+    
+    moveCount.style.position = 'absolute';
+    P1score.style.position = 'absolute';
+    P2score.style.position = 'absolute';
 
+    moveCount .style.top = canvasBounds.top + 10 + 'px';
+    moveCount.style.left = canvasBounds.right / 2 + 'px';
     P1score.style.top = canvasBounds.top + 10 + 'px';
-    P1score.style.left = canvasBounds.left + 10 + 'px';
+    P1score.style.left = canvasBounds.left + 50 + 'px';
     P2score.style.top = canvasBounds.top + 10 + 'px';
-    P2score.style.right = window.innerWidth - canvasBounds.right + 10 + 'px';
+    P2score.style.right = (window.innerWidth - canvasBounds.right + 100) + 'px';
     scene.background = new THREE.Color(0x332D2D);
 
     const numRows = 19;
@@ -446,7 +458,7 @@ export const renderColorwar = (gameNumber, data) => {
         }
     };
 
-    window.addEventListener('resize',() => onWindowResize(camera, renderer));
+    window.addEventListener('resize',() => onWindowResize(camera, renderer, canvas));
 
     const controls = document.getElementById('GameControls');
     controls.style.display = 'flex';
