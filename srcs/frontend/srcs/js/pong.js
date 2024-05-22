@@ -46,7 +46,6 @@ export const verifyUsername = () => {
         const current_game_id = document.getElementById('current_game_id').value;
         const usernameString = player1username + "," + player2username + "," + current_game_id;
         
-        console.log('usernameString id: ', usernameString);
         socket.emit("username", usernameString);
 
         socket.on('setup_game', (data) => {
@@ -73,10 +72,8 @@ export const startScreen = async () => {
 
             await verifyUsername()
 
-            
-            console.log("in the click listener")
+    
             startScreen.style.display = 'none';
-            canvasContainer.style.display = 'block';
             is3DGraphics = styleCheckbox.checked;
 
             socket.emit('message', 'start_game,' + gameNumber);
@@ -106,9 +103,7 @@ function loadGameOverScreen(data) {
     const P2score = document.getElementById('P2Card');
     const player1username = document.getElementById('player1username').value;
     const player2username = document.getElementById('player2username').value;
-    
-    console.log("p1 user:   ", player1username)
-    console.log("p2 user:   ", player2username)
+
 
     P1score.style.display = 'none';
     P2score.style.display = 'none';
@@ -121,10 +116,8 @@ function loadGameOverScreen(data) {
     let winnerText;
     if (p1Score > p2Score) {
         winnerText = `${player1username} wins!`;
-    } else if (p1Score < p2Score) {
-        winnerText = `${player2username} wins!`;
     } else {
-        winnerText = "It's a tie!";
+        winnerText = `${player2username} wins!`;
     }
 
     winnerInfo.textContent = winnerText;
@@ -168,7 +161,18 @@ function addLighting(scene) {
 }
 
 function setup2DScene(scene) {
-    const camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 1000);
+    const aspectRatio = window.innerWidth / window.innerHeight;
+    const viewSize = 1000; 
+    const camera = new THREE.OrthographicCamera(
+        -viewSize * aspectRatio / 2, 
+        viewSize * aspectRatio / 2, 
+        viewSize / 2, 
+        -viewSize / 2, 
+        1, 
+        1000
+    );
+    camera.position.set(0, 0, 1000);
+    camera.lookAt(scene.position);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
@@ -180,13 +184,19 @@ function setup2DScene(scene) {
     let p2_paddle = create2DPaddle(0x808080);
 
     const sizeFactor = 0.2;
-    const ballRadiusScreen = (25 * 2) * (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) * sizeFactor;
+    const ballRadiusScreen = 25 * 2 * Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * sizeFactor;
     let ball = new THREE.Mesh(new THREE.PlaneGeometry(ballRadiusScreen * 2, ballRadiusScreen * 2), new THREE.MeshStandardMaterial({ color: 0x808080 }));
-    p1_paddle.position.set(-100,  0, 0);
-    p2_paddle.position.set(100, 0, 0);
+
+    const paddleOffset = (viewSize * aspectRatio / 2) - 50; // Adjust as needed to keep paddles in view
+
+    // Position paddles
+    p1_paddle.position.set(-paddleOffset, 0, 0);
+    p2_paddle.position.set(paddleOffset, 0, 0);
+
     scene.add(p1_paddle);
     scene.add(p2_paddle);
     scene.add(ball);
+
     return { camera, p1_paddle, p2_paddle, ball };
 }
 
@@ -347,7 +357,7 @@ const AnimationController = {
     
     animate: function(scene, camera, renderer, is3DGraphics) {
         this.animationId = requestAnimationFrame(() => this.animate(scene, camera, renderer, is3DGraphics));
-        console.log(is3DGraphics)
+        // console.log(is3DGraphics)
         if (is3DGraphics)
         {
             animateBallRotation(ball);
@@ -380,6 +390,24 @@ function exit_game(data, scene)
 {
     loadGameOverScreen(data);
     cleanUpScene(scene);
+}
+function onWindowResize(camera, renderer, canvas) {
+
+    const width = window.innerWidth - (window.innerWidth / 4);
+    const height = window.innerHeight - (window.innerHeight / 4);
+    renderer.setSize(width, height);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+
+    const canvasBounds = canvas.getBoundingClientRect();
+    const P1score = document.getElementById('P1Card');
+    const P2score = document.getElementById('P2Card');
+    
+    P1score.style.top = canvasBounds.top + 10 + 'px';
+    P1score.style.left = canvasBounds.left + 100 + 'px';
+    
+    P2score.style.top = canvasBounds.top + 10 + 'px';
+    P2score.style.left = canvasBounds.right - P2score.offsetWidth - 100 + 'px';
 }
 
 ///Main function for setting up and animating game
@@ -416,7 +444,7 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
         camera.lookAt(0, 0, 0);
     } else {
         ({ camera, p1_paddle, p2_paddle, ball } = setup2DScene(scene));
-        camera.position.set(0, 0, 100);
+
         camera.lookAt(0, 0, 0);
     }
     const canvasBounds = canvas.getBoundingClientRect();
@@ -430,25 +458,9 @@ export const renderPongGame = (is3DGraphics, gameNumber) => {
     P2score.style.position = 'absolute';
     P2score.style.top = canvasBounds.top + 10 + 'px';
     P2score.style.left = canvasBounds.right - P2score.offsetWidth - 100 + 'px';
-    
-    window.addEventListener('resize', () => {
-        const width = window.innerWidth - (window.innerWidth / 4);
-        const height = window.innerHeight - (window.innerHeight / 4);
-        renderer.setSize(width, height);
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
-    
-        const canvasBounds = canvas.getBoundingClientRect();
-        const P1score = document.getElementById('P1Card');
-        const P2score = document.getElementById('P2Card');
-        
-        P1score.style.top = canvasBounds.top + 10 + 'px';
-        P1score.style.left = canvasBounds.left + 100 + 'px';
-        
-        P2score.style.top = canvasBounds.top + 10 + 'px';
-        P2score.style.left = canvasBounds.right - P2score.offsetWidth - 100 + 'px';
-    });
-    
+
+    window.addEventListener('resize',() => onWindowResize(camera, renderer, canvas));
+
 
     socket.on('state', (data) => {
         updateGameState(data, p1_paddle, p2_paddle, ball, is3DGraphics)
