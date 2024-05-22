@@ -223,19 +223,17 @@ def start_game(splitted_command):
 	if len(splitted_command) != 2:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
-	number = -1
-	index = int(splitted_command[1])
+	number = int(splitted_command[1])
 	with games_lock:
-		if games[index].is_game_running() == 0:
-			number = index
-	with games_lock:
-		if number == -1:
-			socketio.emit('message', 'ERROR, game already running cannot create new.')
+		if games[number].is_game_running() == 1:
+			#socketio.emit('start_game', 'OK,{}'.format(number))
+			socketio.emit('start_state', 'OK,{}'.format(games[number].return_game_state()))
 			return
 		else:
 			games[number].new_game_initilization()
 			games[number].set_game_slot(number)
 			games[number].set_game_running(1)
+			#socketio.emit('start_game', 'OK,{}'.format(number))
 			socketio.emit('start_state', 'OK,{}'.format(games[number].return_game_state()))
 
 def stop_game(splitted_command):
@@ -361,8 +359,6 @@ def handle_message(message):
 				socketio.emit('message', 'ERROR, command not recognised: ' + message)
 	else:
 		socketio.emit('message', 'ERROR, nothing was sent.')
-	
-
 
 @socketio.on('username')
 def validate_username(data):
@@ -379,11 +375,14 @@ def validate_username(data):
 	with app.app_context():
 		django_url = "http://transcendence:8000/pong/validate_match/"
 		try:
-
 			slot = -1
 			response = requests.post(django_url, data=data_to_send)
 			if response.status_code == 200:
 				with games_lock:
+					for index in range(4): # check to prevent creating multiple games with same details
+						if (games[index].game_id == usernames[2]):
+							socketio.emit('setup_game', 'OK,{}'.format(index))
+							return jsonify({"message": "Usernames verified"})
 					for index in range(4):
 						if games[index].is_game_running() == 0:
 							slot = index
