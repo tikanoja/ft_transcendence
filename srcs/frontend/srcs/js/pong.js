@@ -121,10 +121,8 @@ function loadGameOverScreen(data) {
     let winnerText;
     if (p1Score > p2Score) {
         winnerText = `${player1username} wins!`;
-    } else if (p1Score < p2Score) {
-        winnerText = `${player2username} wins!`;
     } else {
-        winnerText = "It's a tie!";
+        winnerText = `${player2username} wins!`;
     }
 
     winnerInfo.textContent = winnerText;

@@ -2,8 +2,8 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.m
 
 let socket;
 let gameNumber = -1;
-let made_listner = 0;
 let render = true;
+const eventListeners = new Map();
 
 
 export const loadScript = () => {
@@ -166,17 +166,14 @@ function exitGame(data, tileMeshes, colorTextures)
 {
     updateGameState(data, tileMeshes, colorTextures)
     loadGameOverScreen(data)
-    if (made_listner == 1)
-    {   
-        const button1 = document.querySelector('button[type="Colour 1"] img');
-        const button2 = document.querySelector('button[type="Colour 2"] img');
-        const button3 = document.querySelector('button[type="Colour 3"] img');
-        const button4 = document.querySelector('button[type="Colour 4"] img');
-        button1.removeEventListener('mouseup', () => handleMouseUpButton1(gameNumber));
-        button2.removeEventListener('mouseup', () => handleMouseUpButton2(gameNumber));
-        button3.removeEventListener('mouseup', () => handleMouseUpButton3(gameNumber));
-        button4.removeEventListener('mouseup', () => handleMouseUpButton4(gameNumber));
-    }
+    const button1 = document.querySelector('button[type="Colour 1"] img');
+    const button2 = document.querySelector('button[type="Colour 2"] img');
+    const button3 = document.querySelector('button[type="Colour 3"] img');
+    const button4 = document.querySelector('button[type="Colour 4"] img');
+    button1.removeEventListener('mouseup', () => handleMouseUpButton1(gameNumber));
+    button2.removeEventListener('mouseup', () => handleMouseUpButton2(gameNumber));
+    button3.removeEventListener('mouseup', () => handleMouseUpButton3(gameNumber));
+    button4.removeEventListener('mouseup', () => handleMouseUpButton4(gameNumber));
     cleanupGameBoard(tileMeshes)
     const canvas = document.getElementById('canvasContainer');
     canvas.remove();
@@ -338,6 +335,25 @@ function onWindowResize(camera, renderer) {
     gameControls.style.display = 'block';
 }
 
+function addUniqueEventListener(button, event, handler) {
+    const key = button;
+
+    if (!eventListeners.has(key)) {
+        eventListeners.set(key, new Set());
+    }
+
+    const handlers = eventListeners.get(key);
+
+    if (!Array.from(handlers).some(({ event: e, handler: h }) => e === event && h.toString() === handler.toString())) {
+        button.addEventListener(event, handler);
+
+        handlers.add({ event, handler });
+
+        console.log(`Event listener for ${event} added to ${button.id}`);
+    } else {
+        console.log(`Event listener for ${event} already exists on ${button.id}`);
+    }
+}
 
 export const renderColorwar = (gameNumber, data) => {
     const scene = new THREE.Scene();
@@ -493,20 +509,15 @@ export const renderColorwar = (gameNumber, data) => {
         exitGame(data, tileMeshes, colorTextures)
     });
 
+
     
-    if (made_listner == 0)
-    {
-        if (canvasFocused)
-        {
-            button1.addEventListener('mouseup', () => handleMouseUpButton1(gameNumber));
-            button2.addEventListener('mouseup', () => handleMouseUpButton2(gameNumber));
-            button3.addEventListener('mouseup', () => handleMouseUpButton3(gameNumber));
-            button4.addEventListener('mouseup', () => handleMouseUpButton4(gameNumber));
-            made_listner = 1
-        }
+    if (canvasFocused) {
+        addUniqueEventListener(button1, 'mouseup', () => handleMouseUpButton1(gameNumber));
+        addUniqueEventListener(button2, 'mouseup', () => handleMouseUpButton2(gameNumber));
+        addUniqueEventListener(button3, 'mouseup', () => handleMouseUpButton3(gameNumber));
+        addUniqueEventListener(button4, 'mouseup', () => handleMouseUpButton4(gameNumber));
     }
-
-
+    
     if (render) {
         AnimationController.startAnimation(scene, camera, renderer);
     }
