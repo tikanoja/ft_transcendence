@@ -82,6 +82,7 @@ class Game:
 	def return_game_state(self):
 		# self.screen_width: int = 1920 # x
 		# self.screen_height: int = 1080 # y
+		print(self.which_player_turn)
 		state = str(self.game_slot)
 		state += ','
 		state += str(self.left_score)
@@ -97,6 +98,8 @@ class Game:
 				state += str(self.squares[x + (y * self.width)].colour) # 1,2,3,4 # white,black,green,red
 				state += ','
 				state += str(self.squares[x + (y * self.width)].owner) # 1,2,0 # left,right,no one owns
+		state += ','
+		state += str(self.which_player_turn)
 		return state
 
 	def check_game_running_conditions(self):

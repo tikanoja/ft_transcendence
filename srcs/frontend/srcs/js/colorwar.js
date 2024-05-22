@@ -97,11 +97,32 @@ function addLighting(scene) {
 let previousP1Score = null;
 let previousP2Score = null;
 
-export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
+export const updateScoreboard = (p1Score, p2Score, currentMoveCount, currentPlayerMove) => {
     const scoreLeftElement = document.querySelector('#player1Score');
     const scoreRightElement = document.querySelector('#player2Score');
     const moveCountElement = document.getElementById('moveCounter'); 
+    const p1Card = document.getElementById('P1Card');
+    const p2Card = document.getElementById('P2Card');
+    //0 = p1 1 = p2
+    if (currentPlayerMove == '0') {
+        p1Card.classList.add('border-danger');
+        p1Card.classList.remove('border-dark');
+        p1Card.style.borderWidth = '4px';
+        
+        p2Card.classList.add('border-dark');
+        p2Card.classList.remove('border-danger');
+        p2Card.style.borderWidth = '1px';
+    } else if (currentPlayerMove == '1') {
+        p1Card.classList.add('border-dark');
+        p1Card.classList.remove('border-danger');
+        p1Card.style.borderWidth = '1px';
+        
+        p2Card.classList.add('border-danger');
+        p2Card.classList.remove('border-dark');
+        p2Card.style.borderWidth = '4px';
+    }
 
+    console.log(currentPlayerMove)
     if (isNaN(p1Score) || isNaN(p2Score)) {
         return;
     }
@@ -190,13 +211,13 @@ function updateGameState(data, tileMeshes, colorTextures) {
         let player1score = valuesArray[2];
         let player2score = valuesArray[3];
         let currentMoveCount = valuesArray[5];
-
-        for (let i = 6; i < valuesArray.length; i += 2) {
+        for (let i = 6; i < valuesArray.length - 1; i += 2) {
             const color = valuesArray[i];
             const owner = valuesArray[i + 1];
             const tile = { color, owner };
             tileLegend.push(tile);
         }
+        let currentPlayerMove = valuesArray[ valuesArray.length -1];
 
         tileLegend.forEach((tileInfo, index) => {
             let tileTexture;
@@ -215,7 +236,7 @@ function updateGameState(data, tileMeshes, colorTextures) {
             tileMesh.material.needsUpdate = true;
         });
 
-        updateScoreboard(player1score, player2score, currentMoveCount);
+        updateScoreboard(player1score, player2score, currentMoveCount, currentPlayerMove);
 
         let gameRunning =  valuesArray[4];
         if (gameRunning != 1) {
