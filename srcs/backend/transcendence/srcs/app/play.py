@@ -164,40 +164,52 @@ def playPOST(request):
         else:
             return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, ve, "Unknown content type"))
 
-    current_user = request.user
     sent_form = GameRequestForm(request.POST)
+
     try:
         if not sent_form.is_valid():
             raise ValidationError("Form filled incorrectly")
+
+        challenged_username = sent_form.cleaned_data['username']
+        challenged_user = CustomUser.objects.filter(username=challenged_username).first()
+
+        game = sent_form.cleaned_data["game_type"]
+        as_user_challenge_user(request.user, challenged_user, game)
+
     except ValidationError as ve:
         return render(request, 'user/play.html', playContext(request, ve, None))
-    
-    challenged_username = sent_form.cleaned_data['username']
-    challenged_user = CustomUser.objects.filter(username=challenged_username).first()
-    if challenged_user in current_user.blocked_users.all() or current_user in challenged_user.blocked_users.all():
-        return render(request, 'user/play.html', playContext(request, "Blocked", None))
+
+    return render(request, 'user/play.html', playContext(request, None, "Game invite sent!")) 
+
+def as_user_challenge_user(user: CustomUser, challengee: CustomUser, game_name: str):
+    # Check if participants have blocked each other
+    if challengee in user.blocked_users.all() or user in challengee.blocked_users.all():
+        raise ValidationError("Blocked")
+        #return render(request, 'user/play.html', playContext(request, "Blocked", None))
 
     # check if they are trying to add themselves
-    if request.user.username == challenged_username:
-        return render(request, 'user/play.html', playContext(request, "No single player mode...", None))
+    if user.username == challengee.username:
+        raise ValidationError("No single player mode...")
 
     # request already sent?
-    all_pending_games = GameInstance.objects.filter(Q(p1=current_user) | Q(p2=current_user), status='Pending')
-    prior_request = all_pending_games.filter(Q(p1=challenged_user) | Q(p2=challenged_user)).first()
+    all_pending_games = GameInstance.objects.filter(Q(p1=user) | Q(p2=user), status='Pending')
+    prior_request = all_pending_games.filter(Q(p1=challengee) | Q(p2=challengee)).first()
     if prior_request is not None:
-        return render(request, 'user/play.html', playContext(request, "You have already sent a game request to this user", None)) 
+        raise ValidationError("You have already sent a game request to this user")
 
-    game=sent_form.cleaned_data['game_type']
-    if game == 'Pong':
-        new_game_instance = PongGameInstance(p1=current_user, p2=challenged_user, game=game, status='Pending')
-    else:
-        new_game_instance = ColorGameInstance(p1=current_user, p2=challenged_user, game=game, status='Pending')
+    new_game_instance = None
+    match (game_name):
+        case "Pong":
+            new_game_instance = PongGameInstance(p1=user, p2=challengee, game=game_name, status='Pending')
+        case "Color":
+            new_game_instance = ColorGameInstance(p1=user, p2=challengee, game=game_name, status='Pending')
+        case _:
+            raise ValidationError("Invalid game type")
+
     new_game_instance.save()
 
     # CHAT MODULE let challenged user know that they have been challenged
-    chat_system_message(challenged_user, "{name} has challenged you to a game of {game}".format(name = request.user.username, game = game))
-
-    return render(request, 'user/play.html', playContext(request, None, "Game invite sent!")) 
+    chat_system_message(challengee, "{name} has challenged you to a game of {game}".format(name = user.username, game = game_name))
 
 
 def start_tournament(request):

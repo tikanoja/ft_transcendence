@@ -131,38 +131,46 @@ def friendsPOST(request):
 
 def block_user(request):
     logger.debug('in block_user')
-    sent_form = AddFriendForm(request.POST)
 
     try:
+        sent_form = AddFriendForm(request.POST)
+
         if not sent_form.is_valid():
             raise ValidationError("Form filled incorrectly")
-    except ValidationError as ve:
-        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, ve, None), "self_profile": True})
 
-    blocked_username = sent_form.cleaned_data['username']
-    blocked_user = CustomUser.objects.filter(username=blocked_username).first()
-    if blocked_user is None:
-        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, "Blocked user not found", None), "self_profile": True})
+        blocked_username = sent_form.cleaned_data['username']
+        blocked_user = CustomUser.objects.get(username=blocked_username)
 
-    current_user = request.user
+        as_user_block_user(request.user, blocked_user)
 
-    if request.user.username == blocked_username:
-        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, "Please do not block yourself", None), "self_profile": True})
+        ctx = friendsContext(request.user.username, None, "Blocked " + blocked_username + "!")
+        print(ctx)
+        return render(request, 'user/profile_partials/friends.html', {"friends": ctx, "self_profile": True})
+        #return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, None, "Blocked " + blocked_username + "!"), "self_profile": True})
 
-    if blocked_user in current_user.blocked_users.all():
-        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, "You have already blocked " + blocked_username + "!", None), "self_profile": True})
+    # Realistically should have different dispatch for different exceptions...
+    except Exception as e:
+        error_message = e.message if hasattr(e, "message") else str(e)
+        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, error_message, None), "self_profile": True})
+
+
+def as_user_block_user(user: CustomUser, blocked: CustomUser):
+    logger.debug(user.username + " blocking: " + blocked.username)
+
+    if user.username == blocked.username:
+        raise ValidationError("Please do not block yourself")
+
+    if blocked in user.blocked_users.all():
+        raise ValidationError("You have already blocked " + blocked.username)
 
     # Delete possible friendship between them
-    friendships_to_delete = Friendship.objects.filter(Q(from_user=current_user, to_user=blocked_user) | Q(from_user=blocked_user, to_user=current_user))
+    friendships_to_delete = Friendship.objects.filter(Q(from_user=user, to_user=blocked) | Q(from_user=blocked, to_user=user))
     friendships_to_delete.delete()
 
     # Delete pending game invites
-    game_instances_to_delete = GameInstance.objects.filter(Q(p1=current_user, p2=blocked_user) | Q(p2=blocked_user, p1=current_user), status='Pending')
+    game_instances_to_delete = GameInstance.objects.filter(Q(p1=user, p2=blocked) | Q(p2=blocked, p1=user), status='Pending')
     game_instances_to_delete.delete()
 
     # Add to blocked
-    current_user.blocked_users.add(blocked_user)
-    current_user.save()
-
-    return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, None, "Blocked " + blocked_username + "!"), "self_profile": True})
-
+    user.blocked_users.add(blocked)
+    user.save()

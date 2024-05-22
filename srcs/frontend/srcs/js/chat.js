@@ -10,10 +10,10 @@ const logMessageCountMax = 32;
 
 const helpMessage = "\n" +
                     "/h - Display chat commands.\n" +
-                    "/w - Send a direct message.\n" +
-                    "/b - Block user.\n" +
-                    "/u - Unblock user.\n" +
-                    "/i - Send a game invite.\n";
+                    "/w [username] message - Send a direct message.\n" +
+                    "/b [username] - Block user.\n" +
+                    "/u [username] - Unblock user.\n" +
+                    "/i [username] [Pong/ColorWar] - Send a game invite.\n";
 
 inputField.onkeydown = (e) => { if (e.key === "Enter") { _submitHandler(); e.preventDefault(); } }
 
@@ -96,32 +96,42 @@ function _parseInput(input) {
                     message: args[1]
                 };
             }
-            _appendMessage( _createSourceElement("Error"), "Invalid whisper arguments")
             break;
         }
 
          case "b": {
-            const args = rest.split(/^(\S+)\s+/g).filter(s => { return s != ""; });
-            if (args && args.length == 2) {
-                // BLOCK behaviour
+            const args = rest.trim();
+            if (args && /^[A-Za-z0-9]+$/.test(args)) {
+                return {
+                    type: "chat.block",
+                    username: args,
+                }
             }
+            break;
          }
 
          case "u": {
-            const args = rest.split(/^(\S+)\s+/g).filter(s => { return s != ""; });
-            if (args && args.length == 2) {
-                // UNBLOCK behaviour
+            const args = rest.trim();
+            if (args && /^[A-Za-z0-9]+$/.test(args)) {
+                return {
+                    type: "chat.unblock",
+                    username: args,
+                }
             }
          }
 
          case "i": {
             const args = rest.split(/^(\S+)\s+/g).filter(s => { return s != ""; });
-            if (args && args.length == 2) {
-                // UNBLOCK behaviour
+            if (args && args.length == 2
+                && /^[A-Za-z0-9]+$/.test(args[0])
+                && (args[1] == "Pong" || args[1] == "ColorWar")) {
+                return {
+                    type: "chat.invite",
+                    username: args[0],
+                    game: args[1],
+                }
             }
          }
-
-           _appendMessage( _createSourceElement("Error"), "Invalid whisper arguments")
 
         default: break;
     };
