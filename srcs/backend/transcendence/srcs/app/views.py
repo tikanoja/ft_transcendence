@@ -19,7 +19,7 @@ def register_user(request):
             logger.debug('In register user GET')
             response = account.registerGET(request)
         else:
-            response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+            response = JsonResponse({'error': "method not allowed. please use POST or GET"}, )
         return response
     except Exception as e:
         logger.error(f"An error occurred: {e}")
@@ -34,7 +34,7 @@ def login_user(request):
         elif request.method == 'GET':
             response = session.loginGET(request)
         else:
-            response = JsonResponse({'error': "method not allowed. please use POST"})
+            response = JsonResponse({'error': "method not allowed. please use POST"}, status=405)
         return response
     except Exception as e:
         logger.error(f"An error occurred: {e}")
@@ -47,22 +47,25 @@ def logout_user(request):
             logger.debug('In logout user')
             response = session.logoutPOST(request)
         else:
-            response = JsonResponse({'error': "method not allowed. please use POST"})
+            response = JsonResponse({'error': "method not allowed. please use POST"}, status=405)
         return response
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
 
 
-# TODO: this needs to return the correct status code based on the situation
 def get_current_username(request):
     try:
         logger.debug('In get_current_username()')
         if request.method == 'GET':
             username = session.get_current_usernameGET(request)
+            if username == "unknown user":
+                return JsonResponse({'message': username}, status=404)
+            else:
+                return JsonResponse({'message': username}, status=200)
         else:
             username = 'only GET allowed'
-        response = JsonResponse({'message': username})
+        response = JsonResponse({'message': username}, status=405)
         return response
     except Exception as e:
         logger.error(f"An error occurred: {e}")
@@ -72,10 +75,13 @@ def get_current_username(request):
 def check_login(request):
     try:
         logger.debug('In check_login()')
-        if request.is_authenticated:
-            return JsonResponse({'status': 'authenticated'})
-        else:
-            return JsonResponse({'status': 'not authenticated'})
+        if request.method == "POST":
+            if request.is_authenticated:
+                return JsonResponse({'status': 'authenticated'}, status=200)
+            else:
+                return JsonResponse({'status': 'not authenticated'}, status=200)
+        else: 
+            response = JsonResponse({'message': 'Method not allowed. Only POST'}, status=405)
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
@@ -122,7 +128,7 @@ def friends(request):
         elif request.method == 'POST':
             response = relations.friendsPOST(request)
         else:
-            response = JsonResponse({'error': "method not allowed. please use POST or GET"})
+            response = JsonResponse({'error': "method not allowed. please use POST or GET"}, status=405)
         return response
     except Exception as e:
         logger.error(f"An error occurred: {e}")
@@ -138,7 +144,7 @@ def notfound(request):
             context["current_user"] = request.user.username
             return render(request, '404.html', context)
         else:
-            return JsonResponse({'error': "method not allowed. please use GET"})
+            return JsonResponse({'error': "method not allowed. please use GET"}, status=405)
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
@@ -158,7 +164,7 @@ def profile(request, username):
             context["current_user"] = request.user.username
             return render(request, 'user/profile.html', context)
         else:
-            return JsonResponse({"message": "method not allowed, try GET"})
+            return JsonResponse({"message": "method not allowed, try GET"}, status=405)
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)

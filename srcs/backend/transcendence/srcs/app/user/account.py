@@ -100,7 +100,7 @@ def delete_accountPOST(request, context):
             GameInstance.objects.filter(p2=username, status='Accepted').delete()
             CustomUser.objects.filter(username=username).delete()
             # delete account, return a success page with a 'link' to go to homepage
-            return render(request, "user/account_deleted.html", {}) #JsonResponse({'message': 'Your account has been deleted'})
+            return render(request, "user/account_deleted.html", {})
         else:
             context["del_error"] = 'Unable to delete account. Check which account you are logged in as or re-enter your password'
             return render(request, "user/profile_partials/manage_account.html", context)

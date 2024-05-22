@@ -47,14 +47,17 @@ def save_game_state(request):
                 response = utils.save_cw_game_state(request)
             else:
                 response = JsonResponse({'message': 'Invalid game type!'}, status=400)
-        elif request.method == 'GET':
-            response = JsonResponse({'message': 'Hi from Django GET!'}, status=200)
-        return response
+            return response
+        else:
+            response = JsonResponse({'message': 'Method not allowed. Only POST'}, status=405)
+        
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
 
-
+"""
+TODO:What is the purpose of this?
+"""
 @csrf_exempt
 def validate_match(request):
     try:
@@ -72,55 +75,56 @@ def validate_match(request):
 
 
 def authenticate_player(request):
-    try: 
-        sent_form = PlayerAuthForm(request.POST)
-        sent_form.is_valid()
+    try:
+        if request.method == "POST":
+            sent_form = PlayerAuthForm(request.POST)
+            sent_form.is_valid()
 
-        username = request.POST.get('username')
-        game_id = request.POST.get('game_id')
-        password = sent_form.cleaned_data['password']
+            username = request.POST.get('username')
+            game_id = request.POST.get('game_id')
+            password = sent_form.cleaned_data['password']
 
-        current_game = GameInstance.objects.filter(pk=game_id).first()
-        if current_game is None:
-            return render(request, "pong/play.html", playContext(request, 'Could not find game instance', None))
-        game_type = current_game.game
-        current_user = request.user
+            current_game = GameInstance.objects.filter(pk=game_id).first()
+            if current_game is None:
+                return render(request, "pong/play.html", playContext(request, 'Could not find game instance', None))
+            
+            game_type = current_game.game
+            current_user = request.user
+            context = {
+                'p1_username': current_game.p1.username,
+                'p2_username': current_game.p2.username,
+                'p1_user': current_game.p1,
+                'p2_user': current_game.p2,
+                'form': PlayerAuthForm,
+                'current_game': current_game,
+                'current_user': current_user,
+            }
 
-        context = {
-            'p1_username': current_game.p1.username,
-            'p2_username': current_game.p2.username,
-            'p1_user': current_game.p1,
-            'p2_user': current_game.p2,
-            'form': PlayerAuthForm,
-            'current_game': current_game,
-            'current_user': current_user,
-        }
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                if current_game.p1 == user:
+                    current_game.p1auth = True
+                    current_game.save()
+                elif current_game.p2 == user:
+                    current_game.p2auth = True
+                    current_game.save()
+            else:
+                if username == current_game.p1.username:
+                    context['p1error'] = 'Auth failed!'
+                elif username == current_game.p2.username:
+                    context['p2error'] = 'Auth failed!'
 
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            if current_game.p1 == user:
-                current_game.p1auth = True
-                current_game.save()
-            elif current_game.p2 == user:
-                current_game.p2auth = True
-                current_game.save()
+            if game_type == 'Pong':
+                return render(request, "pong/pong.html", context)
+            elif game_type == 'Color':
+                return render(request, "pong/colorwar.html", context)
+            else:
+                return render(request, "pong/play.html", playContext(request, 'Unknown game type', None))
         else:
-            if username == current_game.p1.username:
-                context['p1error'] = 'Auth failed!'
-            elif username == current_game.p2.username:
-                context['p2error'] = 'Auth failed!'
-
-        if game_type == 'Pong':
-            return render(request, "pong/pong.html", context)
-        elif game_type == 'Color':
-            return render(request, "pong/colorwar.html", context)
-        else:
-            return render(request, "pong/play.html", playContext(request, 'Unknown game type', None))
+            response = JsonResponse({'message': 'Method not allowed. Only POST'}, status=405)
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
-
-
 
 
 @login_required
@@ -137,6 +141,7 @@ def post_pong_canvas(request):
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
+
 
 @login_required
 def post_cw_canvas(request):
@@ -163,7 +168,7 @@ def notfound(request):
             context["current_user"] = request.user
             return render(request, '404.html', context)
         else:
-            return JsonResponse({'error': "method not allowed. please use GET"})
+            return JsonResponse({'error': "method not allowed. please use GET"}, , status=405)
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
