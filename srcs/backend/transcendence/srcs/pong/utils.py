@@ -1,11 +1,11 @@
 from app.models import CustomUser, PongGameInstance, Match, Tournament, GameInstance, ColorGameInstance
 from app.play import update_tournament
 from django.http import JsonResponse
+from app.forms import PlayerAuthForm
 import logging
 
 
 logger = logging.getLogger(__name__)
-
 
 
 def save_cw_game_state(request):
@@ -46,17 +46,17 @@ def save_cw_game_state(request):
 
 
 def save_pong_game_state(request) -> JsonResponse:
-"""
-	Data format from pong_c:
-	data_to_send = {
-		"game" : "Pong",
-		"p1_username": "placeholder",
-		"p1_score": f"{p1_score}",
-		"p2_username": "placeholder2",
-		"p2_score": f"{p2_score}",
-		"longest_rally": f"{rally}"
-	}
-"""
+	"""
+		Data format from pong_c:
+		data_to_send = {
+			"game" : "Pong",
+			"p1_username": "placeholder",
+			"p1_score": f"{p1_score}",
+			"p2_username": "placeholder2",
+			"p2_score": f"{p2_score}",
+			"longest_rally": f"{rally}"
+		}
+	"""
 	logger.debug('in save_pong_game_state')
 	logger.debug(request.POST)
 

@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
 
-# /cli_dashboard/username
+
 @csrf_exempt
 def cli_dashboard(request, username):
      try:
@@ -117,7 +117,7 @@ def authenticate_player(request):
         else:
             return render(request, "pong/play.html", playContext(request, 'Unknown game type', None))
     except Exception as e:
-		logger.error(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
 
 
@@ -135,7 +135,7 @@ def post_pong_canvas(request):
         else:
             return render(request, "pong/nogame.html", {'current_user': request.user})
     except Exception as e:
-		logger.error(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
 
 @login_required
@@ -150,7 +150,7 @@ def post_cw_canvas(request):
         else:
             return render(request, "pong/nogame.html", {'current_user': request.user})
     except Exception as e:
-		logger.error(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
     
 
@@ -165,5 +165,5 @@ def notfound(request):
         else:
             return JsonResponse({'error': "method not allowed. please use GET"})
     except Exception as e:
-		logger.error(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
