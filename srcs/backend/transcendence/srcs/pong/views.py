@@ -66,9 +66,18 @@ def validate_match(request):
             p2_username = request.POST.get('p2_username')
             game_id = request.POST.get('game_id')
             logger.debug(f"data from validate user: {p1_username}, {p2_username}, {game_id}")
-            return JsonResponse({'message': 'Hi from Django POST!'})
-        elif request.method == 'GET':
-            return JsonResponse({'message': 'Hi from Django GET!'})
+            
+            game = GameInstance.objects.filter(pk=game_id).first()
+            if game is None:
+                return JsonResponse({'message': 'Game not found'}, 404)
+            elif game.p1.username != p1_username:
+                return JsonResponse({'message': 'Invalid game, player 1 incorrect'}, 404)
+            elif game.p1.username != p1_username:
+                return JsonResponse({'message': 'Invalid game, player 2 incorrect'}, 404)
+            else:
+                return JsonResponse({'message': 'Game is valid'}, status=200)
+        else:
+            response = JsonResponse({'message': 'Method not allowed. Only POST'}, status=405)
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
@@ -168,7 +177,7 @@ def notfound(request):
             context["current_user"] = request.user
             return render(request, '404.html', context)
         else:
-            return JsonResponse({'error': "method not allowed. please use GET"}, , status=405)
+            return JsonResponse({'error': "method not allowed. please use GET"}, status=405)
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
