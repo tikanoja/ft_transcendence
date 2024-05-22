@@ -103,7 +103,7 @@ export const updateScoreboard = (p1Score, p2Score, currentMoveCount, currentPlay
     const moveCountElement = document.getElementById('moveCounter'); 
     const p1Card = document.getElementById('P1Card');
     const p2Card = document.getElementById('P2Card');
-    //0 = p1 1 = p2
+    
     if (currentPlayerMove == '0') {
         p1Card.classList.add('border-success');
         p1Card.classList.remove('border-dark');

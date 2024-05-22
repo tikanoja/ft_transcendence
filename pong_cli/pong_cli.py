@@ -187,7 +187,7 @@ if __name__ == "__main__":
     sio = socketio.Client(ssl_verify=False)
 
     client_name = "CliClient"
-    server_url = 'https://localhost:8888'
+    server_url = 'https://localhost:8888'   #/pong/socket.io
     sio.connect(server_url)
 
     sio.on('connect', on_connect)
