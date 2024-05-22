@@ -105,19 +105,19 @@ export const updateScoreboard = (p1Score, p2Score, currentMoveCount, currentPlay
     const p2Card = document.getElementById('P2Card');
     //0 = p1 1 = p2
     if (currentPlayerMove == '0') {
-        p1Card.classList.add('border-danger');
+        p1Card.classList.add('border-success');
         p1Card.classList.remove('border-dark');
         p1Card.style.borderWidth = '4px';
         
         p2Card.classList.add('border-dark');
-        p2Card.classList.remove('border-danger');
+        p2Card.classList.remove('border-success');
         p2Card.style.borderWidth = '1px';
     } else if (currentPlayerMove == '1') {
         p1Card.classList.add('border-dark');
-        p1Card.classList.remove('border-danger');
+        p1Card.classList.remove('border-success');
         p1Card.style.borderWidth = '1px';
         
-        p2Card.classList.add('border-danger');
+        p2Card.classList.add('border-success');
         p2Card.classList.remove('border-dark');
         p2Card.style.borderWidth = '4px';
     }
