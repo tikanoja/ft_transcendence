@@ -17,7 +17,7 @@ def loginPOST(request):
     username = sent_form.cleaned_data['username']
     password = sent_form.cleaned_data['password']
     if request.user.is_authenticated:
-        response = JsonResponse({'error': "already logged in!"})
+        response = JsonResponse({'error': "already logged in!"}, status=200)
         return response
     user_check = CustomUser.objects.filter(username=username).first()
     if user_check is None:
@@ -62,7 +62,7 @@ def	logoutPOST(request):
         next = request.GET.get('next', '/login')
         return HttpResponseRedirect(next)	
     else:
-        response = JsonResponse({'error': "Already logged out."})
+        response = JsonResponse({'error': "Already logged out."}, status=200)
     return response
 
 

@@ -50,8 +50,7 @@
 				<th scope="row ">{{ forloop.counter }}</th>
 				<td>{{ entry.date|date:"d/m/Y" }}</td>
 				<td>{{ entry.opponent }}</td>
-				<td>{{ entry.opponent_score }}</td>
-				<td>{{ entry.user_score }}</td>
+				<td>{{ entry.turns_to_win }}</td>
 				<td>{{ entry.winner }}</td>
 				<td>
 					{% if entry.is_tournament_game %}
