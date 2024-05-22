@@ -51,6 +51,7 @@ export const verifyUsername = () => {
         socket.on('setup_game', (data) => {
             const valuesArray = data.split(',');
             gameNumber = valuesArray[1];
+            console.log("setup_game", valuesArray)
             resolve(gameNumber);
         });
 
@@ -70,10 +71,16 @@ export const startScreen = async () => {
 
             await verifyUsername()    
             startScreen.style.display = 'none';
+            
 
+            console.log("before start game", gameNumber)
             socket.emit('message', 'start_game,' + gameNumber);
 
+            socket.on('message', (data) => {
+                console.log(data)  
+            })
             socket.on('start_game', (data) => {
+                console.log("in start game", gameNumber)
                 startScreen.remove();
                 canvasContainer.style.display = 'block';
                 const P1score = document.getElementById('P1Card');
