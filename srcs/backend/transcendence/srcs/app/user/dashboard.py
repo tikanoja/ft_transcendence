@@ -129,8 +129,8 @@ def get_color_stats(user:CustomUser, color_games:QuerySet) -> dict:
     color_stats["games_played"] = len(color_games)
     if not color_games:
         return color_stats
-    wins = color_games[0].turns_to_win
-    least_moves_to_win = 0
+    wins = 0
+    least_moves_to_win = color_games[0].turns_to_win
     sum_moves_to_win = 0
     for game in color_games:
         if user == game.winner:
