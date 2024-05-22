@@ -1,0 +1,6 @@
+
+python_version >= "3.6"
+python-socketio
+socketio.client
+requests
+urllib3

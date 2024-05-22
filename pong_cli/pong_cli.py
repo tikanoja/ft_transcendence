@@ -1,6 +1,5 @@
 import socketio
 import socketio.client
-import json
 import sys
 import time
 import os
