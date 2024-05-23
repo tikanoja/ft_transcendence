@@ -739,6 +739,10 @@ def validate_username(data):
 			response = requests.post(django_url, data=data_to_send)
 			if response.status_code == 200:
 				with games_lock:
+					for index in range(4): # check to prevent creating multiple games with same details
+						if (games[index].game_id == usernames[2]):
+							socketio.emit('setup_game', 'OK,{}'.format(index))
+							return jsonify({"message": "Usernames verified"})
 					for index in range(4):
 						if (games[index].game_id == usernames[2]):
 							socketio.emit('setup_game', 'OK,{}'.format(index))

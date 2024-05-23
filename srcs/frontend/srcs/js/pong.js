@@ -70,7 +70,7 @@ export const startScreen = async () => {
 
             await verifyUsername()    
             startScreen.style.display = 'none';
-            
+
             socket.emit('message', 'start_game,' + gameNumber);
 
             socket.on('start_game', (data) => {

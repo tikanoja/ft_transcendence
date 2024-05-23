@@ -1,4 +1,3 @@
-#import time
 import ssl
 import threading
 import random
@@ -10,7 +9,7 @@ from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app) # works https://piehost.com/socketio-tester
+CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 app.debug = True
@@ -65,7 +64,6 @@ class Game:
 		self.squares[0 + (self.width * (self.height // 2)) + self.width - 1].owner = 2 # right starting player square owner to 2
 		self.which_player_starts: int = random.choice([0, 1])
 		self.which_player_turn: int = self.which_player_starts
-
 
 	def compute_scores(self):
 		total_player_squares = int(0)
@@ -193,13 +191,11 @@ with games_lock:
 	games[2] = Game()
 	games[3] = Game()
 
-# string format is set_game_settings,game_number(0,1,2,3),left_player_id(any string)
-# set_game_settings,0,player1,player2,127.0.0.1,80,127.0.0.1,80 
 def set_game_settings(splitted_command):
 	global socketio
 	global games
 	global games_lock
-	print('do we get here? splitted: ' + splitted_command)
+
 	if len(splitted_command) != 5:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
@@ -215,7 +211,6 @@ def set_game_settings(splitted_command):
 			games[number].left_player_id = splitted_command[2]
 			games[number].right_player_id = splitted_command[3]
 			games[number].game_id = splitted_command[4]
-			print('hellO!!! ' + games[number].game_id)
 			socketio.emit('message', 'OK, game settings set.')
 			return
 
@@ -226,14 +221,10 @@ def start_game(splitted_command):
 	if len(splitted_command) != 2:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
-	number = -1
-	index = int(splitted_command[1])
+	number = int(splitted_command[1])
 	with games_lock:
-		if games[index].is_game_running() == 0:
-			number = index
-	with games_lock:
-		if number == -1:
-			socketio.emit('message', 'ERROR, game already running cannot create new.')
+		if games[number].is_game_running() == 1:
+			socketio.emit('start_state', 'OK,{}'.format(games[number].return_game_state()))
 			return
 		else:
 			games[number].new_game_initilization()
@@ -299,7 +290,6 @@ def	games_running(splitted_command):
 def make_move(splitted_command):
 	global games
 	global games_lock
-	print(splitted_command)
 	if len(splitted_command) != 3:
 		socketio.emit('message', 'ERROR, string not in right format.')
 		return
@@ -332,7 +322,7 @@ def make_move(splitted_command):
 
 @socketio.on('connect')
 def handle_connect():
-	print('Client connected to color war')
+	#print('Client connected to color war')
 	global socketio
 	socketio.emit('message', 'hello client from colorwar')
 
@@ -364,8 +354,6 @@ def handle_message(message):
 				socketio.emit('message', 'ERROR, command not recognised: ' + message)
 	else:
 		socketio.emit('message', 'ERROR, nothing was sent.')
-	
-
 
 @socketio.on('username')
 def validate_username(data):
@@ -382,11 +370,14 @@ def validate_username(data):
 	with app.app_context():
 		django_url = "http://transcendence:8000/pong/validate_match/"
 		try:
-
 			slot = -1
 			response = requests.post(django_url, data=data_to_send)
 			if response.status_code == 200:
 				with games_lock:
+					for index in range(4): # check to prevent creating multiple games with same details
+						if (games[index].game_id == usernames[2]):
+							socketio.emit('setup_game', 'OK,{}'.format(index))
+							return jsonify({"message": "Usernames verified"})
 					for index in range(4):
 						if games[index].is_game_running() == 0:
 							slot = index
@@ -403,11 +394,9 @@ def validate_username(data):
 			else:
 				return jsonify({"error": "Failed to send request"}), response.status_code
 		except Exception as e:
-			print("threw except", str(e))
 			return jsonify({"error": str(e)}), 500
 
 def send_game_over_data(p1_score, p2_score, rally, game_id):
-	print('Sending game over data!!!!!!!!!!')
 	data_to_send = {"game": "Color",
 		"p1_score": f"{p1_score}",
 		"p2_score": f"{p2_score}",
@@ -423,19 +412,19 @@ def send_game_over_data(p1_score, p2_score, rally, game_id):
 			else:
 				return jsonify({"error": "Failed to send request"}), response.status_code
 		except Exception as e:
-			print("threw except", str(e))
 			return jsonify({"error": str(e)}), 500
 
+# is this functon even used?
+# where usernames are stored?
 @app.route('/init_usernames', methods=['GET'])
 def init_usernames():
 	try:
-		print("inside try")
-		# Assuming the request body contains JSON data with 'p1_username' and 'p2_username'
+		# Assuming the request body contains JSON data with 'p1_username' and 'p2_username' THIS ONE SHOULD BE PROPABLY REMOVED
 		data = request.get_json()
 		p1_username = data['p1_username']
 		p2_username = data['p2_username']
-		# Process the data as needed
-		# For example, you can return a response indicating success
+		# Process the data as needed IS THIS NEEDED?
+		# For example, you can return a response indicating success IS THIS NEEDED?
 		return jsonify({'message': 'Usernames initialized successfully', 'p1_username': p1_username, 'p2_username': p2_username}), 200
 	except Exception as e:
 		# Handle any errors
@@ -448,4 +437,3 @@ if __name__ == '__main__':
 	ssl_context.load_cert_chain('/server.crt', '/server.key')
 	print("color war is now running, server is open")
 	socketio.run(app, host='0.0.0.0', port=8889, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
-	#socketio.run(app, host='0.0.0.0', port=8889, debug=True, allow_unsafe_werkzeug=True)
