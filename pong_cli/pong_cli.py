@@ -86,8 +86,8 @@ def end_game(data, game_number):
     game_over = True
 
 def print_message(data):
-    if (data == "ERROR, game not running so no state. "):
-        print(data + "press enter to exit, or wait for a game to start")
+    if (data == "ERROR, game not running so no state."):
+        print(data + " Press enter to exit, or wait for a game to start")
     else:
         print(data)
 
@@ -246,12 +246,14 @@ if __name__ == "__main__":
                 elif command == "dashboard":
                     username = input("Enter a username: ")
                     send_get_dashboard_request(username)
+                elif command == "-h":
+                    print_help()
                 elif command == "games_running":
                     sio.emit('message', 'games_running')
                     sio.on('games_running_response', on_games_running_response)
                     time.sleep(3)
                 else:
-                    print(colors.WARNING + "not a valid command" + colors.ENDC)
+                    print(colors.WARNING + "Not a valid command" + colors.ENDC)
         sio.disconnect()
     except EOFError:
         eof_handler()
