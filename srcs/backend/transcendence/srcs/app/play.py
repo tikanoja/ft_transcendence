@@ -201,9 +201,9 @@ def as_user_challenge_user(user: CustomUser, challengee: CustomUser, game_name: 
 
     new_game_instance = None
     match (game_name):
-        case "Pong":
+        case "pong":
             new_game_instance = PongGameInstance(p1=user, p2=challengee, game=game_name, status='Pending')
-        case "Color":
+        case "color":
             new_game_instance = ColorGameInstance(p1=user, p2=challengee, game=game_name, status='Pending')
         case _:
             raise ValidationError("Invalid game type")

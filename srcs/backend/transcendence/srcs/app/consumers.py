@@ -32,7 +32,6 @@ class UserConsumer(AsyncJsonWebsocketConsumer):
 
         for group in [user.username, "Global"]:
             await self.channel_layer.group_add(group, self.channel_name)
-        print("Connected " + user.username)
 
 
     async def disconnect(self, close_code):
@@ -40,7 +39,6 @@ class UserConsumer(AsyncJsonWebsocketConsumer):
 
         for group in [user.username, "Global"]:
             await self.channel_layer.group_discard(group, self.channel_name)
-        print("Disconnected " + user.username)
     
 
     async def receive_json(self, content):
@@ -88,7 +86,7 @@ class UserConsumer(AsyncJsonWebsocketConsumer):
 
                 case "chat.invite":
                     user_to_invite: CustomUser = await CustomUser.objects.aget(username=content["username"])
-                    await sync_to_async(app.play.as_user_challenge_user)(user, user_to_invite, content["game"])
+                    await sync_to_async(app.play.as_user_challenge_user)(user, user_to_invite, content["game"].lower())
                     await self.chat_system(user_to_invite.username + " has been challenged")
 
                 case _:

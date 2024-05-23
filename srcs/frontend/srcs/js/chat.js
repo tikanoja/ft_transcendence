@@ -38,7 +38,8 @@ function connect() {
 
         socket.onopen    = (event) => { console.log('Chat connection opened' , event); _set_disabled(false); };
         socket.onerror   = (event) => { console.log('Chat socket error: ',     event); };
-        socket.onclose   = () => {
+        socket.onclose   = (event) => {
+            console.log(event);
             socket = null;
             _set_disabled(true);
             while (chatLog.lastChild) { chatLog.lastChild.remove(); }
@@ -56,6 +57,12 @@ function disconnect() {
 }
 
 function _submitHandler() {
+    inputField.value.trim();
+
+    if (inputField.value == "" || socket.readyState != WebSocket.OPEN) {
+        return null;
+    }
+
     try {
         const payload = _parseInput(inputField.value) 
 
@@ -66,24 +73,18 @@ function _submitHandler() {
         }
 
     } catch (e) {
-        console.log("Failed to submit chat message: ", e);
+        console.error("Failed to submit chat message: ", e);
     }
 
     inputField.value = '';
 };
 
 function _parseInput(input) {
-    inputField.value.trim();
-
-    if (!inputField.value || socket.readyState != WebSocket.OPEN) {
-        return null;
-    }
-
     if (!input.startsWith("/")) {
         return { type: "chat.broadcast", message: input };
     }
 
-    const parts = input.split(/^\/(\S)\S*\s+/g).filter(s => { return s != ""; });
+    const parts = input.split(/^\/(\w)\s+/g).filter(s => { return s != ""; });
 
     if (!parts || parts.length != 2) {
         return null;
@@ -129,13 +130,14 @@ function _parseInput(input) {
 
          case "i": {
             const args = rest.split(/^(\S+)\s+/g).filter(s => { return s != ""; });
-            if (args && args.length == 2
-                && /^[A-Za-z0-9]+$/.test(args[0])
-                && (args[1] == "Pong" || args[1] == "Color")) {
-                return {
-                    type: "chat.invite",
-                    username: args[0],
-                    game: args[1],
+            if (args && args.length == 2 && /^[A-Za-z0-9]+$/.test(args[0])) {
+                args[1] = args[1].toLowerCase();
+                if (args[1] == "pong" || args[1] == "color") {
+                    return {
+                        type: "chat.invite",
+                        username: args[0],
+                        game: args[1],
+                    }
                 }
             }
          }
