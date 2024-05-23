@@ -92,6 +92,8 @@ class UserConsumer(AsyncJsonWebsocketConsumer):
                 case _:
                     print("Invalid event by user: ", self.scope["user"].username)
 
+        except KeyError as e:
+                await self.error_response("Content invalid.")
         except Exception as e:
             if hasattr(e, "message"):
                 await self.error_response(e.message)
