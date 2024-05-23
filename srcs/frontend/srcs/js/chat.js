@@ -38,7 +38,11 @@ function connect() {
 
         socket.onopen    = (event) => { console.log('Chat connection opened' , event); _set_disabled(false); };
         socket.onerror   = (event) => { console.log('Chat socket error: ',     event); };
-        socket.onclose   = disconnect;
+        socket.onclose   = () => {
+            socket = null;
+            _set_disabled(true);
+            while (chatLog.lastChild) { chatLog.lastChild.remove(); }
+        };
         socket.onmessage = _messageHandler;
     }
 
@@ -46,9 +50,9 @@ function connect() {
 }
 
 function disconnect() {
-            socket = null;
-            _set_disabled(true);
-            while (chatLog.lastChild) { chatLog.lastChild.remove(); }
+    if (socket) {
+        socket.close()
+    }
 }
 
 function _submitHandler() {
@@ -145,6 +149,7 @@ function _parseInput(input) {
 function _messageHandler(event) {
     try {
         const content = JSON.parse(event.data);
+        console.log("content")
         switch (content.type) {
             case "chat.broadcast": // Same fronted behaviour as whisper, difference being indicated would be nice I guess.
             case "chat.whisper"  : _appendMessage( _createUsernameElement(content.sender), content.message ); break;
@@ -153,7 +158,7 @@ function _messageHandler(event) {
 
             default: throw Error("Unknown chat event");
         }
-    } catch (e) { console.err("Chat message handling failure: ", e); }
+    } catch (e) { console.error("Chat message handling failure: ", e); }
 }
 
 function _set_disabled(isDisabled) {

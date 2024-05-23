@@ -32,6 +32,7 @@ class UserConsumer(AsyncJsonWebsocketConsumer):
 
         for group in [user.username, "Global"]:
             await self.channel_layer.group_add(group, self.channel_name)
+        print("Connected " + user.username)
 
 
     async def disconnect(self, close_code):
@@ -39,6 +40,7 @@ class UserConsumer(AsyncJsonWebsocketConsumer):
 
         for group in [user.username, "Global"]:
             await self.channel_layer.group_discard(group, self.channel_name)
+        print("Disconnected " + user.username)
     
 
     async def receive_json(self, content):
