@@ -1,4 +1,5 @@
 import { getSingleHandlerDetails, getMultipleElementDetails } from './handlers.js'
+import { routeRedirect } from './router.js'
 
 
 // Extract named cookie and return its value if exists
@@ -8,7 +9,7 @@ function getCookie(name) {
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
+            // Does this cookie string begin with the name we want
             if (cookie.substring(0, name.length + 1) === (name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
@@ -39,20 +40,40 @@ const sendPostRequest = async (endpoint, data, isJson = false) => {
 }
 
 
-const sendGetRequest = async (endpoint, data, callback) => {
+const sendGetRequest = async (endpoint) => {
     const response = await fetch(endpoint, {
         method: 'GET'
     })
     return response
 }
 
-// const handleResponseForContentUpdate = async (response, newTitle, newDescripton) => {
-
-// }
-
-// const handleResponseForElementUpdate = async (response, elementName) => {
+const handleResponseForContentUpdate = async (response, newTitle, newDescripton) => {
     
-// }
+    if (response.redirected) {
+        let redirect_location = response.url;
+        console.log("redir to: ", redirect_location);
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        // handling normal content update
+        const html = await response.text();
+        updateContent(html, newTitle, newDescripton);
+    } else {
+        console.log('handleResponseForContentUpdate: response status: ' + response.status); //should this be an error log?
+    }
+}
+
+const handleResponseForElementUpdate = async (response, elementName) => {
+    
+    if (response.redirected) {
+		let redirect_location = response.url;
+		routeRedirect(redirect_location);
+	} else if (response.ok) {
+		const html = await response.text();
+		updateElementContent(html, elementName);
+	} else {
+		console.log("Response status in handleResponseForElementUpdate(): ", response.status)//should this be an error log?
+	}
+}
 
 
 function updateEventListeners() {
@@ -99,5 +120,4 @@ function updateElementContent(html, elementId) {
 }
 
 
-export { updateContent, updateElementContent, updateEventListeners, sendPostRequest, sendGetRequest }
-
+export { updateContent, updateElementContent, updateEventListeners, sendPostRequest, sendGetRequest, handleResponseForContentUpdate, handleResponseForElementUpdate }

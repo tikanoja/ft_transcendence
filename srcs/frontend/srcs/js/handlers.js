@@ -1,4 +1,4 @@
-import { sendPostRequest, sendGetRequest, updateContent, updateElementContent } from './index.js'
+import { sendPostRequest, sendGetRequest, updateContent, updateElementContent, handleResponseForContentUpdate, handleResponseForElementUpdate } from './index.js'
 import { routeRedirect } from './router.js'
 import { startScreen} from './pong.js'
 import { startScreenColorwar} from './colorwar.js'
@@ -14,11 +14,7 @@ single_listeners = [
         event: e.g submit,
         handler: function
     },
-    {
-        element: document element,
-        event: e.g submit,
-        handler: function
-    }
+    ...
 ]
 */
 
@@ -168,7 +164,7 @@ async function logoutButtonClickHandler(event) {
         let redirect_location = response.url;
         routeRedirect(redirect_location);
     } else {
-        console.log("this shouldn't be? logout should always lead to redirection?");
+        console.log("Logout failed to redirect");
     }
 }
 
@@ -181,18 +177,7 @@ const submitRegistrationHandler = async (event) => {
     const querystring = window.location.search;
     var endpoint = '/app/register/' + querystring;
     const response = await sendPostRequest(endpoint, formData);
-    if (response.redirected) {
-        let redirect_location = response.url;
-        console.log("redir to: ", redirect_location);
-        routeRedirect(redirect_location);
-    } else if (response.ok) {
-        // handling normal content update
-        const html = await response.text();
-        updateContent(html, "Registration | Pong", "Description");
-    } else {
-        // something is not quite right...
-        console.log('submitRegistrationHandler(): response status: ' + response.status);
-    }
+    await handleResponseForContentUpdate(response, "Registration | Pong", "Register to Play Pong!");
 }
 
 
@@ -204,57 +189,31 @@ const loginFormHandler = async (event) => {
 	var endpoint = '/app/login/' + querystring;
 	const response = await sendPostRequest(endpoint, formData);
 	document.dispatchEvent(loginEvent);
-	if (response.redirected) {
-		let redirect_location = response.url;
-		routeRedirect(redirect_location);
-	} else if (response.ok) {
-		const html = await response.text();
-		updateContent(html, "Login | Pong", "Login form");
-	} else {
-		console.log("Response status in loginFormHandler(): ", response.status)
-	}
+    await handleResponseForContentUpdate(response, "Login | Pong", "Login form");
 }
 
 
 const blockUserHandler = async (event) => {
 	console.log('In blockUserHandler()');
 	event.preventDefault();
-	let form = document.getElementById("addFriendForm")
+	let form = document.getElementById("addFriendForm");
 	const formData = new FormData(form);
 	const querystring = window.location.search;
 	var endpoint = '/app/block_user/' + querystring;
 	const response = await sendPostRequest(endpoint, formData);
-	if (response.redirected) {
-		let redirect_location = response.url;
-		routeRedirect(redirect_location);
-	} else if (response.ok) {
-		const html = await response.text();
-		updateElementContent(html, "friends");
-		// updateContent(html, "Friends | Pong", "Add friend form");
-	} else {
-		console.log("Response status in addFriendHandler(): ", response.status)
-	}
+    await handleResponseForElementUpdate(response, "friends");
 }
 
 
 const addFriendHandler = async (event) => {
 	console.log('In addFriendHandler()');
 	event.preventDefault();
-	let form = document.getElementById("addFriendForm")
+	let form = document.getElementById("addFriendForm");
 	const formData = new FormData(form);
 	const querystring = window.location.search;
 	var endpoint = '/app/friends/' + querystring;
 	const response = await sendPostRequest(endpoint, formData);
-	if (response.redirected) {
-		let redirect_location = response.url;
-		routeRedirect(redirect_location);
-	} else if (response.ok) {
-		const html = await response.text();
-		updateElementContent(html, "friends");
-		// updateContent(html, "Friends | Pong", "Add friend form");
-	} else {
-		console.log("Response status in addFriendHandler(): ", response.status)
-	}
+    await handleResponseForElementUpdate(response, "friends");
 }
 
 
@@ -275,15 +234,7 @@ const friendRequestHandler = async (event) => {
 	const querystring = window.location.search;
 	var endpoint = '/app/friends/' + querystring;
 	const response = await sendPostRequest(endpoint, data, true);
-	if (response.redirected) {
-		let redirect_location = response.url;
-		routeRedirect(redirect_location);
-	} else if (response.ok) {
-		const html = await response.text();
-		updateElementContent(html, "friends");
-	} else {
-		console.log("Response status in friendRequestHandler(): ", response.status)
-	}
+    await handleResponseForElementUpdate(response, "friends");
 }
 
 
@@ -324,22 +275,7 @@ const manageAccountHandler = async (event) => {
 const updateProfilePicture = async(event) => {
     console.log("in update profile picture func")
     let response = await sendGetRequest("/app/profile_picture/");
-    if (response.redirected) {
-        console.log('redirect status found');
-        let redirect_location = response.url;
-        console.log("redir to: ", redirect_location);
-        routeRedirect(redirect_location);
-    }
-	else if (response.ok) {
-        console.log('response,ok triggered');
-		// stay on this page, display the content only for the manage-content div
-        const html = await response.text();
-        updateElementContent(html, "profile-picture");
-	}
-	else {
-		console.log("Response status: ", response.status)
-		// some 400 or 500 code probably, show the error that was sent?
-	}
+    await handleResponseForElementUpdate(response, "profile-picture");
 }
 
 
@@ -355,23 +291,9 @@ const profileLinkHandler = async (event) => {
     console.log("profile path " + profilePath);
     let profileUsername = event.target.textContent;
     let response = await sendGetRequest('/app' + profilePath);
-    if (response.redirected) {
-        console.log('redirect status found');
-        let redirect_location = response.url;
-        console.log("redir to: ", redirect_location);
-        routeRedirect(redirect_location);
-    }
-	else if (response.ok) {
-        console.log('response,ok triggered');
-		// stay on this page, display the content again
-        const html = await response.text();
+    await handleResponseForContentUpdate(response, "Profile | " + profileUsername, "Personal Profile");
+    if (response.ok)
         window.history.pushState("", "", profilePath);
-        updateContent(html, "Profile | " + profileUsername, "Personal Profile");
-	}
-	else {
-		console.log("Response status: ", response.status)
-		// some 400 or 500 code probably, show the error that was sent?
-	}
 }
 
 
@@ -387,7 +309,6 @@ const playButtoncolorwarClickHandler = async (event) => {
     console.log("in color war click handler");
     startScreenColorwar();
 }
-
 
 
 const gameResponseHandler = async (event) => {
@@ -407,15 +328,7 @@ const gameResponseHandler = async (event) => {
     const querystring = window.location.search;
     var endpoint = '/app/play/' + querystring;
     const response = await sendPostRequest(endpoint, data, true);
-    if (response.redirected) {
-        let redirect_location = response.url;
-        routeRedirect(redirect_location);
-    } else if (response.ok) {
-        const html = await response.text();
-        updateContent(html, "Play | Pong", "Play");
-	} else {
-		console.log("Response status in gameResponseHandler(): ", response.status)
-	} 
+    await handleResponseForContentUpdate(response, "Play | Pong", "Play");
 }
 
 
@@ -427,18 +340,10 @@ const gameRequestHandler = async (event) => {
 
     var endpoint = '/app/play/' + querystring;
     const response = await sendPostRequest(endpoint, formData);
-    if (response.redirected) {
-        let redirect_location = response.url;
-        routeRedirect(redirect_location);
-    } else if (response.ok) {
-        const html = await response.text();
-        updateContent(html, "Play | Pong", "Play games");
-	} else {
-		console.log("Response status in gameRequestHandler(): ", response.status)
-	}
+    await handleResponseForContentUpdate(response, "Play | Pong", "Play games");
 }
 
-
+// window history pushing...need to change to updatContent stuff...
 const gameRenderButtonHandler = async (event) => {
     event.preventDefault();
     var gameType = event.target.dataset.game;
@@ -459,24 +364,11 @@ const gameRenderButtonHandler = async (event) => {
         endpoint = '/pong/post_cw_canvas/';
     }
     let response = await sendPostRequest(endpoint, data, true);
-    if (response.redirected) {
-        console.log('redirect status found');
-        let redirect_location = response.url;
-        console.log("redir to: ", redirect_location);
-        routeRedirect(redirect_location);
-    }
-	else if (response.ok) {
-        console.log('response,ok triggered');
-		// stay on this page, display the content again
-        const html = await response.text();
+    await handleResponseForContentUpdate(response, "Playing " + gameType, "Playing " + gameType);
+    if (response.ok)
         window.history.pushState("", "", "https://localhost/play/" + gameType.toLowerCase());
-        updateContent(html, "Playing " + gameType, "Playing " + gameType);
-	}
-	else {
-		console.log("Response status: ", response.status)
-		// some 400 or 500 code probably, show the error that was sent?
-	}
 }
+
 
 const playerAuthHandler = async (event) => {
     console.log('In playerAuthHandler()');
@@ -486,18 +378,7 @@ const playerAuthHandler = async (event) => {
     const querystring = window.location.search;
     var endpoint = '/pong/authenticate_player/' + querystring;
     const response = await sendPostRequest(endpoint, formData);
-    if (response.redirected) {
-        let redirect_location = response.url;
-        console.log("redir to: ", redirect_location);
-        routeRedirect(redirect_location);
-    } else if (response.ok) {
-        // handling normal content update
-        const html = await response.text();
-        updateContent(html, "Registration | Pong", "Description");
-    } else {
-        // something is not quite right...
-        console.log('submitRegistrationHandler(): response status: ' + response.status);
-    }
+    await handleResponseForContentUpdate(response, "Authorize Game | Pong", "Play games");
 }
 
 const tournamentFormHandler = async (event) => {
@@ -508,15 +389,7 @@ const tournamentFormHandler = async (event) => {
 
     var endpoint = '/app/tournament_forms/' + querystring;
     const response = await sendPostRequest(endpoint, formData);
-    if (response.redirected) {
-        let redirect_location = response.url;
-        routeRedirect(redirect_location);
-    } else if (response.ok) {
-        const html = await response.text();
-        updateContent(html, "Play | Pong", "Play games");
-	} else {
-		console.log("Response status in tournamentFormHandler(): ", response.status)
-	}
+    await handleResponseForContentUpdate(response, "Play | Pong", "Play games");
 }
 
 const tournamentButtonHandler = async (event) => {
@@ -540,16 +413,8 @@ const tournamentButtonHandler = async (event) => {
 
     const querystring = window.location.search;
     var endpoint = '/app/tournament_buttons/' + querystring;
-    const response = await sendPostRequest(endpoint, data, true); //, data, true);
-    if (response.redirected) {
-        let redirect_location = response.url;
-        routeRedirect(redirect_location);
-    } else if (response.ok) {
-        const html = await response.text();
-        updateContent(html, "Tournament");
-	} else {
-		console.log("Response status in tournamentButtons(): ", response.status)
-	}
+    const response = await sendPostRequest(endpoint, data, true);
+    await handleResponseForContentUpdate(response, "Tournament | Pong", "Play Tournament");
 }
 
 // ***** DEV FEATURE ***** //
@@ -578,18 +443,7 @@ const automate_register = async (event) => {
         const querystring = window.location.search;
         var endpoint = '/app/register/' + querystring;
         const response = await sendPostRequest(endpoint, formData);
-        if (response.redirected) {
-            let redirect_location = response.url;
-            console.log("Redirected to: ", redirect_location);
-            routeRedirect(redirect_location);
-        } else if (response.ok) {
-            // Handling normal content update
-            const html = await response.text();
-            updateContent(html, "Registration | Pong", "Description");
-        } else {
-            // Something is not quite right...
-            console.log('submitRegistrationHandler(): Response status: ' + response.status);
-        }
+        await handleResponseForContentUpdate(response, "Registration | Pong", "Register to Play");
     }
 }
 
