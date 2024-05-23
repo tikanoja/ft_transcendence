@@ -5,7 +5,7 @@ import { startScreenColorwar} from './colorwar.js'
 const loginEvent  = new Event("login");
 const logoutEvent = new Event("logout");
 
-// Once we are using templates, we should include a csrftoken in django. Then django will be very happy and there is no need for decorator.
+// Extract named cookie and return its value if exists
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -22,32 +22,6 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function checkLogin() {
-    fetch('app/check_login/', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-    })
-    .then(response => {
-        if (!response.ok) {
-            return false;
-        }
-        return response.json()
-    })
-    .then(data => {
-        if (data.status === 'authenticated') {
-            return true;
-        } else {
-            return false;
-        }
-    })
-    .catch(error => {
-        console.error('Problem with fetch call:', error);
-        return false;
-    });
-}
 
 const sendPostRequest = async (endpoint, data, isJson = false) => {
     console.log('In sendPostRequest()');
@@ -68,6 +42,7 @@ const sendPostRequest = async (endpoint, data, isJson = false) => {
     return response
 }
 
+
 const sendGetRequest = async (endpoint, data, callback) => {
     const response = await fetch(endpoint, {
         method: 'GET'
@@ -75,6 +50,25 @@ const sendGetRequest = async (endpoint, data, callback) => {
     return response
 }
 
+/*
+single_listeners = [
+    {
+        element: document element,
+        event: e.g submit,
+        handler: function
+    },
+    {
+        element: document element,
+        event: e.g submit,
+        handler: function
+    }
+]
+
+many_listeners_in_one = [
+    ...
+]
+
+*/
 function updateEventListeners() {
     var loginForm = document.getElementById('loginForm');
     var registerForm = document.getElementById('registerForm');
@@ -160,6 +154,7 @@ function updateEventListeners() {
     }
     if (autoregister)
         autoregister.removeEventListener('click', automate_register);
+
     // begin add listeners if currently present
     if (profilePictureForm)
         profilePictureForm.addEventListener('submit', manageAccountHandler);
@@ -660,6 +655,5 @@ const automate_register = async (event) => {
 
 
 
-export { profileLinkHandler, checkLogin, updateContent, updateEventListeners}
+export { profileLinkHandler, updateContent, updateEventListeners}
 
-// export { updateEventListeners, setActive, checkLogin, updateContent }

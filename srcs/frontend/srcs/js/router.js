@@ -17,7 +17,6 @@ document.addEventListener("click", (e) => {
 		return ;
 	}
 	// Prevent the navigation to a new page
-	// checkLogin();
 	e.preventDefault();
 	route();
 })
