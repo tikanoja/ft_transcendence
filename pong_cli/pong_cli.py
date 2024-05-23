@@ -88,15 +88,17 @@ def end_game(data, game_number):
 def print_message(data):
     if (data == "ERROR, game not running so no state."):
         print(data + " Press enter to exit, or wait for a game to start")
+    # elif (data == "ERROR, game not running so cannot stop existing game."):
+        
     else:
         print(data)
 
 def watch_game(game_number):
     global game_over
     os.system('clear')
+    sio.on('endstate', lambda data: end_game(data, game_number))
     sio.on('state_cli', lambda data: print_state(data, game_number))
     sio.on('message', print_message)
-    sio.on('endstate', lambda data: end_game(data, game_number))
     try:
         while True:
             if sys.stdin in select.select([sys.stdin], [], [], 0)[0] or game_over:

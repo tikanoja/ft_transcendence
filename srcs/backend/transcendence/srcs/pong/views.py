@@ -22,6 +22,8 @@ def cli_dashboard(request, username):
         print(request, username)
         if request.method == 'GET':
             user = CustomUser.objects.filter(username=username).first()
+            if user is None:
+                return JsonResponse({'message': "user not found"}, status=404)
             pong_games = PongGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
             resource = dashboard.get_stats_for_cli(user, pong_games)
             print(resource)
