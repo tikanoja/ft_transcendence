@@ -57,7 +57,10 @@ function _submitHandler() {
 
         if (payload) {
             socket.send(JSON.stringify(payload));
+        } else {
+            _appendMessage( _createSourceElement("System"), helpMessage);
         }
+
     } catch (e) {
         console.log("Failed to submit chat message: ", e);
     }
@@ -135,7 +138,6 @@ function _parseInput(input) {
 
         default: break;
     };
-    _appendMessage( _createSourceElement("System"), helpMessage);
     return null;
 }
 
