@@ -75,17 +75,6 @@ body {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Add a shadow for depth */
 }
 
-#canvas {
-    display: flex;
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
-    height: 100vh; /* Set canvas height to full viewport height */
-    position: relative;
-    width: 10%;
-    height: 10%;
-    display: block;
-}
-
 /* Nav item styling  */
 
 .nav-item {

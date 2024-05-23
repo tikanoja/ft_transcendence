@@ -317,7 +317,7 @@ function onWindowResize(camera, renderer) {
     const originalHeight = 100; 
     const canvas = renderer.domElement;
   
-    const canvasBounds = canvas.getBoundingClientRect();
+    // const canvasBounds = canvas.getBoundingClientRect();
     const P1score = document.getElementById('P1Card');
     const P2score = document.getElementById('P2Card');
     const moveCount = document.getElementById('moveCard');
@@ -329,30 +329,11 @@ function onWindowResize(camera, renderer) {
         button.style.height = `${scaleFactor * originalHeight}px`;
     });
 
-    const canvasCenterX = canvasBounds.left + canvasBounds.width / 2;
-
-    moveCount.style.position = 'absolute';
     moveCount.style.display = 'block';
-    moveCount.style.top = canvasBounds.top + 10 + 'px';
-    moveCount.style.left = `${canvasCenterX - moveCount.offsetWidth / 2}px`;
-
-    P1score.style.position = 'absolute';
     P1score.style.display = 'block';
-    P1score.style.top = canvasBounds.top + 10 + 'px';
-    P1score.style.left = `${Math.max(canvasBounds.left + 50, 10)}px`;
-
-    P2score.style.position = 'absolute';
     P2score.style.display = 'block';
-    P2score.style.top = canvasBounds.top + 10 + 'px';
-    P2score.style.right = `${Math.max(window.innerWidth - canvasBounds.right + 50, 10)}px`;
 
     const gameControls = document.getElementById('GameControls');
-    const gameControlsBottomMargin = 7; // Adjust this value as needed
-    gameControls.style.position = 'absolute';
-    gameControls.style.bottom = `${gameControlsBottomMargin}px`;
-
-    const gameControlsLeftOffsetFactor = 1.3; // Adjust this value as needed
-    gameControls.style.left = `${(canvasCenterX - gameControls.offsetWidth) / gameControlsLeftOffsetFactor}px`;    
     gameControls.style.display = 'block';
 }
 
