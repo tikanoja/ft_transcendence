@@ -46,6 +46,14 @@ const sendGetRequest = async (endpoint, data, callback) => {
     return response
 }
 
+// const handleResponseForContentUpdate = async (response, newTitle, newDescripton) => {
+
+// }
+
+// const handleResponseForElementUpdate = async (response, elementName) => {
+    
+// }
+
 
 function updateEventListeners() {
 

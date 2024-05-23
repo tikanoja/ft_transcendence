@@ -172,6 +172,7 @@ async function logoutButtonClickHandler(event) {
     }
 }
 
+
 const submitRegistrationHandler = async (event) => {
     console.log('In submitRegistrationHandler');
     event.preventDefault();
@@ -194,150 +195,97 @@ const submitRegistrationHandler = async (event) => {
     }
 }
 
-const playButtonClickHandler = async (event) => {	
-    startScreen();
-}
-
-const playButtoncolorwarClickHandler = async (event) => {
-    event.preventDefault();
-    console.log("in color war click handler");
-    startScreenColorwar();
-}
 
 const loginFormHandler = async (event) => {
-    console.log('In loginFormHandler()');
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const querystring = window.location.search;
-    var endpoint = '/app/login/' + querystring;
+	console.log('In loginFormHandler()');
+	event.preventDefault();
+	const formData = new FormData(event.target);
+	const querystring = window.location.search;
+	var endpoint = '/app/login/' + querystring;
 	const response = await sendPostRequest(endpoint, formData);
-    document.dispatchEvent(loginEvent);
-    if (response.redirected) {
-        let redirect_location = response.url;
-        routeRedirect(redirect_location);
-    } else if (response.ok) {
-        const html = await response.text();
-        updateContent(html, "Login | Pong", "Login form");
+	document.dispatchEvent(loginEvent);
+	if (response.redirected) {
+		let redirect_location = response.url;
+		routeRedirect(redirect_location);
+	} else if (response.ok) {
+		const html = await response.text();
+		updateContent(html, "Login | Pong", "Login form");
 	} else {
 		console.log("Response status in loginFormHandler(): ", response.status)
 	}
 }
 
+
 const blockUserHandler = async (event) => {
-    console.log('In blockUserHandler()');
-    event.preventDefault();
-    let form = document.getElementById("addFriendForm")
-    const formData = new FormData(form);
-    const querystring = window.location.search;
-    var endpoint = '/app/block_user/' + querystring;
-    const response = await sendPostRequest(endpoint, formData);
-    if (response.redirected) {
-        let redirect_location = response.url;
-        routeRedirect(redirect_location);
-    } else if (response.ok) {
-        const html = await response.text();
-        updateElementContent(html, "friends");
-        // updateContent(html, "Friends | Pong", "Add friend form");
+	console.log('In blockUserHandler()');
+	event.preventDefault();
+	let form = document.getElementById("addFriendForm")
+	const formData = new FormData(form);
+	const querystring = window.location.search;
+	var endpoint = '/app/block_user/' + querystring;
+	const response = await sendPostRequest(endpoint, formData);
+	if (response.redirected) {
+		let redirect_location = response.url;
+		routeRedirect(redirect_location);
+	} else if (response.ok) {
+		const html = await response.text();
+		updateElementContent(html, "friends");
+		// updateContent(html, "Friends | Pong", "Add friend form");
 	} else {
 		console.log("Response status in addFriendHandler(): ", response.status)
 	}
 }
 
+
 const addFriendHandler = async (event) => {
-    console.log('In addFriendHandler()');
-    event.preventDefault();
-    let form = document.getElementById("addFriendForm")
-    const formData = new FormData(form);
-    const querystring = window.location.search;
-    var endpoint = '/app/friends/' + querystring;
-    const response = await sendPostRequest(endpoint, formData);
-    if (response.redirected) {
-        let redirect_location = response.url;
-        routeRedirect(redirect_location);
-    } else if (response.ok) {
-        const html = await response.text();
-        updateElementContent(html, "friends");
-        // updateContent(html, "Friends | Pong", "Add friend form");
-    } else {
-        console.log("Response status in addFriendHandler(): ", response.status)
-    }
-}
-
-const gameResponseHandler = async (event) => {
-    console.log('gameResponseHandler()');
-    event.preventDefault();
-
-    var fromUser = event.target.getAttribute('data-from-user');
-    var action = event.target.getAttribute('data-action');
-    console.log('from user: ', fromUser, 'action: ', action);
-
-    var data = {
-        'from_user': fromUser,
-        'action': action,
-        'request_type': 'gameResponse'
-    }
-
-    const querystring = window.location.search;
-    var endpoint = '/app/play/' + querystring;
-    const response = await sendPostRequest(endpoint, data, true);
-    if (response.redirected) {
-        let redirect_location = response.url;
-        routeRedirect(redirect_location);
-    } else if (response.ok) {
-        const html = await response.text();
-        updateContent(html, "Play | Pong", "Play");
+	console.log('In addFriendHandler()');
+	event.preventDefault();
+	let form = document.getElementById("addFriendForm")
+	const formData = new FormData(form);
+	const querystring = window.location.search;
+	var endpoint = '/app/friends/' + querystring;
+	const response = await sendPostRequest(endpoint, formData);
+	if (response.redirected) {
+		let redirect_location = response.url;
+		routeRedirect(redirect_location);
+	} else if (response.ok) {
+		const html = await response.text();
+		updateElementContent(html, "friends");
+		// updateContent(html, "Friends | Pong", "Add friend form");
 	} else {
-		console.log("Response status in gameResponseHandler(): ", response.status)
-	} 
+		console.log("Response status in addFriendHandler(): ", response.status)
+	}
 }
+
 
 const friendRequestHandler = async (event) => {
-    console.log('in friendRequestHandler');
-    event.preventDefault();
+	console.log('in friendRequestHandler');
+	event.preventDefault();
 
-    var fromUser = event.target.getAttribute('data-from-user');
-    var action = event.target.getAttribute('data-action');
-    console.log('from user: ', fromUser, 'action: ', action);
+	var fromUser = event.target.getAttribute('data-from-user');
+	var action = event.target.getAttribute('data-action');
+	console.log('from user: ', fromUser, 'action: ', action);
 
-    var data = {
-        'from_user': fromUser,
-        'action': action,
-        'request_type': 'friendResponse'
-    }
+	var data = {
+		'from_user': fromUser,
+		'action': action,
+		'request_type': 'friendResponse'
+	}
 
-    const querystring = window.location.search;
-    var endpoint = '/app/friends/' + querystring;
-    const response = await sendPostRequest(endpoint, data, true);
-    if (response.redirected) {
-        let redirect_location = response.url;
-        routeRedirect(redirect_location);
-    } else if (response.ok) {
-        const html = await response.text();
-        updateElementContent(html, "friends");
-        // updateContent(html, "Friends | Pong", "Add friend form");
+	const querystring = window.location.search;
+	var endpoint = '/app/friends/' + querystring;
+	const response = await sendPostRequest(endpoint, data, true);
+	if (response.redirected) {
+		let redirect_location = response.url;
+		routeRedirect(redirect_location);
+	} else if (response.ok) {
+		const html = await response.text();
+		updateElementContent(html, "friends");
 	} else {
 		console.log("Response status in friendRequestHandler(): ", response.status)
 	}
 }
 
-const gameRequestHandler = async (event) => {
-    event.preventDefault();
-    console.log('in gameRequestHandler');
-    const formData = new FormData(event.target);
-    const querystring = window.location.search;
-
-    var endpoint = '/app/play/' + querystring;
-    const response = await sendPostRequest(endpoint, formData);
-    if (response.redirected) {
-        let redirect_location = response.url;
-        routeRedirect(redirect_location);
-    } else if (response.ok) {
-        const html = await response.text();
-        updateContent(html, "Play | Pong", "Play games");
-	} else {
-		console.log("Response status in gameRequestHandler(): ", response.status)
-	}
-}
 
 const manageAccountHandler = async (event) => {
     event.preventDefault();
@@ -425,6 +373,71 @@ const profileLinkHandler = async (event) => {
 		// some 400 or 500 code probably, show the error that was sent?
 	}
 }
+
+
+//  ***** PLAY HANDLERS ***** //
+
+const playButtonClickHandler = async (event) => {	
+    startScreen();
+}
+
+
+const playButtoncolorwarClickHandler = async (event) => {
+    event.preventDefault();
+    console.log("in color war click handler");
+    startScreenColorwar();
+}
+
+
+
+const gameResponseHandler = async (event) => {
+    console.log('gameResponseHandler()');
+    event.preventDefault();
+
+    var fromUser = event.target.getAttribute('data-from-user');
+    var action = event.target.getAttribute('data-action');
+    console.log('from user: ', fromUser, 'action: ', action);
+
+    var data = {
+        'from_user': fromUser,
+        'action': action,
+        'request_type': 'gameResponse'
+    }
+
+    const querystring = window.location.search;
+    var endpoint = '/app/play/' + querystring;
+    const response = await sendPostRequest(endpoint, data, true);
+    if (response.redirected) {
+        let redirect_location = response.url;
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        const html = await response.text();
+        updateContent(html, "Play | Pong", "Play");
+	} else {
+		console.log("Response status in gameResponseHandler(): ", response.status)
+	} 
+}
+
+
+const gameRequestHandler = async (event) => {
+    event.preventDefault();
+    console.log('in gameRequestHandler');
+    const formData = new FormData(event.target);
+    const querystring = window.location.search;
+
+    var endpoint = '/app/play/' + querystring;
+    const response = await sendPostRequest(endpoint, formData);
+    if (response.redirected) {
+        let redirect_location = response.url;
+        routeRedirect(redirect_location);
+    } else if (response.ok) {
+        const html = await response.text();
+        updateContent(html, "Play | Pong", "Play games");
+	} else {
+		console.log("Response status in gameRequestHandler(): ", response.status)
+	}
+}
+
 
 const gameRenderButtonHandler = async (event) => {
     event.preventDefault();
@@ -538,6 +551,8 @@ const tournamentButtonHandler = async (event) => {
 		console.log("Response status in tournamentButtons(): ", response.status)
 	}
 }
+
+// ***** DEV FEATURE ***** //
 
 const automate_register = async (event) => {
     console.log('In automate_register');
