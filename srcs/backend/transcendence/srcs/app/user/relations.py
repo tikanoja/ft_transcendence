@@ -143,12 +143,12 @@ def block_user(request):
 
         as_user_block_user(request.user, blocked_user)
 
-        return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, None, "Blocked " + blocked_username + "!"), "self_profile": True})
-
-    # Realistically should have different dispatch for different exceptions!
+    # Realistically should have different dispatch for different exceptions.
     except Exception as e:
         error_message = e.message if hasattr(e, "message") else str(e)
         return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, error_message, None), "self_profile": True})
+
+    return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, None, "Blocked " + blocked_username + "!"), "self_profile": True})
 
 
 def as_user_block_user(user: CustomUser, blocked: CustomUser):

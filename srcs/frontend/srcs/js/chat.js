@@ -13,7 +13,7 @@ const helpMessage = "\n" +
                     "/w [username] message - Send a direct message.\n" +
                     "/b [username] - Block user.\n" +
                     "/u [username] - Unblock user.\n" +
-                    "/i [username] [Pong/ColorWar] - Send a game invite.\n";
+                    "/i [username] [Pong/Color] - Send a game invite.\n";
 
 inputField.onkeydown = (e) => { if (e.key === "Enter") { _submitHandler(); e.preventDefault(); } }
 
@@ -124,7 +124,7 @@ function _parseInput(input) {
             const args = rest.split(/^(\S+)\s+/g).filter(s => { return s != ""; });
             if (args && args.length == 2
                 && /^[A-Za-z0-9]+$/.test(args[0])
-                && (args[1] == "Pong" || args[1] == "ColorWar")) {
+                && (args[1] == "Pong" || args[1] == "Color")) {
                 return {
                     type: "chat.invite",
                     username: args[0],

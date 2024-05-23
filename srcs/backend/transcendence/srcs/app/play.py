@@ -13,7 +13,7 @@ from django.utils import timezone
 import os
 from transcendence import settings
 
-from app.consumers import chat_system_message
+import app.consumers
 
 logger = logging.getLogger(__name__)
 
@@ -157,34 +157,38 @@ def gameResponse(request, data):
 
 
 def playPOST(request):
-    if request.content_type == 'application/json':
-        data = json.loads(request.body)
-        if data.get('request_type') == 'gameResponse':
-            return gameResponse(request, data)
-        else:
-            return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, ve, "Unknown content type"))
+    try: 
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+            if data.get('request_type') == 'gameResponse':
+                return gameResponse(request, data)
+            else:
+                return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, ve, "Unknown content type"))
 
-    sent_form = GameRequestForm(request.POST)
-
-    try:
+        sent_form = GameRequestForm(request.POST)
         if not sent_form.is_valid():
-            raise ValidationError("Form filled incorrectly")
+                raise ValidationError("Form filled incorrectly")
 
-        challenged_username = sent_form.cleaned_data['username']
-        challenged_user = CustomUser.objects.filter(username=challenged_username).first()
+        challenged_username: str    = sent_form.cleaned_data['username']
+        challenged_user: CustomUser = CustomUser.objects.get(username=challenged_username)
 
         game = sent_form.cleaned_data["game_type"]
         as_user_challenge_user(request.user, challenged_user, game)
 
-    except ValidationError as ve:
-        return render(request, 'user/play.html', playContext(request, ve, None))
+    # Realistically should have different dispatch for different exceptions
+    except Exception as e:
+        print(e)
+        error_message = e.message if hasattr(e, "message") else str(e)
+        return render(request, 'user/play.html', playContext(request, error_message, None))
+
+
 
     return render(request, 'user/play.html', playContext(request, None, "Game invite sent!")) 
 
 def as_user_challenge_user(user: CustomUser, challengee: CustomUser, game_name: str):
     # Check if participants have blocked each other
     if challengee in user.blocked_users.all() or user in challengee.blocked_users.all():
-        raise ValidationError("Blocked")
+        raise ValidationError("You are blocked")
         #return render(request, 'user/play.html', playContext(request, "Blocked", None))
 
     # check if they are trying to add themselves
@@ -209,7 +213,7 @@ def as_user_challenge_user(user: CustomUser, challengee: CustomUser, game_name: 
     new_game_instance.save()
 
     # CHAT MODULE let challenged user know that they have been challenged
-    chat_system_message(challengee, "{name} has challenged you to a game of {game}".format(name = user.username, game = game_name))
+    app.consumers.chat_system_message(challengee, "{name} has challenged you to a game of {game}".format(name = user.username, game = game_name))
 
 
 def start_tournament(request):
@@ -297,7 +301,7 @@ def tournament_invite(request):
     Participant.objects.create(user=invited_user, tournament=tournament, status='Pending')
 
     # CHAT MODULE msg to invited_user to inform that they have been invited to a tournament
-    chat_system_message(invited_user, "{name} has invited you to a tournament!".format(name = request.user.username))
+    app.consumers.chat_system_message(invited_user, "{name} has invited you to a tournament!".format(name = request.user.username))
 
     return render(request, 'user/play.html', playContext(request, None, 'Invite sent!'))
 
@@ -371,7 +375,7 @@ def update_tournament(game_instance):
                     logger.debug(f'Scheduled a game: {p1_user.username} vs {p2_user.username}!')
                     # CHAT MODULE let player know in chat that they have a new game
                     for matchup in [(p1_user, p2_user), (p2_user, p1_user)]:
-                        chat_system_message(matchup.first, "Your next tournament match against {name}!".format(name=matchup.second))
+                        app.consumers.chat_system_message(matchup.first, "Your next tournament match against {name}!".format(name=matchup.second))
 
         else:
             logger.debug('No more levels in tournament, finishing tournament!')
@@ -382,7 +386,7 @@ def update_tournament(game_instance):
             # CHAT MODULE announce tournament winner
             winner_username = match.game_instance.winner.username;
             for user in tournament.participants:
-                chat_system_message(user, "Congratulations to {name} for winning the tournament!".format(name=winner_username))
+                app.consumers.chat_system_message(user, "Congratulations to {name} for winning the tournament!".format(name=winner_username))
     else:
         logger.debug('There are still matches remaining on this level of the tournament')
         match.status = Match.FINISHED
@@ -390,7 +394,7 @@ def update_tournament(game_instance):
 
         # CHAT MODULE let player know that we are waiting for games to finish
         winner = match.game_instance.winner
-        chat_system_message(winner, "Matches are still ongoing, please wait for your next game.")
+        app.consumers.chat_system_message(winner, "Matches are still ongoing, please wait for your next game.")
 
     
 def get_wl_ratio(user, game):
@@ -571,7 +575,7 @@ def tournament_start(request, data):
 
     # CHAT MODULE announce tournament start
     for user in participants:
-        chat_system_message(user, "Tournament is starting!")
+        app.consumers.chat_system_message(user, "Tournament is starting!")
 
     return render(request, 'user/play.html', playContext(request, None, 'Tournament started!'))
 

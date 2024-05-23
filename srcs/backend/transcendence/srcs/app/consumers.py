@@ -8,6 +8,8 @@ from channels.layers import get_channel_layer
 from app.models import CustomUser
 from app.user.relations import as_user_block_user
 
+import app.play
+
 logger = logging.getLogger(__name__)
 
 channel_layer = get_channel_layer()
@@ -23,17 +25,19 @@ class UserConsumer(AsyncJsonWebsocketConsumer):
 
     async def connect(self):
         await self.accept()
-
         user : CustomUser = self.scope["user"]
+
         if not user.is_authenticated or user.is_anonymous:
             return await self.close()
 
-        self.groups = [user.username, "Global"]
-        for group in self.groups:
+        for group in [user.username, "Global"]:
             await self.channel_layer.group_add(group, self.channel_name)
 
+
     async def disconnect(self, close_code):
-        for group in self.groups:
+        user : CustomUser = self.scope["user"]
+
+        for group in [user.username, "Global"]:
             await self.channel_layer.group_discard(group, self.channel_name)
     
 
@@ -46,44 +50,44 @@ class UserConsumer(AsyncJsonWebsocketConsumer):
         try:
             match content["type"]:
                 case "chat.broadcast":
-                    if "message" not in content:
-                        print("Chat broadcast event with missing fields by user: ", self.scope["user"].username)
-                        return
                     content["sender"] = user.username
-                    await self.channel_layer.group_send(self.groups[1], content)
+                    sanitized_content = {
+                        "type" : content["type"],
+                        "sender" : user.username,
+                        "message" : content["message"]
+                    }
+                    await self.channel_layer.group_send(user.username, sanitized_content)
 
                 case "chat.whisper":
-                    if "receiver" not in content or "message" not in content:
-                        print("Chat message event with missing fields by user: ", self.scope["user"].username)
+                    receiver = content["receiver"]
+                    if not receiver in self.channel_layer.groups:
+                        await self.error_response("User not reachable")
                         return
-
-                    if not content["receiver"] in self.channel_layer.groups:
-                        await self.error_response("No such user")
-                        return
-
-                    content["sender"] = user.username
-                    await self.channel_layer.group_send(content["receiver"], content)
-                    if (content["receiver"] != self.groups[0]):
-                        await self.channel_layer.group_send(self.groups[0], content)
+                    content = {
+                        "type" : content["type"],
+                        "sender" : user.username,
+                        "message" : content["message"]
+                    }
+                    await self.channel_layer.group_send(receiver, content)
+                    if (receiver != user.username):
+                        await self.channel_layer.group_send(user.username, content)
 
                 case "chat.block":
                     name_to_block = content["username"]
-
                     blocked: CustomUser = await CustomUser.objects.aget(username=name_to_block)
                     await sync_to_async(as_user_block_user)(self.scope["user"], blocked)
                     await self.chat_system(name_to_block + " has been blocked")
 
                 case "chat.unblock":
-                    name_to_unblock: str = content["username"]
-                    user_to_unblock = await CustomUser.objects.aget(username=name_to_unblock)
-                    client: CustomUser = self.scope["user"]
-                    await client.blocked_users.aremove(user_to_unblock);
-                    await client.asave()
-
-                    await self.chat_system(name_to_unblock + " has been unblocked")
+                    user_to_unblock: CustomUser = await CustomUser.objects.aget(username=content["username"])
+                    await user.blocked_users.aremove(user_to_unblock);
+                    await user.asave()
+                    await self.chat_system(user_to_unblock.username + " has been unblocked")
 
                 case "chat.invite":
-                    user_to_unblock: CustomUser = await CustomUser.objects.aget(username=name_to_unblock)
+                    user_to_invite: CustomUser = await CustomUser.objects.aget(username=content["username"])
+                    await sync_to_async(app.play.as_user_challenge_user)(user, user_to_invite, content["game"])
+                    await self.chat_system(user_to_invite.username + " has challenged")
 
                 case _:
                     print("Invalid event by user: ", self.scope["user"].username)
@@ -111,8 +115,6 @@ class UserConsumer(AsyncJsonWebsocketConsumer):
 
         if await receiver.blocked_users.filter(username=sender_name).aexists():
             return
-
-        del content["receiver"]
 
         await self.send_json(content)
 
