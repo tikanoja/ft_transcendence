@@ -465,8 +465,12 @@ def stop_game(splitted_command):
 		else:
 			games[number].set_game_running(0)
 			socketio.emit('endstate', games[number].return_game_state())
-			send_game_over_data(games[number].left_score, games[number].right_score, games[number].moves, games[number].game_id)
-			games[number].set_game_slot(-1)
+			check = send_game_over_data(games[number].left_score, games[number].right_score, games[number].moves, games[number].game_id)
+			if check == True:
+				games[number].set_game_slot(-1)
+			else:
+				print("Error sending game over data, this game will not be added to stats", response.status_code)
+				games[number].set_game_slot(-1)
 			return
 
 # get state of game from specific slot
@@ -740,21 +744,26 @@ def validate_username(data):
 							socketio.emit('setup_game', 'OK,{}'.format(index))
 							return jsonify({"message": "Usernames verified"})
 					for index in range(4):
+						if (games[index].game_id == usernames[2]):
+							socketio.emit('setup_game', 'OK,{}'.format(index))
+					for index in range(4):
 						if games[index].is_game_running() == 0:
 							slot = index
 							break
 					if slot == -1:
-						return jsonify({"message": "ERROR, all game slots are already in use"})
+						print("ERROR, all game slots are already in use")
+						socketio.emit('setup_game', 'ERROR, Game slots in use')
 					else:
 						games[slot].left_player_id = usernames[1]
 						games[slot].right_player_id = usernames[0]
 						games[slot].game_id = usernames[2]
 						socketio.emit('setup_game', 'OK,{}'.format(slot))
-						return jsonify({"message": "Usernames verified"})
 			else:
-				return jsonify({"error": "Failed to send request"}), response.status_code
+				socketio.emit('setup_game', 'ERROR, invalid usernames')
+				print("ERROR, Failed to send request", response.status_code)
 		except Exception as e:
-			return jsonify({"error": str(e)}), 500
+			socketio.emit('setup_game', 'ERROR, Validating usernames failed')
+			print("ERROR, validating usernames", response.status_code)
 
 def send_game_over_data(p1_score, p2_score, rally, game_id):
 	data_to_send = {"game" : "Pong",
@@ -767,13 +776,13 @@ def send_game_over_data(p1_score, p2_score, rally, game_id):
 		django_url = "http://transcendence:8000/pong/send_game_data/"
 		try:
 			response = requests.post(django_url, data=data_to_send)
-			print('Response from sending game data: ', response)
 			if response.status_code == 200:
-				return jsonify({"message": "Request sent successfully"})
+				return True
 			else:
-				return jsonify({"error": "Failed to send request"}), response.status_code
+				return False
 		except Exception as e:
-			return jsonify({"error": str(e)}), 500
+			print("Error sending game over data:	", response.status_code)
+			return False
 
 @app.route('/init_usernames', methods=['GET'])
 def init_usernames():
@@ -781,9 +790,10 @@ def init_usernames():
 		data = request.get_json()
 		p1_username = data['p1_username']
 		p2_username = data['p2_username']
-		return jsonify({'message': 'Usernames initialized successfully', 'p1_username': p1_username, 'p2_username': p2_username}), 200
+		return
 	except Exception as e:
-		return jsonify({'error': str(e)}), 500
+		print("Failed to init usernames")
+		return
 
 if __name__ == '__main__':
 	# Use SSL/TLS encryption for WSS
