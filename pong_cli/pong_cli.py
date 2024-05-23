@@ -56,10 +56,15 @@ def on_games_running_response(data):
     sio.on('message', print_message)
     valuesArray = data.split(',')
     index = 0
+    running = False
     while index != 4:
         index += 1
         if valuesArray[index] != '0' and valuesArray[index] != ' 0':
+            running = True
             print_color(str(index - 1), colors.HEADER)
+    if running == False:
+        print_color("There are no games currently running", colors.HEADER)
+
     if interactive_mode == False:
         sio.disconnect()
 
@@ -71,7 +76,7 @@ def end_game(data, game_number):
     game_over = True
 
 def print_message(data):
-    if (data == "ERROR, game not running so no state."):
+    if (data == "ERROR, game not running so no state. "):
         print(data + "press enter to exit, or wait for a game to start")
     else:
         print(data)
@@ -91,7 +96,7 @@ def watch_game(game_number):
                 print(colors.WARNING + "Exiting watch_game, press enter......" + colors.ENDC)
                 _ = sys.stdin.readline()
                 break
-            sio.emit('message', 'get_state_cli,' + game_number)
+            sio.emit('message', 'get_state_cli,' + str(game_number))
             time.sleep(5)
     except KeyboardInterrupt:
         print(colors.WARNING + "Keyboard interrupt detected. Exiting watch_game......" + colors.ENDC)
@@ -132,7 +137,7 @@ def send_get_dashboard_request(username):
         except ValueError:
             print("Empty or non-JSON response")
     else:
-        print("Error:", response.status_code)
+        print("Error with requesting user dashboard: ", response.status_code)
 
 
 
@@ -145,8 +150,14 @@ def run_command(argv):
         sio.on('games_running_response', on_games_running_response)
         sio.wait()
     elif argv[1] == "watch_game":
-        game_number = input("Enter a game number: ")
-        watch_game(game_number)
+        try:
+            game_number = int(input("Enter a game number (0-3): "))
+            if game_number in range(4):
+                watch_game(game_number)
+            else:
+                print("Invalid input. Please enter a number between 0 and 3.")
+        except ValueError:
+            print("Invalid input. Please enter a number between 0 and 3.")
     elif argv[1] == "sabotage-1 L":
         sio.emit('message', "left_paddle_up,0")
         time.sleep(0.2)
@@ -174,8 +185,8 @@ def run_command(argv):
 
 if __name__ == "__main__":
 
-    interactive_mode = False
     warnings.filterwarnings("ignore", category=InsecureRequestWarning)
+    interactive_mode = False
     if '-h' in sys.argv or '--help' in sys.argv or len(sys.argv) == 1:
         print_banner()
         print_help()
@@ -187,8 +198,14 @@ if __name__ == "__main__":
     sio = socketio.Client(ssl_verify=False)
 
     client_name = "CliClient"
-    server_url = 'https://localhost:8888'   #/pong/socket.io
-    sio.connect(server_url)
+    server_url = 'https://localhost:8888/pong/socket.io'
+    
+    try:
+        sio.connect(server_url)
+        print("Connection established successfully")
+    except socketio.exceptions.ConnectionError as e:
+        print(f"Failed to connect to the server: {e}")
+        sys.exit(1)  # Exit the script with an error code
 
     sio.on('connect', on_connect)
     sio.on('disconnect', on_disconnect)
@@ -204,14 +221,23 @@ if __name__ == "__main__":
             if command.lower() == 'exit':
                 break
             if command == 'watch_game':
-                game_number = input("Enter a game number: ")
-                watch_game(game_number)
-            if command == "dashboard":
+                try:
+                    game_number = input("Enter a game number (0-3): ")
+                    if int(game_number) in range(4):
+                        watch_game(game_number)
+                    else:
+                        print("Invalid input. Please enter a number between 0 and 3.")
+                except ValueError:
+                    print("Invalid input. Please enter a number between 0 and 3.")
+            elif command == "dashboard":
                 username = input("Enter a username: ")
                 send_get_dashboard_request(username)
-            else:
-                sio.emit('message', command)
-                run_command(sys.argv)
+            elif command == "games_running":
+                sio.emit('message', 'games_running')
                 sio.on('games_running_response', on_games_running_response)
+                time.sleep(3)
+            else:
+                print(colors.WARNING + "not a valid command" + colors.ENDC)
+                
 
     sio.disconnect()

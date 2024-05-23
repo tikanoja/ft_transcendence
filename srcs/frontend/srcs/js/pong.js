@@ -51,7 +51,6 @@ export const verifyUsername = () => {
         socket.on('setup_game', (data) => {
             const valuesArray = data.split(',');
             gameNumber = valuesArray[1];
-            console.log("setup_game", valuesArray)
             resolve(gameNumber);
         });
 
@@ -72,15 +71,9 @@ export const startScreen = async () => {
             await verifyUsername()    
             startScreen.style.display = 'none';
             
-
-            console.log("before start game", gameNumber)
             socket.emit('message', 'start_game,' + gameNumber);
 
-            socket.on('message', (data) => {
-                console.log(data)  
-            })
             socket.on('start_game', (data) => {
-                console.log("in start game", gameNumber)
                 startScreen.remove();
                 canvasContainer.style.display = 'block';
                 const P1score = document.getElementById('P1Card');
@@ -144,8 +137,6 @@ export const updateScoreboard = (p1Score, p2Score) => {
             previousP1Score = p1Score;
             previousP2Score = p2Score;
         }
-    } else {
-        console.error('Error loading html elements');
     }
 };
 
@@ -266,14 +257,14 @@ function updateGameState(data, p1_paddle, p2_paddle, ball) {
 	}
 }
 
-// Slow down the ball rotation
 let rotate_ball_turn = 0;
 let ball_rotation_slowdown_factor = 2;
 
 function animateBallRotation(ball) {
     if (rotate_ball_turn == 0) // Is it time to update ball rotation
     {
-        if (!render) return; // If rendering is not active dont update ball
+        if (!render)
+            return; // If rendering is not active dont update ball
         // Define rotations for the ball
         const randomRotationX = Math.random() * Math.PI * 2;
         const randomRotationY = Math.random() * Math.PI * 2;
