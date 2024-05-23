@@ -175,15 +175,13 @@ def playPOST(request):
         game = sent_form.cleaned_data["game_type"]
         as_user_challenge_user(request.user, challenged_user, game)
 
-    # Realistically should have different dispatch for different exceptions
-    except Exception as e:
-        print(e)
+    # Realistically should have different dispatch for various different exceptions
+    except ValidationError as e:
         error_message = e.message if hasattr(e, "message") else str(e)
         return render(request, 'user/play.html', playContext(request, error_message, None))
 
-
-
     return render(request, 'user/play.html', playContext(request, None, "Game invite sent!")) 
+
 
 def as_user_challenge_user(user: CustomUser, challengee: CustomUser, game_name: str):
     # Check if participants have blocked each other
