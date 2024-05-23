@@ -56,7 +56,7 @@ class UserConsumer(AsyncJsonWebsocketConsumer):
                         "sender" : user.username,
                         "message" : content["message"]
                     }
-                    await self.channel_layer.group_send(user.username, sanitized_content)
+                    await self.channel_layer.group_send("Global", sanitized_content)
 
                 case "chat.whisper":
                     receiver = content["receiver"]
