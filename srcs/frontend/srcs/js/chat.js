@@ -9,11 +9,11 @@ const submitButton = document.getElementById("chat-submit");
 const logMessageCountMax = 32;
 
 const helpMessage = "\n" +
-                    "/h - Display chat commands.\n" +
-                    "/w [username] message - Send a direct message.\n" +
-                    "/b [username] - Block user.\n" +
-                    "/u [username] - Unblock user.\n" +
-                    "/i [username] [Pong/Color] - Send a game invite.\n";
+                    "/h\t\t\t\t\t\t\t - Display chat commands.\n" +
+                    "/w\t[username] message\t\t - Send a direct message.\n" +
+                    "/b\t[username] \t\t\t\t - Block user.\n" +
+                    "/u\t[username] \t\t\t\t - Unblock user.\n" +
+                    "/i\t[username] [Pong/Color]\t - Send a game invite.\n";
 
 inputField.onkeydown = (e) => { if (e.key === "Enter") { _submitHandler(); e.preventDefault(); } }
 
@@ -48,6 +48,7 @@ function connect() {
     }
 
     _set_disabled(false);
+    _appendMessage( _createSourceElement("System"), helpMessage);
 }
 
 function disconnect() {
