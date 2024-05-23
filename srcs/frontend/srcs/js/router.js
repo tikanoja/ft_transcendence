@@ -46,13 +46,13 @@ const routes = {
 	}, 
 	"/register" : {
 		view: "/app/register/",
-		title: "Login | " + pageTitle,
-		description: "Login"
+		title: "Register | " + pageTitle,
+		description: "Register to play!"
 	},
 	"/profile" : {
 		view: "app/profile/",
 		title: "test_profile | " +  pageTitle,
-		description: "Only Jen's profile"
+		description: "Test profile"
 	},
 	"/play/pong" : {
 		view: "/pong/post_pong_canvas/",
@@ -65,7 +65,7 @@ const routes = {
 		description: "Play games"
 	}
 }
-// route above should not be the same as the calls to the backend...seems fragile
+
 
 // Checks the URL
 const route = (event) => {

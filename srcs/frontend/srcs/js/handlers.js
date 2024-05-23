@@ -254,7 +254,6 @@ const manageAccountHandler = async (event) => {
     }
 	else if (response.ok) {
         console.log('response,ok triggered');
-		// stay on this page, display the content only for the manage-content div
         const html = await response.text();
         if (event.target.id === "delete-account-form") {
             window.history.pushState("", "", "/account/deleted");
@@ -268,9 +267,9 @@ const manageAccountHandler = async (event) => {
 	}
 	else {
 		console.log("Response status: ", response.status)
-		// some 400 or 500 code probably, show the error that was sent?
 	}
 }
+
 
 const updateProfilePicture = async(event) => {
     console.log("in update profile picture func")
@@ -343,7 +342,7 @@ const gameRequestHandler = async (event) => {
     await handleResponseForContentUpdate(response, "Play | Pong", "Play games");
 }
 
-// window history pushing...need to change to updatContent stuff...
+
 const gameRenderButtonHandler = async (event) => {
     event.preventDefault();
     var gameType = event.target.dataset.game;
@@ -364,7 +363,7 @@ const gameRenderButtonHandler = async (event) => {
         endpoint = '/pong/post_cw_canvas/';
     }
     let response = await sendPostRequest(endpoint, data, true);
-    await handleResponseForContentUpdate(response, "Playing " + gameType, "Playing " + gameType);
+    await handleResponseForContentUpdate(response, "Playing " + gameType + " | Pong", "Playing " + gameType);
     if (response.ok)
         window.history.pushState("", "", "https://localhost/play/" + gameType.toLowerCase());
 }
@@ -378,7 +377,7 @@ const playerAuthHandler = async (event) => {
     const querystring = window.location.search;
     var endpoint = '/pong/authenticate_player/' + querystring;
     const response = await sendPostRequest(endpoint, formData);
-    await handleResponseForContentUpdate(response, "Authorize Game | Pong", "Play games");
+    await handleResponseForContentUpdate(response, "Playing | Pong", "Play games");
 }
 
 const tournamentFormHandler = async (event) => {

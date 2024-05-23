@@ -88,12 +88,6 @@ function updateEventListeners() {
             entry.element.addEventListener(entry.event_name, entry.handler);
         }
     })
-    for (let entry in singleElementListenersList) {
-        if (entry.element) {
-            entry.element.removeEventListener(entry.event_name, entry.handler);
-            entry.elemnet.addEventListener(entry.event_name, entry.handler);
-        }
-    }
 
     multipletElementListenersList.forEach(entry => {
         if (entry.element) {
