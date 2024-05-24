@@ -152,7 +152,6 @@ function _parseInput(input) {
 function _messageHandler(event) {
     try {
         const content = JSON.parse(event.data);
-        console.log("content")
         switch (content.type) {
             case "chat.broadcast": // Same fronted behaviour as whisper, difference being indicated would be nice I guess.
             case "chat.whisper"  : _appendMessage( _createUsernameElement(content.sender), content.message ); break;

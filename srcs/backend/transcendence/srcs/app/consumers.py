@@ -25,21 +25,31 @@ def chat_system_message(user, message: str):
 class UserConsumer(AsyncJsonWebsocketConsumer):
 
     async def connect(self):
-        await self.accept()
-        user : CustomUser = self.scope["user"]
+        try:
+            await self.accept()
+            user : CustomUser = self.scope["user"]
 
-        if not user.is_authenticated or user.is_anonymous:
-            return await self.close()
+            if not user.is_authenticated or user.is_anonymous:
+                return await self.close()
 
-        for group in [user.username, "Global"]:
-            await self.channel_layer.group_add(group, self.channel_name)
+            for group in [user.username, "Global"]:
+                await self.channel_layer.group_add(group, self.channel_name)
+        except Exception as e:
+            logger.error(user.username if user.username else "UNKNOWN USER " + " connection ERROR: " + str(e))
+            await self.close();
 
 
     async def disconnect(self, close_code):
-        user : CustomUser = self.scope["user"]
+        try:
+            user : CustomUser = self.scope["user"]
 
-        for group in [user.username, "Global"]:
-            await self.channel_layer.group_discard(group, self.channel_name)
+            if not user.is_authenticated or user.is_anonymous:
+                return
+
+            for group in [user.username, "Global"]:
+                await self.channel_layer.group_discard(group, self.channel_name)
+        except Exception as e:
+            logger.error(user.username if user.username else "UNKNOWN USER " + " disconnection ERROR: " + str(e))
     
 
     async def receive_json(self, content):
