@@ -305,6 +305,9 @@ def tournament_leave(request, data):
     participant = Participant.objects.filter(pk=data.get('participant_id')).first()
     if participant is None:
         return render(request, 'user/play.html', playContext(request, 'Participant instance not found.', None))
+    tournament = participant.tournament
+    if tournament.status != Tournament.PENDING:
+        return render(request, 'user/play.html', playContext(request, 'Too late, tournament already started!', None))
     participant.delete()
     return render(request, 'user/play.html', playContext(request, None, 'Left tournament!'))
 
@@ -500,7 +503,7 @@ def generate_brackets(tournament, accepted_participants):
 def tournament_start(request, data):
     current_user = request.user
     # Get tournament
-    tournament = Tournament.objects.filter(creator=current_user).first()
+    tournament = Tournament.objects.filter(creator=current_user, status='Pending').first()
     if tournament is None:
         return render(request, 'user/play.html', playContext(request, 'Could not find tournament instance...', None))
 
