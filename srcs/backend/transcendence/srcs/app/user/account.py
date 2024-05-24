@@ -141,7 +141,7 @@ def manage_accountPOST(request):
         try:
             if not form.is_valid():
                 raise ValidationError("Form filled incorrectly")
-            user_manager.update_user(request.user.username, password=form.cleaned_data["password"])
+            user_manager.update_user(request.user.username, password=form.cleaned_data["new_password"])
             context['pasword_form_result'] = 'Password updated successfully. Please log back in with your new password'
         except ValidationError as ve:
             context["pw_error"] = ve

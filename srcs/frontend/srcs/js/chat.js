@@ -1,4 +1,4 @@
-import { profileLinkHandler } from "./index.js"
+import { profileLinkHandler } from "./handlers.js"
 
 let   socket = null;
 

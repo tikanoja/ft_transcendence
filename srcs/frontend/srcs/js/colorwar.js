@@ -98,6 +98,7 @@ let previousP1Score = null;
 let previousP2Score = null;
 
 export const updateScoreboard = (p1Score, p2Score, currentMoveCount, currentPlayerMove) => {
+export const updateScoreboard = (p1Score, p2Score, currentMoveCount, currentPlayerMove) => {
     const scoreLeftElement = document.querySelector('#player1Score');
     const scoreRightElement = document.querySelector('#player2Score');
     const moveCountElement = document.getElementById('moveCounter'); 
