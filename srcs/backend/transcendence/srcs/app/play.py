@@ -373,7 +373,7 @@ def update_tournament(game_instance):
                     logger.debug(f'Scheduled a game: {p1_user.username} vs {p2_user.username}!')
                     # CHAT MODULE let player know in chat that they have a new game
                     for matchup in [(p1_user, p2_user), (p2_user, p1_user)]:
-                        app.consumers.chat_system_message(matchup.first, "Your next tournament match is against {name}!".format(name=matchup.second))
+                        app.consumers.chat_system_message(matchup[0], "Your next tournament match is against {name}!".format(name=matchup[1].username))
 
         else:
             logger.debug('No more levels in tournament, finishing tournament!')
@@ -383,7 +383,7 @@ def update_tournament(game_instance):
             tournament.save()
             # CHAT MODULE announce tournament winner
             winner_username = match.game_instance.winner.username;
-            for p in tournament.participants:
+            for p in Participant.objects.filter(tournament=tournament):
                 app.consumers.chat_system_message(p.user, "Congratulations to {name} for winning the tournament!".format(name=winner_username))
     else:
         logger.debug('There are still matches remaining on this level of the tournament')
