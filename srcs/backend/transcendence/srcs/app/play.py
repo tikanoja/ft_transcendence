@@ -13,6 +13,8 @@ from django.utils import timezone
 import os
 from transcendence import settings
 
+import app.consumers
+
 logger = logging.getLogger(__name__)
 
 def playContext(request, error, success):
@@ -155,44 +157,61 @@ def gameResponse(request, data):
 
 
 def playPOST(request):
-    if request.content_type == 'application/json':
-        data = json.loads(request.body)
-        if data.get('request_type') == 'gameResponse':
-            return gameResponse(request, data)
-        else:
-            return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, ve, "Unknown content type"))
+    try: 
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+            if data.get('request_type') == 'gameResponse':
+                return gameResponse(request, data)
+            else:
+                return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, ve, "Unknown content type"))
 
-    current_user = request.user
-    sent_form = GameRequestForm(request.POST)
-    try:
+        sent_form = GameRequestForm(request.POST)
         if not sent_form.is_valid():
-            raise ValidationError("Form filled incorrectly")
-    except ValidationError as ve:
-        return render(request, 'user/play.html', playContext(request, ve, None))
-    
-    challenged_username = sent_form.cleaned_data['username']
-    challenged_user = CustomUser.objects.filter(username=challenged_username).first()
-    if challenged_user in current_user.blocked_users.all() or current_user in challenged_user.blocked_users.all():
-        return render(request, 'user/play.html', playContext(request, "Blocked", None))
+                raise ValidationError("Form filled incorrectly")
+
+        challenged_username: str    = sent_form.cleaned_data['username']
+        challenged_user: CustomUser = CustomUser.objects.get(username=challenged_username)
+
+        game = sent_form.cleaned_data["game_type"]
+        as_user_challenge_user(request.user, challenged_user, game)
+
+    # Realistically should have different dispatch for various different exceptions
+    except ValidationError as e:
+        error_message = e.message if hasattr(e, "message") else str(e)
+        return render(request, 'user/play.html', playContext(request, error_message, None))
+
+    return render(request, 'user/play.html', playContext(request, None, "Game invite sent!")) 
+
+
+def as_user_challenge_user(user: CustomUser, challengee: CustomUser, game_name: str):
+    # Check if participants have blocked each other
+    if challengee in user.blocked_users.all() or user in challengee.blocked_users.all():
+        raise ValidationError("You are blocked")
+        #return render(request, 'user/play.html', playContext(request, "Blocked", None))
 
     # check if they are trying to add themselves
-    if request.user.username == challenged_username:
-        return render(request, 'user/play.html', playContext(request, "No single player mode...", None))
+    if user.username == challengee.username:
+        raise ValidationError("No single player mode...")
 
     # request already sent?
-    all_pending_games = GameInstance.objects.filter(Q(p1=current_user) | Q(p2=current_user), status='Pending')
-    prior_request = all_pending_games.filter(Q(p1=challenged_user) | Q(p2=challenged_user)).first()
+    all_pending_games = GameInstance.objects.filter(Q(p1=user) | Q(p2=user), status='Pending')
+    prior_request = all_pending_games.filter(Q(p1=challengee) | Q(p2=challengee)).first()
     if prior_request is not None:
-        return render(request, 'user/play.html', playContext(request, "You have already sent a game request to this user", None)) 
+        raise ValidationError("You have already sent a game request to this user")
 
-    game=sent_form.cleaned_data['game_type']
-    if game == 'Pong':
-        new_game_instance = PongGameInstance(p1=current_user, p2=challenged_user, game=game, status='Pending')
-    else:
-        new_game_instance = ColorGameInstance(p1=current_user, p2=challenged_user, game=game, status='Pending')
+    new_game_instance = None
+    match (game_name.lower()):
+        case "pong":
+            new_game_instance = PongGameInstance(p1=user, p2=challengee, game=game_name, status='Pending')
+        case "color":
+            new_game_instance = ColorGameInstance(p1=user, p2=challengee, game=game_name, status='Pending')
+        case _:
+            raise ValidationError("Invalid game type")
+
     new_game_instance.save()
+
     # CHAT MODULE let challenged user know that they have been challenged
-    return render(request, 'user/play.html', playContext(request, None, "Game invite sent!")) 
+    app.consumers.chat_system_message(challengee, "{name} has challenged you to a game of {game}".format(name = user.username, game = game_name))
 
 
 def start_tournament(request):
@@ -278,7 +297,10 @@ def tournament_invite(request):
         return render(request, 'user/play.html', playContext(request, 'You have already invited that user', None))
     # add the invited_user to the tournament
     Participant.objects.create(user=invited_user, tournament=tournament, status='Pending')
+
     # CHAT MODULE msg to invited_user to inform that they have been invited to a tournament
+    app.consumers.chat_system_message(invited_user, "{name} has invited you to a tournament!".format(name = request.user.username))
+
     return render(request, 'user/play.html', playContext(request, None, 'Invite sent!'))
 
 
@@ -350,18 +372,27 @@ def update_tournament(game_instance):
                     next_level_match.save()
                     logger.debug(f'Scheduled a game: {p1_user.username} vs {p2_user.username}!')
                     # CHAT MODULE let player know in chat that they have a new game
+                    for matchup in [(p1_user, p2_user), (p2_user, p1_user)]:
+                        app.consumers.chat_system_message(matchup[0], "Your next tournament match is against {name}!".format(name=matchup[1].username))
+
         else:
             logger.debug('No more levels in tournament, finishing tournament!')
-            # CHAT MODULE announce tournament winner
             match.status = Match.FINISHED
             match.save()
             tournament.status = Tournament.FINISHED
             tournament.save()
+            # CHAT MODULE announce tournament winner
+            winner_username = match.game_instance.winner.username;
+            for p in Participant.objects.filter(tournament=tournament):
+                app.consumers.chat_system_message(p.user, "Congratulations to {name} for winning the tournament!".format(name=winner_username))
     else:
         logger.debug('There are still matches remaining on this level of the tournament')
-        # CHAT MODULE let player know that we are waiting for games to finish
         match.status = Match.FINISHED
         match.save()
+
+        # CHAT MODULE let player know that we are waiting for games to finish
+        winner = match.game_instance.winner
+        app.consumers.chat_system_message(winner, "Matches are still ongoing, please wait for your next game.")
 
     
 def get_wl_ratio(user, game):
@@ -539,7 +570,11 @@ def tournament_start(request, data):
         generate_brackets(tournament, accepted_participants)
     except ValueError as e:
         return render(request, 'user/play.html', playContext(request, str(e), None))
+
     # CHAT MODULE announce tournament start
+    for p in participants:
+        app.consumers.chat_system_message(p.user, "Tournament is starting!")
+
     return render(request, 'user/play.html', playContext(request, None, 'Tournament started!'))
 
 
