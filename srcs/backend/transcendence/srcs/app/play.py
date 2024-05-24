@@ -315,13 +315,13 @@ def tournament_leave(request, data):
 def update_tournament(game_instance):
     logger.debug('in update_tournament')
     match = Match.objects.filter(game_instance=game_instance).first()
-    if Match is None:
+    if match is None:
         logger.debug('could not find match! :(')
     else:
         logger.debug('Match found!')
 
     tournament = match.tournament
-    if Tournament is None:
+    if tournament is None:
         logger.debug('could not find tournament! : (')
     else:
         logger.debug('tournament found!')
@@ -388,7 +388,7 @@ def get_wl_ratio(user, game):
         else:
             losses += 1
     if losses == 0:
-        logger.debug('no prior losses, assuming ratio of WIN == ' + wins)
+        logger.debug('no prior losses, assuming ratio of WIN == ' + str(wins))
         return wins
     ratio = wins / losses
     logger.debug('calculated ratio of ' + str(ratio))
@@ -503,7 +503,7 @@ def generate_brackets(tournament, accepted_participants):
 def tournament_start(request, data):
     current_user = request.user
     # Get tournament
-    tournament = Tournament.objects.filter(creator=current_user, status='Pending').first()
+    tournament = Tournament.objects.filter(creator=current_user, status=Tournament.PENDING).first()
     if tournament is None:
         return render(request, 'user/play.html', playContext(request, 'Could not find tournament instance...', None))
 
@@ -521,7 +521,7 @@ def tournament_start(request, data):
         all_games = GameInstance.objects.filter(Q(p1=user) | Q(p2=user))
         if all_games.first() is not None:
             all_non_finished_games = all_games.exclude(status='Finished')
-            if all_non_finished_games is not None:
+            if all_non_finished_games.first() is not None:
                 logger.debug('found this many unfinished games: ' + str(all_non_finished_games.count()) + ' for user: ' + user.username + '!!!')
                 logger.debug('deleted pending games')
                 all_non_finished_games.delete()
