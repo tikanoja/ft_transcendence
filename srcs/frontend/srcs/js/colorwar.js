@@ -40,7 +40,6 @@ export const verifyUsername = () => {
         const current_game_id = document.getElementById('current_game_id').value;
         const usernameString = player1username + "," + player2username + "," + current_game_id;
         
-        console.log('usernameString id: ', usernameString);
         socket.emit("username", usernameString);
 
         socket.on('setup_game', (data) => {
@@ -98,7 +97,6 @@ let previousP1Score = null;
 let previousP2Score = null;
 
 export const updateScoreboard = (p1Score, p2Score, currentMoveCount, currentPlayerMove) => {
-export const updateScoreboard = (p1Score, p2Score, currentMoveCount, currentPlayerMove) => {
     const scoreLeftElement = document.querySelector('#player1Score');
     const scoreRightElement = document.querySelector('#player2Score');
     const moveCountElement = document.getElementById('moveCounter'); 
@@ -123,7 +121,6 @@ export const updateScoreboard = (p1Score, p2Score, currentMoveCount, currentPlay
         p2Card.style.borderWidth = '4px';
     }
 
-    console.log(currentPlayerMove)
     if (isNaN(p1Score) || isNaN(p2Score)) {
         return;
     }
@@ -174,6 +171,7 @@ function loadGameOverScreen(data) {
 
     winnerInfo.textContent = winnerText;
     gameOverScreen.style.display = 'block';
+    const canvasContainer = document.getElementById('canvasContainer');
     canvasContainer.style.display = 'none';
 }
 
@@ -197,8 +195,7 @@ function exitGame(data, tileMeshes, colorTextures)
     button3.removeEventListener('mouseup', () => handleMouseUpButton3(gameNumber));
     button4.removeEventListener('mouseup', () => handleMouseUpButton4(gameNumber));
     cleanupGameBoard(tileMeshes)
-    const canvas = document.getElementById('canvasContainer');
-    canvas.remove();
+
     const scoreboard = document.getElementById('scoreboard');
     scoreboard.remove;
     AnimationController.stopAnimation();
@@ -354,9 +351,6 @@ function addUniqueEventListener(button, event, handler) {
 
         handlers.add({ event, handler });
 
-        console.log(`Event listener for ${event} added to ${button.id}`);
-    } else {
-        console.log(`Event listener for ${event} already exists on ${button.id}`);
     }
 }
 
