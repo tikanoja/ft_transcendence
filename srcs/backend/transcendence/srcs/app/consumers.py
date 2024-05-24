@@ -90,7 +90,7 @@ class UserConsumer(AsyncJsonWebsocketConsumer):
 
                 case "chat.invite":
                     user_to_invite: CustomUser = await CustomUser.objects.aget(username=content["username"])
-                    await sync_to_async(app.play.as_user_challenge_user)(user, user_to_invite, content["game"].lower())
+                    await sync_to_async(app.play.as_user_challenge_user)(user, user_to_invite, content["game"])
                     await self.chat_system(user_to_invite.username + " has been challenged.")
 
                 case _:

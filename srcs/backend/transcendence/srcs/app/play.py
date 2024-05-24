@@ -200,7 +200,7 @@ def as_user_challenge_user(user: CustomUser, challengee: CustomUser, game_name: 
         raise ValidationError("You have already sent a game request to this user")
 
     new_game_instance = None
-    match (game_name):
+    match (game_name.lower()):
         case "pong":
             new_game_instance = PongGameInstance(p1=user, p2=challengee, game=game_name, status='Pending')
         case "color":
@@ -373,7 +373,7 @@ def update_tournament(game_instance):
                     logger.debug(f'Scheduled a game: {p1_user.username} vs {p2_user.username}!')
                     # CHAT MODULE let player know in chat that they have a new game
                     for matchup in [(p1_user, p2_user), (p2_user, p1_user)]:
-                        app.consumers.chat_system_message(matchup.first, "Your next tournament match against {name}!".format(name=matchup.second))
+                        app.consumers.chat_system_message(matchup.first, "Your next tournament match is against {name}!".format(name=matchup.second))
 
         else:
             logger.debug('No more levels in tournament, finishing tournament!')
@@ -383,8 +383,8 @@ def update_tournament(game_instance):
             tournament.save()
             # CHAT MODULE announce tournament winner
             winner_username = match.game_instance.winner.username;
-            for user in tournament.participants:
-                app.consumers.chat_system_message(user, "Congratulations to {name} for winning the tournament!".format(name=winner_username))
+            for p in tournament.participants:
+                app.consumers.chat_system_message(p.user, "Congratulations to {name} for winning the tournament!".format(name=winner_username))
     else:
         logger.debug('There are still matches remaining on this level of the tournament')
         match.status = Match.FINISHED
@@ -572,8 +572,8 @@ def tournament_start(request, data):
         return render(request, 'user/play.html', playContext(request, str(e), None))
 
     # CHAT MODULE announce tournament start
-    for user in participants:
-        app.consumers.chat_system_message(user, "Tournament is starting!")
+    for p in participants:
+        app.consumers.chat_system_message(p.user, "Tournament is starting!")
 
     return render(request, 'user/play.html', playContext(request, None, 'Tournament started!'))
 
