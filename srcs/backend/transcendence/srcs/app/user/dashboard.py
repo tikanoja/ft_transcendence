@@ -130,13 +130,13 @@ def get_color_stats(user:CustomUser, color_games:QuerySet) -> dict:
     if not color_games:
         return color_stats
     wins = 0
-    least_moves_to_win = color_games[0].turns_to_win
+    least_moves_to_win = 0
     sum_moves_to_win = 0
     for game in color_games:
         if user == game.winner:
             wins += 1
             sum_moves_to_win += game.turns_to_win
-            if game.turns_to_win < least_moves_to_win:
+            if game.turns_to_win < least_moves_to_win or least_moves_to_win == 0:
                 least_moves_to_win = game.turns_to_win
     color_stats["wins"] = wins
     color_stats['win_percent'] = round((wins / color_stats["games_played"]) * 100, 2)
