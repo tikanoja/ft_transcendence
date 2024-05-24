@@ -316,8 +316,10 @@ function onWindowResize(camera, renderer) {
     const originalWidth = 100; 
     const originalHeight = 100; 
     const canvas = renderer.domElement;
-  
-    // const canvasBounds = canvas.getBoundingClientRect();
+    
+    canvas.style.width = `${window.innerWidth - (window.innerWidth / 4)}px`;
+    canvas.style.height = `${window.innerHeight - (window.innerHeight / 4)}px`;
+
     const P1score = document.getElementById('P1Card');
     const P2score = document.getElementById('P2Card');
     const moveCount = document.getElementById('moveCard');
@@ -372,10 +374,10 @@ export const renderColorwar = (gameNumber, data) => {
     renderer.domElement.id = 'colorCanvas'; 
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
  
-    
-	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4)); 
+	renderer.setSize(window.innerWidth / 2 , window.innerHeight - (window.innerHeight / 4));
     let canvasFocused = true;
     const canvas = renderer.domElement;
+
     canvas.setAttribute('tabindex', '0');
     canvas.addEventListener('focus', () => {
         canvasFocused = true;
