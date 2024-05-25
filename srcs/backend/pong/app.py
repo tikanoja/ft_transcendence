@@ -8,12 +8,11 @@ from dataclasses import dataclass
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
-from flask_restful import Resource, Api
 
 app = Flask(__name__)
 
 CORS(app)
-api = Api(app)
+
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 app.debug = True
@@ -783,17 +782,6 @@ def send_game_over_data(p1_score, p2_score, rally, game_id):
 		except Exception as e:
 			print("Error sending game over data:	", response.status_code)
 			return False
-
-@app.route('/init_usernames', methods=['GET'])
-def init_usernames():
-	try:
-		data = request.get_json()
-		p1_username = data['p1_username']
-		p2_username = data['p2_username']
-		return
-	except Exception as e:
-		print("Failed to init usernames")
-		return
 
 if __name__ == '__main__':
 	# Use SSL/TLS encryption for WSS

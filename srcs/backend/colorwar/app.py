@@ -414,23 +414,6 @@ def send_game_over_data(p1_score, p2_score, rally, game_id):
 		except Exception as e:
 			return jsonify({"error": str(e)}), 500
 
-# is this functon even used?
-# where usernames are stored?
-@app.route('/init_usernames', methods=['GET'])
-def init_usernames():
-	try:
-		# Assuming the request body contains JSON data with 'p1_username' and 'p2_username' THIS ONE SHOULD BE PROPABLY REMOVED
-		data = request.get_json()
-		p1_username = data['p1_username']
-		p2_username = data['p2_username']
-		# Process the data as needed IS THIS NEEDED?
-		# For example, you can return a response indicating success IS THIS NEEDED?
-		return jsonify({'message': 'Usernames initialized successfully', 'p1_username': p1_username, 'p2_username': p2_username}), 200
-	except Exception as e:
-		# Handle any errors
-		return jsonify({'error': str(e)}), 500
-
-
 if __name__ == '__main__':
 	# Use SSL/TLS encryption for WSS
 	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
