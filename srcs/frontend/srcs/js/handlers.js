@@ -117,7 +117,7 @@ function getSingleHandlerDetails() {
             event_name: "click",
             handler: automate_register
         }
-    ]
+    ];
     return elementsList
 }
 
@@ -146,14 +146,14 @@ function getMultipleElementDetails() {
             event_name: "click",
             handler: tournamentButtonHandler
         }
-    ]
+    ];
     return elementsList
 }
 
 // ***** USER SERVICE HANDLERS ***** //
 
 async function logoutButtonClickHandler(event) {
-    console.log('In logoutButtonClickHandler()');	
+	
     event.preventDefault();
 
     const querystring = window.location.search;
@@ -170,7 +170,7 @@ async function logoutButtonClickHandler(event) {
 
 
 const submitRegistrationHandler = async (event) => {
-    console.log('In submitRegistrationHandler');
+    
     event.preventDefault();
     const formData = new FormData(event.target);
 
@@ -182,7 +182,7 @@ const submitRegistrationHandler = async (event) => {
 
 
 const loginFormHandler = async (event) => {
-	console.log('In loginFormHandler()');
+	
 	event.preventDefault();
 	const formData = new FormData(event.target);
 	const querystring = window.location.search;
@@ -194,7 +194,7 @@ const loginFormHandler = async (event) => {
 
 
 const blockUserHandler = async (event) => {
-	console.log('In blockUserHandler()');
+	
 	event.preventDefault();
 	let form = document.getElementById("addFriendForm");
 	const formData = new FormData(form);
@@ -206,7 +206,7 @@ const blockUserHandler = async (event) => {
 
 
 const addFriendHandler = async (event) => {
-	console.log('In addFriendHandler()');
+	
 	event.preventDefault();
 	let form = document.getElementById("addFriendForm");
 	const formData = new FormData(form);
@@ -218,18 +218,17 @@ const addFriendHandler = async (event) => {
 
 
 const friendRequestHandler = async (event) => {
-	console.log('in friendRequestHandler');
+
 	event.preventDefault();
 
 	var fromUser = event.target.getAttribute('data-from-user');
 	var action = event.target.getAttribute('data-action');
-	console.log('from user: ', fromUser, 'action: ', action);
 
 	var data = {
 		'from_user': fromUser,
 		'action': action,
 		'request_type': 'friendResponse'
-	}
+	};
 
 	const querystring = window.location.search;
 	var endpoint = '/app/friends/' + querystring;
@@ -240,24 +239,20 @@ const friendRequestHandler = async (event) => {
 
 const manageAccountHandler = async (event) => {
     event.preventDefault();
-    console.log("in manageAccountHandler");
-    console.log(event.target)
+    
     const formData = new FormData(event.target);
     formData.append("form_id", event.target.id);
 
 	let response = await sendPostRequest('/app/manage_account/', formData);
     if (response.redirected) {
-        console.log('redirect status found');
         let redirect_location = response.url;
-        console.log("redir to: ", redirect_location);
         routeRedirect(redirect_location);
     }
 	else if (response.ok) {
-        console.log('response,ok triggered');
         const html = await response.text();
         if (event.target.id === "delete-account-form") {
             window.history.pushState("", "", "/account/deleted");
-            updateContent(html, "Account Deleted", "You're account is gone forever!")
+            updateContent(html, "Account Deleted", "You're account is gone forever!");
         }
         else
             updateElementContent(html, "manage-account");
@@ -272,22 +267,21 @@ const manageAccountHandler = async (event) => {
 
 
 const updateProfilePicture = async(event) => {
-    console.log("in update profile picture func")
+    
     let response = await sendGetRequest("/app/profile_picture/");
     await handleResponseForElementUpdate(response, "profile-picture");
 }
 
 
 const profileLinkHandler = async (event) => {
+
     event.preventDefault();
-    console.log("in profileLinkHandler");
 
     let profileUrl = new URL(event.target.href);
-    console.log("profile url " + profileUrl);
+    
     if (profileUrl == window.location.href)
 		return ;
     let profilePath = profileUrl.pathname;
-    console.log("profile path " + profilePath);
     let profileUsername = event.target.textContent;
     let response = await sendGetRequest('/app' + profilePath);
     await handleResponseForContentUpdate(response, "Profile | " + profileUsername, "Personal Profile");
@@ -304,25 +298,24 @@ const playButtonClickHandler = async (event) => {
 
 
 const playButtoncolorwarClickHandler = async (event) => {
+
     event.preventDefault();
-    console.log("in color war click handler");
     startScreenColorwar();
 }
 
 
 const gameResponseHandler = async (event) => {
-    console.log('gameResponseHandler()');
+
     event.preventDefault();
 
     var fromUser = event.target.getAttribute('data-from-user');
     var action = event.target.getAttribute('data-action');
-    console.log('from user: ', fromUser, 'action: ', action);
 
     var data = {
         'from_user': fromUser,
         'action': action,
         'request_type': 'gameResponse'
-    }
+    };
 
     const querystring = window.location.search;
     var endpoint = '/app/play/' + querystring;
@@ -332,8 +325,9 @@ const gameResponseHandler = async (event) => {
 
 
 const gameRequestHandler = async (event) => {
+
     event.preventDefault();
-    console.log('in gameRequestHandler');
+    
     const formData = new FormData(event.target);
     const querystring = window.location.search;
 
@@ -344,6 +338,7 @@ const gameRequestHandler = async (event) => {
 
 
 const gameRenderButtonHandler = async (event) => {
+
     event.preventDefault();
     var gameType = event.target.dataset.game;
     var p1 = event.target.dataset.p1;
@@ -356,10 +351,8 @@ const gameRenderButtonHandler = async (event) => {
         'game': gameType
     }
     if (gameType === 'Pong') {
-        console.log("Rendering pong game");
         endpoint = '/pong/post_pong_canvas/';
     } else {
-        console.log("Rendering CW game");
         endpoint = '/pong/post_cw_canvas/';
     }
     let response = await sendPostRequest(endpoint, data, true);
@@ -370,7 +363,7 @@ const gameRenderButtonHandler = async (event) => {
 
 
 const playerAuthHandler = async (event) => {
-    console.log('In playerAuthHandler()');
+
     event.preventDefault();
     const formData = new FormData(event.target);
 
@@ -381,8 +374,9 @@ const playerAuthHandler = async (event) => {
 }
 
 const tournamentFormHandler = async (event) => {
+    
     event.preventDefault();
-    console.log('in tournamentFormHandler');
+    
     const formData = new FormData(event.target);
     const querystring = window.location.search;
 
@@ -392,14 +386,14 @@ const tournamentFormHandler = async (event) => {
 }
 
 const tournamentButtonHandler = async (event) => {
-    console.log('in tournamentButtonHandler');
+
     event.preventDefault();
 
     var action = event.target.getAttribute('data-action');
 
     var data = {
         'action': action,
-    }
+    };
 
     if (action == 'nuke')
         data['tournament-id'] = event.target.getAttribute('data-tournament-id');

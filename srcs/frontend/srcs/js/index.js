@@ -21,7 +21,7 @@ function getCookie(name) {
 
 
 const sendPostRequest = async (endpoint, data, isJson = false) => {
-    console.log('In sendPostRequest()');
+    
     const headers = {
         'X-CSRFToken': getCookie('csrftoken')
     };
@@ -34,24 +34,22 @@ const sendPostRequest = async (endpoint, data, isJson = false) => {
         credentials: 'include',
         headers: headers,
         body: data
-    })
-    console.log("Response status in sendrequest: ", response.status)
-    return response
+    });
+    return response;
 }
 
 
 const sendGetRequest = async (endpoint) => {
     const response = await fetch(endpoint, {
         method: 'GET'
-    })
-    return response
+    });
+    return response;
 }
 
 const handleResponseForContentUpdate = async (response, newTitle, newDescripton) => {
     
     if (response.redirected) {
         let redirect_location = response.url;
-        console.log("redir to: ", redirect_location);
         routeRedirect(redirect_location);
     } else if (response.ok) {
         // handling normal content update
