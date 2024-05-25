@@ -40,7 +40,6 @@ export const verifyUsername = () => {
         const current_game_id = document.getElementById('current_game_id').value;
         const usernameString = player1username + "," + player2username + "," + current_game_id;
         
-        console.log('usernameString id: ', usernameString);
         socket.emit("username", usernameString);
 
         socket.on('setup_game', (data) => {
@@ -97,10 +96,30 @@ function addLighting(scene) {
 let previousP1Score = null;
 let previousP2Score = null;
 
-export const updateScoreboard = (p1Score, p2Score, currentMoveCount) => {
+export const updateScoreboard = (p1Score, p2Score, currentMoveCount, currentPlayerMove) => {
     const scoreLeftElement = document.querySelector('#player1Score');
     const scoreRightElement = document.querySelector('#player2Score');
     const moveCountElement = document.getElementById('moveCounter'); 
+    const p1Card = document.getElementById('P1Card');
+    const p2Card = document.getElementById('P2Card');
+    
+    if (currentPlayerMove == '0') {
+        p1Card.classList.add('border-success');
+        p1Card.classList.remove('border-dark');
+        p1Card.style.borderWidth = '4px';
+        
+        p2Card.classList.add('border-dark');
+        p2Card.classList.remove('border-success');
+        p2Card.style.borderWidth = '1px';
+    } else if (currentPlayerMove == '1') {
+        p1Card.classList.add('border-dark');
+        p1Card.classList.remove('border-success');
+        p1Card.style.borderWidth = '1px';
+        
+        p2Card.classList.add('border-success');
+        p2Card.classList.remove('border-dark');
+        p2Card.style.borderWidth = '4px';
+    }
 
     if (isNaN(p1Score) || isNaN(p2Score)) {
         return;
@@ -152,6 +171,7 @@ function loadGameOverScreen(data) {
 
     winnerInfo.textContent = winnerText;
     gameOverScreen.style.display = 'block';
+    const canvasContainer = document.getElementById('canvasContainer');
     canvasContainer.style.display = 'none';
 }
 
@@ -175,8 +195,7 @@ function exitGame(data, tileMeshes, colorTextures)
     button3.removeEventListener('mouseup', () => handleMouseUpButton3(gameNumber));
     button4.removeEventListener('mouseup', () => handleMouseUpButton4(gameNumber));
     cleanupGameBoard(tileMeshes)
-    const canvas = document.getElementById('canvasContainer');
-    canvas.remove();
+
     const scoreboard = document.getElementById('scoreboard');
     scoreboard.remove;
     AnimationController.stopAnimation();
@@ -190,13 +209,13 @@ function updateGameState(data, tileMeshes, colorTextures) {
         let player1score = valuesArray[2];
         let player2score = valuesArray[3];
         let currentMoveCount = valuesArray[5];
-
-        for (let i = 6; i < valuesArray.length; i += 2) {
+        for (let i = 6; i < valuesArray.length - 1; i += 2) {
             const color = valuesArray[i];
             const owner = valuesArray[i + 1];
             const tile = { color, owner };
             tileLegend.push(tile);
         }
+        let currentPlayerMove = valuesArray[ valuesArray.length -1];
 
         tileLegend.forEach((tileInfo, index) => {
             let tileTexture;
@@ -215,7 +234,7 @@ function updateGameState(data, tileMeshes, colorTextures) {
             tileMesh.material.needsUpdate = true;
         });
 
-        updateScoreboard(player1score, player2score, currentMoveCount);
+        updateScoreboard(player1score, player2score, currentMoveCount, currentPlayerMove);
 
         let gameRunning =  valuesArray[4];
         if (gameRunning != 1) {
@@ -295,8 +314,10 @@ function onWindowResize(camera, renderer) {
     const originalWidth = 100; 
     const originalHeight = 100; 
     const canvas = renderer.domElement;
-  
-    const canvasBounds = canvas.getBoundingClientRect();
+    
+    canvas.style.width = `${window.innerWidth - (window.innerWidth / 4)}px`;
+    canvas.style.height = `${window.innerHeight - (window.innerHeight / 4)}px`;
+
     const P1score = document.getElementById('P1Card');
     const P2score = document.getElementById('P2Card');
     const moveCount = document.getElementById('moveCard');
@@ -308,30 +329,11 @@ function onWindowResize(camera, renderer) {
         button.style.height = `${scaleFactor * originalHeight}px`;
     });
 
-    const canvasCenterX = canvasBounds.left + canvasBounds.width / 2;
-
-    moveCount.style.position = 'absolute';
     moveCount.style.display = 'block';
-    moveCount.style.top = canvasBounds.top + 10 + 'px';
-    moveCount.style.left = `${canvasCenterX - moveCount.offsetWidth / 2}px`;
-
-    P1score.style.position = 'absolute';
     P1score.style.display = 'block';
-    P1score.style.top = canvasBounds.top + 10 + 'px';
-    P1score.style.left = `${Math.max(canvasBounds.left + 50, 10)}px`;
-
-    P2score.style.position = 'absolute';
     P2score.style.display = 'block';
-    P2score.style.top = canvasBounds.top + 10 + 'px';
-    P2score.style.right = `${Math.max(window.innerWidth - canvasBounds.right + 50, 10)}px`;
 
     const gameControls = document.getElementById('GameControls');
-    const gameControlsBottomMargin = 7; // Adjust this value as needed
-    gameControls.style.position = 'absolute';
-    gameControls.style.bottom = `${gameControlsBottomMargin}px`;
-
-    const gameControlsLeftOffsetFactor = 1.3; // Adjust this value as needed
-    gameControls.style.left = `${(canvasCenterX - gameControls.offsetWidth) / gameControlsLeftOffsetFactor}px`;    
     gameControls.style.display = 'block';
 }
 
@@ -349,9 +351,6 @@ function addUniqueEventListener(button, event, handler) {
 
         handlers.add({ event, handler });
 
-        console.log(`Event listener for ${event} added to ${button.id}`);
-    } else {
-        console.log(`Event listener for ${event} already exists on ${button.id}`);
     }
 }
 
@@ -370,10 +369,10 @@ export const renderColorwar = (gameNumber, data) => {
     renderer.domElement.id = 'colorCanvas'; 
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
  
-    
-	renderer.setSize(window.innerWidth - (window.innerWidth / 4), window.innerHeight - (window.innerHeight / 4)); 
+	renderer.setSize(window.innerWidth / 2 , window.innerHeight - (window.innerHeight / 4));
     let canvasFocused = true;
     const canvas = renderer.domElement;
+
     canvas.setAttribute('tabindex', '0');
     canvas.addEventListener('focus', () => {
         canvasFocused = true;

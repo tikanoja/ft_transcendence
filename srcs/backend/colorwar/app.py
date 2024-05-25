@@ -80,6 +80,7 @@ class Game:
 	def return_game_state(self):
 		# self.screen_width: int = 1920 # x
 		# self.screen_height: int = 1080 # y
+		print(self.which_player_turn)
 		state = str(self.game_slot)
 		state += ','
 		state += str(self.left_score)
@@ -95,6 +96,8 @@ class Game:
 				state += str(self.squares[x + (y * self.width)].colour) # 1,2,3,4 # white,black,green,red
 				state += ','
 				state += str(self.squares[x + (y * self.width)].owner) # 1,2,0 # left,right,no one owns
+		state += ','
+		state += str(self.which_player_turn)
 		return state
 
 	def check_game_running_conditions(self):
@@ -410,23 +413,6 @@ def send_game_over_data(p1_score, p2_score, rally, game_id):
 				return jsonify({"error": "Failed to send request"}), response.status_code
 		except Exception as e:
 			return jsonify({"error": str(e)}), 500
-
-# is this functon even used?
-# where usernames are stored?
-@app.route('/init_usernames', methods=['GET'])
-def init_usernames():
-	try:
-		# Assuming the request body contains JSON data with 'p1_username' and 'p2_username' THIS ONE SHOULD BE PROPABLY REMOVED
-		data = request.get_json()
-		p1_username = data['p1_username']
-		p2_username = data['p2_username']
-		# Process the data as needed IS THIS NEEDED?
-		# For example, you can return a response indicating success IS THIS NEEDED?
-		return jsonify({'message': 'Usernames initialized successfully', 'p1_username': p1_username, 'p2_username': p2_username}), 200
-	except Exception as e:
-		# Handle any errors
-		return jsonify({'error': str(e)}), 500
-
 
 if __name__ == '__main__':
 	# Use SSL/TLS encryption for WSS

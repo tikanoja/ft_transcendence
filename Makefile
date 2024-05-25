@@ -7,6 +7,7 @@ clean:
 
 fclean: clean
 	docker system prune -f
+	@if [ -d "pong_cli/env" ]; then rm -rf pong_cli/env; fi
 
 re: fclean all
 
@@ -27,4 +28,7 @@ logs:
 log:
 	docker logs transcendence_c
 
-.PHONY: all clean fclean re up down
+pong_cli:
+	./pong_cli/setup_cli.sh
+
+.PHONY: all clean fclean re up down logs log pong_cli
