@@ -2,7 +2,6 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import logging
 import json
-import requests
 from django.shortcuts import render
 from . import utils
 from app.models import PongGameInstance, CustomUser, GameInstance

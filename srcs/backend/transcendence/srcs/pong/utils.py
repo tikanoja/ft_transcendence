@@ -1,4 +1,4 @@
-from app.models import CustomUser, PongGameInstance, Match, Tournament, GameInstance, ColorGameInstance
+from app.models import CustomUser, PongGameInstance, GameInstance, ColorGameInstance
 from app.play import update_tournament
 from django.http import JsonResponse
 from app.forms import PlayerAuthForm
