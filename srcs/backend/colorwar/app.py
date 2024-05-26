@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-app.debug = True
+app.debug = False
 app.host = '0.0.0.0'
 
 @dataclass
@@ -419,4 +419,4 @@ if __name__ == '__main__':
 	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 	ssl_context.load_cert_chain('/server.crt', '/server.key')
 	print("color war is now running, server is open")
-	socketio.run(app, host='0.0.0.0', port=8889, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
+	socketio.run(app, host='0.0.0.0', port=8889, debug=False, ssl_context=ssl_context, allow_unsafe_werkzeug=True)
