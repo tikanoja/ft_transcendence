@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-app.debug = True
+app.debug = False
 app.host = '0.0.0.0'
 
 @dataclass

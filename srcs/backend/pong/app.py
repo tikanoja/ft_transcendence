@@ -15,7 +15,7 @@ CORS(app)
 
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-app.debug = True
+app.debug = False
 app.host = '0.0.0.0'
 
 @dataclass # "struct" in c/c++ terms
