@@ -35,18 +35,15 @@ def loginPOST(request):
         return res
         # could send a redirect to the home page or user profile
     else:
-        logger.debug("user not authenticated")
         return render(request, 'user/login.html', {"form": sent_form, "title": title, "error": "wrong password!"})
 
 
 def loginGET(request):
-    logger.debug('In loginGET()')
     title = "Sign in to play!"
     # send a redirect to logout pg?
     if request.user.is_authenticated:
         return render(request, 'user/logged_in.html', {"current_user": request.user})
     form = LoginForm()
-    logger.debug(form)
     next = request.GET.get('next', '/play')
     res = render(request, 'user/login.html', {"form": form, "title": title})
     if next:

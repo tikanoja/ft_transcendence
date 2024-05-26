@@ -159,7 +159,7 @@ class UploadImageForm(forms.ModelForm):
 class GameRequestForm(forms.Form):
     GAME_TYPE_CHOICES = [
         (GameInstance.PONG, 'Pong'),
-        (GameInstance.COLOR, 'Color'),
+        (GameInstance.COLOR, 'ColorWar'),
     ]
     
     game_type = forms.ChoiceField(widget=forms.RadioSelect(attrs={'class': 'form-check-input'}), choices=GAME_TYPE_CHOICES, label='Choose Game Type:')
@@ -180,7 +180,7 @@ class GameRequestForm(forms.Form):
 class LocalGameForm(forms.Form):
     GAME_TYPE_CHOICES = [
         (GameInstance.PONG, 'Pong'),
-        (GameInstance.COLOR, 'Color'),
+        (GameInstance.COLOR, 'ColorWar'),
     ]
     game_type = forms.ChoiceField(choices=GAME_TYPE_CHOICES, label='Game Type')
     username = forms.CharField(label='P2 Username', widget=forms.TextInput(attrs={'placeholder': 'Enter username'}), max_length=50, required=True)
@@ -206,7 +206,7 @@ class LocalGameForm(forms.Form):
 class StartTournamentForm(forms.Form):
     GAME_TYPE_CHOICES = [
         (GameInstance.PONG, 'Pong'),
-        (GameInstance.COLOR, 'Color'),
+        (GameInstance.COLOR, 'ColorWar'),
     ]
     game_type = forms.ChoiceField(widget=forms.RadioSelect(attrs={'class': 'form-check-input'}), choices=GAME_TYPE_CHOICES, label='Choose Game Type:')
     alias = forms.CharField(label='Enter alias', widget=forms.TextInput(attrs={'placeholder': 'Enter alias', 'class': 'form-control'}), max_length=50, required=True)

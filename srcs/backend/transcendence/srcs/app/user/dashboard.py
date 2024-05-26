@@ -1,4 +1,4 @@
-from app.models import CustomUser, GameInstance, PongGameInstance, ColorGameInstance
+from app.models import CustomUser, PongGameInstance, ColorGameInstance
 from django.db.models import Q, QuerySet
 import logging
 
@@ -44,7 +44,6 @@ def get_pong_history(username:str, pong_games:QuerySet) -> dict:
         entry["winner"] = check_user_not_none(game.winner)
         entry["is_tournament_game"] = game.tournament_match
         pong_history[iter] = entry
-    logger.debug(pong_history)
     return pong_history
 
 
@@ -68,7 +67,6 @@ def get_pong_stats(user:CustomUser, pong_games:QuerySet) -> dict:
         is_p1 = (game.p1 == user)
         margin = 0
         if user == game.winner:
-            logger.debug(f"User is {user.username} and winner is {game.winner}")
             wins += 1
             if is_p1:
                 margin = game.p1_score - game.p2_score
@@ -91,7 +89,6 @@ def get_pong_stats(user:CustomUser, pong_games:QuerySet) -> dict:
     pong_stats['longest_rally'] = longest_rally
     pong_stats['win_percent'] = round((wins / pong_stats["games_played"]) * 100, 2)
     pong_stats["tournament_games"] = len(pong_games.filter(tournament_match=True))
-    logger.debug(pong_stats)
     return pong_stats
 
 
@@ -114,7 +111,6 @@ def get_color_history(username:str, color_games:QuerySet) -> dict:
         entry["turns_to_win"] = game.turns_to_win
         entry["is_tournament_game"] = game.tournament_match
         color_history[iter] = entry
-    logger.debug(color_history)
     return color_history
 
 
@@ -146,16 +142,12 @@ def get_color_stats(user:CustomUser, color_games:QuerySet) -> dict:
     else:
         color_stats["average_move_to_win"] = 0
     color_stats["tournament_games"] = len(color_games.filter(tournament_match=True))
-    logger.debug(color_stats)
     return color_stats
 
 
 def get_game_history_and_stats(username:str) -> dict:
-    logger.debug("in get game history")
     user = CustomUser.objects.get(username=username)
     all_pong_games = PongGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
-    logger.debug('all pong games: ')
-    logger.debug(all_pong_games)
     all_color_games = ColorGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
     pong_history = get_pong_history(username, all_pong_games)
     pong_stats = get_pong_stats(user, all_pong_games)
@@ -171,13 +163,11 @@ def get_wl_ratio(user, game):
     if no losses, returns wins to avoid division by 0
     otherwise, returns a ratio wins/losses
     """
-    logger.debug('calculating ratio of user ' + user.username + ' for game ' + game)
     if game == 'Pong':
         all_games = PongGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
     else:
         all_games = ColorGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
     if all_games.first() is None:
-        logger.debug('no prior games, assuming ratio of 1')
         return 1
     wins = 0
     losses = 0
@@ -189,8 +179,6 @@ def get_wl_ratio(user, game):
         else:
             losses += 1
     if losses == 0:
-        logger.debug('no prior losses, assuming ratio of WIN == ' + wins)
         return wins
     ratio = wins / losses
-    logger.debug('calculated ratio of ' + ratio)
     return ratio

@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 
+from django.core.management.utils import get_random_secret_key
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,13 +22,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-*9#ubcwnam1fwt8y$$*l3)+u-cpsh+ms)w%pglfthdiwgza*8u'
+key_env = os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY = key_env if key_env else get_random_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'http://localhost', 'https://localhost', 'transcendence', 'pong', 'https://c1r5p9']
-CSRF_TRUSTED_ORIGINS = ['https://localhost', 'http://pong', 'https://c1r5p9']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'http://localhost', 'https://localhost', 'transcendence', 'pong']
+CSRF_TRUSTED_ORIGINS = ['https://localhost', 'http://pong']
 # Application definition
 INSTALLED_APPS = [
     'channels',
@@ -73,23 +76,18 @@ TEMPLATES = [
     },
 ]
 
-#add!
 ASGI_APPLICATION = 'transcendence.asgi.application'
 WSGI_APPLICATION = 'transcendence.wsgi.application'
 
 LOGIN_URL = '/app/login'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_SAMESITE = 'None' #Remove this for CORS
+SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = 'Lax' # Might have to be removed once we have templates
+CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_AGE = 90 * 60 # == 1h30min
 SESSION_SAVE_EVERY_REQUEST = True
-# added trying to get form submission to work from templates
-# CSRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"  # The header name used by Nginx
-# SESSION_COOKIE_DOMAIN = None
-# CSRF_COOKIE_DOMAIN = None
 
 CHANNEL_LAYERS = {
     "default": {
@@ -100,7 +98,7 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME':  os.environ.get('POSTGRES_DB'),
+        'NAME': os.environ.get('POSTGRES_DB'),
         'USER': os.environ.get('POSTGRES_USER'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
         'HOST': 'database',
@@ -179,8 +177,3 @@ LOGGING = {
         'level': 'DEBUG',
     },
 }
-
-# Set up possible project-wide defines here
-# Example:
-# PROJECT_NAME = 'PongChamps'
-# Remember!! from django.conf import settings

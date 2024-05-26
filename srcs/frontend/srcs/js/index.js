@@ -21,7 +21,7 @@ function getCookie(name) {
 
 
 const sendPostRequest = async (endpoint, data, isJson = false) => {
-    console.log('In sendPostRequest()');
+    
     const headers = {
         'X-CSRFToken': getCookie('csrftoken')
     };
@@ -34,31 +34,29 @@ const sendPostRequest = async (endpoint, data, isJson = false) => {
         credentials: 'include',
         headers: headers,
         body: data
-    })
-    console.log("Response status in sendrequest: ", response.status)
-    return response
+    });
+    return response;
 }
 
 
 const sendGetRequest = async (endpoint) => {
     const response = await fetch(endpoint, {
         method: 'GET'
-    })
-    return response
+    });
+    return response;
 }
 
 const handleResponseForContentUpdate = async (response, newTitle, newDescripton) => {
     
     if (response.redirected) {
         let redirect_location = response.url;
-        console.log("redir to: ", redirect_location);
         routeRedirect(redirect_location);
     } else if (response.ok) {
         // handling normal content update
         const html = await response.text();
         updateContent(html, newTitle, newDescripton);
     } else {
-        console.log('handleResponseForContentUpdate: response status: ' + response.status); //should this be an error log?
+        console.log('handleResponseForContentUpdate: response status: ' + response.status + ' for : ' + newTitle);
     }
 }
 
@@ -71,7 +69,7 @@ const handleResponseForElementUpdate = async (response, elementName) => {
 		const html = await response.text();
 		updateElementContent(html, elementName);
 	} else {
-		console.log("Response status in handleResponseForElementUpdate(): ", response.status)//should this be an error log?
+		console.log("Response status in handleResponseForElementUpdate(): ", response.status, " for element: ", elementName);
 	}
 }
 
