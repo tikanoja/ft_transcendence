@@ -791,4 +791,4 @@ if __name__ == '__main__':
 		background_thread_running = 1
 		thread = threading.Thread(target=game_loop)
 		thread.start()
-	socketio.run(app, host='0.0.0.0', port=8888, debug=True, ssl_context=ssl_context, allow_unsafe_werkzeug=True) # unsafe is for self signed ssl certificates
+	socketio.run(app, host='0.0.0.0', port=8888, debug=False, ssl_context=ssl_context, allow_unsafe_werkzeug=True) # unsafe is for self signed ssl certificates
