@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, username, email, password=None, **extra_fields): #add the params needed
+    def create_user(self, username, email, password=None, **extra_fields):
         if not username:
             raise ValueError('The username field must be set.')
         if not email:
@@ -39,7 +39,6 @@ class CustomUserManager(BaseUserManager):
             user.set_password(kwargs["password"])
         user.save()
 
-# Create your models here.
 class CustomUser(AbstractBaseUser):
     username = models.CharField(max_length = 50, unique=True)
     first_name = models.CharField(max_length = 50, null=True)
@@ -116,7 +115,6 @@ class PongGameInstance(GameInstance):
         return f'({self.game} instance:  p1: {self.p1.username}, p2: {self.p2.username}, status: {self.status})'
 
 
-# changed for current tracking in game
 class ColorGameInstance(GameInstance):
     turns_to_win = models.IntegerField(default=0)
     
@@ -142,7 +140,6 @@ class Match(models.Model):
 
     def is_last_of_level(self):
         unfinished_matches = self.tournament.match_set.filter(level=self.level).exclude(status='Finished').count()
-        logger.debug('Unfinished matches on this level of tournament: ' + str(unfinished_matches))
         return unfinished_matches == 1
 
 
@@ -191,5 +188,4 @@ class Tournament(models.Model):
     
     def get_highest_level(self):
         highest_level = self.match_set.aggregate(max_level=models.Max('level'))['max_level']
-        logger.debug('Highest match level in tournament: ' + str(highest_level))
         return highest_level if highest_level is not None else 0

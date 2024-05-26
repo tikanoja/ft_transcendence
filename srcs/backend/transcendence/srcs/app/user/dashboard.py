@@ -171,7 +171,6 @@ def get_wl_ratio(user, game):
     if no losses, returns wins to avoid division by 0
     otherwise, returns a ratio wins/losses
     """
-    logger.debug('calculating ratio of user ' + user.username + ' for game ' + game)
     if game == 'Pong':
         all_games = PongGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
     else:
@@ -189,7 +188,6 @@ def get_wl_ratio(user, game):
         else:
             losses += 1
     if losses == 0:
-        logger.debug('no prior losses, assuming ratio of WIN == ' + wins)
         return wins
     ratio = wins / losses
     logger.debug('calculated ratio of ' + ratio)

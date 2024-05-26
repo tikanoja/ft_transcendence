@@ -28,7 +28,6 @@ def friendsContext(username, error, success):
 
     for friendship in friendships:
         other_user = friendship.from_user if friendship.from_user != current_user else friendship.to_user
-        logger.debug('username: ' + other_user.username + ', last seen at: ' + other_user.last_seen.strftime('%Y-%m-%d %H:%M:%S'))
         if other_user.is_online and timezone.now() - other_user.last_seen > timezone.timedelta(minutes=42):
             other_user.is_online = False
             other_user.save()
