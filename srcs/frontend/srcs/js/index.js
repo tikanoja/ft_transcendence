@@ -56,7 +56,7 @@ const handleResponseForContentUpdate = async (response, newTitle, newDescripton)
         const html = await response.text();
         updateContent(html, newTitle, newDescripton);
     } else {
-        console.log('handleResponseForContentUpdate: response status: ' + response.status); //should this be an error log?
+        console.log('handleResponseForContentUpdate: response status: ' + response.status + ' for : ' + newTitle);
     }
 }
 
@@ -69,7 +69,7 @@ const handleResponseForElementUpdate = async (response, elementName) => {
 		const html = await response.text();
 		updateElementContent(html, elementName);
 	} else {
-		console.log("Response status in handleResponseForElementUpdate(): ", response.status)//should this be an error log?
+		console.log("Response status in handleResponseForElementUpdate(): ", response.status, " for element: ", elementName);
 	}
 }
 

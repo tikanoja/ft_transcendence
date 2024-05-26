@@ -261,7 +261,7 @@ const manageAccountHandler = async (event) => {
         }
 	}
 	else {
-		console.log("Response status: ", response.status)
+		console.log("Response status: ", response.status, " for manage account form: ", event.target.id)
 	}
 }
 
