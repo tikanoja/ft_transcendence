@@ -29,7 +29,7 @@
 				<div class="card-title h2 text-center jersey-20-regular">1 v 1</div>
 				<div class="card-body d-flex flex-column align-items-center">
 					<h3>Send Invite</h3>
-					<form id="gameInviteForm" class="w-90 bg-secondary rounded p-3">
+					<form id="gameInviteForm" class="bg-secondary rounded p-3" style="width: 90%;">
 						{% csrf_token %}
 						<div class="mb-3 d-flex text-white">
 							{{ inviteform.game_type.label}}
@@ -50,7 +50,7 @@
 					</form>
 			
 					<h3>Pending Invites</h3>
-					<div class="w-90" style="height: 200px; overflow-y:scroll;">
+					<div style="height: 200px; overflow-y:scroll; width: 90%;">
 						<ul class="list-group list-group-flush">	
 							{% for invite in invites_sent %}
 								<li class="list-group-item h6 pe-5">
@@ -115,7 +115,7 @@
 
 					{% elif hosting_tournament is True %} {% comment %} We ARE hosting a tournament, show form to invite users {% endcomment %}
 					{% if my_tournament_count == 4 or my_tournament_count == 8 %}
-					<button type="submit" id="tournamentButton" data-tournament-id={{ my_tournament.id }} data-action="startTournament" class="btn btn-success">Start tournament!</button>
+					<button type="submit" id="tournamentButton" data-tournament-id={{ my_tournament.id }} data-action="startTournament" class="btn btn-success mb-3">Start tournament!</button>
 					{% else %}
 					<p class="h5 mt-3" >Invite players for your tournament!</p>
 					<p class="mb-3" ><i>Tournament can start at 4 or 8 accepted players</i></p>
@@ -162,7 +162,7 @@
 
 							{% else %} {% comment %} Attendance and alias confirmed, show list of players, their statuses and the option to cancel {% endcomment %}
 								<h4 class="pt-3">{{ tournament_in.creator.username }}'s {{ tournament_in.game }} tournament</h4>
-								<div class="w-90" style="height: 200px; overflow-y:scroll;">
+								<div style="height: 200px; overflow-y:scroll; width: 90%;">
 									<ul class="list-group list-group-flush">
 										{% for participant in tournament_in_participants %}
 										<li class="list-group-item h6 pe-5">
@@ -173,7 +173,7 @@
 												<a href="/profile/{{ participant.user.username }}" >{{ participant.user.username }}</a>
 											</nav>
 											{% endif %}
-											as {{ participant.alias }}   Status: {% if participant.status == "Accepted" %}<p class="text-success d-inline">{{ participant.status }}</p>{% else %}<p class="text-warning d-inline">{{ participant.status }}{% endif %}
+											as {{ participant.alias }}      <span class="ms-5"> Status: {% if participant.status == "Accepted" %}</span><p class="text-success d-inline">{{ participant.status }}</p>{% else %}<p class="text-warning d-inline">{{ participant.status }}{% endif %}
 											{% if participant.user == current_user and current_user != tournament_in.creator%}
 												<button type="submit" id="tournamentButton" data-participant-id={{ participant.id }} data-action="leaveTournament" class="btn btn-danger btn-sm">Cancel</button>
 											{% endif %}
@@ -192,22 +192,30 @@
 						<h3>In active tournament. Please follow chat for more info!</h3>
 						<ul class="list-group list-group-flush">
 							{% for match in matches %}
-									<li class="list-group-item h6 pe-5">
+									<li class="list-group-item h6 pe-5 d-flex justify-content-between">
+										<span>
 										{% if match.game_instance.p1.username is not None %}
-											   {{ match.game_instance.p1.username }}
+											   <b>{{ match.game_instance.p1.username }}</b>
 										{% else %}
-											???
+											<b>???</b>
 										{% endif %}
+										</span>
+										<span class="mx-3">
 										vs
+										</span>
+										<span>
 										{% if match.game_instance.p2.username is not None %}
-											   {{ match.game_instance.p2.username }}
+											   <b>{{ match.game_instance.p2.username }}</b>
 										{% else %}
-											???
+											<b>???</b>
 										{% endif %}
+										</span>
+										 <span class="ms-5">
 										 Status: {{ match.status }}
 										{% if match.status == 'Finished' %}
-										 Winner: {{ match.game_instance.winner.username }}
+										<span class="ms-3">Winner: <b>{{ match.game_instance.winner.username }}</b></span> 
 										{% endif %}
+										 </span> 
 									</li>
 							{% endfor %}
 						</ul>
