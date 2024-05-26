@@ -9,7 +9,7 @@ import os
 from transcendence import settings
 import logging
 from django.db.models import Q
-from PIL import Image, ImageFile
+from PIL import Image
 import io
 
 
@@ -34,7 +34,7 @@ def	registerPOST(request):
         if not sent_form.is_valid():
             raise ValidationError("Form filled incorrectly")
     except ValidationError as ve:
-        logger.debug(f"Error in registration form: {ve}")
+        logger.error(f"Error in registration form: {ve}")
         return render(request, 'user/register.html', {"form": sent_form, "title": title, "error": ve})
     new_user = get_user_model()
     new_user.objects.create_user(username=sent_form.cleaned_data['username'], email=sent_form.cleaned_data['email'], password=sent_form.cleaned_data['password'], first_name=sent_form.cleaned_data['first_name'], last_name=sent_form.cleaned_data['last_name'])
@@ -111,10 +111,8 @@ def delete_accountPOST(request, context):
 
 def manage_accountPOST(request):
     user_manager = CustomUserManager()
-    logger.debug(request.POST)
     context = create_manage_account_context(request.user.username)
     if "name-change-form" == request.POST['form_id']:
-        logger.debug("name change form found")
         form = UpdateNameForm(request.POST)
         try:
             if not form.is_valid():
@@ -125,7 +123,6 @@ def manage_accountPOST(request):
             context["name_error"] = ve
             context["name_form"] = form
     elif "email-change-form" == request.POST['form_id']:
-        logger.debug("email change form found")
         form = UpdateEmailForm(request.POST)
         try:
             if not form.is_valid():
@@ -136,7 +133,6 @@ def manage_accountPOST(request):
             context["email_error"] = ve
             context["email_form"] = form 
     elif "password-change-form" == request.POST['form_id']:
-        logger.debug("password change form found")
         form = UpdatePasswordForm(request.POST)
         try:
             if not form.is_valid():

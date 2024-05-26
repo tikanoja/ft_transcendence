@@ -10,23 +10,19 @@ logger = logging.getLogger(__name__)
 
 def get_profile_details(username:str, self:bool) -> dict:
     details = {}
-    user = CustomUser.objects.filter(username=username)
-    logger.debug(user[0])
-    if not user:
+    user = CustomUser.objects.filter(username=username).first()
+    if user is None:
         details["error"] = "No users in system match the requested user"
     else:
         details["username"] = username
-        details["first_name"] = user[0].first_name
-        details["last_name"] = user[0].last_name
+        details["first_name"] = user.first_name
+        details["last_name"] = user.last_name
         if self:
-            details["email"] = user[0].email
-    # details["img"] = user.img #how to get link for profile image?
-    # print(details)
+            details["email"] = user.email
     return details
 
 
 def profileContext(username:str, self:bool) -> dict:
-    logger.debug('in profileContext')
     context = {}
     context["active"] = "profile"
     context["friends"] = friendsContext(username, None, None)
@@ -45,9 +41,8 @@ def profileContext(username:str, self:bool) -> dict:
         if profile_user:
             context["profile_picture"] = profile_user.profile_picture
     except Exception as e:
-        logger.debug('error: ', e)
+        logger.error('error in profile context: ', e)
         context['error'] = e
-        logger.debug('unable to search image')
     return context
 
 def get_profile_picture_context(username:str):

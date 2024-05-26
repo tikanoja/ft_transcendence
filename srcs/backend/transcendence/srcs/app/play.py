@@ -1,23 +1,17 @@
 from .forms import GameRequestForm, LocalGameForm, StartTournamentForm, TournamentInviteForm, TournamentJoinForm
-from django.contrib.auth import authenticate, login
-from django.contrib.auth import get_user_model
 from .models import CustomUser, GameInstance, Tournament, Participant, Match, PongGameInstance, ColorGameInstance, PongGameInstance, ColorGameInstance
 from django.core.exceptions import ValidationError
 import logging
-from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect
+from django.http import JsonResponse
+from django.shortcuts import render
 from django.db.models import Q
 import json
-from django.utils import timezone
-import os
-from transcendence import settings
 
 import app.consumers
 
 logger = logging.getLogger(__name__)
 
 def playContext(request, error, success):
-    logger.debug('in playContext()')
     current_user = request.user
     inviteform = GameRequestForm()
     playform = LocalGameForm()
@@ -227,7 +221,6 @@ def start_tournament(request):
 
     game_type = sent_form.cleaned_data['game_type']
     alias = sent_form.cleaned_data['alias']
-    logger.debug('user ' + current_user.username + ' started ' + game_type + ' tournament!')
     new_tournament = Tournament(creator=current_user, game=game_type, status='Pending')
     new_tournament.save()
     Participant.objects.create(user=current_user, tournament=new_tournament, alias=alias, status='Accepted')
@@ -236,7 +229,6 @@ def start_tournament(request):
 
 
 def tournament_join(request):
-    logger.debug('in tournament_join()')
     current_user = request.user
     sent_form = TournamentJoinForm(request.POST)
 
@@ -302,7 +294,6 @@ def tournament_invite(request):
 
 
 def delete_tournament(request, data):
-    logger.debug('In delete_tournament()')
     tournament = Tournament.objects.filter(pk=data.get('tournament-id')).first()
     if tournament is None:
         return render(request, 'user/play.html', playContext(request, 'Tournament instance not found!', None))
@@ -311,7 +302,6 @@ def delete_tournament(request, data):
 
 
 def tournament_reject(request, data):
-    logger.debug('In tournament_reject()')
     participant = Participant.objects.filter(pk=data.get('participant_id')).first()
     if participant is None:
         return render(request, 'user/play.html', playContext(request, 'Participant instance not found.', None))
@@ -320,7 +310,6 @@ def tournament_reject(request, data):
 
 
 def tournament_leave(request, data):
-    logger.debug('In tournament_leave()')
     participant = Participant.objects.filter(pk=data.get('participant_id')).first()
     if participant is None:
         return render(request, 'user/play.html', playContext(request, 'Participant instance not found.', None))
@@ -332,15 +321,14 @@ def tournament_leave(request, data):
 
 
 def update_tournament(game_instance):
-    logger.debug('in update_tournament')
     match = Match.objects.filter(game_instance=game_instance).first()
 
     tournament = match.tournament
     
     if match.is_last_of_level() is True:
-        logger.debug('Last match of level finished, checking if more levels in tournament...')
+        # Last match of level finished, checking if more levels in tournament...
         if match.level < tournament.get_highest_level():
-            logger.debug('There are higher levels! Filling in TBD bracket of level ' + str(match.level + 1))
+            # There are higher levels! Filling in TBD bracket of level
             match.status = Match.FINISHED
             match.save()
             # Get the winners of matches with match.level (there will be 2 or 4)
@@ -359,12 +347,12 @@ def update_tournament(game_instance):
                     next_level_match.game_instance.save()
                     next_level_match.status = Match.SCHEDULED
                     next_level_match.save()
-                    logger.debug(f'Scheduled a game: {p1_user.username} vs {p2_user.username}!')
+                    # Scheduled a game
                     for matchup in [(p1_user, p2_user), (p2_user, p1_user)]:
                         app.consumers.chat_system_message(matchup[0], "Your next tournament match is against {name}!".format(name=matchup[1].username))
 
         else:
-            logger.debug('No more levels in tournament, finishing tournament!')
+            # No more levels in tournament, finishing tournament!
             match.status = Match.FINISHED
             match.save()
             tournament.status = Tournament.FINISHED
@@ -373,10 +361,9 @@ def update_tournament(game_instance):
             for p in Participant.objects.filter(tournament=tournament):
                 app.consumers.chat_system_message(p.user, "Congratulations to {name} for winning the tournament!".format(name=winner_username))
     else:
-        logger.debug('There are still matches remaining on this level of the tournament')
+        # There are still matches remaining on this level of the tournament
         match.status = Match.FINISHED
         match.save()
-
         winner = match.game_instance.winner
         app.consumers.chat_system_message(winner, "Matches are still ongoing, please wait for your next game.")
 
@@ -392,7 +379,7 @@ def get_wl_ratio(user, game):
     else:
         all_games = ColorGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
     if all_games.first() is None:
-        logger.debug('no prior games, assuming ratio of 1')
+        # no prior games, assuming ratio of 1
         return 1
     wins = 0
     losses = 0
@@ -404,15 +391,14 @@ def get_wl_ratio(user, game):
         else:
             losses += 1
     if losses == 0:
-        logger.debug('no prior losses, assuming ratio of WIN == ' + str(wins))
+        # no prior losses assume w/l ratio
         return wins
     ratio = wins / losses
-    logger.debug('calculated ratio of ' + str(ratio))
     return ratio
 
 
 def generate_brackets(tournament, accepted_participants):
-    logger.debug('generating tournament brackets...')
+    # logger.debug('generating tournament brackets...')
     if tournament.status != Tournament.ACTIVE:
         raise ValueError("Tournament must be active to generate brackets!")
     num_participants = accepted_participants.count()
@@ -425,23 +411,23 @@ def generate_brackets(tournament, accepted_participants):
         ratio = get_wl_ratio(user, game_type)
         participants_with_ratios.append((participant, ratio))
 
-    logger.debug('\nbefore sorting')
-    for participant, ratio in participants_with_ratios:
-        logger.debug(f"{participant.user.username}: {ratio}")
+    # logger.debug('\nbefore sorting')
+    # for participant, ratio in participants_with_ratios:
+    #     logger.debug(f"{participant.user.username}: {ratio}")
 
     # Sort participants based on their win/loss ratio
     sorted_participants = sorted(participants_with_ratios, key=lambda x: x[1])
 
-    logger.debug('\nafter sorting')
-    for participant, ratio in sorted_participants:
-        logger.debug(f"{participant.user.username}: {ratio}")
+    # logger.debug('\nafter sorting')
+    # for participant, ratio in sorted_participants:
+    #     logger.debug(f"{participant.user.username}: {ratio}")
 
     # Extract just the sorted participants (without the ratios)
     sorted_participant_objects = [item[0] for item in sorted_participants]
 
-    logger.debug("\nUsernames in sorted order:")
-    for participant in sorted_participant_objects:
-        logger.debug(participant.user.username)
+    # logger.debug("\nUsernames in sorted order:")
+    # for participant in sorted_participant_objects:
+    #     logger.debug(participant.user.username)
 
     if game_type == 'Pong':
         game_instance_model = PongGameInstance
@@ -479,11 +465,11 @@ def generate_brackets(tournament, accepted_participants):
             status='TBD',
             level=2
         )
-        logger.debug('making one final game (4p)')
+        # logger.debug('making one final game (4p)')
     
     # creating 8 player semifinals and final
     if num_participants == 8:
-        logger.debug('In 8 player follow up creation')
+        # logger.debug('In 8 player follow up creation')
         for _ in range(2): # Creates semifinals
             game_instance = game_instance_model.objects.create(
                 p1=None,
@@ -498,7 +484,7 @@ def generate_brackets(tournament, accepted_participants):
                 status='TBD',
                 level=2
             )
-            logger.debug('created a semifinal (8p)')
+            # logger.debug('created a semifinal (8p)')
         # Final
         game_instance = game_instance_model.objects.create(
             p1=None,
@@ -513,7 +499,7 @@ def generate_brackets(tournament, accepted_participants):
             status='TBD',
             level=3
         )
-        logger.debug('created the final (8p)')
+        # logger.debug('created the final (8p)')
 
 
 def tournament_start(request, data):
@@ -538,7 +524,6 @@ def tournament_start(request, data):
         if all_games.first() is not None:
             all_non_finished_games = all_games.exclude(status='Finished')
             if all_non_finished_games.first() is not None:
-                logger.debug('found this many unfinished games: ' + str(all_non_finished_games.count()) + ' for user: ' + user.username + '!!!')
                 all_non_finished_games.delete()
 
     # Delete pending participants (those who did not accept the inv before the creator started the tournament)
@@ -562,27 +547,32 @@ def tournament_start(request, data):
 
 
 def tournament_buttons(request):
-    logger.debug('In torunament_buttons()')
-    if request.content_type == 'application/json':
-        data = json.loads(request.body)
-        if data.get('action') == 'nuke':
-            return delete_tournament(request, data)
-        if data.get('action') == 'rejectTournamentInvite':
-            return tournament_reject(request, data)
-        if data.get('action') == 'leaveTournament':
-            return tournament_leave(request, data)
-        if data.get('action') == 'startTournament':
-            return tournament_start(request, data)
-
-    return render(request, 'user/play.html', playContext(request, 'error in tournament_buttons()???', None))
+    try:
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+            if data.get('action') == 'nuke':
+                return delete_tournament(request, data)
+            if data.get('action') == 'rejectTournamentInvite':
+                return tournament_reject(request, data)
+            if data.get('action') == 'leaveTournament':
+                return tournament_leave(request, data)
+            if data.get('action') == 'startTournament':
+                return tournament_start(request, data)
+        return render(request, 'user/play.html', playContext(request, 'error in tournament_buttons()???', None))
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 def tournament_forms(request):
-    formname = request.POST.get('formname')
-    logger.debug('In tournament_forms() received form: ' + formname)
-    if formname == 'startTournamentForm':
-        return start_tournament(request)
-    elif formname == 'tournamentInviteForm':
-        return tournament_invite(request)
-    elif formname == 'tournamentJoinForm':
-        return tournament_join(request)
+    try:
+        formname = request.POST.get('formname')
+        if formname == 'startTournamentForm':
+            return start_tournament(request)
+        elif formname == 'tournamentInviteForm':
+            return tournament_invite(request)
+        elif formname == 'tournamentJoinForm':
+            return tournament_join(request)
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        return JsonResponse({"error": str(e)}, status=500)

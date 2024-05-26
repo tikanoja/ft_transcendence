@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 from app.models import CustomUser, GameInstance, Friendship
 from app.forms import AddFriendForm
+from django.http import JsonResponse
 import json
 import logging
 
@@ -12,19 +13,15 @@ logger = logging.getLogger(__name__)
 
 
 def friendsContext(username, error, success):
-    logger.debug('in friendsContext')
     form = AddFriendForm()
     title = "Manage friends"
-    # current_user = request.user
     current_user = CustomUser.objects.filter(username=username).first()
-
     all_friendships = Friendship.objects.filter(Q(from_user=current_user) | Q(to_user=current_user))
 
     friendships = all_friendships.filter(status=Friendship.ACCEPTED)
     in_invites = all_friendships.filter(to_user=current_user, status=Friendship.PENDING)
     out_invites = all_friendships.filter(from_user=current_user, status=Friendship.PENDING)
     blocked_users = current_user.blocked_users.all()
-    logger.debug(blocked_users) #
 
     for friendship in friendships:
         other_user = friendship.from_user if friendship.from_user != current_user else friendship.to_user
@@ -40,7 +37,7 @@ def friendsContext(username, error, success):
         context = {'current_user': current_user, 'form': form, 'title': title, 'in_invites': in_invites, 'out_invites': out_invites, 'friendships': friendships, 'blocked_users': blocked_users, 'success': success}
     return context
 
-# can get rid of this?
+
 def friendsGET(request):
     return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, None, None))	
 
@@ -72,9 +69,8 @@ def friendResponse(request, data):
         friendship.delete()
         return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, None, "Friendship DELETED!"), "self_profile": True})
 
-# TODO: don't need to use the json.loads for the POST info
+
 def friendsPOST(request):
-    logger.debug('in friendsPOST')
     if request.content_type == 'application/json':
         data = json.loads(request.body)
         if data.get('request_type') == 'friendResponse':
@@ -129,8 +125,6 @@ def friendsPOST(request):
 
 
 def block_user(request):
-    logger.debug('in block_user')
-
     try:
         sent_form = AddFriendForm(request.POST)
 
@@ -141,18 +135,17 @@ def block_user(request):
         blocked_user = CustomUser.objects.get(username=blocked_username)
 
         as_user_block_user(request.user, blocked_user)
-
-    # Realistically should have different dispatch for different exceptions.
     except ValidationError as e:
         error_message = e.message if hasattr(e, "message") else str(e)
         return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, error_message, None), "self_profile": True})
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        return JsonResponse({"error": str(e)}, status=500)
 
     return render(request, 'user/profile_partials/friends.html', {"friends": friendsContext(request.user.username, None, "Blocked " + blocked_username + "!"), "self_profile": True})
 
 
 def as_user_block_user(user: CustomUser, blocked: CustomUser):
-    logger.debug(user.username + " blocking: " + blocked.username)
-
     if user.username == blocked.username:
         raise ValidationError("Please do not block yourself")
 

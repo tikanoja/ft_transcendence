@@ -13,10 +13,8 @@ logger = logging.getLogger(__name__)
 def register_user(request):
     try:
         if request.method == 'POST':
-            logger.debug('In register user POST')
             response = account.registerPOST(request)
         elif request.method == 'GET':
-            logger.debug('In register user GET')
             response = account.registerGET(request)
         else:
             response = JsonResponse({'error': "method not allowed. please use POST or GET"}, )
@@ -28,7 +26,6 @@ def register_user(request):
 
 def login_user(request):
     try:
-        logger.debug('In login_user()')
         if request.method == 'POST':
             response = session.loginPOST(request)
         elif request.method == 'GET':
@@ -44,7 +41,6 @@ def login_user(request):
 def logout_user(request):
     try:
         if request.method == 'POST':
-            logger.debug('In logout user')
             response = session.logoutPOST(request)
         else:
             response = JsonResponse({'error': "method not allowed. please use POST"}, status=405)
@@ -56,7 +52,6 @@ def logout_user(request):
 
 def get_current_username(request):
     try:
-        logger.debug('In get_current_username()')
         if request.method == 'GET':
             username = session.get_current_usernameGET(request)
             if username == "unknown user":
@@ -74,7 +69,6 @@ def get_current_username(request):
 
 def check_login(request):
     try:
-        logger.debug('In check_login()')
         if request.method == "POST":
             if request.is_authenticated:
                 return JsonResponse({'status': 'authenticated'}, status=200)
@@ -92,7 +86,6 @@ def check_login(request):
 @login_required
 def manage_account(request):
     try:
-        logger.debug('In manage_account()')
         if request.method =='POST':
             response = account.manage_accountPOST(request)
         else:
@@ -106,7 +99,6 @@ def manage_account(request):
 @login_required
 def play(request):
     try:
-        logger.debug('In play()')
         if request.method == 'GET':
             response = playGET(request)
         elif request.method == 'POST':
@@ -122,7 +114,6 @@ def play(request):
 @login_required
 def friends(request):
     try:
-        logger.debug('In friends()')
         if request.method == 'GET':
             response = relations.friendsGET(request)
         elif request.method == 'POST':
@@ -137,7 +128,6 @@ def friends(request):
 
 def notfound(request):
     try:
-        logger.debug('in notfound()')
         if request.method == 'GET':
             # check for current_user
             context = {}
@@ -153,7 +143,6 @@ def notfound(request):
 @login_required
 def profile(request, username):
     try:
-        logger.debug('getting profile')
         if request.method == "GET":
             if not user_profile.user_exists(username):
                 return render(request, '404.html', {"current_user": request.user.username})

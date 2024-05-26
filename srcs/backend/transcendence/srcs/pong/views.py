@@ -37,12 +37,9 @@ def cli_dashboard(request, username):
 
 @csrf_exempt
 def save_game_state(request):
-    logger.debug('in save_game_state')
     try:
-        logger.debug('checking all game instances for pong')
         if request.method == 'POST':
             game_type = request.POST.get('game')
-            logger.debug('game type: ' + game_type)
             if game_type == 'Pong':
                 response = utils.save_pong_game_state(request)
             elif game_type == 'Color':
@@ -57,9 +54,7 @@ def save_game_state(request):
         logger.error(f"An error occurred: {e}")
         return JsonResponse({"error": str(e)}, status=500)
 
-"""
-TODO:What is the purpose of this?
-"""
+
 @csrf_exempt
 def validate_match(request):
     try:
@@ -67,14 +62,13 @@ def validate_match(request):
             p1_username = request.POST.get('p1_username')
             p2_username = request.POST.get('p2_username')
             game_id = request.POST.get('game_id')
-            logger.debug(f"data from validate user: {p1_username}, {p2_username}, {game_id}")
             
             game = GameInstance.objects.filter(pk=game_id).first()
             if game is None:
                 return JsonResponse({'message': 'Game not found'}, 404)
             elif game.p1.username != p1_username:
                 return JsonResponse({'message': 'Invalid game, player 1 incorrect'}, 404)
-            elif game.p1.username != p1_username:
+            elif game.p2.username != p2_username:
                 return JsonResponse({'message': 'Invalid game, player 2 incorrect'}, 404)
             else:
                 return JsonResponse({'message': 'Game is valid'}, status=200)
@@ -141,7 +135,6 @@ def authenticate_player(request):
 @login_required
 def post_pong_canvas(request):
     try:
-        logger.debug('In post_pong_canvas()')
         if request.method == 'POST':
             data = json.loads(request.body)
             if utils.game_exists(data) is False:
@@ -157,7 +150,6 @@ def post_pong_canvas(request):
 @login_required
 def post_cw_canvas(request):
     try:
-        logger.debug('In post_cw_canvas()')
         if request.method == 'POST':
             data = json.loads(request.body)
             if utils.game_exists(data) is False:
@@ -172,7 +164,6 @@ def post_cw_canvas(request):
 
 def notfound(request):
     try:
-        logger.debug('in notfound()')
         if request.method == 'GET':
             # check for current_user
             context = {}
