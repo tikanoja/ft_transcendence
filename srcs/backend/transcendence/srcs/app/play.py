@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 from .models import CustomUser, GameInstance, Tournament, Participant, Match, PongGameInstance, ColorGameInstance, PongGameInstance, ColorGameInstance
 from django.core.exceptions import ValidationError
 import logging
-# from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from django.db.models import Q
@@ -210,7 +209,6 @@ def as_user_challenge_user(user: CustomUser, challengee: CustomUser, game_name: 
 
     new_game_instance.save()
 
-    # CHAT MODULE let challenged user know that they have been challenged
     app.consumers.chat_system_message(challengee, "{name} has challenged you to a game of {game}".format(name = user.username, game = game_name))
 
 
@@ -298,7 +296,6 @@ def tournament_invite(request):
     # add the invited_user to the tournament
     Participant.objects.create(user=invited_user, tournament=tournament, status='Pending')
 
-    # CHAT MODULE msg to invited_user to inform that they have been invited to a tournament
     app.consumers.chat_system_message(invited_user, "{name} has invited you to a tournament!".format(name = request.user.username))
 
     return render(request, 'user/play.html', playContext(request, None, 'Invite sent!'))
@@ -337,16 +334,8 @@ def tournament_leave(request, data):
 def update_tournament(game_instance):
     logger.debug('in update_tournament')
     match = Match.objects.filter(game_instance=game_instance).first()
-    if match is None:
-        logger.debug('could not find match! :(')
-    else:
-        logger.debug('Match found!')
 
     tournament = match.tournament
-    if tournament is None:
-        logger.debug('could not find tournament! : (')
-    else:
-        logger.debug('tournament found!')
     
     if match.is_last_of_level() is True:
         logger.debug('Last match of level finished, checking if more levels in tournament...')
@@ -371,7 +360,6 @@ def update_tournament(game_instance):
                     next_level_match.status = Match.SCHEDULED
                     next_level_match.save()
                     logger.debug(f'Scheduled a game: {p1_user.username} vs {p2_user.username}!')
-                    # CHAT MODULE let player know in chat that they have a new game
                     for matchup in [(p1_user, p2_user), (p2_user, p1_user)]:
                         app.consumers.chat_system_message(matchup[0], "Your next tournament match is against {name}!".format(name=matchup[1].username))
 
@@ -381,8 +369,7 @@ def update_tournament(game_instance):
             match.save()
             tournament.status = Tournament.FINISHED
             tournament.save()
-            # CHAT MODULE announce tournament winner
-            winner_username = match.game_instance.winner.username;
+            winner_username = match.game_instance.winner.username
             for p in Participant.objects.filter(tournament=tournament):
                 app.consumers.chat_system_message(p.user, "Congratulations to {name} for winning the tournament!".format(name=winner_username))
     else:
@@ -390,7 +377,6 @@ def update_tournament(game_instance):
         match.status = Match.FINISHED
         match.save()
 
-        # CHAT MODULE let player know that we are waiting for games to finish
         winner = match.game_instance.winner
         app.consumers.chat_system_message(winner, "Matches are still ongoing, please wait for your next game.")
 
@@ -401,7 +387,6 @@ def get_wl_ratio(user, game):
     if no losses, returns wins to avoid division by 0
     otherwise, returns a ratio wins/losses
     """
-    logger.debug('calculating ratio of user ' + user.username + ' for game ' + game)
     if game == 'Pong':
         all_games = PongGameInstance.objects.filter(Q(p1=user) | Q(p2=user)).filter(status='Finished')
     else:
@@ -554,7 +539,6 @@ def tournament_start(request, data):
             all_non_finished_games = all_games.exclude(status='Finished')
             if all_non_finished_games.first() is not None:
                 logger.debug('found this many unfinished games: ' + str(all_non_finished_games.count()) + ' for user: ' + user.username + '!!!')
-                logger.debug('deleted pending games')
                 all_non_finished_games.delete()
 
     # Delete pending participants (those who did not accept the inv before the creator started the tournament)
@@ -571,7 +555,6 @@ def tournament_start(request, data):
     except ValueError as e:
         return render(request, 'user/play.html', playContext(request, str(e), None))
 
-    # CHAT MODULE announce tournament start
     for p in participants:
         app.consumers.chat_system_message(p.user, "Tournament is starting!")
 
@@ -590,8 +573,6 @@ def tournament_buttons(request):
             return tournament_leave(request, data)
         if data.get('action') == 'startTournament':
             return tournament_start(request, data)
-        # else:
-        #     return render(request, 'user/profile_partials/friends.html', friendsContext(request.user.username, ve, "Unknown content type"))
 
     return render(request, 'user/play.html', playContext(request, 'error in tournament_buttons()???', None))
 

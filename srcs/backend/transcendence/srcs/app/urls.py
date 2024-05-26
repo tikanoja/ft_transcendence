@@ -18,5 +18,3 @@ urlpatterns = [
 	path('tournament_buttons/', play.tournament_buttons, name='tournament_buttons'),
 	path('profile_picture/', views.profile_picture, name="profile_picture"),
 ]
-
-# TODO block user need divverent view definition.

@@ -20,18 +20,4 @@ RUN pip install --no-cache-dir --upgrade pip -r /tmp/requirements.txt
 
 WORKDIR /transcendence
 
-# Having this enabled causes an error... Uncomment and check 'docker logs database_c'
 ENTRYPOINT ["./start.sh"]
-
-# CMD ["python", "volume/manage.py", "runserver", "0.0.0.0:8000"]
-
-# CMD ["daphne", \
-# 	"-e", \
-# 	"ssl:8000:privateKey=/transcendence/ssl/certificate.key:certKey=/transcendence/ssl/certificate.crt", \
-# 	"transcendence.asgi:application"]
-
-# CMD ["daphne", \
-#     "-e", "ssl:8000:privateKey=/transcendence/ssl/certificate.crt:certKey=/transcendence/ssl/certificate.key", \
-# 	"--websocket_timeout=300", "--websocket_connect_timeout=100", \
-#     "transcendence.asgi:application", \
-#     "-v", "3"]
