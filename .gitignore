@@ -13,3 +13,5 @@ srcs/backend/transcendence/srcs/media_files/profile_pictures/profile-default.png
 virtual_env/
 
 pong_cli/env
+
+.env
