@@ -1,0 +1,25 @@
+<h3 class="mt-5 text-danger">Delete Account</h3>
+<div style="outline: 1px solid red; border-radius: 8px; padding: 5px;">
+	
+	<div class="alert alert-danger" role="alert">
+		Submitting this form will cause the irreversiable action of deleting your account
+	</div>
+	{% if del_error %}
+	<div class="alert alert-warning">{{del_error}}</div>
+	{% endif %}
+	<form id="delete-account-form" enctype="multipart/form-data">
+		{% csrf_token %}
+		{% for field in form %}
+		<div class="form-floating">
+			{{ field }}
+			{{ field.label_tag }}
+			<ul>
+				{% for error in field.errors %}
+				<li style="text-danger">{{ error }}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endfor %}
+		<button class="btn btn-danger" type="submit">Delete Account</button>
+	</form>
+</div>

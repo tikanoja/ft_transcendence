@@ -1,0 +1,143 @@
+/* @font-face {
+    font-family: 'PressStart2P';
+    src: url('../fonts/Press_Start_2P/PressStart2P-Regular.ttf') format('truetype');
+} */
+
+* {
+    font-family: "Raleway", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+}
+
+.jersey-20-regular {
+    font-family: "Jersey 20", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 44px;
+}
+
+.jersey-60-regular {
+    font-family: "Jersey 20", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 80px;
+}
+
+#GameControls button img {
+    width: 100px; /* Set a specific width for the images */
+    height: 100px; /* Set a specific height for the images */
+    object-fit: cover; /* Maintain aspect ratio and cover container */
+    display: none;
+}
+
+#GameControls {
+    display: none; /* Hide the GameControls initially */
+}
+
+
+.canvas-container {
+    position: relative;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'PressStart2P', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+#startScreen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100; /* Ensure the start screen appears above the graphics */
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Add a shadow for depth */
+}
+
+#gameOverScreen {
+    position: absolute;
+    display: none;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100; /* Ensure the start screen appears above the graphics */
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Add a shadow for depth */
+}
+
+/* Nav item styling  */
+
+.nav-item {
+    /* padding-left: 15px; */
+    margin-top: 10px;
+}
+
+.nav-link {
+    color: #fff;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-link:hover {
+    color: #17a2b8;
+    text-decoration: none;
+}
+
+.nav-link:active {
+    background-color: rgba(23, 162, 184, 0.5);
+    color: #fff;
+}
+
+.nav-link:visited {
+    color: #ffffff;
+}
+
+/* Remove the default focus outline */
+.nav-link:focus {
+    outline: none; 
+}
+
+/*  content styling  */
+
+.main-content {
+    /* box-sizing: border-box; */
+    height: 100vh;
+    width: 100vw;
+    padding-left: 200px;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.chat-text {
+    font-family: sans-serif;
+    font-size: 13px;
+}
+
+.chat-log {
+    min-height: 32px;
+    max-height: 256px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.chat-message {
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    padding-left: 2em;
+    text-indent: -2em;
+}
+
+/* adjust alert icon */
+.custom-icon-transform {
+    transform: translateY(-12px); /* Adjust this value to move the icon up */
+  }

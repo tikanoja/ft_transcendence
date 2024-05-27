@@ -1,0 +1,32 @@
+<div class="container">
+	<div class="row g-3">
+		<div class="col-12">
+			<h3 class="text-center">Pong</h3>
+			{% if stats.pong.games_played %}
+
+				<p><b>Total games:</b> {{ stats.pong.games_played }}</p>
+				<p><b>Total wins:</b> {{ stats.pong.wins }}</p>
+				<p><b>Win rate:</b> {{ stats.pong.win_percent }}%</p>
+				<p><b>Best win margin:</b> {{ stats.pong.largest_win_margin }}</p>
+				<p><b>Worst loss margin:</b> {{ stats.pong.largest_loss_margin }}</p>
+				<p><b>Longest rally:</b> {{ stats.pong.longest_rally }}</p>
+				<p><b>Tournament Games Played:</b> {{ stats.pong.tournament_games }}</p>
+			{% else %}
+				<p>No Pong statistics to report</p>
+			{% endif %}
+		</div>
+		<div class="col-12">
+			<h3 class="text-center">Color War</h3>
+			{% if stats.color.games_played %}
+				<p><b>Total games:</b> {{ stats.color.games_played }}</p>
+				<p><b>Total wins:</b> {{ stats.color.wins }}</p>
+				<p><b>Win rate:</b> {{ stats.color.win_percent }}%</p>
+				<p><b>Least moves to win:</b> {{ stats.color.least_moves_to_win }}</p>
+				<p><b>Average moves to win:</b> {{ stats.color.average_move_to_win }}</p>
+				<p><b>Tournament Games Played:</b> {{ stats.color.tournament_games }}</p>
+			{% else %}
+				<p>No ColorWar statistics to report</p>
+			{% endif %}
+		</div>
+	</div>
+</div>

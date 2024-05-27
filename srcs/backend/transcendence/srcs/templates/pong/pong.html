@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block content%}
+
+<div id="startScreen">
+    <label>
+        <div class ="row">
+            <div class="col-md-5">
+                <div id="player1">
+                    {% comment %} <h2>Player 1</h2> {% endcomment %}
+                    <img src="{{ p1_user.profile_picture.url }}" alt="Player 1 Profile Picture">
+                    <p>{{ p1_username }}</p>
+                    {% if current_game.p1auth == False %}
+                    <form id="playerAuthForm" method="post">
+                        {% csrf_token %}
+                        {{ form.password }}
+                        <input type="hidden" name="username" value="{{ p1_username }}">
+                        <input type="hidden" name="game_id" value="{{ current_game.id }}">
+                        {% if p1error %}
+                        <p style="color: red">{{ p1error }}</p>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary">Authenticate</button>
+                    </form>
+                    {% else %}
+                    <p style="color: green">Ready!</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-2">
+                <h1>VS</h1>
+            </div>
+            <div class="col-md-5">
+                <div id="player2">
+                    <img src="{{ p2_user.profile_picture.url }}" alt="Player 2 Profile Picture">
+                    <p>{{ p2_username }}</p>
+                    {% if current_game.p2auth == False %}
+                    <form id="playerAuthForm" method="post">
+                        {% csrf_token %}
+                        {{ form.password }}
+                        <input type="hidden" name="username" value="{{ p2_username }}">
+                        <input type="hidden" name="game_id" value="{{ current_game.id }}">
+                        {% if p2error %}
+                        <p style="color: red">{{ p2error }}</p>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary">Authenticate</button>
+                    </form>
+                    {% else %}
+                    <p style="color: green">Ready!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class ="row">
+            <div class="col-md-6 offset-md-3">
+                {% if current_game.p1auth == True and current_game.p2auth == True %}
+                <button id="playButton" class="btn btn-success">Play</button>
+                {% else %}
+                <p style="color: red">Both players must authenticate before playing</p>
+                {% endif %}
+            </div>
+        </div>
+    </label>
+</div>
+
+<div id="gameOverScreen" class="container mt-3">
+    <h1 class="text-center">Game Over</h1>
+    <div id="winnerInfo" class="my-4 text-center"></div>
+    <div class="text-center mt-4">
+        <input type="hidden" id="current_game_id" value="{{ current_game.id }}">
+        <input type="hidden" id="player1username" value="{{ p1_username }}">
+        <input type="hidden" id="player2username" value="{{ p2_username }}">
+        <button class="btn btn-primary">
+            <nav>
+                <a href="/play" class="nav-link">Return to Game Manager</a>
+            </nav>
+        </button>
+    </div>
+</div>
+
+<div id="scoreboard" class="container-fluid d-flex justify-content-between position-absolute" style="top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; display: none;">
+    <div class="card text-center flex-fill mx-1 my-0 p-2" id="P1Card" style="display: none; max-width: 120px;">
+        <div class="card-body p-1" style="padding: 5px;">
+            <h6 class="card-title mb-1" id="player1username" style="margin-bottom: 5px; font-size: 0.8rem;">{{ p1_username }}</h6>
+            <p class="card-text mb-1" style="margin-bottom: 5px; font-size: 0.8rem;">Score: <span id="player1Score">0</span></p>
+        </div>
+    </div>
+    <div class="card text-center flex-fill mx-1 my-0 p-2" id="P2Card" style="display: none; max-width: 120px;">
+        <div class="card-body p-1" style="padding: 5px;">
+            <h6 class="card-title mb-1" id="player2username" style="margin-bottom: 5px; font-size: 0.8rem;">{{ p2_username }}</h6>
+            <p class="card-text mb-1" style="margin-bottom: 5px; font-size: 0.8rem;">Score: <span id="player2Score">0</span></p>
+        </div>
+    </div>
+    <div class="move-count" id="moveCount" style="order: 1;"></div>
+</div>
+
+<div id="canvasContainer" style="position: relative; display: none;">
+</div>
+
+{% endblock %}

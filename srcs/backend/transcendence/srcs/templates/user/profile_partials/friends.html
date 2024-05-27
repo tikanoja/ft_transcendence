@@ -1,0 +1,177 @@
+<div class="container">
+	{% if friends.error %}
+	<div class="alert alert-danger" role="alert">Error: {{friends.error}}</div>
+	{% endif %}
+
+	{% if friends.success %}
+	<div class="alert alert-success" role="alert">{{friends.success}}</div>
+	{% endif %}
+
+	{% if self_profile %}
+	<form id="addFriendForm" class="w-90 bg-secondary rounded p-3 mb-3">
+		{% csrf_token %}
+		{% for field in friends.form %}
+		<div class="form-floating">
+			{{ field }}
+			{{ field.label_tag }}
+			<p style="color: red">{{ field.errors }}<p>
+		</div>
+		{% endfor %}
+		<div class="position-relative pb-3  mb-3">
+			<div class="position-absolute end-0 me-3">
+				<button type="submit" id="addFriendButton" class="btn btn-primary btn-sm">Add friend</button>
+				<button type="submit" id="blockUserButton" class="btn btn-danger btn-sm">Block user</button>
+			</div>
+		</div>
+	</form>
+	
+	</br>
+
+	<div>
+		<div class="d-flex justify-content-between mt-3">
+			<p class="bd-mode-toggle">
+				<div class="position-relative">
+					{% if friends.in_invites|length > 0 %}
+					<div class="position-absolute top-0 end-0 text-success custom-icon-transform">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-heart-fill" viewBox="0 0 16 16">
+							<path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555l-4.2 2.568-.051-.105c-.666-1.3-2.363-1.917-3.699-1.25-1.336-.667-3.033-.05-3.699 1.25l-.05.105zM11.584 8.91l-.073.139L16 11.8V4.697l-4.003 2.447c.027.562-.107 1.163-.413 1.767Zm-4.135 3.05c-1.048-.693-1.84-1.39-2.398-2.082L.19 12.856A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144L10.95 9.878c-.559.692-1.35 1.389-2.398 2.081L8 12.324l-.551-.365ZM4.416 8.91c-.306-.603-.44-1.204-.413-1.766L0 4.697v7.104l4.49-2.752z"/>
+							<path d="M8 5.993c1.664-1.711 5.825 1.283 0 5.132-5.825-3.85-1.664-6.843 0-5.132"/>
+						  </svg>
+					</div>
+					{% endif %}
+					<button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePendingInvites" aria-expanded="false" aria-controls="collapsePendingInvites">
+						Pending Invites
+					</button>
+				</div>
+			</p>
+			<p class="bd-mode-toggle">
+				<button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBlockedUsers" aria-expanded="false" aria-controls="collapseBlockedUsers">
+					Blocked Users
+				</button>
+			</p>
+		</div>
+		<div class="collapse" id="collapsePendingInvites">
+			<ul class="list-group list-group-flush">
+				{% for invite in friends.in_invites %}
+					<li class="list-group-item h5">
+						<nav>
+							<a class="pe-5" href="/profile/{{ invite.from_user.username }}" >{{ invite.from_user.username }}</a>
+						</nav>
+						<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="accept" class="btn btn-primary btn-sm">Accept</button>
+						<button type="submit" id="friendRequestButton" data-from-user={{ invite.from_user.username }} data-action="reject" class="btn btn-danger btn-sm">Reject</button>
+					</li>
+				{% empty %}
+					<li class="list-group-item">No pending invites.</li>
+				{% endfor %}
+			</ul>
+		</div>
+
+		<div class="collapse" id="collapseBlockedUsers">
+			<ul class="list-group list-group-flush">
+				{% for blocked in friends.blocked_users %}
+					<li class="list-group-item h5">
+						{{ blocked.username }} 
+						<button type="submit" id="friendRequestButton" data-from-user={{ blocked.username }} data-action="unblock" class="btn btn-outline-danger ms-5 btn-sm">Unblock</button>
+					</li>
+				{% empty %}
+					<li class="list-group-item">No blocked users.</li>
+				{% endfor %}
+			</ul>
+		</div>
+		<br>
+		{% endif %}
+
+		<h4 class="text-center">List of friends</h4>
+		<div class="h-30" style="overflow-y:scroll;">
+			{% if self_profile %}
+			<ul class="list-group list-group-flush">
+				{% for invite in friends.out_invites %}
+					<li class="list-group-item pe-5 text-secondary">
+						<nav>
+							<a class="h5 text-black" href="/profile/{{ invite.to_user.username }}" >{{ invite.to_user.username }}</a> 
+						</nav>
+						Friend request pending...
+					</li>
+				{% endfor %}
+	
+				{% for friendship in friends.friendships %}
+					{% if friends.current_user == friendship.to_user %}
+						<li class="list-group-item h5 pe-5">
+							<nav>
+								<a href="/profile/{{ friendship.from_user.username }}" >{{ friendship.from_user.username }}</a> 
+							</nav>
+							{% if friendship.from_user.is_online %}
+							<span class="text-success" id="online_status">
+								<i class="bi bi-emoji-laughing-fill text-success"></i>
+							</span>
+							{% else %}
+							<span class="text-secondary" id="online_status">
+								<i class="bi bi-emoji-frown-fill text-secondary"></i>
+							</span>
+							{% endif %}
+							<button type="submit" id="friendRequestButton" data-from-user={{ friendship.from_user.username }} data-action="delete" class="btn btn-outline-danger btn-sm ms-5">Unfriend</button>
+						</li>
+					{% else %}
+						<li class="list-group-item h5 pe-5">
+							<nav>
+								<a href="/profile/{{friendship.to_user.username}}" >{{ friendship.to_user.username }}</a> 
+							</nav>
+							{% if friendship.to_user.is_online %}
+							<span class="text-success" id="online_status">
+								<i class="bi bi-emoji-laughing-fill text-success"></i>
+							</span>
+							{% else %}
+							<span class="text-secondary" id="online_status">
+								<i class="bi bi-emoji-frown-fill text-secondary"></i>
+							</span>
+							{% endif %} 
+							<button type="submit" id="friendRequestButton" data-from-user={{ friendship.to_user.username }} data-action="delete" class="btn btn-outline-danger btn-sm ms-5">Unfriend</button>
+						</li>
+					{% endif %}
+				{% empty %}
+					<li class="list-group-item">No friends :0</li>
+				{% endfor %}
+			</ul>
+			{% else %}
+			{% comment %} for other's profiles {% endcomment %}
+			<ul class="list-group list-group-flush">
+				{% for friendship in friends.friendships %}
+					{% if friends.current_user == friendship.to_user %}
+						<li class="list-group-item h5 pe-5">
+							<nav>
+								<a href="/profile/{{friendship.from_user.username}}" >{{ friendship.from_user.username }}</a>
+							</nav>
+							{% if friendship.from_user.is_online %}
+							<span class="text-success" id="online_status">
+								<i class="bi bi-emoji-laughing-fill text-success"></i>
+							</span>
+							{% else %}
+							<span class="text-secondary" id="online_status">
+								<i class="bi bi-emoji-frown-fill text-secondary"></i>
+							</span>
+							{% endif %}
+						</li>
+					{% else %}
+						<li class="list-group-item h5 pe-5">
+							<nav>
+								<a href="/profile/{{friendship.to_user.username}}" >{{ friendship.to_user.username }}</a> 
+							</nav>
+							{% if friendship.to_user.is_online %}
+							<span class="text-success" id="online_status">
+								<i class="bi bi-emoji-laughing-fill text-success"></i>
+							</span>
+							{% else %}
+							<span class="text-secondary" id="online_status">
+								<i class="bi bi-emoji-frown-fill text-secondary"></i>
+							</span>
+							{% endif %} 
+						</li>
+					{% endif %}
+				{% empty %}
+					<li class="list-group-item">No friends :0</li>
+				{% endfor %}
+			</ul>
+			{% endif %}
+		</div>
+	</div>
+</div>

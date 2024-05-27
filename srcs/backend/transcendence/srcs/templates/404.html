@@ -1,0 +1,37 @@
+{% if current_user %}
+<div>
+	{% include 'partials/navbar_full.html' with current_user=current_user %}
+</div>
+{% else %}
+<div>
+	{% include 'partials/navbar_empty.html' %}
+</div>
+{% endif %}
+
+<div class="d-flex flex-column align-items-center text-white">
+	<h1 class="m-3">Whoops!</h1>
+	<p class="h4">The content you are looking doesn't seem to be here</p>
+		<i class="bi bi-emoji-frown-fill text-warning" style="font-size: 300px;"></i>
+	<p class="h4 mb-5">404 Not Found</p>
+
+	{% if current_user %}
+	<nav class="pb-5">
+		<button class="btn btn-primary"><a href="/play" class="nav-link">
+			<span class="pe-2">
+				<i class="bi bi-joystick"></i>
+			</span>
+			Back to playing!
+		</a></button>
+	</nav>
+	{% else %}
+	<nav class="pb-5">
+		<button class="btn btn-primary"><a href="/login" class="nav-link">
+			<span class="pe-2">
+				<i class="bi bi-skip-backward-fill text-white"></i>
+			</span>
+		Login
+		</a></button>
+	</nav>
+	{% endif %}
+</div>
+

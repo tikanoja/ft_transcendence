@@ -1,49 +1,96 @@
-# version: '1'
-
 services:
   frontend:
     build:
-      context: ./services/frontend
+      context: ./srcs/frontend
       dockerfile: Dockerfile
     image: frontend-img:dev
-    container_name: frontend
+    container_name: frontend_c
     ports:
       - "443:443"
-    depends_on:
-      - backend
-    env_file: .env
     networks:
       - frontend-network
+      - backend-network  # Add frontend service to backend network
     restart: always
     volumes:
-      - frontend-data:/app/frontend
-
-  backend:
-    build:
-      context: ./services/backend
-      dockerfile: Dockerfile
-    image: backend-img:dev
-    container_name: backend
-    ports:
-      - "8000:8000"
-    env_file: .env
-    restart: always
+      - ./srcs/frontend/srcs/:/var/html/www:ro
+      - ./srcs/frontend/temp_files:/var/lib/nginx/tmp/client_body:rw
     depends_on:
-      database:
-        condition: service_healthy
+      - transcendence
+
+  transcendence:
+    build:
+      context: ./srcs/backend/transcendence
+      dockerfile: Dockerfile
+    image: transcendence-img:dev
+    container_name: transcendence_c
+    expose:
+      - "8000:8000"
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+    restart: always
     networks:
       - frontend-network
       - backend-network
+    volumes:
+      - ./srcs/backend/transcendence/srcs:/transcendence:ro
+      - ./srcs/backend/transcendence/srcs/app/migrations:/transcendence/app/migrations:rw
+      - ./srcs/backend/transcendence/srcs/media_files:/transcendence/media_files:rw
+    depends_on:
+      database:
+        condition: service_healthy
+        
+  pong:
+    build:
+      context: ./srcs/backend/pong
+      dockerfile: Dockerfile
+    image: pong_img:dev
+    container_name: pong_c
+    hostname: pong
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "8080:8080"
+      - "8888:8888"
+    restart: always
+    networks:
+      - frontend-network
+      - backend-network  # Add frontend service to backend network
+
+  colorwar:
+    build:
+      context: ./srcs/backend/colorwar
+      dockerfile: Dockerfile
+    image: colorwar_img:dev
+    container_name: colorwar_c
+    hostname: colorwar
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "8889:8889"
+    restart: always
+    networks:
+      - frontend-network
+      - backend-network  # Add frontend service to backend network
 
   database:
     build:
-      context: ./services/database
+      context: ./srcs/backend/database
       dockerfile: Dockerfile
     image: database-img:dev
-    container_name: database
-    ports:
+    container_name: database_c
+    expose:
       - "5432:5432"
-    env_file: .env
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     restart: always
     networks:
       - backend-network
@@ -56,8 +103,6 @@ services:
       retries: 10
 
 volumes:
-  frontend-data:
-    name: frontend-data
   database-data:
     name: database-data
 

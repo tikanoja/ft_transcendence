@@ -1,0 +1,70 @@
+<div class="container">
+	<h3 class="text-center">Pong</h3>
+	<table class="table table-hover table-responsive">
+		<thead>
+			<th scope="col">#</th>
+			<th scope="col">Date</th>
+			<th scope="col">Foe</th>
+			<th scope="col">Foe Score</th>
+			<th scope="col">User Score</th>
+			<th scope="col">Winner</th>
+			<th scope="col">Tournamnet Game</th>
+		</thead>
+		<tbody>
+		{% for key, entry in history.pong.items %}
+			<tr>
+				<th scope="row ">{{ forloop.counter }}</th>
+				<td>{{ entry.date|date:"d/m/Y"}}</td>
+				<td>{{ entry.opponent }}</td>
+				<td>{{ entry.opponent_score }}</td>
+				<td>{{ entry.user_score }}</td>
+				<td>{{ entry.winner }}</td>
+				<td>
+					{% if entry.is_tournament_game %}
+					Y
+					{% else %}
+					N
+					{% endif %}
+				</td>
+			</tr>
+		{% empty %}
+			<tr>
+				<td colspan="6">No Pong games played</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+	<h3 class="text-center">Color War</h3>
+	<table class="table table-hover table-responsive">
+		<thead>
+			<th scope="col">#</th>
+			<th scope="col">Date</th>
+			<th scope="col">Foe</th>
+			<th scope="col">Moves to Win</th>
+			<th scope="col">Winner</th>
+			<th scope="col">Tournamnet Game</th>
+		</thead>
+		<tbody>
+		{% for key, entry in history.color.items %}
+			<tr>
+				<th scope="row ">{{ forloop.counter }}</th>
+				<td>{{ entry.date|date:"d/m/Y" }}</td>
+				<td>{{ entry.opponent }}</td>
+				<td>{{ entry.turns_to_win }}</td>
+				<td>{{ entry.winner }}</td>
+				<td>
+					{% if entry.is_tournament_game %}
+					Y
+					{% else %}
+					N
+					{% endif %}
+				</td>
+			</tr>
+		{% empty %}
+			<tr>
+				<td colspan="6">No Color War games played</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+</div>

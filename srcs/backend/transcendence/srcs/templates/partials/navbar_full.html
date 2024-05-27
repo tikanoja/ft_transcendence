@@ -1,0 +1,40 @@
+<nav class="navbar navbar-expand-md bg-dark z-10" id="navbar">
+	<div class="container-fluid">
+		<h1 class="navbar-brand text-primary jersey-20-regular">PongChamps</h1>
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="" role="button" ><i class="fa fa-bars" aria-hidden="true" style="color:#e6e6ff"></i></span>
+		</button>
+		<!-- Init bootstrap nav component as horizontal bar -->
+		<div class="collapse navbar-collapse justify-content-md-end" id="navbarSupportedContent">
+			<ul class="navbar-nav ml-auto">
+				<!-- The items of the nav component -->
+				{% if active == "play" %}
+				<li class="nav-item ms-3"> <a href="/play" class="nav-link">
+					<span class="text-success">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
+							<path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+						</svg>
+					</span>
+					Play
+				</a></li>
+				<li class="nav-item ms-3"> <a href="/profile/{{current_user}}" class="nav-link">My Profile</a></li>
+				<li class="nav-item ms-3"> <button type="submit" id="logoutButton" class="btn btn-primary">Logout</button></li>
+				{% elif active == "profile" %}
+				<li class="nav-item ms-3"> <a href="/play" class="nav-link">Play</a></li>
+				<li class="nav-item ms-3"> <a href="/profile/{{current_user}}" class="nav-link">
+					<span class="text-success">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
+							<path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+						</svg>
+					</span>
+					My Profile
+				</a></li>
+				<li class="nav-item ms-3"> <button type="submit" id="logoutButton" class="btn btn-primary">Logout</button></li>
+				{% else %}
+				<li class="nav-item ms-3"> <a href="/play" class="nav-link">Play</a></li>
+				<li class="nav-item ms-3"> <a href="/profile/{{current_user}}" class="nav-link">My Profile</a></li>
+				<li class="nav-item ms-3"> <button type="submit" id="logoutButton" class="btn btn-primary">Logout</button></li>
+				{% endif %}
+		</div>
+	</div>
+</nav>

@@ -1,0 +1,6 @@
+<div>
+	{% include 'partials/navbar_full.html' with current_user=current_user active=active %}
+	{% block content %}
+	{% endblock %}
+	{% comment %} maybe add in the chat here {% endcomment %}
+</div>

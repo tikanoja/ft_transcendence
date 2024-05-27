@@ -1,0 +1,4 @@
+docker build -t pong .
+docker rm -f $(docker ps -qa)
+docker run -p 8888:8888 pong
+

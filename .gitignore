@@ -1,2 +1,17 @@
+# MacOS
 .DS_Store
-.vscode/
+
+# VSCode
+.vscode
+
+# Python
+__pycache__
+
+migrations/
+
+srcs/backend/transcendence/srcs/media_files/profile_pictures/profile-default.png
+virtual_env/
+
+pong_cli/env
+
+.env
