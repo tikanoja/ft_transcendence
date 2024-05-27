@@ -8,6 +8,8 @@ from flask import Flask, jsonify
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 
+
+
 app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -80,7 +82,6 @@ class Game:
 	def return_game_state(self):
 		# self.screen_width: int = 1920 # x
 		# self.screen_height: int = 1080 # y
-		print(self.which_player_turn)
 		state = str(self.game_slot)
 		state += ','
 		state += str(self.left_score)
@@ -108,14 +109,14 @@ class Game:
 		for i in self.squares:
 			if i.owner == 1:
 				total_player_squares += 1
-		if total_player_squares > half_squares:
+		if total_player_squares >= half_squares: #
 			return False
 		# player 2 squares
 		total_player_squares = int(0)
 		for i in self.squares:
 			if i.owner == 2:
 				total_player_squares += 1
-		if total_player_squares > half_squares:
+		if total_player_squares >= half_squares: #
 			return False
 		# if no player has more than 50 percent of squares
 		# then check if there are are still unclaimed squares
@@ -162,26 +163,6 @@ class Game:
 			self.paint_with_colour(x, y + 1, colour)
 			self.paint_with_colour(x, y - 1, colour)
 
-	def who_won_or_draw(self):	
-		total_squares = self.width * self.height
-		half_squares = int(total_squares / 2)
-		# player 1 squares
-		total_player_squares1 = int(0)
-		for i in self.squares:
-			if i.owner == 1:
-				total_player_squares1 += 1
-		if total_player_squares1 > half_squares:
-			return 1 # player 1
-		# player 2 squares
-		total_player_squares2 = int(0)
-		for i in self.squares:
-			if i.owner == 2:
-				total_player_squares2 += 1
-		if total_player_squares2 > half_squares:
-			return 2 # player 2
-		# Draw
-		if total_player_squares1 == total_player_squares2:
-			return 0 # draw
 
 games_lock = threading.Lock()
 with games_lock:
@@ -249,9 +230,13 @@ def stop_game(splitted_command):
 			return
 		else:
 			games[number].set_game_running(0)
+			print("emitting end game state from app.py")
 			socketio.emit('endstate', 'OK,{}'.format(games[number].return_game_state()))
+			print("send_game_over_data from app.py")
 			send_game_over_data(games[number].left_score, games[number].right_score, games[number].moves, games[number].game_id)
+			print("set_game_slot -1 from app.py")
 			games[number].set_game_slot(-1)
+			print(" returning from app.py")
 			return
 
 def get_state(splitted_command):
@@ -322,13 +307,11 @@ def make_move(splitted_command):
 
 @socketio.on('connect')
 def handle_connect():
-	#print('Client connected to color war')
 	global socketio
 	socketio.emit('message', 'hello client from colorwar')
 
 @socketio.on('disconnect')
 def handle_disconnect():
-	#print('Client disconnected')
 	pass
 
 @socketio.on('message')
@@ -361,12 +344,11 @@ def validate_username(data):
 	global games_lock
 	global socketio
 	usernames = data.split(",")
-	print(data)
 	data_to_send = { "p1_username": usernames[0],
 	"p2_username": usernames[1],
 	"game_id": usernames[2]
 	}
-
+	print("validate username")
 	with app.app_context():
 		django_url = "http://transcendence:8000/pong/validate_match/"
 		try:
@@ -376,19 +358,21 @@ def validate_username(data):
 				with games_lock:
 					for index in range(4): # check to prevent creating multiple games with same details
 						if (games[index].game_id == usernames[2]):
+							print("found same game id")
 							socketio.emit('setup_game', 'OK,{}'.format(index))
-							return jsonify({"message": "Usernames verified"})
+							return
 					for index in range(4):
 						if games[index].is_game_running() == 0:
 							slot = index
 							break
 					if slot == -1:
+						print("ERROR, all game slots are already in use")
 						return jsonify({"message": "ERROR, all game slots are already in use"})
 					else:
+						print("setting up new game ", slot)
 						games[slot].left_player_id = usernames[1]
 						games[slot].right_player_id = usernames[0]
 						games[slot].game_id = usernames[2]
-						print("Emiting setup game")
 						socketio.emit('setup_game', 'OK,{}'.format(slot))
 						return jsonify({"message": "Usernames verified"})
 			else:
@@ -403,6 +387,7 @@ def send_game_over_data(p1_score, p2_score, rally, game_id):
 		"longest_rally": f"{rally}",
 		"game_id": f"{game_id}",
 	}
+	print("send_game_over_data app.py: ", game_id)
 	with app.app_context():
 		django_url = "http://transcendence:8000/pong/send_game_data/"
 		try:
@@ -418,5 +403,4 @@ if __name__ == '__main__':
 	# Use SSL/TLS encryption for WSS
 	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 	ssl_context.load_cert_chain('/server.crt', '/server.key')
-	print("color war is now running, server is open")
 	socketio.run(app, host='0.0.0.0', port=8889, debug=False, ssl_context=ssl_context, allow_unsafe_werkzeug=True)

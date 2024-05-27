@@ -40,6 +40,7 @@ export const verifyUsername = () => {
         const current_game_id = document.getElementById('current_game_id').value;
         const usernameString = player1username + "," + player2username + "," + current_game_id;
         
+        render = true;
         socket.emit("username", usernameString);
 
         socket.on('setup_game', (data) => {
@@ -166,8 +167,7 @@ function loadGameOverScreen(data) {
         winnerText = `${player2username} wins!`;
     } else {
         winnerText = "It's a tie!";
-    }
-
+    } //TODO : fix this, ties arent possible
 
     winnerInfo.textContent = winnerText;
     gameOverScreen.style.display = 'block';
@@ -194,6 +194,8 @@ function exitGame(data, tileMeshes, colorTextures)
     button2.removeEventListener('mouseup', () => handleMouseUpButton2(gameNumber));
     button3.removeEventListener('mouseup', () => handleMouseUpButton3(gameNumber));
     button4.removeEventListener('mouseup', () => handleMouseUpButton4(gameNumber));
+    button1.removeEventListener('mouseup', () => handleMouseUpButton1(gameNumber));
+    window.removeEventListener('resize', () => onWindowResize(camera, renderer));
     cleanupGameBoard(tileMeshes)
 
     const scoreboard = document.getElementById('scoreboard');
@@ -293,7 +295,6 @@ const AnimationController = {
     },
     
     stopAnimation: function() {
-        socket.emit('message', 'stop_game,' + gameNumber);
         socket.on('disconnect', () => {
             console.log('Disconnected from server');
         });
@@ -321,20 +322,22 @@ function onWindowResize(camera, renderer) {
     const P1score = document.getElementById('P1Card');
     const P2score = document.getElementById('P2Card');
     const moveCount = document.getElementById('moveCard');
-   
-    const scaleFactor = Math.min(window.innerWidth, window.innerHeight) / 1000;
-    const buttons = document.querySelectorAll('#GameControls button img');
-    buttons.forEach(button => {
-        button.style.width = `${scaleFactor * originalWidth}px`;
-        button.style.height = `${scaleFactor * originalHeight}px`;
-    });
+   if (P1score && P2score && moveCount)
+   {
+        const scaleFactor = Math.min(window.innerWidth, window.innerHeight) / 1000;
+        const buttons = document.querySelectorAll('#GameControls button img');
+        buttons.forEach(button => {
+            button.style.width = `${scaleFactor * originalWidth}px`;
+            button.style.height = `${scaleFactor * originalHeight}px`;
+        });
 
-    moveCount.style.display = 'block';
-    P1score.style.display = 'block';
-    P2score.style.display = 'block';
+        moveCount.style.display = 'block';
+        P1score.style.display = 'block';
+        P2score.style.display = 'block';
 
-    const gameControls = document.getElementById('GameControls');
-    gameControls.style.display = 'block';
+        const gameControls = document.getElementById('GameControls');
+        gameControls.style.display = 'block';
+    }
 }
 
 function addUniqueEventListener(button, event, handler) {
@@ -505,7 +508,7 @@ export const renderColorwar = (gameNumber, data) => {
 
 	socket.on('endstate', (data) => {
         socket.emit('message', 'stop_game,' + gameNumber);
-        exitGame(data, tileMeshes, colorTextures)
+        exitGame(data, tileMeshes, colorTextures);
     });
 
 
