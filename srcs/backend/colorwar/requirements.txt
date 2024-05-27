@@ -3,4 +3,3 @@ flask_socketio
 flask-cors
 requests
 urllib3
-pyOpenSSL

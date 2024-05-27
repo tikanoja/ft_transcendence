@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from flask import Flask, jsonify
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
-from OpenSSL import SSL
 
 
 
