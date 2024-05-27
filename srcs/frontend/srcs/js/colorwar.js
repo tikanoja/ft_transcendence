@@ -39,7 +39,7 @@ export const verifyUsername = () => {
         const player2username = document.getElementById('player2username').value;
         const current_game_id = document.getElementById('current_game_id').value;
         const usernameString = player1username + "," + player2username + "," + current_game_id;
-        
+
         socket.emit("username", usernameString);
 
         socket.on('setup_game', (data) => {
@@ -166,8 +166,7 @@ function loadGameOverScreen(data) {
         winnerText = `${player2username} wins!`;
     } else {
         winnerText = "It's a tie!";
-    }
-
+    } //TODO : fix this, ties arent possible
 
     winnerInfo.textContent = winnerText;
     gameOverScreen.style.display = 'block';
@@ -293,7 +292,7 @@ const AnimationController = {
     },
     
     stopAnimation: function() {
-        socket.emit('message', 'stop_game,' + gameNumber);
+        // socket.emit('message', 'stop_game,' + gameNumber);
         socket.on('disconnect', () => {
             console.log('Disconnected from server');
         });
@@ -505,7 +504,7 @@ export const renderColorwar = (gameNumber, data) => {
 
 	socket.on('endstate', (data) => {
         socket.emit('message', 'stop_game,' + gameNumber);
-        exitGame(data, tileMeshes, colorTextures)
+        exitGame(data, tileMeshes, colorTextures);
     });
 
 
